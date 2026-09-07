@@ -301,6 +301,64 @@ plain RAG.
       be hand-edited by the user; this entry and the constitution-file
       content changes were made by Claude.
 
+12. **Knowledge-base ownership is split by content type: Architecture curates
+    its own knowledge in git; the org-wide tagging programme covers only the
+    current-state landscape other streams own.** Decided while finishing the
+    Architecture stream plan (slide 26 of the CTB pack, `AI SDLC/slide/`),
+    which had committed to tagging the existing Confluence/Jira/asset-registry
+    estate to 80% (Q3) then 95–100% (Q4) across Architecture, Security,
+    Platform and Engineering. That directly contradicted decision 5
+    (Confluence as an output, curated in git), and the two strategies compete
+    for the same scarce resource — architect curation time.
+    - **The split:** the git-curated KG owns knowledge Architecture authors
+      itself (principles, patterns, prior decisions, target state) and remains
+      the source of truth for it, published outward per decision 5. The
+      tagging programme is scoped down to the *current-state landscape* only
+      — asset registry and per-domain as-is technology landscape — which is
+      inherently other streams' data and cannot be authored in this repo.
+    - **Why this over the alternatives:** making the tagging programme the
+      plan of record would have made 95–100% coverage of an estate
+      Architecture doesn't own a hard gate on Q4, and would have required
+      revising decision
+      5. Dropping the tagging ladder entirely would have removed the
+      current-state landscape that the solution-design capabilities need. The
+      split keeps both true and shrinks the ask on other streams to what only
+      they can supply.
+    - **Consequence for the slide, now written in:** Q2's "Maturity 1" process
+      change reads as Architecture curating its own grounding set *plus*
+      tagging standards agreed with the other streams, and portfolio-team
+      preparation asks Security, Platform and Engineering to nominate an owner
+      for their part of the landscape rather than to curate a knowledge base
+      wholesale.
+
+13. **Q2 FY27 re-baselined: Vendor/Product Due Diligence stays, displacing
+    roadmap milestone 1.3 ("first build-learn-adjust loop closure").** Chosen
+    explicitly by the user over the alternative of restoring 1.3 and moving
+    Vendor DD to Q3. Recorded here because it is a milestone change, not just
+    a slide edit, and `CLAUDE.md` requires those to be approved rather than
+    inferred — approval was given.
+    - **What this obliges, and has not happened yet:** the Confluence
+      milestone tracker and slide 17 (the program's now/next/later view) both
+      still show 1.3 in Q2. `docs/program-roadmap.md` is a *snapshot* of the
+      Confluence page and is deliberately not hand-edited (see its header), so
+      the change has to be made on the Confluence page and then re-fetched.
+      Until that happens the pack disagrees with itself.
+    - **Where 1.3 goes is undecided.** Q3's "human in the loop" headline is
+      the natural home for the first build-learn-adjust loop, but that was not
+      settled in this conversation and should not be assumed.
+
+14. **Q2–Q4 capabilities on the Architecture stream plan carry no initiative
+    IDs, by choice.** Verified against Jira: only IN-562, IN-563 and IN-564
+    exist for Architecture; the five later capabilities (Vendor/Product Due
+    Diligence, Solution Architecture Maturity 2 and 3, AI-Drafted Sparring
+    Submission, AI-Drafted TPP Impact Analysis) had `(IN-XXX)` placeholders
+    with nothing behind them. Rather than raise five initiatives now or leave
+    fake IDs on a leadership slide, the placeholders were removed and a
+    footnote added: capabilities shown without an ID are indicative, and
+    initiatives are raised as each quarter is planned. This is consistent with
+    the slide's existing footnote that Q3/Q4 objectives will be revisited off
+    Q1–Q2 learnings.
+
 ## Constraints identified
 
 - **Rovo is cloud-hosted; the KG is local.** Rovo can't reach the local repo
@@ -341,6 +399,25 @@ plain RAG.
   happening outside this repo (workflow/tagging/tooling decisions could count
   before any entity exists) or the tracker is ahead of reality — worth
   confirming which rather than assuming either.
+- **The Architecture stream plan's capability names diverge from the Jira
+  initiatives they cite, in two cases substantively.** IN-562 is
+  "Foundation - Environment & Tooling" in Jira but "PoC of Architecture agent"
+  on the slide; IN-563 is "Business process definition for Architecture" but
+  "Architecture capability maturity assessment"; IN-564 is "AI-Assisted
+  Architecture Design validation & Alignment MVP" but "AI-Validated Solution
+  Architecture – Maturity 1". Reframing for a leadership audience is what the
+  pack's own guidance asks for, so wording alone is fine — but the M1/M2/M3
+  maturity ladder introduced by IN-564's rename has become the stream's
+  operating model and drives the whole tagging sequence. Unresolved: whether
+  the ladder is the real framing (in which case Jira, slide 17 and the
+  Confluence roadmap should follow) or slide-local shorthand.
+- **Whether Architecture and Security are building the same thing.**
+  [IN-574](https://tyropaymentsltd.atlassian.net/browse/IN-574) "AI-Assisted
+  Security Architecture & Solution Design" declares a dependency on
+  Architecture; Architecture's own plan builds AI-Assisted Solution
+  Architecture and AI-Drafted Sparring Submissions. Security has been added to
+  Architecture's dependency cells so the link is at least visible from both
+  sides, but the actual split of ownership is not agreed.
 - Concrete schema: entity types, relationship types, folder layout, frontmatter
   shape.
 - Confluence publish/sync mechanism (git → Confluence): generation approach,

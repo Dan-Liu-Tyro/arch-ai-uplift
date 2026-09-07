@@ -46,3 +46,17 @@ principle's `status` and must not be silently absorbed as if it agreed.
 - 2026-08-19 · Returned to and asked to close out a previously-dropped analysis thread (the external critique) once flagged, rather than letting a completed assessment go stale unread · "yes, good catch, where do we start?" · unpromoted — single instance, plausibly just good hygiene rather than a distinct pattern; watch for repetition
 - 2026-08-19 · Pushed back on fetching full Confluence page content, preferring a thin structural layer referencing existing pages over duplicating their information · "shouldn't we build another layer of data structure on top of it instead of duplicating information?" · unpromoted — single instance; may overlap with the provenance-vs-integration-state split already in SCHEMA.md rather than being new
 - 2026-08-19 · Asked to read and understand Arc's actual Rovo implementation before documenting or building a local counterpart, rather than designing from assumption · "ask me any questions before documenting it" · → supports:verify-state-claims
+
+- 2026-09-07 — **stated** — Given a leadership slide to "work on," the user
+  accepted a critique-first pass and then chose the *harder* option on the one
+  question where a roadmap milestone was at stake: asked whether to restore
+  program milestone 1.3 in Q2 (the low-friction, no-re-baseline path) or keep a
+  net-new capability and re-baseline the roadmap, they chose to re-baseline
+  ("Keep Vendor DD in Q2, re-baseline roadmap"). On the same turn they took the
+  *conservative* option on Jira IDs — no placeholder IDs on a leadership slide,
+  mark capabilities indicative instead. Evidence: AskUserQuestion responses,
+  session 2026-09-07. The pattern worth tracking: willingness to pay
+  coordination cost to keep a plan honest about scope, paired with unwillingness
+  to let a slide imply commitments that don't exist in the tracker. Both point
+  the same way — the artifact should not overstate certainty — but they trade
+  off differently against effort, so this is two data points, not one.
