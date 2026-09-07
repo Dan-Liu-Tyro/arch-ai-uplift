@@ -343,9 +343,12 @@ plain RAG.
       Confluence page and is deliberately not hand-edited (see its header), so
       the change has to be made on the Confluence page and then re-fetched.
       Until that happens the pack disagrees with itself.
-    - **Where 1.3 goes is undecided.** Q3's "human in the loop" headline is
-      the natural home for the first build-learn-adjust loop, but that was not
-      settled in this conversation and should not be assumed.
+    - **Resolved 2026-09-08: 1.3 becomes a story (or epic) under IN-564**,
+      not a quarter-row capability of its own. Not yet created in Jira — see
+      the pending action under Next steps and the preserved description
+      below, since the ticket that used to carry this content (IN-565 /
+      AIDLC-116) was repurposed for Vendor/Product Due Diligence before this
+      was decided.
 
 14. **Q2–Q4 capabilities on the Architecture stream plan carry no initiative
     IDs, by choice.** Verified against Jira: only IN-562, IN-563 and IN-564
@@ -426,12 +429,19 @@ plain RAG.
     and the slide agreeing with each other doesn't mean either agrees with
     the roadmap — that's exactly the re-evaluation decision 15 defers until
     the plan is finished and XLT-approved.
-  - **What was traded away, not just reworded:** IN-563/AIDLC-115 lost their
-    only reference to defining the business-process contract to other
-    streams — the actual chartered scope of that ticket — and IN-562 lost
-    the "foundational environment and tooling" half of its original scope.
-    Neither survives anywhere else in Jira; the tagging-standards mention in
-    slide 26's Q1 process-changes cell is the closest remaining trace.
+  - **What was traded away, not just reworded — and which of it is fine to
+    lose.** The user confirmed IN-563/AIDLC-115's business-process-contract
+    scope and IN-562's environment/tooling scope are fine to drop: minor, or
+    already completed. **Not fine to lose, and preserved here because it no
+    longer exists anywhere in Jira:** IN-565 and its epic AIDLC-116 were
+    renamed from "First Build-Lean-Adjust loop" to Vendor/Product Due
+    Diligence (below) before the question of where 1.3 goes was resolved.
+    AIDLC-116's original description, verbatim, so the content survives
+    until a real ticket exists for it: *"Gathering the lived experience and
+    technical learnings from MVP to make adjustments to the grounding logic,
+    content structure, and agent behaviour — ensuring a robust foundation
+    for scaling."* Per the resolution above, this becomes a story or epic
+    under IN-564, not yet created — see Next steps.
 - **Whether Architecture and Security are building the same thing.**
   [IN-574](https://tyropaymentsltd.atlassian.net/browse/IN-574) "AI-Assisted
   Security Architecture & Solution Design" declares a dependency on
@@ -493,3 +503,10 @@ Resolved since first draft:
    to match wherever the approved plan has moved ahead of it — starting with
    the Q2 milestone 1.3 displacement (decision 13) and the M1/M2/M3 naming
    introduced on the slide and in IN-564/AIDLC-117.
+5. **Create a Story (or Epic) under IN-564 / AIDLC-117 for the first
+   build-learn-adjust loop** (decision 13's resolution). Use AIDLC-116's
+   preserved original description (decision 13, "what was traded away") as
+   the starting content: gathering lived experience and technical learnings
+   from Maturity 1 to adjust grounding logic, content structure, and agent
+   behaviour. Explicitly not actioned yet — the user asked to document this
+   only, not touch Jira again this session.
