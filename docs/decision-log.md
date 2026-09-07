@@ -359,6 +359,21 @@ plain RAG.
     the slide's existing footnote that Q3/Q4 objectives will be revisited off
     Q1–Q2 learnings.
 
+15. **Once the Architecture capability stream plan (slide 26 of the CTB pack,
+    `AI SDLC/slide/`) is finished and approved by XLT, it becomes the source
+    of truth for the Architecture stream's FY27 goals and milestones —
+    `docs/program-roadmap.md` (the Confluence milestone tracker) then needs
+    re-evaluating for alignment against it, not the other way round.** This
+    reverses the direction that page's own header currently assumes ("re-fetch
+    rather than hand-edit if it drifts") for anything the approved plan
+    changes. Concretely in scope for that re-evaluation: milestone 1.3's
+    displacement from Q2 (decision 13, still pending a Confluence-side fix);
+    the M1/M2/M3 solution-architecture maturity ladder now used across the
+    slide and across IN-564/AIDLC-117, which doesn't yet appear in the
+    roadmap's own milestone language; and whichever other Q1–Q4 wording ends
+    up diverging by the time the plan is finished. Not actioned yet — the
+    plan itself isn't finished. Tracked in Next steps below.
+
 ## Constraints identified
 
 - **Rovo is cloud-hosted; the KG is local.** Rovo can't reach the local repo
@@ -399,18 +414,24 @@ plain RAG.
   happening outside this repo (workflow/tagging/tooling decisions could count
   before any entity exists) or the tracker is ahead of reality — worth
   confirming which rather than assuming either.
-- **The Architecture stream plan's capability names diverge from the Jira
-  initiatives they cite, in two cases substantively.** IN-562 is
-  "Foundation - Environment & Tooling" in Jira but "PoC of Architecture agent"
-  on the slide; IN-563 is "Business process definition for Architecture" but
-  "Architecture capability maturity assessment"; IN-564 is "AI-Assisted
-  Architecture Design validation & Alignment MVP" but "AI-Validated Solution
-  Architecture – Maturity 1". Reframing for a leadership audience is what the
-  pack's own guidance asks for, so wording alone is fine — but the M1/M2/M3
-  maturity ladder introduced by IN-564's rename has become the stream's
-  operating model and drives the whole tagging sequence. Unresolved: whether
-  the ladder is the real framing (in which case Jira, slide 17 and the
-  Confluence roadmap should follow) or slide-local shorthand.
+- **Resolved 2026-09-08, by explicit instruction: IN-562, IN-563, IN-564 and
+  their epics (AIDLC-115, AIDLC-117) have been edited to match slide 26's
+  wording**, on the basis that the approved capability stream plan is the
+  source of truth (decision 15). This closes the divergence noted above as
+  it originally stood — Jira no longer disagrees with the slide.
+  - **What it does not resolve, and decision 15 now tracks instead:** the
+    M1/M2/M3 solution-architecture maturity ladder introduced by IN-564's
+    rename is now in Jira as well as on the slide, but still doesn't appear
+    in `docs/program-roadmap.md` or slide 17's own milestone language. Jira
+    and the slide agreeing with each other doesn't mean either agrees with
+    the roadmap — that's exactly the re-evaluation decision 15 defers until
+    the plan is finished and XLT-approved.
+  - **What was traded away, not just reworded:** IN-563/AIDLC-115 lost their
+    only reference to defining the business-process contract to other
+    streams — the actual chartered scope of that ticket — and IN-562 lost
+    the "foundational environment and tooling" half of its original scope.
+    Neither survives anywhere else in Jira; the tagging-standards mention in
+    slide 26's Q1 process-changes cell is the closest remaining trace.
 - **Whether Architecture and Security are building the same thing.**
   [IN-574](https://tyropaymentsltd.atlassian.net/browse/IN-574) "AI-Assisted
   Security Architecture & Solution Design" declares a dependency on
@@ -466,3 +487,9 @@ Resolved since first draft:
    cadence, handling of hand-edited pages).
 3. Sample a representative slice of the 100+ existing Confluence pages to
    pressure-test the draft schema against real content before committing to it.
+4. **Once the Architecture capability stream plan (slide 26) is finished and
+   approved by XLT:** re-evaluate `docs/program-roadmap.md` for alignment
+   against it (see decision 15), and update the Confluence milestone tracker
+   to match wherever the approved plan has moved ahead of it — starting with
+   the Q2 milestone 1.3 displacement (decision 13) and the M1/M2/M3 naming
+   introduced on the slide and in IN-564/AIDLC-117.
