@@ -199,27 +199,39 @@ about authorization, not a filesystem limitation.
 
 ---
 
-## The `Skill` tool caches a skill's instructions on first load for the rest of the session
+## Claude Code caches agent/skill definitions in-session; a mid-session edit doesn't reliably propagate
 
-**What happened.** A `SKILL.md` file was rewritten mid-session (new
-instructions, new content) after having already been invoked once earlier
-in the same conversation via the `Skill` tool. Re-invoking the same skill
-by name afterward returned the *original* instructions verbatim, not the
-new file content — confirmed by reading the file directly immediately
+**What happened, first form.** A `SKILL.md` file was rewritten mid-session
+(new instructions, new content) after having already been invoked once
+earlier in the same conversation via the `Skill` tool. Re-invoking the same
+skill by name afterward returned the *original* instructions verbatim, not
+the new file content — confirmed by reading the file directly immediately
 after, which showed the edit had genuinely landed on disk. The tool result
 itself named this: "the skill instructions were previously loaded."
 
-**Cost.** Would have produced a false-positive test result — reporting a
-content change as verified working when the invocation had actually run
-against stale, pre-edit instructions — if the file hadn't been re-read
-directly to cross-check before drawing that conclusion.
+**What happened, second form.** A subagent (`.claude/agents/arc-lite.md`)
+already recognized by the `Agent` tool earlier in the session had its
+`tools:` line edited mid-session to add a new tool (`Skill`). A fresh
+dispatch to that same subagent afterward did not see the new grant: the
+subagent's own reply reported, unprompted and correctly, that it had
+worked around the missing tool by using `Read` directly instead, rather
+than pretending the skill had fired. So a brand-new agent *name* becoming
+available (which did happen mid-session without a restart, in an earlier
+observation on this project) is a different event from an
+*already-registered* agent's tool grant being refreshed — the first can
+happen in-session, the second was not observed to.
 
-**Rule.** Treat a skill's instructions as fixed for the rest of the
-session once that skill has been invoked once, regardless of subsequent
-edits to its `SKILL.md`. To verify a change to a skill actually took
-effect, read the file directly rather than trusting a re-invocation's
-output in the same session, or verify from a fresh session. This is a
-different mechanism from the `.claude/agents/` subagent-registration delay
-noted elsewhere: that one appeared to resolve itself within the same
-session without an explicit restart, while this skill-content cache did
-not self-refresh at all during the session it was observed in.
+**Cost.** Both would have produced a false-positive test result —
+reporting a change as verified working when the actual invocation ran
+against stale, pre-edit configuration — if the file hadn't been read
+directly, or the agent hadn't self-reported honestly, to cross-check before
+drawing that conclusion. Not every case will self-report; check directly
+rather than assuming.
+
+**Rule.** Treat both a skill's instructions and a subagent's tool grants as
+fixed for the rest of the session once that skill/subagent has been
+invoked once, regardless of subsequent edits to `SKILL.md` or a subagent's
+`tools:` line. To verify either kind of change actually took effect, read
+the file directly rather than trusting a same-session re-invocation's
+output, or verify from a fresh session/process (e.g. a fresh `claude -p
+--agent <name>` terminal invocation).
