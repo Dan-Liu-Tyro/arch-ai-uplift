@@ -165,15 +165,34 @@ OS issue. The same class of block separately hit `git branch
 **Cost.** Several minutes and multiple failed command retries diagnosing what
 looked like a git problem before testing the path directly settled it.
 
-**Rule.** In any Claude-Code-managed repo, expect writes to `.claude/agents/`,
-`.claude/skills/`, `.claude/hooks/`, `.claude/settings.json` /
-`.claude/settings.local.json`, and `.git/config` to be sandboxed off
-entirely — by design, to stop an agent from silently expanding its own tool
-grants or git remotes. This blocks any git operation that would create,
-delete, or unlink a path in those directories, regardless of whether the
-resulting content is a real conflict. Diagnose with a direct `mkdir`/`touch`
-test on the specific path before assuming it's a real conflict, and reach
-for `git update-index --add --cacheinfo <mode>,<blob-sha>,<path>` (edits only
+**Rule.** In any Claude-Code-managed repo, expect operations that *create,
+delete, or unlink a path* under `.claude/agents/`, `.claude/skills/`,
+`.claude/hooks/`, `.claude/settings.json` / `.claude/settings.local.json`,
+and `.git/config` to be sandboxed off entirely — by design, to stop an agent
+from silently expanding its own tool grants or git remotes. This is what a
+git checkout/reset does under the hood (it recreates the path), and what a
+plain `mkdir`/`touch` does directly, so both are the right diagnostic to
+confirm the block before assuming a real merge conflict. Reach for `git
+update-index --add --cacheinfo <mode>,<blob-sha>,<path>` (edits only
 `.git/index`, never the protected path) rather than retrying the same
-checkout/reset command. A change to a file in one of these directories needs
-a human hand — Claude can propose the diff but not apply it directly.
+checkout/reset command.
+
+**Correction, 2026-09-08.** The rule's last sentence — "a change to a file
+in one of these directories needs a human hand" — overgeneralized this into
+"no writes at all," and that overgeneralization got repeated into two
+project documents (`components/local-agent/README.md`,
+`docs/decision-log.md`) as a reason a real fix needed the user's hand, before
+being caught when the user asked why a file Claude had created was
+supposedly uneditable by Claude. Direct test: the `Edit` tool successfully
+rewrote content inside the already-tracked `.claude/agents/arc-lite.md` in
+place, while a same-session `touch` of a *new* file in that directory still
+failed with `Operation not permitted`. So the block is specifically on
+create/delete/unlink of a path in these directories, not on editing an
+existing tracked file's content — a much narrower boundary than originally
+recorded. Re-verify with the same create-vs-edit distinction before citing
+this entry as a reason a change needs a human hand; it usually doesn't.
+Separately, and for a different reason: expanding a subagent's `tools:`
+grant specifically is worth leaving to the user's own hand regardless of
+what the sandbox permits, since self-expanding tool grants is the exact
+failure mode this design intent guards against — that's a judgment call
+about authorization, not a filesystem limitation.

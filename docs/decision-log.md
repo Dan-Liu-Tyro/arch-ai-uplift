@@ -452,16 +452,34 @@ plain RAG.
       `gap-log.md`. Not fixed now — flagged so it isn't assumed to be
       symmetric.
     - **Discovered in the same pass, unrelated to this decision but found
-      while touching these files:** `.claude/agents/arc-lite.md`'s
-      file-pointer list never actually gained
-      `constitution/05-ignore-list.md` when decision 11 said it had —
-      Arc Lite has been running without being told to read the ignore
-      list. See `components/local-agent/README.md`'s "Known drift" note
-      and Next steps below.
+      while touching these files, and fixed the same day:**
+      `.claude/agents/arc-lite.md`'s file-pointer list never actually
+      gained `constitution/05-ignore-list.md` when decision 11 said it
+      had — Arc Lite had been running without being told to read the
+      ignore list. First recorded here as needing a human hand, on the
+      belief (from `meta/procedural-memory/universal.md`) that
+      `.claude/agents/` was blanket write-protected. The user challenged
+      that belief directly — "why would you create a file you can't
+      modify?" — and testing it showed the protection only covers
+      creating/deleting a path there, not editing an existing tracked
+      file's content. Both missing lines (`05-ignore-list.md` and
+      `06-answer-format.md`) were added directly the same turn; see
+      `components/local-agent/README.md`'s correction note and
+      `universal.md`'s correction to the sandbox-write-protection entry
+      for the corrected boundary.
     - **Deliberately not built:** blocking a non-compliant answer instead
       of flagging it, and extending the mechanical check to the direct
       subagent-invocation path. Both are named as possible escalations in
       `06-answer-format.md`/this entry, not committed to.
+    - **A second, separate drift found while re-checking the first:**
+      `arc-lite.md`'s `tools:` line still reads `Read, Grep, Glob` —
+      decision 11's Atlassian MCP tool grant for live-Confluence-read
+      access isn't actually present in the file, despite that decision
+      recording it as added. Unlike the file-pointer list, this one is
+      *not* fixed here: expanding a subagent's tool grant is exactly the
+      kind of self-authorization this project treats as the user's call
+      regardless of what the sandbox permits (see `universal.md`'s
+      correction). Left for the user to confirm and apply.
 
 ## Constraints identified
 
@@ -596,12 +614,11 @@ Resolved since first draft:
    from Maturity 1 to adjust grounding logic, content structure, and agent
    behaviour. Explicitly not actioned yet — the user asked to document this
    only, not touch Jira again this session.
-6. **Hand-edit `.claude/agents/arc-lite.md`'s numbered file-pointer
-   list** (sandbox-write-protected from Claude Code) to add
-   `components/local-agent/constitution/05-ignore-list.md` (missing
-   since decision 11, only just discovered) and
-   `components/local-agent/constitution/06-answer-format.md` (decision
-   17) — both in the same edit.
+6. ~~Hand-edit `.claude/agents/arc-lite.md`'s file-pointer list~~ —
+   **done 2026-09-08.** Turned out not to need a human hand at all; see
+   decision 17's correction note. Both missing entries
+   (`constitution/05-ignore-list.md`, `constitution/06-answer-format.md`)
+   are in the file now.
 7. **Use Arc Lite for real, on real architecture questions, through
    `ui/server.py`,** so `gap-log.md` (decision 17) actually starts
    filling from lived usage rather than staying a designed-but-untested
