@@ -376,6 +376,25 @@ plain RAG.
     roadmap's own milestone language; and whichever other Q1–Q4 wording ends
     up diverging by the time the plan is finished. Not actioned yet — the
     plan itself isn't finished. Tracked in Next steps below.
+    - **Snapshot of slide 26's FY27 vision & outcomes, as of 2026-09-08 —
+      not settled, expect this to keep moving until XLT approval.** Captured
+      here because the working file is being live-edited between turns and
+      has already changed twice mid-conversation without notice; recorded
+      so this repo's record doesn't rely on memory of an earlier read.
+      Current text: *"Clarity and Coherence at AI Speed. Architecture
+      guidance arrives at the point of decision, grounded in Tyro's own
+      standards, patterns and technology strategy."* Outcomes: *"Faster
+      design validation · quality sparring · faster vendor due diligence ·
+      Architecture practice that accelerates business growth."* Overall RAG:
+      **Green** (the user's own call, made after this log recommended
+      Amber — recorded as a disagreement, not silently overwritten).
+      - **Open tension worth surfacing again if the wording holds:**
+        "technology strategy" is forward-looking (the plan/direction), not
+        the current-state grounding ("what's actually built, and why") that
+        motivated this rewrite in the first place. It may be answering a
+        different, legitimate question — target-state alignment — rather
+        than the one originally raised. Not resolved; flagged twice in
+        conversation, not pushed further once the user set the direction.
 
 ## Constraints identified
 
