@@ -196,3 +196,30 @@ grant specifically is worth leaving to the user's own hand regardless of
 what the sandbox permits, since self-expanding tool grants is the exact
 failure mode this design intent guards against — that's a judgment call
 about authorization, not a filesystem limitation.
+
+---
+
+## The `Skill` tool caches a skill's instructions on first load for the rest of the session
+
+**What happened.** A `SKILL.md` file was rewritten mid-session (new
+instructions, new content) after having already been invoked once earlier
+in the same conversation via the `Skill` tool. Re-invoking the same skill
+by name afterward returned the *original* instructions verbatim, not the
+new file content — confirmed by reading the file directly immediately
+after, which showed the edit had genuinely landed on disk. The tool result
+itself named this: "the skill instructions were previously loaded."
+
+**Cost.** Would have produced a false-positive test result — reporting a
+content change as verified working when the invocation had actually run
+against stale, pre-edit instructions — if the file hadn't been re-read
+directly to cross-check before drawing that conclusion.
+
+**Rule.** Treat a skill's instructions as fixed for the rest of the
+session once that skill has been invoked once, regardless of subsequent
+edits to its `SKILL.md`. To verify a change to a skill actually took
+effect, read the file directly rather than trusting a re-invocation's
+output in the same session, or verify from a fresh session. This is a
+different mechanism from the `.claude/agents/` subagent-registration delay
+noted elsewhere: that one appeared to resolve itself within the same
+session without an explicit restart, while this skill-content cache did
+not self-refresh at all during the session it was observed in.
