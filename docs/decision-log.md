@@ -529,14 +529,12 @@ plain RAG.
       questions about Arc Lite itself, grounded on `constitution/00-soul.md`.
       Deliberately trivial — the point was proving the wiring, not solving
       a real need — per `least-infrastructure-first`.
-    - **Not yet invokable by Arc Lite.** `.claude/agents/arc-lite.md`'s
-      `tools:` line does not grant `Skill`. Per decision 17's own finding
-      that expanding a subagent's tool grant is the user's call regardless
-      of technical feasibility, this was left for the user to add, not
-      done automatically even though the user had separately said to
-      proceed with building the skill — that approval addressed a
-      session-coordination concern (another active session on this repo),
-      not a waiver of the tool-grant-needs-a-human-hand rule.
+    - **Resolved by decision 20, below: `Skill` was added to
+      `.claude/agents/arc-lite.md`'s `tools:` line as an explicit,
+      user-granted exception** to this same rule, not a user hand-edit.
+      Still open and unaffected by that: decision 17's "second, separate
+      drift" — the Atlassian MCP tool grant for live-Confluence read
+      (decision 11) — is still missing from the same `tools:` line.
     - **Coordination note:** raised and resolved while at least one other
       Claude Code session was active on this same repo (started minutes
       earlier). The user confirmed proceeding anyway rather than checking
@@ -575,9 +573,10 @@ plain RAG.
       non-negotiable everywhere except inside `arc-lite-identity`'s own
       instructions. Re-confirm this scoping explicitly before adding any
       second skill; it is not a precedent for skills generally.
-    - **Still blocked on decision 18's finding:** this skill is written
-      but still not invokable by the `arc-lite` subagent until a human
-      adds `Skill` to `.claude/agents/arc-lite.md`'s `tools:` line.
+    - **No longer blocked — see decision 20:** the `arc-lite` subagent
+      now has the `Skill` tool grant, so `arc-lite-identity` is
+      invokable. This entry's own point (verbatim porting as a scoped
+      disclaimer exception) is unaffected either way.
 20. **Claude added `Skill` to `.claude/agents/arc-lite.md`'s `tools:` line
     directly, as a named, explicit exception to decision 17/18's rule that
     expanding a subagent's own tool grant is left to a human hand
