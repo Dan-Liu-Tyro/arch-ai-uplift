@@ -349,6 +349,12 @@ plain RAG.
       below, since the ticket that used to carry this content (IN-565 /
       AIDLC-116) was repurposed for Vendor/Product Due Diligence before this
       was decided.
+    - **Reconfirmed the same day** — "1.3 can be merged into one of the
+      epic or story within Q2 initiative" — leaving open whether it lands
+      as a new epic under IN-564 or a story under the epic already there
+      (AIDLC-117). Still not created either way — needs the user's
+      go-ahead on the actual create call, per the standing rule that
+      new-issue creation is a scope decision, not routine upkeep.
 
 14. **Q2–Q4 capabilities on the Architecture stream plan carry no initiative
     IDs, by choice.** Verified against Jira: only IN-562, IN-563 and IN-564
@@ -483,6 +489,16 @@ plain RAG.
 
 ## Constraints identified
 
+- **The user is likely to be the sole person working the Architecture
+  stream for this program**, stated directly on 2026-09-08 while assessing
+  slide 26's capacity against its FY27 scope. This sharpens rather than
+  answers the capacity concern raised repeatedly in conversation: eight
+  substantial FY27 capabilities — agent PoC, capability-maturity
+  assessment, a three-stage solution-architecture maturity ladder, vendor
+  due diligence, sparring-submission drafting, TPP impact analysis — against
+  one person, not the two named on slide 2 of the CTB pack. Not resolved
+  here; flagged as context for whoever revisits scope or sequencing later,
+  including a future session of this project.
 - **Rovo is cloud-hosted; the KG is local.** Rovo can't reach the local repo
   directly. Any interface Rovo queries against (API/MCP/other) must be
   network-reachable, which means eventually going through the org's real
