@@ -126,6 +126,33 @@ plain RAG.
      missed. Transcript retention is unverified beyond "present today back to
      project start" — no rotation/cleanup policy is known — so backfill is
      best-effort recovery, not a substitute for live capture.
+   - **Added a fourth meta component, `perception-failures`, then explicitly
+     decided to keep it separate from `architecture-learning` rather than
+     merge them — for now.** Raised 2026-09-08 by the user after catching a
+     live instance (Claude asserting `.claude/agents/` was blanket
+     write-protected, an overgeneralization of a narrower real finding) and
+     asking that this kind of incident be tracked toward an eventual
+     paper/essay on how an agent's incorrect perceptions form and get
+     caught. The user then asked directly whether it should just be folded
+     into `architecture-learning`, since both are slow, evidence-based,
+     no-consumer-yet trackers. Kept separate on the strength of this
+     decision's own precedent, quoted back: `procedural-memory` stays out
+     of `architecture-learning` because "the former records the agent's own
+     errors ... the latter models the user's reasoning" — a subject-matter
+     split, not a mechanism split. `perception-failures` is squarely
+     agent-subject, so merging it into the user-subject component would
+     cross the one axis this project had already decided was load-bearing.
+     The one real point in the merge's favor — reusing
+     `architecture-learning`'s observations/principles/`reindex.py`
+     machinery rather than building fresh — was already handled the way
+     `procedural-memory` handled the same question: reuse the *pattern* at
+     low volume without merging the *directory*, revisiting only if volume
+     or a real cross-instance pattern justifies it.
+     - **Not a closed question.** The user asked to keep it separate "for
+       now" and revisit later, not permanently. Revisit if `meta/`
+       component sprawl becomes its own maintenance burden, or once
+       `perception-failures/log.md` has enough entries that its shape (or
+       lack of one) is actually visible — not on a fixed date.
 5. **Confluence flow (planned direction, not yet designed in detail):** curate
    truth in the local git KG → generate structured pages (one per entity,
    consistent template) → publish into a dedicated Confluence space (user has
