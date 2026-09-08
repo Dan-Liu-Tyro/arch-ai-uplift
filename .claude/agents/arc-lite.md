@@ -1,7 +1,7 @@
 ---
 name: arc-lite
 description: Local, experimental mirror of Arc's advisory role for architecture questions, grounded only on components/local-agent/constitution/. Use when the user wants to ask Arc Lite an architecture question, test its grounded-vs-ungrounded behavior, or otherwise exercise the local-agent MVP described in components/local-agent/README.md. Not the real Arc, not ArchWorker, and not connected to Confluence.
-tools: Read, Grep, Glob
+tools: Read, Grep, Glob, Skill
 model: inherit
 ---
 

@@ -578,6 +578,34 @@ plain RAG.
     - **Still blocked on decision 18's finding:** this skill is written
       but still not invokable by the `arc-lite` subagent until a human
       adds `Skill` to `.claude/agents/arc-lite.md`'s `tools:` line.
+20. **Claude added `Skill` to `.claude/agents/arc-lite.md`'s `tools:` line
+    directly, as a named, explicit exception to decision 17/18's rule that
+    expanding a subagent's own tool grant is left to a human hand
+    regardless of technical feasibility.** Asked first which of the two
+    the user wanted — self-edit or an explicit exception — because "yes
+    please" to "want to add that `tools:` line" didn't say which; the
+    clarifying question was dismissed once, then the user confirmed
+    directly: "I want you to do it as explicit exception." Unlike decision
+    9 and 19, where the user chose an option from a menu Claude proposed,
+    here the user named "explicit exception" themselves, unprompted by any
+    option wording, after the first clarifying question went unanswered —
+    the strongest form of deliberate, informed consent available for
+    overriding a standing rule.
+    - **Scope of the exception:** this one line, this one grant. The
+      underlying rule — a subagent expanding its own tool access is a
+      human decision regardless of sandbox permissions — is not repealed;
+      re-ask before any future tool-grant change to any subagent, the same
+      way decision 19 requires re-confirming its disclaimer exception
+      before any second skill.
+    - **What this unblocks:** the `arc-lite` subagent can now invoke
+      `arc-lite-identity`, completing the wiring decision 18/19 left
+      half-built. Real end-to-end verification (dispatching a question to
+      the `arc-lite` subagent and confirming it reaches for the skill on
+      its own, ideally from a fresh session or a `claude -p --agent
+      arc-lite` terminal invocation rather than this one) is still
+      outstanding — see `meta/procedural-memory/universal.md`'s new entry
+      on why this session's own `Skill` tool calls can't be trusted to
+      prove it.
 
 ## Constraints identified
 
