@@ -48,6 +48,13 @@ about architecture, is curated slowly, and has no wired-up consumer yet. This on
 records how *I* got something wrong and what to do instead. Different subject,
 different urgency.
 
+**Versus `perception-failures`:** that component catalogues one specific *shape*
+of mistake — an incorrect belief asserted as settled fact, usually an
+overgeneralization or a stale carried-forward conclusion — structured for
+eventual cross-instance comparison rather than for changing behaviour today.
+Every entry there should point at a fix recorded here, not restate it; not
+every entry here has that shape, so the relationship is one-directional.
+
 **Versus session memory:** session memory is not a second master to keep in sync
 with this component — that produced exactly the drift risk the line below warns
 against. Instead, session memory is treated as disposable scratch: periodically

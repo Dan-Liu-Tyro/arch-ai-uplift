@@ -250,5 +250,9 @@ either.
 
 `procedural-memory` records **my** operational mistakes and takes effect immediately
 via a `CLAUDE.md` pointer. This component models **the user's** reasoning and has no
-consumer yet. Session memory holds only what the user stated or corrected directly.
-Same lesson never lives in two of the three.
+consumer yet. `perception-failures` also records something about **my** own
+failures, like `procedural-memory`, but narrower and slower: only the specific
+shape where a belief was asserted as settled and was wrong, kept unpromoted
+until enough instances exist to compare, in service of eventual synthesis
+rather than immediate correction. Session memory holds only what the user
+stated or corrected directly. Same lesson never lives in two of these four.

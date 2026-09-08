@@ -29,6 +29,7 @@ components/claude-code-access/   local query glue for Claude Code
 components/local-agent/          MVP: local mirror of Arc, no production access
 meta/procedural-memory/          operational lessons — read lessons.md early
 meta/architecture-learning/      evidence-based record of demonstrated style
+meta/perception-failures/        catalogue of Claude's own incorrect-belief incidents
 meta/token-tracking/             token usage data + summarize.py
 ```
 
@@ -112,15 +113,22 @@ wrong, update it in the same change.
   ideas; a component's `README.md` when its purpose, boundary, or
   dependencies change. If it isn't in one of those files, it didn't happen,
   as far as the next session (or a teammate) is concerned.
-- **Two more background habits, easy to let slide in a long session.** Before
+- **Three background habits, easy to let slide in a long session.** Before
   treating a substantial turn as finished, check whether anything in it
   qualifies for `meta/architecture-learning/observations.md` (append, no
-  ceremony — see that component's README) or `meta/procedural-memory/lessons.md`
-  (a mistake worth a rule — see that component's README). Both are described in
-  full elsewhere in this file; this bullet exists because the habit has already
-  been observed to lapse across a whole session without a reminder. Treat a
-  session with no entries in either file as something to ask about, not as
-  quiet evidence that nothing qualified.
+  ceremony — see that component's README), `meta/procedural-memory/lessons.md`
+  (a mistake worth a rule — see that component's README), or
+  `meta/perception-failures/log.md` (Claude stated something as settled fact
+  that turned out to be an overgeneralization or a stale carried-forward
+  belief — see that component's README for the exact shape). All three are
+  described in full elsewhere in this file; this bullet exists because the
+  habit has already been observed to lapse across a whole session without a
+  reminder. Treat a session with no entries in the first two files as
+  something to ask about, not as quiet evidence that nothing qualified.
+  `perception-failures/log.md` is different: most sessions genuinely won't
+  produce an entry, so its absence isn't itself a signal — the risk with
+  that one is failing to notice the rare turn where it does apply, not
+  under-filling it on a normal turn.
 - **Roadmap and milestone scope changes need explicit approval, not just
   good reasoning.** Both the program's phase/milestone roadmap
   (`docs/program-roadmap.md`) and the local three-step integration plan
