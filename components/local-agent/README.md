@@ -56,6 +56,9 @@ disposable comparison tool to a candidate for a real local agent; see
   a knowledge owner reviews it and updates `02-canonical-sources.md`
   from real usage, closing the loop decision 12 assumed but hadn't
   built.
+- Skills as native Claude Code Skills (`.claude/skills/`), listed in
+  `constitution/03-skills.md`, not a Confluence-page-based skill index
+  like the real Arc's — see decision 18 in `docs/decision-log.md`.
 - Comparing answers with and without local+live grounding present, on
   real questions.
 

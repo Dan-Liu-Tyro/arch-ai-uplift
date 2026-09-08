@@ -513,6 +513,35 @@ plain RAG.
       kind of self-authorization this project treats as the user's call
       regardless of what the sandbox permits (see `universal.md`'s
       correction). Left for the user to confirm and apply.
+18. **Arc Lite's first skill is a native Claude Code Skill
+    (`.claude/skills/arc-lite-identity/SKILL.md`), not a mirror of the real
+    Arc's Confluence-page-based skill index.** Raised when the user asked
+    to validate whether Arc Lite's skills had been "re-constructed as
+    native skills rather than a half-way compromised Confluence pages with
+    skill index" — the honest answer was that no skill existed yet either
+    way (`constitution/03-skills.md` said "None yet"), so this was a
+    green-field choice, not a migration. Chose the native primitive because
+    it is git-versioned and PR-reviewable with no live-Confluence
+    dependency, consistent with decisions 2 and 3 (git as source of truth;
+    Confluence as output, never input) rather than reintroducing the
+    dependency those decisions argue against.
+    - **`arc-lite-identity`** answers "what's your name" / "who are you"
+      questions about Arc Lite itself, grounded on `constitution/00-soul.md`.
+      Deliberately trivial — the point was proving the wiring, not solving
+      a real need — per `least-infrastructure-first`.
+    - **Not yet invokable by Arc Lite.** `.claude/agents/arc-lite.md`'s
+      `tools:` line does not grant `Skill`. Per decision 17's own finding
+      that expanding a subagent's tool grant is the user's call regardless
+      of technical feasibility, this was left for the user to add, not
+      done automatically even though the user had separately said to
+      proceed with building the skill — that approval addressed a
+      session-coordination concern (another active session on this repo),
+      not a waiver of the tool-grant-needs-a-human-hand rule.
+    - **Coordination note:** raised and resolved while at least one other
+      Claude Code session was active on this same repo (started minutes
+      earlier). The user confirmed proceeding anyway rather than checking
+      with that session first; worth reconciling if that session was also
+      touching `components/local-agent/` or `constitution/03-skills.md`.
 
 ## Constraints identified
 
