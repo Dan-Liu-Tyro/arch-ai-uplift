@@ -36,3 +36,13 @@ recorded in `gap-log.md` regardless of whether the compliance check
 otherwise passes — that is the actual point of this file: turning a
 lived gap into something a knowledge owner can review later, not just a
 one-time answer-quality check.
+
+**Known gap, surfaced 2026-09-08 by `arc-lite-identity` (decision 19):**
+this format has no real slot for a skill-sourced answer. `CITED id=...
+status=...` assumes the id and status come from a real
+`02-canonical-sources.md` row; a skill like `arc-lite-identity` has
+neither, so the first live invocation improvised `status=reference-example`
+as the closest fit rather than a clean match. Not resolved — flagged so
+the workaround isn't mistaken for a real pass, and so a real
+`ARC-LITE-CHECK: SKILL id=<skill-name>` form (or similar) can be
+designed deliberately rather than backed into.
