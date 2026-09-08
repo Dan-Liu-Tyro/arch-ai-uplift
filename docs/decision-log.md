@@ -605,6 +605,104 @@ plain RAG.
       outstanding — see `meta/procedural-memory/universal.md`'s new entry
       on why this session's own `Skill` tool calls can't be trusted to
       prove it.
+    - **Verified, 2026-09-08:** the user ran `claude -p --agent arc-lite
+      "tell me about your name"` from a real terminal (fresh process, no
+      stale in-session cache) and confirmed it worked — the skill actually
+      fires, not just the file content being correct. Decisions 18–20's
+      native-skill chain is now proven end to end, not just built.
+
+21. **Collapsed Arc Lite's mirrored five-part Constitution into its native
+    Claude Code shape, and ended `local-agent`'s dependency-graph exception
+    by folding its grounding into `kg-content`.** Raised when the user
+    asked directly whether the multi-file constitution pattern was "still
+    valid" or should be reconsidered "the Claude native way," and what a
+    from-scratch native Architecture agent would look like. The honest
+    answer, after reviewing all seven constitution files against
+    `arc-lite.md`, `03-skills.md`, `06-answer-format.md`, `ui/server.py`,
+    and `SCHEMA.md`: the constitution's shape mirrored a constraint Claude
+    Code doesn't have. Arc's real five-page split exists because Rovo loads
+    pages dynamically from Confluence, governed by a separate agent
+    (ArchWorker), so a rule can change without redeploying the agent. A
+    Claude Code subagent file is already the fresh, version-controlled,
+    zero-redeploy source — splitting `00-soul.md`, `01-working-protocol.md`,
+    and `06-answer-format.md` into files read via three extra tool calls on
+    every invocation paid a real cost (latency, context) to preserve a
+    metaphor with no matching constraint here.
+    - **What moved into `.claude/agents/arc-lite.md` directly:** identity/
+      tone (`00-soul.md`), the working protocol (`01-working-protocol.md`),
+      and the answer-format contract (`06-answer-format.md`) — all
+      behavior/prose that changes rarely and benefits from being the
+      subagent's own single source, not separate files.
+      `00-soul.md`, `01-working-protocol.md`, `02-canonical-sources.md`,
+      and `06-answer-format.md` are deleted; `03-skills.md`,
+      `04-procedure-memory.md`, and `05-ignore-list.md` keep their existing
+      filenames unchanged (not renumbered), specifically so every earlier
+      decision-log entry that cites them by path stays correct.
+    - **What did not move, on purpose:** `04-procedure-memory.md` stays a
+      separate file inside `components/local-agent/`, even though it
+      mirrors `meta/procedural-memory`'s shape almost exactly, because
+      `docs/component-model.md`'s one hard rule — nothing under
+      `components/` may depend on `meta/` — forbids Arc Lite from pointing
+      at `meta/procedural-memory/lessons.md` directly. The duplication here
+      is required decoupling, not an oversight to clean up.
+    - **The bigger change: `02-canonical-sources.md` is gone, and
+      `local-agent`'s "deliberately outside the dependency graph" exception
+      (decision 2, `docs/component-model.md`) ends.** Arc Lite now searches
+      `components/kg-content/entities/` directly for grounding — the same
+      thing the old file was a thinner, parallel shadow of — instead of
+      maintaining a second schema. `kg-content` was still at zero entities
+      when this was decided, so there was no migration cost to defer;
+      continuing to grow the shadow table instead would have been exactly
+      the premature-then-permanent duplication this project's own
+      principles warn against, now that decision 11 already reframed Arc
+      Lite from disposable comparison tool to a candidate for the real
+      local agent.
+      - **Not a mechanical 1:1 migration — the three rows didn't have the
+        same shape.** Only one of the three, `nfr-enrichment-2026-08-02`
+        (`canonical` in Arc Lite's own now-retired vocabulary), was actually
+        architecture guidance; it became `kg-content`'s first-ever entity —
+        `entities/principles/nfr-priority-third-party-financial-integration.md`,
+        type `principle`, status `draft`. `draft` rather than a carried-over
+        `canonical`, because this is the first entity to go through
+        `kg-content`'s own (still entirely human-review-based) quality
+        gate, and Arc Lite's retired "canonical" tier was never that gate.
+        The other two rows (`sparring-experiment-2026-08-04`,
+        `prd-readiness-2026-07-31`) were explicitly marked
+        `reference-example` / `insufficient-evidence` in the old file — not
+        architecture guidance, but examples of Arc's own answer quality for
+        grounded-vs-ungrounded comparison. Moving those into `kg-content`
+        would have been the wrong fit; they moved instead to the new
+        `components/local-agent/eval-examples.md`, explicitly linked to
+        `docs/program-roadmap.md`'s flagged lead that these same three
+        experiments may already contain real material toward the AKB's
+        50+-question Golden Evaluation Set.
+    - **The answer-format contract is now a single fenced ```json block per
+      answer** (`{"citations": [...], "refusal": bool}`), parsed by
+      `ui/server.py` via `json.loads` on the extracted block rather than
+      per-line regex on `ARC-LITE-CHECK:` sentinels. Citations carry a
+      `source` of `kg-content` (`id` + `status`, checked against the
+      entity's actual frontmatter), `live-unverified` (`url`, checked
+      against `05-ignore-list.md`), or the newly added `skill` (`name`,
+      checked against `.claude/skills/`) — closing the gap
+      `06-answer-format.md` flagged and left open when `arc-lite-identity`
+      shipped (decision 19): a skill-sourced answer now has a real slot
+      instead of improvising `status=reference-example` as the closest fit.
+      A skill citation is not logged to `gap-log.md` — it isn't a knowledge
+      gap the way a refusal or a live citation is.
+    - **Documentation updated in the same change, per this repo's own
+      contract-README rule:** `docs/component-model.md` (the exception
+      ending, the dependency diagram), `components/local-agent/README.md`
+      (boundary, depends-on, how-to-use), `components/kg-content/README.md`
+      and `components/kg-core/README.md` (`Depended on by`).
+    - **Deliberately not done in this pass:** the Atlassian MCP tool grant
+      decision 17 flagged as still missing from `arc-lite.md`'s `tools:`
+      line stays exactly as open as before — expanding that grant is a
+      separate decision the user has to make explicitly (decisions 17 and
+      20), not something this restructuring pass folds in. The real
+      end-to-end run decision 20 just verified went through direct CLI
+      invocation, not `ui/server.py`, so it exercised the old contract and
+      still left `gap-log.md` empty; that gap (and next step 7) is
+      unaffected by this decision.
 
 ## Constraints identified
 
@@ -652,10 +750,13 @@ plain RAG.
   collaborate; this repo's design (`claude-code-access`) only accounts for
   Rovo and Claude Code.
 - **Whether milestone 1.1's "in progress" status matches this repo's actual
-  state.** `kg-content` has zero entities. Either curation progress is
-  happening outside this repo (workflow/tagging/tooling decisions could count
-  before any entity exists) or the tracker is ahead of reality — worth
-  confirming which rather than assuming either.
+  state.** `kg-content` held zero entities from repo start until decision 21
+  (2026-09-08) added its first, migrated from Arc Lite's retired grounding
+  table rather than authored fresh — a real entity, but one, and not yet
+  through the three-entity typed-relationship pressure test
+  `kg-content/README.md`'s Status section still calls for. Either curation
+  progress is happening outside this repo too, or the tracker is still ahead
+  of reality — worth confirming which rather than assuming either.
 - **Resolved 2026-09-08, by explicit instruction: IN-562, IN-563, IN-564 and
   their epics (AIDLC-115, AIDLC-117) have been edited to match slide 26's
   wording**, on the basis that the approved capability stream plan is the
@@ -758,3 +859,17 @@ Resolved since first draft:
    `ui/server.py`,** so `gap-log.md` (decision 17) actually starts
    filling from lived usage rather than staying a designed-but-untested
    mechanism.
+8. **Design an eval set for the local agent (Arc Lite).** Raised
+   2026-09-08, right after decisions 18–20's native-skill wiring was
+   verified end to end. Already has a first concrete artifact, built
+   concurrently by another session the same day:
+   `components/local-agent/eval-examples.md`, which migrated the two
+   non-canonical rows out of the now-retired `02-canonical-sources.md`
+   (see decision 21) as candidate material, and connects them explicitly
+   to `docs/program-roadmap.md`'s AKB 50+-question Golden Evaluation Set
+   (program milestone 2.1). Still open, beyond adding more candidates:
+   whether this stays a small local rehearsal of that same program-scale
+   set, or grows into something scoped to what Arc Lite alone can be
+   graded on (e.g. `kg-content` citation correctness, refusal correctness
+   per `.claude/agents/arc-lite.md`'s working protocol, skill-trigger
+   accuracy) — worth deciding before it grows much past two entries.
