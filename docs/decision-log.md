@@ -396,6 +396,28 @@ plain RAG.
         than the one originally raised. Not resolved; flagged twice in
         conversation, not pushed further once the user set the direction.
 
+16. **IN-566 through IN-569 — pre-existing placeholders explicitly labeled
+    "Phase 2 - [maturity target area N]" / "Phase 3 - [maturity target area
+    N]" — were repurposed for slide 26's Q3/Q4 capabilities (Solution
+    Architecture Maturity 2/3, Sparring Submission, TPP Impact Analysis).**
+    Chosen explicitly by the user over leaving them alone and raising fresh
+    initiatives, after I flagged that the "Phase 2"/"Phase 3" labels almost
+    certainly refer to `docs/program-roadmap.md`'s own Phase 2 ("Human-in-
+    the-Loop," Apr 2027) and Phase 3 ("Human-on-the-Loop," Aug 2027)
+    milestones, not to slide 26's FY27 quarters. All four had blank
+    descriptions and no linked epics, so — unlike IN-565 — nothing existing
+    was actually lost by the rename.
+    - **Risk this creates, not yet checked by anyone:** these were most
+      likely someone's early skeleton for Phase 2/3's own initiatives,
+      created before this slide existed. A fifth placeholder, IN-570
+      ("Phase 3 - [maturity target area 5]"), was deliberately left alone as
+      the only remaining trace of that skeleton. If Phase 2/3 planning later
+      needs its own initiatives, whoever does that planning may find part of
+      the ticket range they expected to use already spent on FY27 Q3/Q4
+      work, with no note anywhere except here explaining why. Worth a quick
+      check with whoever originally created IN-566–570 before this surfaces
+      as a surprise.
+
 ## Constraints identified
 
 - **Rovo is cloud-hosted; the KG is local.** Rovo can't reach the local repo
