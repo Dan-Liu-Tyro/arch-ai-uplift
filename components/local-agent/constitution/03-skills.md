@@ -10,10 +10,15 @@ reintroducing the dependency those decisions argue against. See decision
 18 in `docs/decision-log.md`.
 
 - **`arc-lite-identity`** (`.claude/skills/arc-lite-identity/SKILL.md`) —
-  answers identity questions about Arc Lite itself ("what's your name,"
-  "who are you"), grounded on `00-soul.md`. Added first and deliberately
-  minimal, to prove native-skill wiring end to end before adding a skill
-  with real architecture-grounding stakes.
+  answers "tell me about your name" / "why Arc?" questions. Ported
+  verbatim from Arc's real "Skill - Tell Me About Your Name" (Confluence
+  ARCH space, page `2005434483`, canonical source page `1998749707`'s
+  "About my name" section). **Deliberate, scoped exception:** for this
+  skill only, answers as Arc, in first person, with no "I'm Arc Lite, not
+  the real Arc" disclaimer — every other skill and every other answer
+  keeps that disclaimer per `00-soul.md`. Recorded as decision 19 in
+  `docs/decision-log.md`; re-check that scoping before adding a second
+  skill.
   - **Not yet invokable.** `.claude/agents/arc-lite.md`'s `tools:` line
     does not grant `Skill` yet — that grant is left to a human hand
     deliberately (see that file's own note on why), so this skill exists

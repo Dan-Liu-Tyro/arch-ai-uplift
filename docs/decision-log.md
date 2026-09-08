@@ -542,6 +542,42 @@ plain RAG.
       earlier). The user confirmed proceeding anyway rather than checking
       with that session first; worth reconciling if that session was also
       touching `components/local-agent/` or `constitution/03-skills.md`.
+19. **`arc-lite-identity` is ported verbatim from Arc's real content, as
+    a deliberate, scoped exception to the non-affiliation disclaimer
+    `00-soul.md`, the README, and `arc-lite.md` all currently call
+    non-negotiable.** The user asked for Arc Lite's "tell me your name"
+    output to exactly match what the real Arc would say, explicitly not
+    differentiating Arc from Arc Lite "in this sense yet." Flagged
+    directly as a conflict with language stated as absolute in three
+    separate files before acting, rather than loosening it quietly. Given
+    three options — a scoped exception just for this skill, dropping the
+    disclaimer rule generally, or keeping the disclaimer while only
+    matching tone/content — the user chose the scoped exception.
+    - **Source, fetched live via the Atlassian MCP connector, not
+      guessed:** Confluence ARCH space — `Arc Workspace` (page
+      `1997307980`, the Constitution index) → `03 - Skills` (page
+      `2005500019`, the real Skill Index) → `Skill - Tell Me About Your
+      Name` (page `2005434483`, the actual skill definition) → `README`
+      (page `1998749707`)'s "About my name" section, the skill's own
+      mandatory canonical source. All authored by the user (Dan Liu).
+    - **What this incidentally confirmed about the real Arc's skill
+      architecture** — directly relevant to decision 18's native-vs-
+      Confluence-index choice: `00 - Agent Soul` (page `1996390531`)
+      has a "🛡️ Execution Grounding (MANDATORY)" section requiring Arc to
+      read the Skills index page, then the matched skill's own page, then
+      the Procedure Memory page, live, on every triggered request, before
+      acting — three live Confluence reads per skill invocation, every
+      time, with no caching implied. This is the concrete shape of the
+      "clunky" live-index mechanism decision 18 chose not to mirror.
+    - **Scope of the exception is the skill file only.**
+      `constitution/00-soul.md`, `components/local-agent/README.md`, and
+      `.claude/agents/arc-lite.md` are unchanged — the disclaimer stays
+      non-negotiable everywhere except inside `arc-lite-identity`'s own
+      instructions. Re-confirm this scoping explicitly before adding any
+      second skill; it is not a precedent for skills generally.
+    - **Still blocked on decision 18's finding:** this skill is written
+      but still not invokable by the `arc-lite` subagent until a human
+      adds `Skill` to `.claude/agents/arc-lite.md`'s `tools:` line.
 
 ## Constraints identified
 
