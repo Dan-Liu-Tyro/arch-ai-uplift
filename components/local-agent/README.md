@@ -45,6 +45,17 @@ disposable comparison tool to a candidate for a real local agent; see
   and read live Confluence when local grounding doesn't cover a question.
 - An ignore list (`constitution/05-ignore-list.md`) of specific pages to
   exclude from any live search regardless of topical relevance.
+- A machine-checkable answer-format contract
+  (`constitution/06-answer-format.md`): every answer must end with a
+  parseable citation/refusal marker, which `ui/server.py` validates
+  against the constitution before the consumer sees the answer, rather
+  than only trusting the model to have followed
+  `01-working-protocol.md`'s instructions.
+- `gap-log.md`: every refusal and every below-`canonical` citation is
+  logged there automatically, as the knowledge-lifecycle feedback loop —
+  a knowledge owner reviews it and updates `02-canonical-sources.md`
+  from real usage, closing the loop decision 12 assumed but hadn't
+  built.
 - Comparing answers with and without local+live grounding present, on
   real questions.
 
@@ -107,18 +118,29 @@ Nothing yet.
 Invoke the `arc-lite` subagent (`.claude/agents/arc-lite.md`) in a Claude
 Code session in this repo, or ask a session to act as Arc Lite directly.
 Either way the mechanism is the same: read `constitution/00-soul.md`
-through `05-ignore-list.md` fresh each time and follow
-`01-working-protocol.md` exactly — the subagent file only points at those
-six files, it does not duplicate their content, so editing the
-constitution is enough to change Arc Lite's behavior without touching the
-subagent definition, with one exception: the subagent's *tool grant*
-(which MCP tools it's allowed to call) lives in `arc-lite.md` itself, not
-the constitution, and `.claude/agents/` is sandbox-write-protected from
-Claude Code — see `meta/procedural-memory/universal.md`. Decision 11's
-live-Confluence-read access needed a human hand to add the Atlassian MCP
-tools to that file's `tools:` line and extend its file-pointer list to six
-entries; Claude could only prepare the constitution-file side of the
-change.
+through `06-answer-format.md` fresh each time and follow
+`01-working-protocol.md` and `06-answer-format.md` exactly — the subagent
+file only points at those seven files, it does not duplicate their
+content, so editing the constitution is enough to change Arc Lite's
+behavior without touching the subagent definition, with one exception:
+the subagent's *tool grant* (which MCP tools it's allowed to call) lives
+in `arc-lite.md` itself, not the constitution, and `.claude/agents/` is
+sandbox-write-protected from Claude Code — see
+`meta/procedural-memory/universal.md`. Decision 11's live-Confluence-read
+access needed a human hand to add the Atlassian MCP tools to that file's
+`tools:` line and extend its file-pointer list; Claude could only prepare
+the constitution-file side of the change.
+
+**Known drift, discovered 2026-09-08, not yet fixed:** `arc-lite.md`'s
+file-pointer list currently stops at
+`constitution/04-procedure-memory.md` — it never actually gained
+`05-ignore-list.md` despite decision 11 and the paragraph above assuming
+it had. Arc Lite has been running without ever being told to read the
+ignore list. Adding `06-answer-format.md` needs the same human hand as
+decision 11 (see `docs/decision-log.md`, decision 17), so both entries
+should be added to `arc-lite.md`'s numbered list in the same edit:
+`components/local-agent/constitution/05-ignore-list.md` and
+`components/local-agent/constitution/06-answer-format.md`.
 
 The subagent file was created ahead of this component's original
 guidance to wait until the Constitution content had been used and
@@ -136,7 +158,8 @@ reference points from
 [`docs/program-roadmap.md`](../../docs/program-roadmap.md)'s activity
 log — linked back to their source, not duplicated. See
 `constitution/02-canonical-sources.md`. `constitution/05-ignore-list.md`
-is seeded with nothing yet.
+is seeded with nothing yet, and `gap-log.md` starts empty by design — it
+only fills from real usage through `ui/server.py`.
 
 ## Cost
 

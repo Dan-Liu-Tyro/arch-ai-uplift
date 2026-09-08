@@ -418,6 +418,51 @@ plain RAG.
       check with whoever originally created IN-566–570 before this surfaces
       as a surprise.
 
+17. **Arc Lite's grounding contract gets a mechanical compliance check and
+    a gap log, rather than relying on the model to follow
+    `01-working-protocol.md`'s instructions on trust.** Raised 2026-09-08
+    from a discussion with the principal architect about spec-driven
+    bounded control for Arc Lite: the runtime should always respect the
+    control described in its spec, one experiment being "answer only from
+    canonical sources, refuse nicely otherwise," with every refusal
+    documented as the trigger for knowledge lifecycle management. Most of
+    the refusal behavior already existed (`01-working-protocol.md` steps
+    1–5); what didn't exist was (a) any way to verify per-answer that the
+    behavior actually happened rather than trusting the prompt, and (b)
+    anywhere durable for a refusal or weak citation to land once the
+    conversation ended. The user chose, over keeping the constitution
+    instruction-only, to add both:
+    - **New constitution file, `constitution/06-answer-format.md`:**
+      every answer must end with a machine-parseable
+      `ARC-LITE-CHECK:` line (`CITED id=... status=...`,
+      `LIVE-UNVERIFIED url=...`, or `REFUSAL`). `ui/server.py` parses and
+      validates these against `02-canonical-sources.md` and
+      `05-ignore-list.md` before the consumer sees the answer, and flags
+      (does not block) a failure.
+    - **New file, `components/local-agent/gap-log.md`:** every
+      `REFUSAL` and every citation below `canonical` status is appended
+      there automatically by `ui/server.py`, closing the loop decision 12
+      (knowledge-base ownership split) assumed but never built — a
+      knowledge owner now has something concrete, generated from real
+      usage, to review and act on.
+    - **Coverage gap, accepted knowingly:** the mechanical check only
+      runs in the `ui/server.py` path. Arc Lite invoked directly as a
+      Claude Code subagent (no server in front of it) still relies on
+      instruction-following alone, and its answers never reach
+      `gap-log.md`. Not fixed now — flagged so it isn't assumed to be
+      symmetric.
+    - **Discovered in the same pass, unrelated to this decision but found
+      while touching these files:** `.claude/agents/arc-lite.md`'s
+      file-pointer list never actually gained
+      `constitution/05-ignore-list.md` when decision 11 said it had —
+      Arc Lite has been running without being told to read the ignore
+      list. See `components/local-agent/README.md`'s "Known drift" note
+      and Next steps below.
+    - **Deliberately not built:** blocking a non-compliant answer instead
+      of flagging it, and extending the mechanical check to the direct
+      subagent-invocation path. Both are named as possible escalations in
+      `06-answer-format.md`/this entry, not committed to.
+
 ## Constraints identified
 
 - **Rovo is cloud-hosted; the KG is local.** Rovo can't reach the local repo
@@ -551,3 +596,13 @@ Resolved since first draft:
    from Maturity 1 to adjust grounding logic, content structure, and agent
    behaviour. Explicitly not actioned yet — the user asked to document this
    only, not touch Jira again this session.
+6. **Hand-edit `.claude/agents/arc-lite.md`'s numbered file-pointer
+   list** (sandbox-write-protected from Claude Code) to add
+   `components/local-agent/constitution/05-ignore-list.md` (missing
+   since decision 11, only just discovered) and
+   `components/local-agent/constitution/06-answer-format.md` (decision
+   17) — both in the same edit.
+7. **Use Arc Lite for real, on real architecture questions, through
+   `ui/server.py`,** so `gap-log.md` (decision 17) actually starts
+   filling from lived usage rather than staying a designed-but-untested
+   mechanism.
