@@ -235,3 +235,35 @@ invoked once, regardless of subsequent edits to `SKILL.md` or a subagent's
 the file directly rather than trusting a same-session re-invocation's
 output, or verify from a fresh session/process (e.g. a fresh `claude -p
 --agent <name>` terminal invocation).
+
+---
+
+## `git commit` commits everything already staged, not just what this turn `git add`ed
+
+**What happened.** Before committing a single new file
+(`docs/kg-format-research.md`), I checked `git status --short --
+docs/kg-format-research.md` — scoped to that one path — saw only the
+untracked new file, `git add`ed it, and committed with a message describing
+only that file. The commit actually included five files: the new file plus
+four deletions (`components/local-agent/constitution/00-soul.md`,
+`01-working-protocol.md`, `02-canonical-sources.md`, `06-answer-format.md`)
+that were already sitting staged in the index from earlier, unrelated work
+(a prior decision this same repo had already recorded), because a plain
+`git commit` commits the whole index, not the paths named in the most recent
+`git add`. The path-scoped status check made it look like nothing else was
+staged, when a full `git status` at the very start of this conversation had
+already shown those four deletions staged (`D ` prefix) — information I had
+but didn't re-check immediately before committing.
+
+**Cost.** A commit whose message doesn't describe roughly half its actual
+diff. Not destructive here — the swept-in deletions were legitimate and
+already decided elsewhere — but the same sequence with unreviewed or
+unwanted staged content would have committed it silently under a misleading
+message, and the mismatch would only surface if someone happened to open the
+commit and compare it against the message.
+
+**Rule.** Immediately before any `git commit`, run a full, unscoped `git
+status` (not a status filtered to the path just `git add`ed) and confirm
+the full staged set matches what the commit message is about to claim. A
+path-scoped check only tells you that path's state — it actively hides
+other already-staged content sitting in the index from earlier work.
