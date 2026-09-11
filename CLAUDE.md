@@ -85,7 +85,12 @@ conversation length, not with work done.
 
 Each component's `README.md` states its purpose, boundary, dependencies, and
 extraction notes, and is treated as its contract — if a change makes a README
-wrong, update it in the same change.
+wrong, update it in the same change. When part of that contract isn't decided yet
+(a mechanism, a protocol), say so explicitly rather than leaving it implicit — an
+unstated gap reads as decided by omission. `components/query-service/README.md`'s
+purpose-vs-protocol split is the pattern: settled purpose stated plainly, the open
+question named and pointed at its `docs/decision-log.md` entry, not silently
+absent.
 
 ## Working conventions
 
