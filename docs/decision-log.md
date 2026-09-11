@@ -848,6 +848,13 @@ plain RAG.
   cadence, conflict handling. The transport is settled (Atlassian MCP page
   create/update); what remains open is how pages are generated from KG entities
   and how divergence is handled if someone edits a published page by hand.
+- **`query-service`'s wire protocol.** Its purpose is settled — a thin,
+  network-reachable transport over `kg-core` for remote consumers (Rovo, or
+  any agent that can't read this repo's filesystem) — but the protocol itself
+  is not. MCP is a plausible candidate (Rovo already speaks MCP for the
+  Atlassian connector), but nothing has chosen it over a plain REST/GraphQL
+  API. Deliberately left open, per `least-infrastructure-first`, until the
+  component is actually built — see `components/query-service/README.md`.
 - **GitHub connector availability — parked, revisit later.** No GitHub MCP
   connector is enabled in the current Claude Code session (verified against the
   live tool list). Not yet established whether that is an org-level entitlement
