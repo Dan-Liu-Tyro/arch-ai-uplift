@@ -704,6 +704,55 @@ plain RAG.
       still left `gap-log.md` empty; that gap (and next step 7) is
       unaffected by this decision.
 
+22. **Widened `meta/`'s charter to include general-purpose capabilities
+    incubated during this project, not just self-observation.** Raised
+    when the user asked to add a new capability, `idea-to-presentation`
+    (agent-driven: reduce the time from a raw idea to a presentable
+    PowerPoint/Confluence deck), placed directly under `meta/`. Flagged
+    the conflict before acting: decision 4 and `meta/README.md` defined
+    `meta/` by the *opposite* property — its components are "tied to
+    *this* project's history and would be meaningless elsewhere," which is
+    the stated reason `components/` must never depend on `meta/`. A
+    general-purpose deck-builder is exactly what `component-model.md`'s
+    promotion story already has a home for (a `components/` piece that
+    outgrows this repo and gets promoted). Given that conflict, the user
+    chose explicitly to redefine `meta/`'s charter rather than relocate
+    the new capability: `components/` is now specifically for pieces that
+    serve this project's own KG-curation mission (the Architecture
+    stream's AI SDLC outcome); `meta/` is for capabilities built along
+    the way that are not specific to that mission and might have value
+    beyond it, whether or not they turn out to be extractable later.
+    - **What changes:** `meta/README.md`'s definition widens from "holds
+      what observes the process of building this project" to "holds work
+      that isn't a step in the KG pipeline — either because it observes
+      this project's own process, or because it's a capability that
+      emerged from doing this work but isn't specific to
+      architecture-knowledge curation." The hard rule (`components/` must
+      never depend on `meta/`) is unchanged; its rationale is now stated
+      per-kind rather than universally — a self-observation component is
+      tied to this project's history and would be meaningless elsewhere,
+      while a general-purpose meta capability has its own independent
+      incubation lifecycle that a KG-pipeline component shouldn't be
+      coupled to.
+    - **First capability under the widened charter:**
+      `meta/idea-to-presentation`, whose own README states purpose and
+      boundary; mechanism (how an idea actually becomes a deck) is not
+      yet designed.
+    - **Tension flagged, not fully resolved:** the test distinguishing a
+      `meta/` capability from a `components/` promotion candidate is
+      narrower than it used to be — both can now be general-purpose and
+      outgrow this repo. The line kept for now is mission-specificity:
+      `components/` pieces are steps in the KG-curation pipeline; `meta/`
+      pieces are not, however generalizable they turn out to be. Revisit
+      if that line stops doing real work.
+    - **Doesn't retroactively re-justify the existing three meta
+      components under this new rationale.** Decision 8 already rejected
+      moving project-specific lessons into a `components/procedure-memory`
+      on the original, narrower ground (`meta/` = observation, not
+      promotion-readiness); this widening applies going forward to new
+      capabilities, not backward to re-derive why `procedural-memory`,
+      `architecture-learning`, or `token-tracking` are where they are.
+
 ## Constraints identified
 
 - **The user is likely to be the sole person working the Architecture
@@ -873,3 +922,9 @@ Resolved since first draft:
    graded on (e.g. `kg-content` citation correctness, refusal correctness
    per `.claude/agents/arc-lite.md`'s working protocol, skill-trigger
    accuracy) — worth deciding before it grows much past two entries.
+9. **Design `meta/idea-to-presentation`'s actual mechanism (decision 22).**
+   Placement and purpose are settled; how an idea actually becomes a
+   deck/page is not — output formats beyond PowerPoint/Confluence,
+   whether any generation tooling is needed (and if so, its language per
+   org standards), and how it's invoked (skill, agent, or something else)
+   are all still open.

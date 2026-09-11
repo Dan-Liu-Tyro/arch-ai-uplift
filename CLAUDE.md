@@ -31,6 +31,7 @@ meta/procedural-memory/          operational lessons — read lessons.md early
 meta/architecture-learning/      evidence-based record of demonstrated style
 meta/perception-failures/        catalogue of Claude's own incorrect-belief incidents
 meta/token-tracking/             token usage data + summarize.py
+meta/idea-to-presentation/       idea -> deck/page capability, general-purpose
 ```
 
 ## Working with the user
@@ -50,9 +51,12 @@ change to the user's config; after a denied tool call, ask rather than retrying 
 variant; run any code that derives paths or does index arithmetic in the same turn
 you write it.
 
-`meta/` observes the process of building the project rather than participating in
-it. **`components/` must never depend on `meta/`** — that would tie an extractable
-component to this project's history. The repo's only executables live here —
+`meta/` holds whatever isn't a step in the KG pipeline: either it observes the
+process of building the project, or (since decision 22 in `docs/decision-log.md`)
+it's a general-purpose capability incubated along the way that isn't specific to
+architecture-knowledge curation. **`components/` must never depend on `meta/`** —
+that would tie an extractable component to something outside the KG pipeline's own
+trajectory. The repo's only executables live here —
 `token-tracking/summarize.py`, `architecture-learning/reindex.py`, and
 `architecture-learning/extract_transcript.py`, all stdlib only.
 
@@ -162,8 +166,9 @@ cross-references:
    → Rovo indexes that space. Architects edit git, never raw Confluence.
 4. **Components over one application.** Six components under `components/`, sized
    so that pieces which outgrow this repo can be promoted out as a move rather
-   than an untangling. Plus a `meta/` tier that observes the project without being
-   part of it. See the Layout section above.
+   than an untangling. Plus a `meta/` tier for whatever isn't a step in the KG
+   pipeline — self-observation, or (decision 22) a general-purpose capability
+   incubated here. See the Layout section above.
 
 The graph shape is the point: typed relationships (`pattern REQUIRES guardrail`,
 `principle CONFLICTS_WITH pattern`, `decision SUPERSEDES decision`,

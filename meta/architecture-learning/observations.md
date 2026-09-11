@@ -60,3 +60,13 @@ principle's `status` and must not be silently absorbed as if it agreed.
   to let a slide imply commitments that don't exist in the tracker. Both point
   the same way — the artifact should not overstate certainty — but they trade
   off differently against effort, so this is two data points, not one.
+- 2026-09-11 · Asked for a new general-purpose capability
+  (`idea-to-presentation`) to live under `meta/`, and when challenged twice
+  that this conflicted with `meta/`'s documented "observes, never
+  participates" charter, chose to amend the charter itself rather than
+  relocate the capability to `components/` · "I want this new capability
+  live within meta folder just like other capability with meta" · unpromoted
+  — single instance; distinct from other structure-for-extraction evidence
+  because it's the user redrawing the categorization boundary itself, not
+  just accepting or rejecting a placement within an existing one. Decision
+  22, `docs/decision-log.md`.
