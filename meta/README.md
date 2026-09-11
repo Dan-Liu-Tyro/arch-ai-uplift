@@ -2,44 +2,45 @@
 
 Components that sit *above* the project rather than inside it.
 
-Everything under `components/` builds the knowledge graph — pieces that serve this
-project's own mission, curating Tyro's architecture knowledge for the Architecture
-stream's AI SDLC outcome. Everything here is not a step in that pipeline: either it
-observes the process of building this project, accumulating knowledge about *how we
-work* rather than about Tyro's architecture, or it's a capability incubated along
-the way that isn't specific to architecture-knowledge curation and might have value
-beyond this project — widened to include the latter by decision 22 in
-`docs/decision-log.md`. Either way, these are in this repo because they are worth
-versioning and reviewing, but they are not part of the KG pipeline and would not
-ship as part of *it*.
+Everything under `components/` ships as part of the architecture agent product
+itself — the agent, its skills, the knowledge graph — delivered for the
+Architecture stream's mission. Everything here does not ship as part of that
+product: either it observes the process of building this project, accumulating
+knowledge about *how we work* rather than about Tyro's architecture, or it's a
+capability useful along the journey of building and operating the product, which
+could potentially be abstracted into a general-purpose capability beyond this
+project, but is explicitly not part of the product's own delivery — widened to
+include the latter by decision 22 in `docs/decision-log.md`. Either way, these are
+in this repo because they are worth versioning and reviewing, but none of it ships
+with the product.
 
 | Meta component | Purpose |
 |---|---|
 | [`procedural-memory`](procedural-memory) | Operational lessons — mistakes made here and the rules that prevent repeating them. Intended to change behaviour immediately, via a pointer from `CLAUDE.md`. |
 | [`architecture-learning`](architecture-learning) | A slow-curated model of how this architect reasons. Deprioritised: no consumer wired up, revisited later. |
 | [`token-tracking`](token-tracking) | Token consumption and cost by day, five-hour window, branch, effort, and model, so strategy can be adjusted from evidence. |
-| [`idea-to-presentation`](idea-to-presentation) | An agent-driven capability to cut the time from a raw idea to a presentable deck/page (PowerPoint, Confluence). General-purpose, not specific to architecture-knowledge curation — the first capability under the widened charter (decision 22). |
+| [`idea-to-presentation`](idea-to-presentation) | An agent-driven capability to cut the time from a raw idea to a presentable deck/page (PowerPoint, Confluence). Useful along the journey, not part of the agent/skills/KG product's own delivery — the first capability under the widened charter (decision 22). |
 
 The first three are self-observation: `procedural-memory` is about **my** errors and
 takes effect now; `architecture-learning` models **the user's** reasoning and is
 curation without a consumer; `token-tracking` derives cost data from real usage.
 `idea-to-presentation` is a different kind of thing — a capability rather than a
-record — kept here anyway because it isn't a KG-pipeline step and the mission-
-specificity test below still says `components/` isn't the right home for it either.
+record — kept here anyway because, like the first three, it doesn't ship as part of
+the architecture agent product.
 
 ## The one hard rule
 
 **Nothing under `components/` may depend on anything under `meta/`.**
 
 The dependency rules in `docs/component-model.md` describe a graph pointing inward
-to `kg-core`. `meta/` sits outside that graph entirely. The reason differs by kind
-of meta component, but the rule doesn't: a self-observation component (the original
-three) is tied to *this* project's history and would be meaningless elsewhere; a
-general-purpose capability (`idea-to-presentation`) has its own independent
-incubation lifecycle, moving at its own pace for its own audience, that a
-KG-pipeline component shouldn't be coupled to. Either way, if a component ever needs
-something from a meta component, the thing it needs is not meta and belongs in the
-core.
+to `kg-core`. `meta/` sits outside that graph entirely: nothing in it ships as part
+of the product. The reason differs by kind of meta component, but the rule doesn't:
+a self-observation component (the original three) is tied to *this* project's
+history and would be meaningless elsewhere; a general-purpose capability
+(`idea-to-presentation`) has its own independent incubation lifecycle, moving at its
+own pace for its own audience, that the shipped product shouldn't be coupled to.
+Either way, if a component ever needs something from a meta component, the thing it
+needs is not meta and belongs in the core.
 
 This matters for the promotion story. Components are built to be extracted into
 their own projects. A dependency from a component to a meta component would quietly

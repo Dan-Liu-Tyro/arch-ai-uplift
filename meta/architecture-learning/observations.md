@@ -70,3 +70,12 @@ principle's `status` and must not be silently absorbed as if it agreed.
   because it's the user redrawing the categorization boundary itself, not
   just accepting or rejecting a placement within an existing one. Decision
   22, `docs/decision-log.md`.
+- 2026-09-11 · Immediately after that same decision was accepted, corrected
+  the model's own restatement of the boundary from mission-specificity to
+  product-delivery · "those components are becoming the building blocks to
+  ship the architecture agent product... meta capabilities... could
+  potentially be abstracted as general purpose capabilities beyond this
+  project but not as part of the delivery" · unpromoted — single instance;
+  shows the precision-correction habit continuing past the point the
+  substantive decision was already settled, not just at the decision point
+  itself.

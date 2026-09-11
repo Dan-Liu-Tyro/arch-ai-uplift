@@ -717,34 +717,38 @@ plain RAG.
     promotion story already has a home for (a `components/` piece that
     outgrows this repo and gets promoted). Given that conflict, the user
     chose explicitly to redefine `meta/`'s charter rather than relocate
-    the new capability: `components/` is now specifically for pieces that
-    serve this project's own KG-curation mission (the Architecture
-    stream's AI SDLC outcome); `meta/` is for capabilities built along
-    the way that are not specific to that mission and might have value
-    beyond it, whether or not they turn out to be extractable later.
+    the new capability.
+    - **The test, sharpened once more the same day after a first pass
+      used the wrong axis.** The first version of this decision drew the
+      line at mission-specificity ("`components/` serves KG curation;
+      `meta/` doesn't") — the user corrected this directly: the real line
+      is *delivery*, not topic. `components/` holds what ships as part of
+      the architecture agent product itself (the agent, its skills, the
+      knowledge graph); `meta/` holds capabilities useful *along the
+      journey* of building and operating that product, which could
+      potentially be abstracted into general-purpose capabilities beyond
+      this project, but are explicitly not part of the product's own
+      delivery. This is a better test than mission-specificity because it
+      doesn't collide with the promotion story: a promoted
+      `components/` piece (e.g. `query-service`) can be just as
+      general-purpose or extractable as a `meta/` capability — the
+      difference was never generality, it's whether the thing ships with
+      the product.
     - **What changes:** `meta/README.md`'s definition widens from "holds
       what observes the process of building this project" to "holds work
-      that isn't a step in the KG pipeline — either because it observes
-      this project's own process, or because it's a capability that
-      emerged from doing this work but isn't specific to
-      architecture-knowledge curation." The hard rule (`components/` must
-      never depend on `meta/`) is unchanged; its rationale is now stated
-      per-kind rather than universally — a self-observation component is
-      tied to this project's history and would be meaningless elsewhere,
-      while a general-purpose meta capability has its own independent
-      incubation lifecycle that a KG-pipeline component shouldn't be
-      coupled to.
+      that isn't part of the architecture agent product's own delivery —
+      either because it observes this project's own process, or because
+      it's a capability incubated along the way that isn't part of that
+      delivery." The hard rule (`components/` must never depend on
+      `meta/`) is unchanged; its rationale is now stated per-kind rather
+      than universally — a self-observation component is tied to this
+      project's history and would be meaningless elsewhere, while a
+      general-purpose meta capability has its own independent incubation
+      lifecycle that the shipped product shouldn't be coupled to.
     - **First capability under the widened charter:**
       `meta/idea-to-presentation`, whose own README states purpose and
       boundary; mechanism (how an idea actually becomes a deck) is not
       yet designed.
-    - **Tension flagged, not fully resolved:** the test distinguishing a
-      `meta/` capability from a `components/` promotion candidate is
-      narrower than it used to be — both can now be general-purpose and
-      outgrow this repo. The line kept for now is mission-specificity:
-      `components/` pieces are steps in the KG-curation pipeline; `meta/`
-      pieces are not, however generalizable they turn out to be. Revisit
-      if that line stops doing real work.
     - **Doesn't retroactively re-justify the existing three meta
       components under this new rationale.** Decision 8 already rejected
       moving project-specific lessons into a `components/procedure-memory`

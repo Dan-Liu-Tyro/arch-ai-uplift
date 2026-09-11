@@ -58,13 +58,15 @@ local-agent ─────────────── (reads entities) ─�
 
 ### The `meta/` tier
 
-`meta/` holds work that isn't a step in the KG pipeline — see
+`meta/` holds work that doesn't ship as part of the architecture agent product
+(the agent, its skills, the knowledge graph) — see
 [`../meta/README.md`](../meta/README.md) for the full definition. Originally scoped
 to components that observe the *process* of building this project rather than
 participating in it; widened by decision 22 in `docs/decision-log.md` to also cover
-general-purpose capabilities incubated during this project but not specific to
-architecture-knowledge curation (the first is `meta/idea-to-presentation`). It sits
-outside the dependency graph above, with one hard rule:
+general-purpose capabilities that are useful along the journey of building and
+operating the product without being part of its own delivery (the first is
+`meta/idea-to-presentation`). It sits outside the dependency graph above, with one
+hard rule:
 
 **Nothing under `components/` may depend on anything under `meta/`.**
 
@@ -72,8 +74,8 @@ The rationale differs by kind, but the rule doesn't. A self-observation meta
 component is tied to this project's own history and would be meaningless elsewhere.
 A general-purpose meta capability has its own independent incubation lifecycle,
 moving at its own pace for its own audience. Either way, a dependency from a
-component to a meta component would tie that component's fate to something outside
-the KG pipeline's own trajectory — quietly making it non-extractable, which is the
+component to a meta component would tie the shipped product's fate to something
+outside its own delivery — quietly making that component non-extractable, which is the
 property this whole model exists to protect.
 
 ## Contracts

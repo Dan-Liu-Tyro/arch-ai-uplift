@@ -4,13 +4,17 @@ An agent-driven capability aimed at dramatically reducing the time between
 having an idea and having it in a presentable format — a PowerPoint deck or
 a Confluence page — using Claude as the agent that does the drafting.
 
-**General-purpose, not architecture-specific.** Unlike the rest of this
-project, this capability isn't scoped to Tyro's architecture knowledge or
-grounded on `kg-content` — it's meant to work for any idea, on any topic.
-That's exactly why it lives under `meta/` rather than `components/`: see
-decision 22 in `docs/decision-log.md`, which widened `meta/`'s charter for
-this reason. `components/` is for pieces that serve this project's own
-KG-curation mission; this doesn't, even though it was incubated here.
+**Useful along the journey, not part of the product's delivery.** This
+capability doesn't ship as part of the architecture agent product itself
+(the agent, its skills, the knowledge graph) — it's a general-purpose tool
+that helps get *other* work into presentable shape, incubated while building
+that product but not a piece of it. That's exactly why it lives under
+`meta/` rather than `components/`: see decision 22 in
+`docs/decision-log.md`, which widened `meta/`'s charter for this reason.
+`components/` is for pieces that ship with the product; this doesn't, even
+though it was incubated here — and it's also not scoped to Tyro's
+architecture knowledge, so it isn't grounded on `kg-content` and is meant to
+work for any idea, on any topic.
 
 ## Purpose
 
