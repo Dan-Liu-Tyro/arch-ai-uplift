@@ -46,6 +46,41 @@ This enables contradiction detection (conflicting guardrails), dependency
 tracing, and consistency checks across design docs — the differentiator over
 plain RAG.
 
+## Index by area
+
+Hand-maintained, not generated — add a row when a decision is appended.
+Purely a finding aid; the numbered entries below are the actual record, and
+cite each other by name, not number, since this index is exactly the kind
+of second copy that could drift otherwise. Mirrors the raw-entries/index
+split `meta/architecture-learning` already uses for the same reason, at a
+scale that doesn't yet justify that component's `reindex.py` tooling.
+
+| # | One line | Area |
+|---|---|---|
+| 1 | File-based storage, not a graph DB | `kg-core` |
+| 2 | Decouple KG core from integration layer | `kg-core`, component-model |
+| 3 | Components over one application | component-model |
+| 4 | `meta/` tier for self-observation | `meta` |
+| 5 | Confluence flow: curate in git, publish out | `confluence-publish` |
+| 6 | Two-agent model (Arc + Claude Code); 3-step local roadmap | `local-agent` |
+| 7 | Trusted/General two-tier citation model | `local-agent` |
+| 8 | `procedural-memory` splits lessons/universal | `meta/procedural-memory` |
+| 9 | Arc Lite formalized as a persisted subagent | `local-agent` |
+| 10 | Local-only HTML relay UI for Arc Lite | `local-agent` |
+| 11 | Arc Lite reframed; live Confluence **read** access | `local-agent` |
+| 12 | Knowledge-base ownership split vs. the tagging programme | program/org |
+| 13 | Q2 FY27 re-baselined (Vendor DD displaces milestone 1.3) | program roadmap, Jira |
+| 14 | Q2–Q4 capabilities carry no initiative IDs yet | program roadmap, Jira |
+| 15 | Approved capability-stream plan becomes source of truth | program roadmap |
+| 16 | IN-566–569 repurposed for slide 26's Q3/Q4 capabilities | Jira |
+| 17 | Arc Lite mechanical compliance check + `gap-log.md` | `local-agent` |
+| 18 | Arc Lite's first skill: native Claude Code Skill | `local-agent` |
+| 19 | `arc-lite-identity` ported verbatim (disclaimer exception) | `local-agent` |
+| 20 | `Skill` tool grant added to `arc-lite.md` | `local-agent` |
+| 21 | Constitution collapsed into native shape; `local-agent` now depends on `kg-content` | `local-agent`, `kg-content`, component-model |
+| 22 | `meta/`'s charter widened to general-purpose capabilities | `meta` |
+| 23 | Status/related-work findable per component, without a new dashboard file | component-model, all READMEs |
+
 ## Decisions so far (tentative — open to change)
 
 1. **Storage: file-based, not a graph DB (for now).** Markdown + YAML
@@ -756,6 +791,76 @@ plain RAG.
       promotion-readiness); this widening applies going forward to new
       capabilities, not backward to re-derive why `procedural-memory`,
       `architecture-learning`, or `token-tracking` are where they are.
+
+23. **Rejected reviving the deferred "project dashboard" backlog idea as a
+    new status file; extended the two status copies already in the repo
+    instead, and fixed two real drift instances found while checking
+    them.** Raised when the user asked for the project to be organized so
+    a conversational question like "what about the knowledge graph
+    component" can be answered — component, stage, and any related work
+    — without reconstructing context from a transcript, citing
+    `docs/kg-format-research.md` (committed a session earlier) as a
+    concrete example of exactly that failure: real, relevant work with no
+    pointer to it from anywhere a fresh session would look.
+    - **Why not a new dashboard file, even though the trigger is real.**
+      `docs/backlog.md` had already parked and deferred this exact idea
+      2026-08-19, reasoning that `decision-log.md` plus the component
+      READMEs already cover it with "no extra artifact to maintain,"
+      revisit only once scanning them stops answering "where are we"
+      quickly. Building a third status copy now (a dashboard, alongside
+      `component-model.md`'s Status column and each README's own
+      `## Status` section) would be the exact anti-pattern
+      `component-model.md` already names for a different case — "a
+      shared component... becomes the coupling everything routes
+      through" — applied to documentation instead of code, and would add
+      a third place to keep in sync rather than fixing why the existing
+      two had already drifted.
+    - **Concrete drift found, not hypothetical, while checking whether the
+      existing two copies still worked.** `component-model.md`'s table
+      said `kg-content` was `Empty`, three decisions after decision 21 had
+      already given it its first entity — its own README's Status section
+      already said so correctly, so the two copies actively disagreed. And
+      `components/local-agent/README.md`'s `Why this exists`, `Boundary`,
+      `How to use it`, and `Status` sections still described the
+      pre-decision-21 seven-file Constitution mechanism in detail — despite
+      decision 21's own log entry recording that this README had been
+      "updated in the same change." The `constitution/` files it named
+      (`00-soul.md`, `01-working-protocol.md`, `02-canonical-sources.md`,
+      `06-answer-format.md`) were genuinely deleted on disk, so the
+      restructuring itself hadn't been reverted — only this document's
+      prose had drifted back to describing it, undiscovered until now.
+      Both fixed in this change.
+    - **What was built instead, all reusing structure already in the
+      repo rather than adding a new kind of artifact:**
+      1. **A "related work" pointer convention:** a document specific to
+         one component (a research report, a design note, an eval set)
+         gets a pointer from that component's own README in the same
+         change that produces it. Applied retroactively to
+         `kg-core/README.md` → `docs/kg-format-research.md`, the case
+         that prompted this.
+      2. **`component-model.md`'s Status column is now explicitly stated
+         as a one-line mirror of each README's own Status section, not a
+         second source of truth** — the same discipline the contract rule
+         already required for the rest of a README's content, just never
+         said out loud for this one column, which is exactly where it had
+         drifted.
+      3. **A hand-maintained "Index by area" table** at the top of this
+         log, grouping existing decisions by which component/area they
+         touch — mirrors the raw-entries/generated-index split
+         `meta/architecture-learning` already uses for the identical
+         reason (a growing append-only record needs a separate finding
+         aid), at a scale (23 entries) that doesn't yet justify that
+         component's `reindex.py` tooling. Cites by name inside entries as
+         always; the index itself is the one place allowed to cite by
+         number, since it's the thing being indexed.
+    - **Deliberately not done:** no change to `meta/README.md`'s own
+      one-line-per-component table — checked, not found stale, so left
+      alone rather than touched on principle. No automated staleness
+      checker for either status copy; at this scale, catching drift by
+      reading both copies when touching either (now written above as the
+      rule) is proportionate, the same judgment call `kg-core`'s own
+      Status section already makes about validation rules being a PR
+      checklist rather than code.
 
 ## Constraints identified
 

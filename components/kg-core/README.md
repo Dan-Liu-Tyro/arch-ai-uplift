@@ -38,6 +38,19 @@ Schema drafted in `SCHEMA.md`; nothing implemented. The validation rules in that
 document are currently a PR review checklist rather than executable code, which is
 the honest state of a repo whose quality gate is human review.
 
+## Related work
+
+[`docs/kg-format-research.md`](../../docs/kg-format-research.md) —
+research comparing RDF/OWL, property-graph/GQL, JSON-LD, and the current
+Markdown+YAML-frontmatter direction as candidate representations for this
+schema. Recommends keeping the current direction, with two follow-ups for
+whenever `SCHEMA.md`'s "Validation rules" section actually gets built:
+design it as declarative per-type shapes (borrowing SHACL's idea, not its
+syntax) rather than ad hoc code, and prefer GQL over vendor-specific
+Cypher if a real graph engine is ever justified later. Not yet folded
+into a `docs/decision-log.md` entry or `SCHEMA.md`'s own open items —
+that's still pending.
+
 ## Extraction notes
 
 Least likely component to be promoted out, since it is the thing others depend on;

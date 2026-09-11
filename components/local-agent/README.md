@@ -19,20 +19,29 @@ speaks for live Confluence.
 
 ## Why this exists
 
-Arc's real implementation already has a defined five-part "Constitution" —
-Soul, Working Protocol, Canonical Sources, Skills, Procedure Memory —
-loaded dynamically from Confluence pages, built and governed by a separate
-agent, ArchWorker (read from Confluence 2026-08-19, see
+Arc's real implementation has a five-part "Constitution" — Soul, Working
+Protocol, Canonical Sources, Skills, Procedure Memory — loaded dynamically
+from Confluence pages, built and governed by a separate agent, ArchWorker
+(read from Confluence 2026-08-19, see
 [`docs/decision-log.md`](../../docs/decision-log.md) decision 6). This
-component mirrors that same shape locally, grounded first on this repo's
-own tagged references, so the hypothesis — does structured grounding
-change answer quality — could be tested cheaply and with zero production
-access at the outset. Decision 11 opened live Confluence **read** access
-on top of that local grounding once Arc Lite's trajectory changed from a
-disposable comparison tool to a candidate for a real local agent; see
-`constitution/01-working-protocol.md` for exactly how the two combine
-(local first, live search only when local doesn't cover the question,
-`constitution/05-ignore-list.md` checked before any live citation).
+component originally mirrored that same five-file shape locally so the
+hypothesis — does structured grounding change answer quality — could be
+tested cheaply with zero production access. **Decision 21 collapsed that
+mirroring**: Arc's five-page split exists because Rovo loads pages
+dynamically and a rule can change without redeploying the agent, a
+constraint a Claude Code subagent file doesn't have. Identity, working
+protocol, and answer-format now live directly in
+[`.claude/agents/arc-lite.md`](../../.claude/agents/arc-lite.md) itself,
+and local grounding is `components/kg-content/` entities directly — no
+separate `constitution/02-canonical-sources.md` shadow schema. Only the two
+things that are genuinely data that grows by entry, not behaviour, remain
+as their own files under `constitution/`: the skill index
+(`03-skills.md`) and the procedure-memory mirror (`04-procedure-memory.md`,
+kept separate from `meta/procedural-memory/` per
+`docs/component-model.md`'s hard rule that nothing under `components/` may
+depend on `meta/`). `constitution/05-ignore-list.md` (checked before any
+live citation) is the third file, added by decision 11 for a different
+reason — see Boundary below.
 
 ## Boundary
 
@@ -40,22 +49,23 @@ disposable comparison tool to a candidate for a real local agent; see
 - A minimal local grounding format: a handful of tagged references (id,
   title, status, source link, note) — deliberately not `kg-core`'s full
   schema.
-- A local persona ("Arc Lite") mirroring Arc's Constitution shape,
-  grounded first on the files in `constitution/`, and allowed to search
-  and read live Confluence when local grounding doesn't cover a question.
+- A local persona ("Arc Lite"), defined directly in
+  `.claude/agents/arc-lite.md`, grounded first on `components/kg-content/`
+  entities, and allowed to search and read live Confluence when local
+  grounding doesn't cover a question.
 - An ignore list (`constitution/05-ignore-list.md`) of specific pages to
   exclude from any live search regardless of topical relevance.
-- A machine-checkable answer-format contract
-  (`constitution/06-answer-format.md`): every answer must end with a
-  parseable citation/refusal marker, which `ui/server.py` validates
-  against the constitution before the consumer sees the answer, rather
-  than only trusting the model to have followed
-  `01-working-protocol.md`'s instructions.
-- `gap-log.md`: every refusal and every below-`canonical` citation is
-  logged there automatically, as the knowledge-lifecycle feedback loop —
-  a knowledge owner reviews it and updates `02-canonical-sources.md`
-  from real usage, closing the loop decision 12 assumed but hadn't
-  built.
+- A machine-checkable answer-format contract (a single fenced ```json
+  block per answer — `{"citations": [...], "refusal": bool}`, per decision
+  21): every answer must end with one, which `ui/server.py` parses and
+  validates rather than only trusting the model to have followed
+  `arc-lite.md`'s working protocol.
+- `gap-log.md`: every refusal and every citation below `canonical` status
+  is logged there automatically, as the knowledge-lifecycle feedback loop
+  — a knowledge owner reviews it and curates new `kg-content` entities
+  from real usage, closing the loop decision 12 assumed but hadn't built.
+  A `skill` citation (decision 21) is not logged here — it isn't a
+  knowledge gap the way a refusal or a live citation is.
 - Skills as native Claude Code Skills (`.claude/skills/`), listed in
   `constitution/03-skills.md`, not a Confluence-page-based skill index
   like the real Arc's — see decision 18 in `docs/decision-log.md`.
@@ -120,53 +130,54 @@ Nothing yet.
 
 Invoke the `arc-lite` subagent (`.claude/agents/arc-lite.md`) in a Claude
 Code session in this repo, or ask a session to act as Arc Lite directly.
-Either way the mechanism is the same: read `constitution/00-soul.md`
-through `06-answer-format.md` fresh each time and follow
-`01-working-protocol.md` and `06-answer-format.md` exactly — the subagent
-file only points at those seven files, it does not duplicate their
-content, so editing the constitution is enough to change Arc Lite's
-behavior without touching the subagent definition, with one exception:
-the subagent's *tool grant* (which MCP tools it's allowed to call) lives
-in `arc-lite.md` itself, not the constitution. That grant is left to the
-user's own hand deliberately, not because Claude is blocked from writing
-the file — see the correction below — but because a subagent expanding
-its own tool grant is exactly the failure mode worth a human decision
-regardless of what's technically possible.
-
-**Corrected, 2026-09-08 — `.claude/agents/` is not blanket
-write-protected.** An earlier version of this section, and decision 11,
-said any change here needed a human hand, citing
-`meta/procedural-memory/universal.md`'s sandbox-write-protection entry.
-That entry (also corrected the same day) was itself an overgeneralization:
-the sandbox blocks *creating or deleting* a path under `.claude/agents/`
-(confirmed again just now: `touch` on a new file there fails with
-`Operation not permitted`), not editing an existing tracked file's
-content. Direct test — the `Edit` tool successfully added
-`constitution/05-ignore-list.md` (missing since decision 11, only
-discovered while writing this correction) and
-`constitution/06-answer-format.md` (decision 17) to `arc-lite.md`'s
-numbered file-pointer list, now seven entries, no human hand needed. The
-`tools:` line is a separate, deliberate exception — see above — not
-covered by this correction.
+As of decision 21, identity, working protocol, and answer-format live
+directly in `arc-lite.md` — there is no "read N constitution files first"
+indirection for content that small; only `components/kg-content/`
+(grounding, grows by entry) and the three remaining `constitution/`
+registries (`03-skills.md`, `04-procedure-memory.md`,
+`05-ignore-list.md`) are read on demand, per the protocol in `arc-lite.md`
+itself. The subagent's *tool grant* (which MCP tools it's allowed to
+call) also lives in `arc-lite.md`, and is left to the user's own hand
+deliberately — not because Claude is blocked from writing the file (it
+isn't, for an existing tracked file's content — see
+`meta/procedural-memory/universal.md`'s sandbox-write-protection entry
+and its correction) but because a subagent expanding its own tool grant
+is exactly the failure mode worth a human decision regardless of what's
+technically possible. Decision 20 made one explicit, scoped exception to
+that (adding the `Skill` tool grant); re-ask before any other tool-grant
+change.
 
 The subagent file was created ahead of this component's original
 guidance to wait until the Constitution content had been used and
 adjusted "a few times" first — a deliberate, explicit choice made when
-asked, not a default. That means the Constitution content is less
-battle-tested than the original sequencing intended; treat early answers
-from it with correspondingly more scrutiny until real questions have
-exercised `02-canonical-sources.md` a few times.
+asked, not a default. That means its content is less battle-tested than
+the original sequencing intended; treat early answers with
+correspondingly more scrutiny until real questions have exercised it a
+few times.
 
 ## Status
 
 MVP, trajectory under active reconsideration per decision 11 — no longer
-committed to staying a disposable comparison tool. Seeded with three real
-reference points from
-[`docs/program-roadmap.md`](../../docs/program-roadmap.md)'s activity
-log — linked back to their source, not duplicated. See
-`constitution/02-canonical-sources.md`. `constitution/05-ignore-list.md`
-is seeded with nothing yet, and `gap-log.md` starts empty by design — it
-only fills from real usage through `ui/server.py`.
+committed to staying a disposable comparison tool. Grounds on
+`components/kg-content/`, which holds one entity so far (see that
+component's own Status). `constitution/05-ignore-list.md` is seeded with
+nothing yet, and `gap-log.md` starts empty by design — it only fills from
+real usage through `ui/server.py`, which hasn't happened yet (see
+`docs/decision-log.md`'s Next steps).
+
+**Correction, 2026-09-11:** this Status section and the two above it
+(`Why this exists`, `How to use it`) had drifted back to describing the
+pre-decision-21 seven-file constitution mechanism — despite decision 21's
+own log entry recording that this README was updated in the same change.
+The `constitution/` files it referenced (`00-soul.md`,
+`01-working-protocol.md`, `02-canonical-sources.md`,
+`06-answer-format.md`) were genuinely deleted (confirmed on disk), so the
+drift was in this document's prose only, not a sign the restructuring
+itself had been reverted. Caught while building a "related work"/status
+convention across all component READMEs, prompted by the user asking for
+`docs/decision-log.md`'s stated status to be trustworthy without
+reconstructing context from a transcript — precisely the failure mode
+this correction fixes an instance of.
 
 ## Cost
 

@@ -17,7 +17,7 @@ not know about its consumers; this document is how the filesystem enforces it.
 | Component | Responsibility | Status | Likely language |
 |---|---|---|---|
 | `kg-core` | Schema contract, validation, query/traversal logic. Knows nothing about Confluence, Rovo, or Claude. | Schema drafted | Kotlin if it grows into a service; scripts fine while exploring |
-| `kg-content` | The curated graph itself — entity files conforming to the schema. Data, not code. | Empty | n/a (Markdown + YAML) |
+| `kg-content` | The curated graph itself — entity files conforming to the schema. Data, not code. | 1 entity (draft) | n/a (Markdown + YAML) |
 | `confluence-ingest` | Inbound. Reads existing Confluence pages and helps turn them into candidate entities. One-off-ish migration aid. | Not started | Whatever is fastest; this is throwaway-shaped |
 | `confluence-publish` | Outbound. Generates one structured page per entity and publishes to the dedicated space. | Not started | Kotlin or scripts |
 | `query-service` | v2. Network-reachable query interface so cloud-hosted Rovo can reach the graph. Deployed via TAP/CTAP. | Deferred | Kotlin |
@@ -89,6 +89,22 @@ through internal function calls. Concretely: a component reads entity files (or
 calls `kg-core`), and never reaches into another component's internals. This keeps
 the eventual transport swap — local file reads becoming HTTP calls to
 `query-service` — a change in one place.
+
+**The Status column above is a one-line mirror of each component's own
+`README.md` "Status" section, not a second source of truth.** Any change
+that updates a component's Status section updates this row in the same
+change — this table existing at all is exactly the kind of second copy
+`docs/backlog.md`'s "Project dashboard" idea was deferred over, so the one
+already here doesn't get to drift the way the deferred one would have.
+(Caught drifting once already, 2026-09-11: this row said `kg-content` was
+`Empty` after decision 21 had already given it its first entity.)
+
+**A document that applies specifically to one component — a research
+report, a design note, an eval set — gets a pointer from that component's
+own `README.md` in the same change that produces it**, so a fresh session
+asking "what's the state of X" finds it by reading X's contract rather
+than by knowing to search `docs/` separately. `docs/kg-format-research.md`
+is the first case of this; see `kg-core/README.md`'s "Related work".
 
 ## Promotion criteria
 
