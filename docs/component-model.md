@@ -22,7 +22,7 @@ not know about its consumers; this document is how the filesystem enforces it.
 | `confluence-publish` | Outbound. Generates one structured page per entity and publishes to the dedicated space. | Not started | Kotlin or scripts |
 | `query-service` | v2. Network-reachable query interface so cloud-hosted Rovo can reach the graph. Deployed via TAP/CTAP. | Deferred | Kotlin |
 | `claude-code-access` | Local access glue so Claude Code can read and traverse the graph from the filesystem. | Not started | Scripts |
-| `local-agent` | MVP-only, deliberately outside the dependency graph below. A local mirror of Arc's own Constitution structure, testing whether structured grounding helps at all, with zero production access. | MVP | Markdown, no code |
+| `local-agent` | MVP. A local mirror of Arc's advisory role, with zero production access. No longer outside the dependency graph below — see decision 21 in `docs/decision-log.md`. | MVP | Markdown, no code |
 
 ## Dependency rules
 
@@ -32,8 +32,9 @@ The only rule that really matters: **dependencies point inward, toward
 ```
 confluence-ingest ─┐
 confluence-publish ─┼─→ kg-core ←─ (reads) ─ kg-content
-query-service     ─┤
-claude-code-access ┘
+query-service     ─┤                            ↑
+claude-code-access ┘                            │
+local-agent ─────────────── (reads entities) ───┘
 ```
 
 - `kg-core` depends on nothing in this repo. If it ever needs to import from a
@@ -46,12 +47,14 @@ claude-code-access ┘
   pressure, and the one whose violation costs the most later.
 - Shared behaviour that two integrations need belongs in `kg-core`, or it is not
   shared behaviour.
-- **`local-agent` is a deliberate, temporary exception to "dependencies point
-  inward to `kg-core`."** It's testing whether structured grounding is valuable
-  at all, using its own minimal format, before committing to `kg-core`'s full
-  schema — see the component's own README. This is not a precedent for other
-  components skipping `kg-core`; it's justified only because the schema itself
-  is what's still in question.
+- **`local-agent`'s exception to "dependencies point inward to `kg-core`" ended
+  2026-09-08 (decision 21 in `docs/decision-log.md`).** It had used its own
+  minimal grounding format, deliberately outside this diagram, to test whether
+  structured grounding was valuable at all before committing to `kg-core`'s full
+  schema. `kg-content` was still empty when that question was answered, so the
+  exception was retired rather than left to accumulate a second, permanently
+  diverging schema: `local-agent` now reads `kg-content` entities directly, per
+  `kg-core`'s status vocabulary, like any other consumer.
 
 ### The `meta/` tier
 

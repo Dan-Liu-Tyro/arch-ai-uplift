@@ -14,20 +14,22 @@ import subprocess
 import sys
 from datetime import date
 from pathlib import Path
+from typing import Optional
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 UI_DIR = Path(__file__).resolve().parent
 LOCAL_AGENT_DIR = UI_DIR.parent
 CONSTITUTION_DIR = LOCAL_AGENT_DIR / "constitution"
-CANONICAL_SOURCES = CONSTITUTION_DIR / "02-canonical-sources.md"
+KG_CONTENT_ENTITIES = REPO_ROOT / "components" / "kg-content" / "entities"
+SKILLS_DIR = REPO_ROOT / ".claude" / "skills"
 IGNORE_LIST = CONSTITUTION_DIR / "05-ignore-list.md"
 GAP_LOG = LOCAL_AGENT_DIR / "gap-log.md"
 HOST = "127.0.0.1"
 PORT = 8765
 
-CHECK_PREFIX = "ARC-LITE-CHECK:"
-CITED_RE = re.compile(r"CITED id=(\S+) status=(\S+)")
-LIVE_RE = re.compile(r"LIVE-UNVERIFIED url=(\S+)")
+JSON_BLOCK_RE = re.compile(r"```json\s*(\{.*?\})\s*```", re.DOTALL)
+FRONTMATTER_ID_RE = re.compile(r"^id:\s*(\S+)", re.MULTILINE)
+FRONTMATTER_STATUS_RE = re.compile(r"^status:\s*(\S+)", re.MULTILINE)
 
 
 def ask_arc_lite(question: str) -> str:
@@ -58,9 +60,8 @@ def ask_arc_lite(question: str) -> str:
 
 def _parse_table(path: Path, key_col: int, value_col: int) -> dict:
     """Parse a `| a | b | ... |` markdown table's data rows into a dict,
-    skipping the header and separator rows. Shared shape for
-    02-canonical-sources.md (id -> status) and 05-ignore-list.md
-    (id -> source), per constitution/06-answer-format.md."""
+    skipping the header and separator rows. Used for 05-ignore-list.md
+    (id -> source)."""
     table = {}
     if not path.exists():
         return table
@@ -85,39 +86,80 @@ def _log_gap(question: str, trigger: str, detail: str) -> None:
         f.write(row)
 
 
-def check_compliance(question: str, answer: str) -> tuple[str, bool]:
-    """Strip ARC-LITE-CHECK lines per constitution/06-answer-format.md,
-    validate each against the constitution, log every refusal and every
-    below-canonical citation to gap-log.md, and report whether the
-    answer honored the contract. Returns (clean_answer, compliant)."""
-    checks = [
-        line.strip()[len(CHECK_PREFIX):].strip()
-        for line in answer.splitlines()
-        if line.strip().startswith(CHECK_PREFIX)
-    ]
-    clean_answer = "\n".join(
-        line for line in answer.splitlines()
-        if not line.strip().startswith(CHECK_PREFIX)
-    ).strip()
+def _load_kg_content_statuses() -> dict:
+    """Map every kg-content entity id to its recorded status, by scanning
+    frontmatter directly (stdlib only, no YAML dependency) -- this is the
+    grounding set decision 21 replaced 02-canonical-sources.md with."""
+    statuses = {}
+    if not KG_CONTENT_ENTITIES.exists():
+        return statuses
+    for path in KG_CONTENT_ENTITIES.glob("*/*.md"):
+        text = path.read_text(encoding="utf-8")
+        if not text.startswith("---"):
+            continue
+        end = text.find("\n---", 3)
+        frontmatter = text[3:end] if end != -1 else text
+        id_m = FRONTMATTER_ID_RE.search(frontmatter)
+        status_m = FRONTMATTER_STATUS_RE.search(frontmatter)
+        if id_m and status_m:
+            statuses[id_m.group(1)] = status_m.group(1)
+    return statuses
 
-    if not checks:
-        _log_gap(question, "compliance-failure", "no ARC-LITE-CHECK line found")
+
+def _extract_citation_block(answer: str) -> tuple[Optional[dict], str]:
+    """Pull the last fenced ```json block out of the answer per
+    .claude/agents/arc-lite.md's answer-format contract, parse it, and
+    return (payload_or_None, clean_answer_with_block_removed)."""
+    last = None
+    for m in JSON_BLOCK_RE.finditer(answer):
+        last = m
+    if last is None:
+        return None, answer.strip()
+    clean_answer = (answer[: last.start()] + answer[last.end():]).strip()
+    try:
+        return json.loads(last.group(1)), clean_answer
+    except json.JSONDecodeError:
+        return None, clean_answer
+
+
+def check_compliance(question: str, answer: str) -> tuple[str, bool]:
+    """Validate the trailing citation block against .claude/agents/
+    arc-lite.md's answer-format contract, log every refusal and every
+    non-active kg-content citation to gap-log.md, and report whether the
+    answer honored the contract. Returns (clean_answer, compliant)."""
+    payload, clean_answer = _extract_citation_block(answer)
+    if payload is None:
+        _log_gap(question, "compliance-failure", "no valid citation JSON block found")
         return clean_answer, False
 
-    statuses = _parse_table(CANONICAL_SOURCES, key_col=0, value_col=2)
+    citations = payload.get("citations")
+    refusal = payload.get("refusal")
+    if not isinstance(citations, list) or not isinstance(refusal, bool):
+        _log_gap(question, "compliance-failure", f"malformed citation block: {payload}")
+        return clean_answer, False
+
+    if refusal:
+        if citations:
+            _log_gap(question, "compliance-failure", "refusal true but citations present")
+            return clean_answer, False
+        _log_gap(question, "refusal", "no kg-content entity or live search covered the question")
+        return clean_answer, True
+
+    if not citations:
+        _log_gap(question, "compliance-failure", "no citations and no refusal")
+        return clean_answer, False
+
+    kg_statuses = _load_kg_content_statuses()
     ignored_sources = set(_parse_table(IGNORE_LIST, key_col=0, value_col=2).values())
     compliant = True
 
-    for check in checks:
-        if check.upper() == "REFUSAL":
-            _log_gap(question, "refusal", "no local or live source covered the question")
-            continue
-        m = CITED_RE.match(check)
-        if m:
-            cid, status = m.group(1), m.group(2)
-            recorded = statuses.get(cid)
+    for citation in citations:
+        source = citation.get("source")
+        if source == "kg-content":
+            cid, status = citation.get("id"), citation.get("status")
+            recorded = kg_statuses.get(cid)
             if recorded is None:
-                _log_gap(question, "compliance-failure", f"cited unknown id {cid}")
+                _log_gap(question, "compliance-failure", f"cited unknown kg-content id {cid}")
                 compliant = False
             elif recorded != status:
                 _log_gap(
@@ -125,20 +167,24 @@ def check_compliance(question: str, answer: str) -> tuple[str, bool]:
                     f"status mismatch for {cid}: claimed {status}, recorded {recorded}",
                 )
                 compliant = False
-            elif status != "canonical":
-                _log_gap(question, status, f"cited {cid} at non-canonical status")
-            continue
-        m = LIVE_RE.match(check)
-        if m:
-            url = m.group(1)
+            elif status != "active":
+                _log_gap(question, status, f"cited {cid} at non-active status")
+        elif source == "live-unverified":
+            url = citation.get("url")
             if url in ignored_sources:
                 _log_gap(question, "compliance-failure", f"cited ignore-listed url {url}")
                 compliant = False
             else:
                 _log_gap(question, "live-unverified", f"cited live-unverified url {url}")
-            continue
-        _log_gap(question, "compliance-failure", f"unrecognized check line: {check}")
-        compliant = False
+        elif source == "skill":
+            name = citation.get("name")
+            if not (SKILLS_DIR / str(name) / "SKILL.md").exists():
+                _log_gap(question, "compliance-failure", f"cited unknown skill {name}")
+                compliant = False
+            # Skill-sourced answers aren't a knowledge gap -- nothing to log.
+        else:
+            _log_gap(question, "compliance-failure", f"unrecognized citation source: {source}")
+            compliant = False
 
     return clean_answer, compliant
 

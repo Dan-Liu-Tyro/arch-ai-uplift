@@ -40,11 +40,20 @@ The one concession to tooling is `confluence_page_id` in frontmatter, written by
 `confluence-publish` so the git → Confluence mapping travels with the entity.
 Never hand-edit it.
 
+## Depended on by
+
+`local-agent`, as of 2026-09-08 (decision 21 in `docs/decision-log.md`) — reads
+entities directly for Arc Lite's grounding, ending that component's prior
+exception to reading through `kg-core`'s schema.
+
 ## Status
 
-Empty. The schema needs pressure-testing against three real entities that exercise
-the typed relationships — a principle, a guardrail deriving from it, and a pattern
-requiring that guardrail — before bulk authoring starts.
+One entity (`entities/principles/nfr-priority-third-party-financial-integration.md`,
+status `draft`), migrated from `local-agent`'s retired grounding table rather than
+authored fresh. The schema still needs pressure-testing against three real entities
+that exercise the typed relationships — a principle, a guardrail deriving from it,
+and a pattern requiring that guardrail — before bulk authoring starts; one
+unconnected principle doesn't satisfy that yet.
 
 ## Extraction notes
 
