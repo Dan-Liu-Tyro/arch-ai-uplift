@@ -32,6 +32,7 @@ meta/architecture-learning/      evidence-based record of demonstrated style
 meta/perception-failures/        catalogue of Claude's own incorrect-belief incidents
 meta/token-tracking/             token usage data + summarize.py
 meta/idea-to-presentation/       idea -> deck/page capability, general-purpose
+meta/CDCD/                       evidence log: conversation-driven co-design
 ```
 
 ## Working with the user

@@ -80,6 +80,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 21 | Constitution collapsed into native shape; `local-agent` now depends on `kg-content` | `local-agent`, `kg-content`, component-model |
 | 22 | `meta/`'s charter widened to general-purpose capabilities | `meta` |
 | 23 | Status/related-work findable per component, without a new dashboard file | component-model, all READMEs |
+| 24 | Scaffolded `meta/CDCD` to evidence conversation-driven co-design | `meta` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -862,6 +863,73 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       Status section already makes about validation rules being a PR
       checklist rather than code.
 
+24. **Scaffolded a new self-observation meta component, `meta/CDCD`
+    (working title — "Conversation-Driven Co-Design"), to study and
+    evidence the collaboration pattern this project already uses,
+    distinct from `architecture-learning`.** Raised as a follow-on from
+    decision 22's `idea-to-presentation` conversation: the user proposed
+    making "conversation-driven co-design" itself — no upfront spec,
+    structure emerging progressively through daily dialogue, with the
+    agent expected to co-design via counter-argument rather than just
+    implement — a documented, evidenced practice, potentially toward a
+    paper.
+    - **First objection, addressed by the user directly: isn't this
+      just reviving `architecture-learning`?** Resolved by a
+      subject-matter split already used once before in this project
+      (decision 4's `perception-failures` precedent):
+      `architecture-learning`'s subject is the user's own
+      reasoning/taste, aimed at a better Claude next time; CDCD's
+      subject is the human-agent collaboration pattern itself, worth
+      studying even holding the agent's current capability fixed.
+    - **Second objection, addressed by the user directly: is this just
+      "vibe coding"?** The user's distinction, stated directly: vibe
+      coding treats rigor (spec, modularity, documentation,
+      maintainability) as optional and typically absent, left up to the
+      agent whether it happens at all; CDCD treats that same rigor as
+      mandatory, deferring only *when* it's produced — it crystallizes
+      progressively as each decision becomes concrete, rather than
+      being planned in full beforehand. This project's own history in
+      this same session (decision 22's `meta/`-charter widening and its
+      same-day correction; `query-service`'s protocol left explicitly
+      open rather than forced closed) is itself the first evidence for
+      that claim: rigor showed up at the point each question became
+      concrete, not before.
+    - **Evidence discipline required before this becomes a paper-grade
+      claim:** `architecture-learning`'s own prior correction
+      (`evidence-over-assumed-best-practice.md`) — a record built only
+      from supporting anecdotes is advocacy, not a finding. CDCD's
+      `observations.md` is seeded with this founding conversation as
+      supporting evidence, but explicitly flags that no contradicting
+      instance (a real cost from a deferred spec) has been sought yet,
+      and names finding one as a next step, not an afterthought.
+    - **What was built:** `meta/CDCD/README.md` (purpose, boundary,
+      contract), `meta/CDCD/observations.md` (raw evidence, same
+      supports/contradicts discipline as `architecture-learning`), and
+      `meta/CDCD/definition.md` (the current working definition plus a
+      cited comparison against vibe coding, domain-driven design, and
+      spec-driven design — the concrete artifact meant to answer "isn't
+      that just vibe coding?" from this project's own grounded history
+      rather than an asserted opinion). Name is a working title,
+      flagged in the component's own README as possibly underselling
+      the rigor-deferred/co-design aspect in favour of "conversation" as
+      the more visible word.
+    - **Fits `meta/`'s existing charter without a further widening:**
+      unlike `idea-to-presentation` (decision 22), CDCD doesn't ship as
+      part of the architecture agent product and *is* self-observation
+      of the process, so it sits under decision 4's original half of
+      `meta/`'s charter, not the general-purpose-capability half
+      decision 22 added.
+    - **Correction to decision 23's "checked, not found stale" claim
+      about `meta/README.md`'s table.** Editing that table to add
+      `CDCD` surfaced that `perception-failures` — a real component on
+      disk since decision 4, listed correctly in `CLAUDE.md`'s own
+      Layout section — was missing from the table entirely, not merely
+      out of date. Added the missing row and its own line in the
+      evidence/provenance section in the same change. Not a comment on
+      decision 23's broader "related work pointer" convention, which
+      this doesn't touch — just this one specific check that turned out
+      to be wrong.
+
 ## Constraints identified
 
 - **The user is likely to be the sole person working the Architecture
@@ -1044,3 +1112,9 @@ Resolved since first draft:
    whether any generation tooling is needed (and if so, its language per
    org standards), and how it's invoked (skill, agent, or something else)
    are all still open.
+10. **Seed `meta/CDCD/observations.md` with a contradicting instance**
+    (a real cost or rework caused by a deferred spec), not just
+    supporting ones — decision 24 names this as required before
+    treating the CDCD hypothesis as more than a working claim. Also
+    revisit CDCD's working-title name once there's enough material to
+    test it against a reader unfamiliar with the founding conversation.

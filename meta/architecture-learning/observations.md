@@ -79,3 +79,13 @@ principle's `status` and must not be silently absorbed as if it agreed.
   shows the precision-correction habit continuing past the point the
   substantive decision was already settled, not just at the decision point
   itself.
+- 2026-09-11 · Proposed a new meta component (CDCD) for the collaboration
+  methodology itself, then, when challenged that it might just revive the
+  deprioritised architecture-learning, drew a precise subject-matter line
+  rather than conceding or blurring it: "architecture learning can make you
+  a better architect next time, but CDCD talks about... how we co-create
+  the system together" · this conversation · unpromoted — single instance,
+  but the same "defend the boundary with a sharper distinction rather than
+  abandon it" move as the mission-specificity/product-delivery correction
+  above; watch for repetition across different boundary disputes.
+

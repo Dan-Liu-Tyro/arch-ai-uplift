@@ -19,14 +19,19 @@ with the product.
 | [`procedural-memory`](procedural-memory) | Operational lessons — mistakes made here and the rules that prevent repeating them. Intended to change behaviour immediately, via a pointer from `CLAUDE.md`. |
 | [`architecture-learning`](architecture-learning) | A slow-curated model of how this architect reasons. Deprioritised: no consumer wired up, revisited later. |
 | [`token-tracking`](token-tracking) | Token consumption and cost by day, five-hour window, branch, effort, and model, so strategy can be adjusted from evidence. |
+| [`perception-failures`](perception-failures) | A catalogue of instances where Claude asserted an incorrect belief as settled fact. Research-shaped: accumulates toward a possible paper on how an agent's incorrect perceptions form and get caught, not a fix applied today. |
 | [`idea-to-presentation`](idea-to-presentation) | An agent-driven capability to cut the time from a raw idea to a presentable deck/page (PowerPoint, Confluence). Useful along the journey, not part of the agent/skills/KG product's own delivery — the first capability under the widened charter (decision 22). |
+| [`CDCD`](CDCD) | Working title ("Conversation-Driven Co-Design"). Evidences the collaboration pattern this project itself uses — no upfront spec, structure emerging through dialogue, the agent expected to counter-argue — distinct from `architecture-learning` because its subject is the methodology, not the user's reasoning. |
 
-The first three are self-observation: `procedural-memory` is about **my** errors and
+The first four are self-observation: `procedural-memory` is about **my** errors and
 takes effect now; `architecture-learning` models **the user's** reasoning and is
-curation without a consumer; `token-tracking` derives cost data from real usage.
-`idea-to-presentation` is a different kind of thing — a capability rather than a
-record — kept here anyway because, like the first three, it doesn't ship as part of
-the architecture agent product.
+curation without a consumer; `token-tracking` derives cost data from real usage;
+`perception-failures` catalogues a specific way **my own** reasoning goes wrong.
+`idea-to-presentation` and `CDCD` are a different kind of thing each: the former a
+capability rather than a record, the latter a record whose subject is the
+collaboration pattern itself rather than either party's reasoning — all kept here
+anyway because, like the first four, none of it ships as part of the architecture
+agent product.
 
 ## The one hard rule
 
@@ -57,10 +62,15 @@ The self-observation components produce *data*, not opinions:
   unverifiable assertions.
 - `token-tracking` derives from local session transcripts, which carry real
   per-message usage figures.
+- `perception-failures` records each instance with the specific belief, the narrow
+  evidence it over-generalized from, and how it was caught — the same
+  checkable-citation discipline, applied to Claude's own reasoning rather than the
+  user's.
 
-The failure mode for both is confabulation — plausible-sounding records nobody can
-verify. Both are therefore built around evidence and provenance, which is the same
-discipline the KG itself applies to architecture knowledge. This discipline is
-specific to *records* of what happened; `idea-to-presentation` is a capability, not
-a record, so it earns its keep the way a `components/` piece would — a stated
-purpose and boundary in its own README — rather than through evidence/provenance.
+The failure mode for all three is confabulation — plausible-sounding records
+nobody can verify. All are therefore built around evidence and provenance, which
+is the same discipline the KG itself applies to architecture knowledge, and which
+`CDCD` (below) also adopts for its own subject. This discipline is specific to
+*records* of what happened; `idea-to-presentation` is a capability, not a record,
+so it earns its keep the way a `components/` piece would — a stated purpose and
+boundary in its own README — rather than through evidence/provenance.
