@@ -112,3 +112,20 @@ principle's `status` and must not be silently absorbed as if it agreed.
   the same trade-off (pay structural cost to keep a categorisation test
   clean, vs. reuse an imperfect existing home) in a case where I recommend
   the *cheaper* option, which would separate the two readings.
+- 2026-09-14 · Reframed an authority question into a governance one: asked
+  whether to replace our maturity ratings with Naz's, then — before I
+  answered — redirected to "treat what's Naz comments as validation
+  checkpoints to plan and track the progress of this piece of the work",
+  with completeness and maturity-scale as the worked examples · this
+  conversation · stated · unpromoted — **unconfounded evidence**, unlike the
+  2026-09-14 entry above it: this was volunteered against the direction I
+  was visibly heading (I was preparing to argue for authoring our own
+  ratings with Naz's as a cross-check), so it reflects the user's own frame
+  rather than deference to a menu I wrote. The move is the interesting part:
+  where the question was "whose content wins", the answer supplied was "at
+  which gate does the stakeholder decide", which turns a one-off
+  authority contest into a repeatable process with tracking. Worth watching
+  whether this generalises — a preference for converting content disputes
+  into review-point design — because it would predict how they want other
+  externally-owned dependencies handled (`docs/program-roadmap.md`, the
+  slide-26 pack, IN-562…IN-570).

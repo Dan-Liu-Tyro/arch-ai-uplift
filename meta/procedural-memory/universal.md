@@ -115,6 +115,37 @@ careful reading.
 
 ---
 
+## Compute counts about your own artefact; never assert them from reading
+
+**What happened.** Having just authored a 32-row activity table, I wrote in the
+same document that "nine of the ten `not-assessed` rows sit in groups B and C",
+and listed the activities. There were eight such rows, seven in those groups,
+and the activity list was partly wrong too. The claim then got restated in
+`docs/decision-log.md`, so one uncomputed sentence shipped into two documents and
+survived my own review of both.
+
+**Cost.** Low to fix, high in credibility. The surrounding argument was correct
+and load-bearing — it is the reason IN-563 has a contribution of its own — and a
+reader who checks the number finds the strongest point in the document
+overstated. In an assessment whose entire value is being trustworthy about
+evidence, that is the worst possible place to be sloppy.
+
+**Why the existing arithmetic rule did not catch it.** "Verify derived paths by
+running, not by reasoning" is scoped to *code* that derives paths or does index
+arithmetic. Here no code was written, so nothing triggered — the count was prose
+about a table on screen, which feels like reading rather than calculating. That
+feeling is the trap: eyeballing a distribution across 32 rows is arithmetic
+wearing prose clothing.
+
+**Rule.** Any quantified claim about an artefact — a count, a proportion, "most",
+"all but two", a distribution across groups — gets derived with a command in the
+same turn it is written, even when the artefact is one you just wrote and
+especially when the number supports your main argument. `grep -c`, `awk`, or
+`sort | uniq -c` over the actual rows takes one call. Sentences of the form "N of
+the M rows..." are the specific shape to distrust.
+
+---
+
 ## Proof-read commands the user is expected to paste
 
 **What happened.** I gave a `git branch --set-upstream-to` command with the branch
