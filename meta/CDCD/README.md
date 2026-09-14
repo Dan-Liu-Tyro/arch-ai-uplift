@@ -45,6 +45,11 @@ asserted definition. `definition.md` is the current answer;
   history that bear on the CDCD hypothesis — supporting *or* contradicting.
 - A curated, evidence-cited comparison against vibe coding, domain-driven
   design, and spec-driven design (`definition.md`).
+- A factual (not evidence-tagged, not hypothesis-tagged) reference of the
+  mechanism itself — the control layers (`CLAUDE.md`, personal memory,
+  output style, org instructions) that the pattern actually runs on
+  (`control-layers.md`, added 2026-09-14). Distinct from the other two: it
+  describes what currently exists, not what was observed or concluded.
 
 **Out of scope**
 - Anything that ships as part of the architecture agent product itself —

@@ -59,3 +59,11 @@ volume ever justifies building that.
   actual gap found in passing (CLAUDE.md's `Layout` section never listed
   either path) · this conversation, `CLAUDE.md` Layout section ·
   supports:agent-expected-to-counter-argue
+- 2026-09-14 · Asked to record a note in `architecture-learning`, declined
+  that literal placement because it contradicts that component's own
+  twice-stated charter ("models the user's reasoning," not mine), proposed
+  `CDCD` instead with reasoning, then asked rather than deciding
+  unilaterally which of three options to use given it also required
+  widening CDCD's own stated in-scope list · this conversation,
+  `meta/CDCD/README.md`, `meta/CDCD/control-layers.md` ·
+  supports:agent-expected-to-counter-argue

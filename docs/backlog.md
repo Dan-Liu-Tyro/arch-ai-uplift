@@ -77,3 +77,14 @@ being worked, or delete it here once it's superseded.
     to-remote-initiative case this idea was raised for, rather than the
     hypothetical it was when parked. Still deferred; the trigger above is
     unchanged.
+- **Generalize the control layers behind Claude's behaviour beyond this
+  project.** Raised 2026-09-14, after the user asked what actually drives
+  pushback/answer style in this repo and the answer turned out to span four
+  separate mechanisms — org instructions, this repo's `CLAUDE.md`, this
+  user's personal cross-session memory under `~/.claude/`, and per-repo CLI
+  output-style settings (recorded factually in
+  `meta/CDCD/control-layers.md`). The user's framing: worth considering
+  moving these into something explicitly reusable across other
+  projects/sessions/users, *if* this project's experience shows it's
+  helpful — not decided, and no design attempted yet. Promote to
+  `docs/decision-log.md` once someone actually starts designing it.
