@@ -115,14 +115,14 @@ to cover will simply be missing.
 Both are observations about the *source*, which this method can support, not
 findings about the practice, which it cannot.
 
-**The day-to-day core of the practice is the part with no rating.** Nine of the
-ten `not-assessed` rows sit in groups B and C — discovery, solution authoring,
-ADRs, sparring preparation, running the forum, capturing outcomes. That is the
-work itself. It is unrated not by oversight but because the roadmap rates uplift
-programmes, and there is no uplift initiative pointed squarely at "how well do
-we run sparring today". If IN-563 adds one thing of its own, this is the
-candidate: a first defensible rating for the activities the practice spends most
-of its time on.
+**The day-to-day core of the practice is the part with no rating.** Seven of
+the eight `not-assessed` rows sit in groups B and C — impact analysis, vendor
+evaluation, ADRs, sparring preparation, completeness checks, running the
+forum, capturing outcomes. That is the work itself. It is unrated not by
+oversight but because the roadmap rates uplift programmes, and there is no
+uplift initiative pointed squarely at "how well do we run sparring today". If
+IN-563 adds one thing of its own, this is the candidate: a first defensible
+rating for the activities the practice spends most of its time on.
 
 **The named AI opportunities cluster in exactly one place.** All six sub-goals
 land in groups B, C and E — artefact-heavy work with a draftable output.
