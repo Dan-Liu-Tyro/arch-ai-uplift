@@ -71,3 +71,9 @@ being worked, or delete it here once it's superseded.
     slide 26 is done and this is actually being designed** — per this
     file's own header, that's the trigger for moving an idea out of the
     backlog.
+  - **First concrete demand, 2026-09-14: IN-563.** Decision 26 created
+    `practice/capability-maturity/` as the local home for work on an
+    initiative that already exists in Jira — exactly the local-task-mapped-
+    to-remote-initiative case this idea was raised for, rather than the
+    hypothetical it was when parked. Still deferred; the trigger above is
+    unchanged.

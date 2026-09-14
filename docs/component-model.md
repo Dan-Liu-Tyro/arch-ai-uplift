@@ -78,6 +78,37 @@ component to a meta component would tie the shipped product's fate to something
 outside its own delivery — quietly making that component non-extractable, which is the
 property this whole model exists to protect.
 
+### The `practice/` tier
+
+`practice/` holds the Architecture practice's own business work — Jira
+initiatives, practice roadmaps, capability and maturity assessments, process
+models — see [`../practice/README.md`](../practice/README.md) for the full
+definition. Added by decision 26 in `docs/decision-log.md`, because the two
+tiers above are both about *building a product*, and a deliverable owed to the
+org with a Jira ticket and no code in it is neither the product nor a capability
+incubated beside it. It sits outside the dependency graph above, with the same
+hard rule in a stronger form:
+
+**Nothing under `components/` or `meta/` may depend on anything under
+`practice/`.**
+
+Stronger because `practice/` content is partly owned *outside this repo
+entirely* — the roadmap page that grounds `practice/capability-maturity/` is
+Naz Chan's, and can be superseded in a meeting this repo never sees. Code
+depending on it would break for reasons invisible from the codebase. There is
+no executable code under `practice/` today, so the rule currently governs
+citations and generated content rather than imports; it is stated now rather
+than after the first violation.
+
+The three tiers form one test on *what a thing is*, not what it is about — all
+three are about architecture:
+
+| Tier | Test |
+|---|---|
+| `components/` | Does it ship as part of the architecture agent product? |
+| `meta/` | Is it useful while building the product, without shipping with it? |
+| `practice/` | Is it work owed to the org, that happens not to be software? |
+
 ## Contracts
 
 Each component owns a `README.md` stating its purpose, its boundary, what it

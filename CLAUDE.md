@@ -33,6 +33,8 @@ meta/perception-failures/        catalogue of Claude's own incorrect-belief inci
 meta/token-tracking/             token usage data + summarize.py
 meta/idea-to-presentation/       idea -> deck/page capability, general-purpose
 meta/CDCD/                       evidence log: conversation-driven co-design
+practice/                        Architecture-stream business work, not software
+practice/capability-maturity/    IN-563: activity model + maturity read
 .claude/agents/arc-lite.md       local-agent's persona; lives here (not nested
                                   under components/) because this is where
                                   Claude Code's harness scans for it
@@ -66,6 +68,20 @@ extractable component to something outside the KG pipeline's own trajectory. The
 repo's only executables live here —
 `token-tracking/summarize.py`, `architecture-learning/reindex.py`, and
 `architecture-learning/extract_transcript.py`, all stdlib only.
+
+`practice/` (decision 26) is the third tier: the Architecture practice's own
+business work — Jira initiatives, practice roadmaps, capability and maturity
+assessments. The three tiers are one test on what a thing *is*, not what it's
+about, since all three are about architecture: does it ship with the product
+(`components/`), is it useful while building the product without shipping with it
+(`meta/`), or is it work owed to the org that happens not to be software
+(`practice/`). **Nothing under `components/` or `meta/` may depend on anything
+under `practice/`** — stronger than the `meta/` rule, because `practice/` content
+is partly owned outside this repo: a roadmap page another architect owns can be
+superseded in a meeting this repo never sees, so code depending on it would break
+for reasons invisible from the codebase. Every artefact there declares its
+provenance in its header — `snapshot`, `authored here`, or `derived` — because one
+that doesn't gets read as authoritative anyway.
 
 `meta/architecture-learning/` is two layers: append a line to `observations.md`
 during a conversation (no read needed), and promote to `principles/<slug>.md` only
@@ -180,8 +196,9 @@ cross-references:
    so that pieces which outgrow this repo can be promoted out as a move rather
    than an untangling. Plus a `meta/` tier for whatever doesn't ship as part of
    the product — self-observation, or (decision 22) a general-purpose capability
-   useful along the journey but not part of the delivery. See the Layout section
-   above.
+   useful along the journey but not part of the delivery — and a `practice/`
+   tier (decision 26) for the Architecture stream's own business deliverables,
+   which aren't software at all. See the Layout section above.
 
 The graph shape is the point: typed relationships (`pattern REQUIRES guardrail`,
 `principle CONFLICTS_WITH pattern`, `decision SUPERSEDES decision`,
