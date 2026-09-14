@@ -1335,6 +1335,24 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
   one person, not the two named on slide 2 of the CTB pack. Not resolved
   here; flagged as context for whoever revisits scope or sequencing later,
   including a future session of this project.
+- **`updateConfluencePage` replaces the whole body, so Claude can generate a
+  page but cannot safely *edit* a human-maintained one.** Found 2026-09-14
+  trying to add a single emoji marker to one table cell of the Architecture
+  Capability & Process Map. The MCP tool takes no patch or partial update —
+  `body` is a full replacement — so a one-character change means re-emitting
+  the page's entire body, 66,877 characters of HTML carrying `data-local-id`
+  attributes, smartlink nodes and per-cell background colours, byte-perfect.
+  Confluence version history makes a bad write revertible, but nothing makes
+  a long verbatim re-emission reliable.
+  **This splits decision 5's publish path in two, and only one half works.**
+  Generating a page this repo owns, wholesale from entities, is exactly what
+  full-body replacement is for — `confluence-publish` is unaffected. Editing
+  a page a human curates by hand is not viable through this connector at
+  all, regardless of how small the edit is. So any workflow that wants
+  Claude to annotate, mark up, or correct an architect-maintained page needs
+  a different mechanism (a generated companion page, or an inline comment
+  via `createConfluenceInlineComment`, which *is* an additive call), and the
+  small-edit case belongs with the human whose page it is.
 - **Rovo is cloud-hosted; the KG is local.** Rovo can't reach the local repo
   directly. Any interface Rovo queries against (API/MCP/other) must be
   network-reachable, which means eventually going through the org's real
