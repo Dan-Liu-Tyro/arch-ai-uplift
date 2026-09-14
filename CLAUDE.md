@@ -49,15 +49,19 @@ strongest honest objection is the useful contribution; an objection grounded in 
 user's own stated design lands harder than an appeal to external policy. Once a
 decision is made and reaffirmed, implement it well rather than relitigating it.
 
-**Read `meta/procedural-memory/lessons.md` and `universal.md` before substantial
-work.** `lessons.md` holds mistakes tied to something specific about this project;
-`universal.md` holds mistakes whose rule doesn't depend on this project at all, and
-so is worth checking before starting on any project. Four of `universal.md`'s rules
-are short enough to state here, because violating them is expensive: never put a
-credential in a command line; test an environment hypothesis before proposing a
-change to the user's config; after a denied tool call, ask rather than retrying a
-variant; run any code that derives paths or does index arithmetic in the same turn
-you write it.
+**Read `meta/procedural-memory/INDEX.md` before substantial work.** It's the cheap,
+rule-only summary of every entry in `lessons.md` (mistakes tied to something
+specific about this project) and `universal.md` (mistakes whose rule doesn't depend
+on this project at all, and so is worth checking before starting on any project) —
+open either full file only when a current situation matches a rule closely enough
+that the one-liner isn't enough, or before adding a new entry, to check it isn't a
+restatement of one that exists. This split exists specifically so the mandatory
+read doesn't grow unbounded as entries accumulate — see that component's own
+Growth policy. Four of `universal.md`'s rules are short enough to state here
+anyway, because violating them is expensive: never put a credential in a command
+line; test an environment hypothesis before proposing a change to the user's
+config; after a denied tool call, ask rather than retrying a variant; run any code
+that derives paths or does index arithmetic in the same turn you write it.
 
 `meta/` holds whatever doesn't ship as part of the architecture agent product
 (agent, skills, knowledge graph): either it observes the process of building the

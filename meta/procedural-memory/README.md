@@ -4,19 +4,51 @@ Operational lessons from working on this project — mistakes made, and the rule
 prevents repeating them. Unlike `architecture-learning`, this is meant to change
 behaviour immediately.
 
-The content lives in two files, split by scope:
+The content lives in three files:
 
+- [`INDEX.md`](INDEX.md) — the cheap, mandatory-read layer: one line per
+  entry, rule only, no evidence. This is what `CLAUDE.md` points at now.
 - [`lessons.md`](lessons.md) — mistakes whose rule is tied to something specific
-  about this project (its own documents, components, or tooling).
+  about this project (its own documents, components, or tooling). Full detail.
 - [`universal.md`](universal.md) — mistakes whose rule doesn't depend on anything
   about this project at all, and so is a candidate for manual promotion into
-  another project's own procedural memory later.
+  another project's own procedural memory later. Full detail.
 
-This mirrors the raw/promoted split `architecture-learning` already uses, but
-without that component's index-and-reindex machinery: at this component's current
-size (ten entries total), a plain two-file split is enough, and each entry is
-already curated at write time rather than starting as a raw, unjudged capture.
-Revisit if either file grows enough that finding an entry gets slow.
+## Growth policy
+
+Added 2026-09-14, once volume made the cost concrete: `universal.md` alone had
+grown to 15 entries (~3,400 words) plus `lessons.md`'s 2 (~400 words) — a
+mandatory-before-substantial-work read of well over 4,000 words, and growing
+with every new lesson, none of which had ever been retired.
+
+**The index exists so the mandatory read stays cheap regardless of how many
+entries accumulate.** `INDEX.md` (rule only) is read every time; `lessons.md`/
+`universal.md` (full "what happened, cost, rule" narrative) are read only on
+demand — when a current situation matches a rule closely enough that the
+one-liner isn't sufficient, or before writing a new entry, to check it isn't a
+restatement of one that already exists. This is the same index/detail split
+`architecture-learning` uses for the same reason, deliberately lighter: no
+per-entry files and no `reindex.py`, because entries here are curated at write
+time rather than starting as raw, unjudged capture, and volume doesn't yet
+justify generation machinery.
+
+**Keeping the index cheap is a discipline, not a one-time fix.** Any change to
+`lessons.md` or `universal.md` — a new entry, a correction, a retirement — gets
+its one line in `INDEX.md` added, edited, or removed in the same change. An
+index that drifts from the files it summarizes is worse than no index, because
+it would be trusted and wrong.
+
+**Entries get retired, not just appended to forever.** When a correction fully
+supersedes an entry's original framing (not just adds a caveat), or two entries
+turn out to be the same lesson from two angles, merge or trim rather than
+leaving both as permanent weight — the test is the same as for earning an
+entry: does keeping the old text change a future decision, or just repeat one
+the merged/corrected version already covers.
+
+**Revisit this structure** if `INDEX.md` itself gets long enough that scanning
+it stops being cheap (rough trigger: order 40-50 entries) — at that point the
+two-scope split may need the same per-entry-file-plus-generated-index treatment
+`architecture-learning` uses, rather than a hand-maintained index.
 
 ## The mechanism, stated honestly
 
@@ -26,7 +58,7 @@ exist here, and only two of them load automatically:
 | Layer | Loads automatically | Versioned and reviewable | Holds |
 |---|---|---|---|
 | `CLAUDE.md` | **Yes** | Yes | The short, always-relevant rules |
-| This component | No — only via the `CLAUDE.md` pointer | Yes | The full lesson set with its evidence, split project-specific vs. universal |
+| This component | No — only via the `CLAUDE.md` pointer | Yes | `INDEX.md`'s cheap rule-only summary by default; the full lesson set with its evidence (`lessons.md`/`universal.md`) only on demand |
 | Claude Code session memory | **Yes** | No | A small set of direct, standing instructions the user has stated as applying in every session, regardless of project |
 
 So the load-bearing part of this design is the pointer in `CLAUDE.md`, not the
