@@ -50,3 +50,12 @@ volume ever justifies building that.
   pattern · this conversation · unpromoted — meta-observation about the
   log's own one-sidedness so far, not evidence for or against the CDCD
   hypothesis itself; see decision-log next step 10
+- 2026-09-14 · User misread `.claude/agents/` and `.claude/skills/` as an
+  unowned sibling structure at repo root; instead of confirming that
+  reading, pushed back with the project's own decision history (decisions
+  9/18/20/21, `components/local-agent/README.md`) showing both are
+  already-decided local-agent artifacts placed at repo root only because
+  that's where Claude Code's harness scans for them — then closed the
+  actual gap found in passing (CLAUDE.md's `Layout` section never listed
+  either path) · this conversation, `CLAUDE.md` Layout section ·
+  supports:agent-expected-to-counter-argue
