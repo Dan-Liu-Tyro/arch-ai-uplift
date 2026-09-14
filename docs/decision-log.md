@@ -81,6 +81,8 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 22 | `meta/`'s charter widened to general-purpose capabilities | `meta` |
 | 23 | Status/related-work findable per component, without a new dashboard file | component-model, all READMEs |
 | 24 | Scaffolded `meta/CDCD` to evidence conversation-driven co-design | `meta` |
+| 25 | Credit-budget control on the authoritative pool; credits are overage, not an allowance | `meta/token-tracking` |
+| 26 | New `practice/` tier; IN-563 capability maturity assessment | `practice`, component-model |
 
 ## Decisions so far (tentative — open to change)
 
@@ -930,6 +932,209 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       this doesn't touch — just this one specific check that turned out
       to be wrong.
 
+25. **Token tracking extended into a credit-budget controller, built on
+    the authoritative pool rather than the list-price estimate.** The
+    user asked for daily tracking against a believed "$500 monthly
+    credit," with the goal of landing at ~90% of it by cycle end without
+    exceeding it. The pool exists and the user's figure was right;
+    what changed is where the number comes from, what it measures, and
+    whether it can be targeted at all.
+    - **The pool is real, authoritative, and readable locally: $500.00
+      per cycle, $120.59 (24.1%) consumed as of 2026-09-14.** Claude
+      Code caches the account's position in `~/.claude.json` under
+      `cachedUsageUtilization.utilization`, as `extra_usage`
+      (`monthly_limit` 50000, `used_credits` 12059, USD minor units)
+      and a matching `spend` block. `can_purchase_credits: false` and
+      `can_toggle: false` mean the pool is org-administered and cannot
+      be topped up, so exceeding it is a hard stop until reset.
+    - **But `extra_usage` is overage, so 90% is the wrong target
+      shape.** Usage credits accrue only *after* subscription plan
+      limits are hit — the payload's own disclaimer says "Usage credits
+      cover you when you hit your plan limits." Credit consumption is
+      therefore a *consequence* of being rate-limited, not a budget for
+      work and not a control variable. Deliberately driving it to 90%
+      means deliberately spending most of the month at plan limits.
+      The defensible version of the user's goal is the inverse: stop
+      self-throttling, take on the work and the models the task
+      actually warrants, and treat leftover headroom as evidence of
+      valuable work declined rather than as money saved. `--target`
+      keeps the user's framing available as a parameter; this entry
+      records the objection, not a refusal.
+    - **The first reading of the pool was wrong, from a stale cache,
+      and was nearly written into this log as fact.** The cache read
+      5 days old reported a $150 limit at 66.6%, which would have
+      inverted every conclusion — "ahead of pace, nearly exhausted"
+      instead of "behind pace, substantial headroom." It refreshed
+      mid-session and corrected itself. Logged as
+      `meta/perception-failures/log.md` entry 4, because the staleness
+      had been detected and printed and the conclusion drawn anyway.
+    - **`summarize.py` could only ever see this one repo.** It derives
+      its transcript directory from its own `__file__`, which is correct
+      for the per-feature attribution it was built for and wrong for a
+      machine-wide budget — seven project directories consume the same
+      pool. `budget.py` scans all of them. On current data this repo is
+      97.3% of all-time list-price cost, so the correction happens to be
+      small today, but it was silent and would not stay small.
+    - **This repo's own `meta/token-tracking/README.md` asserted, as a
+      verified finding, that no local allowance figure exists.** It was
+      wrong, and the way it was wrong is logged as
+      `meta/perception-failures/log.md` entry 3. The README is corrected
+      in the same change.
+
+    **What was built.** `meta/token-tracking/budget.py` — stdlib only,
+    importing `summarize.py` so the cost model is not duplicated. It
+    reports the authoritative pool with its staleness (the cache only
+    refreshes when `/usage` runs, and was 4d 19h old when first read),
+    bridges the stale window with a calibrated list-price estimate
+    (credits per $1 of list price, derived over the part of the cycle
+    the cache already covers), and prints pace, linear projection, the
+    daily spend needed to land on target, and the daily ceiling before
+    the hard stop. The calibration is explicitly an approximation, not a
+    conversion rate, because credits accrue non-linearly.
+
+    **Open, and deliberately not guessed.** The cycle reset date is
+    assumed to be the 1st (`--cycle-start` overrides it); the real date
+    is visible in `/usage` and has not been confirmed, and every pace
+    figure depends on it. The `monthly_limit` also changed from 15000
+    to 50000 between the 2026-09-09 and 2026-09-14 cache reads while
+    `used_credits` kept accumulating — consistent with the org raising
+    the allocation mid-cycle, but not confirmed, and it means the limit
+    itself should be treated as something that can move rather than a
+    constant. Whether a daily brief should be automated (a scheduled
+    task) was put to the user rather than configured, since that is
+    persistent configuration.
+
+26. **Added a third top-level tier, `practice/`, for the Architecture
+    stream's own business work, and made IN-563's capability maturity
+    assessment its first area.** Raised when the user asked where work on
+    [IN-563](https://tyropaymentsltd.atlassian.net/browse/IN-563)
+    ("Foundation – Architecture capability maturity assessment", grounded in
+    Naz Chan's Confluence page *Architecture Practice Evolution - Roadmap*,
+    ARCH `2291007579`) should live, how this project could help with it, and
+    how to keep track of it. Both halves of this entry — the tier, and what
+    the deliverable actually is — were put to the user as explicit choices
+    with alternatives, and both recommendations were accepted.
+    - **Why none of the three existing homes worked, each rejected on its
+      own stated contract rather than on taste.** `docs/` holds *this
+      repo's own* design record; its nearest precedent,
+      `program-roadmap.md`, is explicitly marked "not owned here — re-fetch
+      rather than hand-edit", which is the opposite of an artefact the user
+      authors, so filing IN-563 there makes `docs/` mean two things.
+      `meta/` fails decision 22's own sharpened test: the user corrected
+      that test from mission-specificity to **delivery**, and a business
+      deliverable is neither the product's delivery nor a capability
+      incubated beside it — using `meta/` would have needed a third charter
+      widening weeks after the second. `components/kg-content/entities/`
+      was the most tempting, since a capability map with maturity ratings
+      and typed relations is genuinely graph-shaped, but `capability` is
+      not one of `SCHEMA.md`'s six entity types, and mixing
+      practice-maturity content into the grounding set Arc Lite searches
+      for solution-design questions dilutes exactly the signal decisions 5
+      and 12 exist to protect.
+    - **Why a tier now rather than deferring per
+      `least-infrastructure-first` — the evidence threshold that principle
+      asks for was already met, three times over, before IN-563.** The
+      slide-26 CTB pack consumed multiple sessions and produced decisions
+      12–16, but lives in `AI SDLC/slide/` *outside this repo* (verified,
+      not assumed — it is absent from the repo and from its workspace
+      siblings), leaving nothing here but log entries *about* it. Jira
+      initiative management across IN-562…IN-570 exists only as
+      decision-log prose plus a deferred `jira-management` idea in
+      `docs/backlog.md`. `docs/program-roadmap.md` is an externally-owned
+      snapshot filed among this repo's own design docs. This is decision
+      23's `kg-format-research.md` failure — real work with no pointer from
+      anywhere a fresh session would look — at larger scale and already
+      recurring, so the argument for waiting for a second instance had
+      nothing left to wait for.
+    - **The test, stated as a three-way on what a thing *is*, not what it
+      is about** (all three tiers are about architecture): `components/` —
+      does it ship as part of the product; `meta/` — is it useful while
+      building the product without shipping with it; `practice/` — is it
+      work owed to the org that happens not to be software. The hard rule
+      is inherited in a stronger form: **nothing under `components/` or
+      `meta/` may depend on anything under `practice/`**, stronger because
+      `practice/` content is partly owned outside this repo entirely — the
+      grounding roadmap is Naz's and can be superseded in a meeting this
+      repo never sees, so code depending on it would break for reasons
+      invisible from the codebase.
+    - **Second half: what IN-563 actually owes, given its source of truth
+      has already done part of it.** Naz's page rates 15 initiatives across
+      two categories on a five-level scale, with priority action, business
+      value, rank and rationale each, plus a six-item *AI-Assisted
+      Architecture Operations Sub-Goals* table. What it does not contain is
+      the layer IN-563's own description names — **"processes and
+      activities"**. The page rates *initiatives*, which are uplift
+      programmes, not what architects do day to day. Chosen deliverable:
+      the activity layer beneath it, rolling up to Naz's pillars rather
+      than competing with them. Rejected alternatives were treating IN-563
+      as substantially delivered and merely contributing to Naz's page
+      (leaves the activity layer absent), and scoping to the AI-opportunity
+      half only (leaves "mapped capabilities, processes and activities"
+      unaddressed).
+    - **Why this deliverable earns its keep beyond the ticket:** it is the
+      missing input to this repo's longest-open question — decision 6's
+      step 1, *"what can Claude Code add on top of what Arc already
+      provides?"*, still answered by guesswork. An activity model carrying
+      a maturity and AI-opportunity read per activity answers it from
+      evidence.
+    - **Maturity vocabulary: reuse, explicitly do not invent a third.**
+      Two are already in play — Naz's five-level practice scale
+      (`Low`/`Emerging`/`Partial`/`In flight`/`Established`) and slide 26 /
+      IN-564's M1/M2/M3 solution-architecture ladder, which decision 15
+      already flags as absent from `docs/program-roadmap.md`'s own
+      milestone language. This work uses the five-level scale, because
+      IN-563 is a practice-wide assessment and that is what that scale
+      measures; M1/M2/M3 stays scoped to the one capability it was defined
+      for.
+    - **What was built:** `practice/README.md` (the tier contract,
+      including a provenance requirement — every artefact declares itself
+      `snapshot`, `authored here`, or `derived`, generalising the header
+      that stopped `program-roadmap.md` drifting),
+      `practice/capability-maturity/README.md` (the ask, the source of
+      truth, what the roadmap already covers and what it doesn't, boundary,
+      open questions), and
+      `practice/capability-maturity/activity-inventory.md` — 32 activities
+      in five groups, each marked `cited` or `inferred` against the roadmap
+      page. `docs/component-model.md` gained the tier and its rule.
+    - **Two honest limits written into the artefact rather than discovered
+      later.** First, an activity's maturity is *inherited* from the
+      roadmap initiative above it and marked `(uplift)`: an initiative's
+      rating describes how far that uplift has progressed, not how mature
+      the underlying activity is, and an `In flight` uplift usually implies
+      the activity is *less* mature, not more — so every such cell is a
+      prompt, not a value to report. Second, deriving activities from the
+      source page means activities that page never mentions are invisible
+      by construction; only two of 32 rows are `inferred`, which reads as a
+      warning that the method reproduced the source's frame, not as
+      reassurance. No maturity rating was invented — `not-assessed` is used
+      where there is no evidence, on the same discipline
+      `meta/architecture-learning` enforces.
+    - **One finding the method can support, flagged because it is
+      actionable:** nine of the ten `not-assessed` activities sit in the
+      discovery and sparring groups — authoring designs, recording ADRs,
+      preparing and running sparring, capturing outcomes. That is the
+      practice's day-to-day core, unrated because the roadmap rates uplift
+      programmes and no initiative points squarely at "how well do we run
+      sparring today". A first defensible rating for those activities is
+      the clearest candidate for IN-563's own contribution. Separately, all
+      six named AI sub-goals fall in artefact-drafting work, with none in
+      intake/triage or in the strategic-guardrail group — which may be
+      where AI genuinely pays off first, or may just be the most visible
+      opportunity; the second reading is worth testing because the
+      guardrail group is precisely what this repo's graph is designed for.
+    - **Deliberately not done, so it isn't assumed:** the three earlier
+      instances that motivated the tier were *not* migrated into it.
+      `docs/program-roadmap.md` is cited by path from many entries in this
+      log, so relocating it breaks cross-references and needs its own pass
+      (see Next steps). The slide-26 pack stays outside the repo. The
+      `jira-management` component stays deferred in `docs/backlog.md`,
+      though IN-563 is now its first concrete demand — a local work item
+      that maps to a remote initiative is exactly what that idea was for.
+      Publishing this assessment back to Confluence is also out of scope:
+      decision 5's curate-in-git-publish-outward pattern is the obvious
+      eventual shape, but Naz owns the target page, so that is a
+      conversation to have rather than a mechanism to build unilaterally.
+
 ## Constraints identified
 
 - **The user is likely to be the sole person working the Architecture
@@ -1112,6 +1317,19 @@ Resolved since first draft:
    whether any generation tooling is needed (and if so, its language per
    org standards), and how it's invoked (skill, agent, or something else)
    are all still open.
+11. **Correct `practice/capability-maturity/activity-inventory.md` with an
+    architect's read** (decision 26). The 32-activity set is derived from one
+    Confluence page plus this repo, so activities that page never mentions are
+    missing by construction, and every `(uplift)` maturity cell is an inherited
+    prompt rather than a rating. Until that pass happens it is a proposal for
+    correction, not an assessment, and should not be reported as one.
+12. **Decide whether `docs/program-roadmap.md` moves into `practice/`**
+    (decision 26). It is structurally a `practice/` artefact — an
+    externally-owned snapshot of the program's Confluence milestone tracker —
+    but it is cited by path from many entries in this log, so the move needs a
+    pass that updates those citations rather than a rename. Not urgent; worth
+    doing before a second snapshot-shaped artefact lands in `docs/` and makes
+    the inconsistency the norm.
 10. **Seed `meta/CDCD/observations.md` with a contradicting instance**
     (a real cost or rework caused by a deferred spec), not just
     supporting ones — decision 24 names this as required before

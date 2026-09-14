@@ -89,3 +89,13 @@ principle's `status` and must not be silently absorbed as if it agreed.
   abandon it" move as the mission-specificity/product-delivery correction
   above; watch for repetition across different boundary disputes.
 
+- 2026-09-14 · Framed cost control as a utilisation target rather than a
+  minimisation one — "max out the credit use about 90% on cycle end while not
+  exceed the limit," with the explicit goal to "improve the overall effective
+  output on a cycle while keep it under control" · this conversation ·
+  stated · unpromoted — single instance, but a notably different instinct
+  from the usual engineering reflex to minimise spend: treats an unspent
+  allocation as waste rather than as saving, which is the same
+  capacity-utilisation reasoning an architect applies to provisioned
+  infrastructure. Watch whether it recurs when the resource is something
+  other than credits (headcount, compute, a review budget).

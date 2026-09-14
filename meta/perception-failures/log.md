@@ -107,3 +107,147 @@ targeted audit for this specific failure mode.
 
 **Fix.** `components/local-agent/README.md`'s own 2026-09-11 correction
 note, and `docs/decision-log.md` decision 23. Not restated here.
+
+---
+
+## 3. Plan allowance believed to be unavailable locally
+
+**Date.** 2026-09-14 (caught); the belief itself dates to 2026-09-03,
+when `meta/token-tracking/README.md` was written.
+
+**Belief asserted.** "**Claude Code does not expose your plan allowance
+locally.** Transcripts were checked for quota, limit, and allowance
+fields; the only matches were incidental prompt text. There is no local
+number to compare daily spend against." Stated in bold, in a section
+headed "Answering the allowance question honestly," and used to justify
+a design decision — that `summarize.py` must take an allowance figure
+the user supplies by hand.
+
+**Actual evidence behind it.** A real probe with a real negative result,
+but of one location only: the JSONL transcripts under
+`~/.claude/projects/`. That search genuinely finds nothing, and the
+README's own sentence says so accurately. The figure lives somewhere the
+probe never looked — `~/.claude.json`, under
+`cachedUsageUtilization.utilization`, which carries `extra_usage`
+(`monthly_limit`, `used_credits`, `utilization`, `decimal_places`), a
+`spend` block with the same numbers in minor units, and rolling
+`five_hour` / `seven_day` plan-limit fields.
+
+**How it formed.** The same shape as entry 1: a narrow true finding
+("transcripts contain no allowance field") was written down as a broad
+conclusion ("Claude Code does not expose your plan allowance locally"),
+and the boundary condition that produced it — *which file was searched*
+— was stated in the sentence immediately after, then not treated as a
+limit on the claim. The scope of the search was visible in the text the
+whole time. What was missing was any step that asked whether transcripts
+were the only plausible location for account-level state, when they are
+per-project conversation records and the allowance is neither.
+
+**How it propagated.** Into a design decision, not just prose. Because
+no local figure was believed to exist, `summarize.py` was given an
+`--allowance N` flag for a hand-supplied number, and the README told the
+reader to go read `/usage` themselves and type the figure in. Eleven
+days later the same false premise was the starting point for a request
+to build credit-budget tracking, and would have produced a controller
+whose denominator was whatever the user typed — with no way to notice if
+they mistyped it, and no staleness signal either. As it happened the
+user's recalled figure ($500) was correct, so the practical cost here was
+zero; the cost was latent rather than realised, which is exactly why it
+survived eleven days.
+
+**Caught by.** Not by re-reading the note, and not by the user. By
+declining to accept the user's stated budget without checking it —
+treating "$500 I believe" as a hypothesis needing verification, which
+meant searching for an authoritative figure, which meant searching
+somewhere other than where the README said there was nothing. The
+README's claim was falsified incidentally, as a side effect of
+distrusting a *different* unverified number.
+
+**Worth noting for the eventual analysis.** Two of three entries so far
+share one mechanism: a true finding about a specific probe, restated as
+a general claim about the world, with the probe's scope left in the
+adjacent sentence where it reads as supporting detail rather than as the
+limit it is. Entry 2 is a different mechanism (a claim that work was
+done, never re-verified against the artifact). If a third instance of
+the narrow-probe pattern appears, that is the first candidate for a real
+pattern rather than a coincidence — but it should be compared against
+entry 1 directly, not asserted from the count.
+
+**Fix.** `meta/token-tracking/README.md`'s corrected "Answering the
+allowance question honestly" section, and `budget.py`, which reads the
+authoritative figure and reports its staleness. Also
+`docs/decision-log.md` decision 25. Not restated here.
+
+---
+
+## 4. Stale cached spend figure treated as current, after printing its own staleness warning
+
+**Date.** 2026-09-14. Belief formed and corrected inside a single
+session, roughly forty minutes apart.
+
+**Belief asserted.** That the monthly usage-credit pool was $150.00 with
+$99.91 (66.6%) consumed, at day 9 of a 30-day cycle — and therefore that
+the user was running at 1.91x pace, had $1.54 of headroom against a 90%
+target, and had to cut daily spend to $0.10/day to avoid a hard stop.
+Written into `docs/decision-log.md` decision 25 as "the user's stated
+budget did not survive contact with the data," and into
+`meta/token-tracking/README.md` as a $150 pool.
+
+**Actual evidence behind it.** `~/.claude.json`'s
+`cachedUsageUtilization`, read once, with `fetchedAtMs` corresponding to
+2026-09-09T15:18 — four days and nineteen hours before it was read. The
+true current figures, visible when the cache refreshed at 10:55 the same
+morning, were a $500.00 limit with $120.59 (24.1%) consumed: *behind*
+pace, with $329 of headroom. Every directional conclusion was inverted.
+The user's own recalled figure, which the entry had described as not
+surviving the data, was right.
+
+**How it formed.** Not from missing the staleness — the staleness was
+measured, printed, and flagged. `budget.py` emitted
+`as of 2026-09-09 15:18 (4d 19h ago)  <- STALE, run /usage to refresh`,
+a warning written into the tool in the same session for exactly this
+risk. A calibrated bridge was then built *on top of* the stale anchor to
+estimate the current position, which had the effect of laundering a
+five-day-old number into something that read as current, and lent it
+false precision ($133.46, "calibrated 0.75 credits per $1 list price").
+The mechanism is specific: detecting and displaying a data-quality
+problem was mistaken for having handled it. A warning is not a
+mitigation, and building a careful derivation on an unreliable input
+makes the output more confident rather than less.
+
+The second-order error compounded it. The stale reading *disagreed with
+the user* — they said $500, the cache implied $150 — and disagreement
+with the user was treated as a finding rather than as a reason to doubt
+the less reliable of the two sources. The standing instruction to
+challenge the user's premises made a confident contradiction feel like
+the job being done well. It inverted correctly: when a stale local cache
+contradicts a human's recollection of their own account, the cache's
+staleness is the first hypothesis, not the human's memory.
+
+**How it propagated.** Into `docs/decision-log.md` decision 25,
+`meta/token-tracking/README.md` (twice — the corrected allowance section
+and the status note), and `meta/perception-failures/log.md` entry 3,
+which cited the user's figure as "wrong by 3.3x." All four were written
+before the refresh and corrected after it, within the same session.
+Nothing reached the user, because the refresh landed during a routine
+verification run before the findings were reported.
+
+**Caught by.** Re-running the tool as a post-edit check, not by any
+reasoning about the cache. The refresh was luck of timing. Had the
+session been thirty minutes shorter, four documents would have shipped
+with inverted conclusions and the user would have been advised to cut
+spending to $0.10/day while sitting on $329 of unused headroom.
+
+**Worth noting for the eventual analysis.** This is a different
+mechanism from entries 1 and 3, which share the narrow-probe-to-broad-
+claim shape. Here the input's unreliability was known, quantified, and
+surfaced; what failed was the step from "I have flagged this as
+unreliable" to "I may not build conclusions on it." That suggests the
+catalogue should distinguish *unknown* bad inputs from *known* bad
+inputs knowingly used — the second seems likelier in exactly the
+situations where a tool has been built well enough to detect the
+problem, which is an uncomfortable inversion worth examining if it
+recurs.
+
+**Fix.** Recorded in `meta/procedural-memory/universal.md` under
+"A staleness warning is not a mitigation." Not restated here.

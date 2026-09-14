@@ -267,3 +267,39 @@ status` (not a status filtered to the path just `git add`ed) and confirm
 the full staged set matches what the commit message is about to claim. A
 path-scoped check only tells you that path's state — it actively hides
 other already-staged content sitting in the index from earlier work.
+
+## A staleness warning is not a mitigation
+
+**What happened.** Building a credit-budget tool, I read the account's
+usage-credit position from a local cache, correctly computed that the cache
+was 4 days 19 hours old, and printed a prominent
+`<- STALE, run /usage to refresh` warning — a warning I had just written into
+the tool for exactly this hazard. I then built a calibrated estimate on top of
+that stale anchor and reported its output as the current position, with two
+decimal places. The stale figures said the monthly pool was $150 at 66.6%
+consumed and badly over pace. The real figures, once the cache refreshed
+forty minutes later, were $500 at 24.1% and comfortably *under* pace. Every
+directional conclusion was inverted, and four project documents had already
+been written on the wrong basis.
+
+**Compounding factor worth naming separately.** The stale reading contradicted
+what the user had told me — they said $500, the cache implied $150 — and
+because I am asked to challenge the user's premises rather than accept them, a
+confident contradiction felt like doing the job well. I wrote "the user's
+stated budget did not survive contact with the data" into a decision log. The
+user's memory was right and my data was stale.
+
+**Cost.** None realised, purely by timing: the cache happened to refresh during
+a routine re-run before I reported anything. Had the session been half an hour
+shorter, the user would have been told to cut daily spend by 99% while sitting
+on $329 of unused headroom.
+
+**Rule.** Detecting and displaying a data-quality problem does not address it.
+When an input is known stale, either refresh it, or say plainly that the
+conclusion is unavailable — do not build a derivation on top of it, because a
+careful-looking derivation launders an unreliable input into a confident
+output and adds false precision. And when a stale or second-hand source
+contradicts a human's recollection of *their own* account, state, or history,
+the source's unreliability is the first hypothesis to test, not theirs.
+Challenging the user's premises is right; doing it from a number I already
+know is untrustworthy is not challenge, it is noise with a warning label on it.
