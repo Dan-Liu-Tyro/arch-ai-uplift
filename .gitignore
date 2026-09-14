@@ -1,3 +1,5 @@
 .idea/
 components/local-agent/ui/.run/
 .claude/worktrees/
+.DS_Store
+.DS_Store
