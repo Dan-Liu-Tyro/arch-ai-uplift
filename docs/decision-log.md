@@ -1533,7 +1533,10 @@ Resolved since first draft:
     three rows have no maturity-level descriptions so cannot be rated
     (*Architecture Governance*, *Architecture Debt Management*, *Post
     Implementation Conformance Check*), and *Sensible Defaults Maintenance* has
-    no Inputs. CP2 and CP3 are both blocked on this; until it passes,
+    no Inputs. Also on the agenda, and not fixed on the page: *Architecture
+    Sparring Preparation & Jamming* carries no 🌟 although IN-567 targets it
+    (the edit was deliberately not made — see the full-body-replacement
+    constraint above). CP2 and CP3 are both blocked on this; until it passes,
     `practice/capability-maturity/` holds a proposal for correction, not an
     assessment, and should not be reported as one.
 12. **Decide whether `docs/program-roadmap.md` moves into `practice/`**
