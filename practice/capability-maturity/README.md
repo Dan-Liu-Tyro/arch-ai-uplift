@@ -82,6 +82,13 @@ make that worse rather than better:
 and that is what scale 1 measures. M1/M2/M3 stays scoped to the
 solution-architecture capability it was defined for.
 
+That reasoning was made here and has **not** been confirmed with Naz, so the
+choice is provisional pending checkpoint CP1 in
+[`validation-plan.md`](validation-plan.md) — "are these the right maturity
+levels?" is one of the two questions that checkpoint exists to ask, precisely
+because rating 32 activities on the wrong scale is the most expensive mistake
+available here.
+
 ## Boundary
 
 - **Assesses the Architecture practice's own processes.** Not Tyro's technical
@@ -104,28 +111,46 @@ solution-architecture capability it was defined for.
 
 | File | What it is |
 |---|---|
+| [`validation-plan.md`](validation-plan.md) | The three validation checkpoints Naz's review forms, what each asks, what must be true to run it, and current status. **Read this first — it is the plan of record for this area.** |
 | [`activity-inventory.md`](activity-inventory.md) | First-cut activity model. Every row marked `cited` or `inferred` against the roadmap page; maturity inherited where an activity maps to a rated initiative, `not-assessed` otherwise. |
 
 ## Status
 
-**Draft activity inventory, not yet assessed** (2026-09-14).
+**Draft activity inventory, awaiting checkpoint CP1** (2026-09-14).
 
 `activity-inventory.md` exists and is structurally complete — 32 activities in
 five groups — but it is a *proposal for correction*, not an assessment. Most
-rows carry `not-assessed` maturity, and the activity set itself is derived from
-one Confluence page plus this repo, not from observing the practice or talking
-to the other architects.
+rows carry inherited `(uplift)` maturity or `not-assessed`, and the activity set
+itself is derived from one Confluence page plus this repo, not from observing
+the practice or talking to the other architects.
+
+Progress is tracked against the checkpoints in
+[`validation-plan.md`](validation-plan.md), not against a percentage of rows
+filled in. CP1 is **not ready**: it needs inputs and outputs modelled per
+activity first, because "are the inputs/outputs correct?" is half of what it
+asks, and because the structural checks that narrow the completeness question
+are impossible without them.
 
 ## Open questions
 
-- **Is the activity set right?** It was derived from the roadmap page's pillars,
-  priority actions and AI sub-goals. Activities the page never mentions are
-  invisible to that method by construction. Needs an architect's read before it
-  is treated as the practice's shape.
+Three of the questions this area started with are now *checkpoint questions*
+rather than open questions — they have an owner (Naz), a gate they are asked
+at, and a place their answer gets recorded. See
+[`validation-plan.md`](validation-plan.md): "is the activity set complete, and
+are the inputs/outputs right" and "is the maturity scale right" are CP1; "how
+does this land relative to Naz's page" is CP3.
+
+What remains genuinely open, because no checkpoint resolves it:
+
 - **Who else rates maturity?** A single-assessor rating is an opinion. The
   roadmap page's own framing ("guide prioritisation, not judge team
   performance") suggests this wants more than one architect's input, but the
   capacity constraint recorded in `../../docs/decision-log.md` — the user is
-  likely the sole person on this stream — cuts against that. Unresolved.
-- **Does this get published back to Naz's page, or stay an input to it?** See
-  Boundary above. Not decided, and not this repo's call alone.
+  likely the sole person on this stream — cuts against that. Naz validating a
+  rating is not the same as a second architect producing one independently, so
+  CP2 narrows this but does not close it.
+- **How are inputs and outputs modelled?** Adding two columns to a 32-row table
+  makes it very wide, and most cells would be `inferred`, which inflates the
+  artefact's apparent authority — the failure the inventory already warns
+  about. A separate activity-flow view is the alternative. Undecided; it gates
+  CP1.

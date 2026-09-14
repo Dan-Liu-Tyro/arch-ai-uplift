@@ -83,6 +83,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 24 | Scaffolded `meta/CDCD` to evidence conversation-driven co-design | `meta` |
 | 25 | Credit-budget control on the authoritative pool; credits are overage, not an allowance | `meta/token-tracking` |
 | 26 | New `practice/` tier; IN-563 capability maturity assessment | `practice`, component-model |
+| 27 | Naz's review modelled as validation checkpoints; they are IN-563's plan of record | `practice/capability-maturity` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -1110,9 +1111,10 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       where there is no evidence, on the same discipline
       `meta/architecture-learning` enforces.
     - **One finding the method can support, flagged because it is
-      actionable:** nine of the ten `not-assessed` activities sit in the
-      discovery and sparring groups — authoring designs, recording ADRs,
-      preparing and running sparring, capturing outcomes. That is the
+      actionable:** seven of the eight `not-assessed` activities sit in the
+      discovery and sparring groups — impact analysis, vendor evaluation,
+      ADRs, sparring preparation, completeness checks, running the forum,
+      capturing outcomes. That is the
       practice's day-to-day core, unrated because the roadmap rates uplift
       programmes and no initiative points squarely at "how well do we run
       sparring today". A first defensible rating for those activities is
@@ -1134,6 +1136,80 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       decision 5's curate-in-git-publish-outward pattern is the obvious
       eventual shape, but Naz owns the target page, so that is a
       conversation to have rather than a mechanism to build unilaterally.
+
+27. **Naz's review is modelled as validation checkpoints, and those
+    checkpoints — not a row-completion percentage — are IN-563's plan of
+    record.** Raised by the user: "we should treat what's Naz comments as
+    validation checkpoints to plan and track the progress of this piece of
+    the work", with two examples — align on completeness (did we capture
+    everything we do; are the inputs/outputs correct?) and whether the
+    maturity levels are the right ones.
+    - **What this replaced.** The question on the table was whether to
+      replace the activity ratings with Naz's initiative ratings. That
+      would have been wrong on a units mismatch — an initiative rating
+      measures how far an uplift programme has progressed, not how mature
+      the underlying activity is, and 15 of the 24 inherited cells read
+      `In flight`, so copying them down yields an assessment with almost no
+      differentiation, biased upward in exactly the places an uplift exists
+      *because* the activity is weak. The checkpoint framing is a better
+      answer to the same instinct: Naz is the **validator** of ratings
+      authored here, not the **source** of them. Her page stays the
+      authority on what it covers; her judgement becomes the gate on what
+      it doesn't.
+    - **Why checkpoints fit this deliverable specifically.** An
+      assessment's only real quality gate is whether the practice's own
+      architects recognise it as true, so the work is planned around the
+      review points rather than presented at the end. It also closes a gap
+      the inventory names about itself: activities the source page never
+      mentions are invisible to the derivation method by construction, and
+      no further desk work fixes that — only someone who does the work can.
+      "Did we capture everything we do?" is therefore a checkpoint
+      question, not a research task.
+    - **Three checkpoints, not six, and completeness is bundled with the
+      scale question.** CP1 asks completeness *and* whether the maturity
+      levels are right; CP2 asks the per-activity ratings; CP3 asks the
+      AI-opportunity read and how the artefact lands relative to Naz's
+      page. The user listed completeness and scale as separate concerns;
+      they are asked together because they are independent — the scale
+      answer stays valid whatever happens to the activity set — so
+      bundling risks no wasted work and costs one conversation on the Head
+      of Architecture's calendar instead of two. Each checkpoint is framed
+      as a question with a yes/no-with-corrections answer rather than a
+      document review, because a gate that asks Naz to read a 32-row table
+      and react will get a rubber stamp or a delay.
+    - **The maturity scale is now explicitly provisional.** Decision 26
+      chose Naz's five-level practice scale over the M1/M2/M3 ladder on the
+      reasoning that IN-563 is a practice-wide assessment. That reasoning
+      was made here and never confirmed with her, and the user's second
+      example question puts it on the table. `README.md` now marks the
+      choice provisional pending CP1 rather than settled — rating 32
+      activities on the wrong scale is the most expensive mistake
+      available in this area.
+    - **Inputs and outputs are promoted from documentation to a
+      completeness *test*.** The user's completeness question includes
+      "are the inputs/outputs correct?", which the inventory cannot answer
+      — it has no such columns. Modelling them enables three structural
+      checks runnable *before* spending Naz's time: a dangling input (an
+      activity consumes what nothing produces) means a missing activity or
+      an imaginary input; an orphan output means a missing consumer or work
+      nobody uses, itself a finding; a weakly-connected group suggests the
+      group was derived from the source's structure rather than observed.
+      This is the same reason the repo chose a graph shape over flat docs —
+      typed relationships surface contradictions a list cannot — applied to
+      the practice's own process model.
+    - **What was built:** `practice/capability-maturity/validation-plan.md`
+      (the three checkpoints, their entry conditions, what each blocks, the
+      structural checks, and a status table), plus `README.md` updates —
+      validation plan added to Contents and marked read-first, the scale
+      marked provisional, Status reframed to track against checkpoints, and
+      three former open questions moved into the checkpoints that now own
+      them.
+    - **Left open deliberately:** *how* inputs and outputs get modelled.
+      Two columns on a 32-row table makes it very wide and most cells would
+      be `inferred`, which inflates the artefact's apparent authority — the
+      exact failure the inventory warns about. A separate activity-flow
+      view is the alternative. This gates CP1, so it is the next thing to
+      decide, not a parked idea.
 
 ## Constraints identified
 
@@ -1317,12 +1393,18 @@ Resolved since first draft:
    whether any generation tooling is needed (and if so, its language per
    org standards), and how it's invoked (skill, agent, or something else)
    are all still open.
-11. **Correct `practice/capability-maturity/activity-inventory.md` with an
-    architect's read** (decision 26). The 32-activity set is derived from one
-    Confluence page plus this repo, so activities that page never mentions are
-    missing by construction, and every `(uplift)` maturity cell is an inherited
-    prompt rather than a rating. Until that pass happens it is a proposal for
-    correction, not an assessment, and should not be reported as one.
+11. **Model inputs and outputs per activity, then run CP1** (decisions 26,
+    27). This is IN-563's critical path: CP1 in
+    `practice/capability-maturity/validation-plan.md` asks whether the activity
+    set is complete *and* whether the inputs/outputs are right, and the
+    inventory has no inputs/outputs columns to review. Decide the modelling
+    shape first — two more columns on a 32-row table versus a separate
+    activity-flow view — since most cells would be `inferred` and the wide-table
+    option inflates the artefact's apparent authority. Then run the three
+    structural checks (dangling input, orphan output, group isolation) to narrow
+    the completeness question before it reaches Naz. Until CP1 passes, the
+    inventory is a proposal for correction, not an assessment, and should not be
+    reported as one.
 12. **Decide whether `docs/program-roadmap.md` moves into `practice/`**
     (decision 26). It is structurally a `practice/` artefact — an
     externally-owned snapshot of the program's Confluence milestone tracker —
