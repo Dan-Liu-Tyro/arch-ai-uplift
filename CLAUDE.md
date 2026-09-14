@@ -33,6 +33,11 @@ meta/perception-failures/        catalogue of Claude's own incorrect-belief inci
 meta/token-tracking/             token usage data + summarize.py
 meta/idea-to-presentation/       idea -> deck/page capability, general-purpose
 meta/CDCD/                       evidence log: conversation-driven co-design
+.claude/agents/arc-lite.md       local-agent's persona; lives here (not nested
+                                  under components/) because this is where
+                                  Claude Code's harness scans for it
+.claude/skills/arc-lite-identity/  local-agent's one native Claude Code Skill,
+                                  same harness-discovery reason as above
 ```
 
 ## Working with the user
