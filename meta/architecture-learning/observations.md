@@ -99,3 +99,16 @@ principle's `status` and must not be silently absorbed as if it agreed.
   capacity-utilisation reasoning an architect applies to provisioned
   infrastructure. Watch whether it recurs when the resource is something
   other than credits (headcount, compute, a review budget).
+
+- 2026-09-14 · Chose a new top-level `practice/` tier over three cheaper
+  existing homes (`docs/`, `meta/`, `kg-content` entities), and chose the
+  deeper of three deliverable scopings for IN-563 — building an activity
+  layer beneath the practice roadmap rather than contributing to the
+  existing page or scoping to the AI-opportunity half · this conversation ·
+  inferred · unpromoted — **weak evidence, flagged as such**: both were
+  selected from a menu where I had marked those same options
+  "(Recommended)", so the choice is confounded with deference and says
+  less about taste than an unprompted preference would. Worth re-testing
+  the same trade-off (pay structural cost to keep a categorisation test
+  clean, vs. reuse an imperfect existing home) in a case where I recommend
+  the *cheaper* option, which would separate the two readings.

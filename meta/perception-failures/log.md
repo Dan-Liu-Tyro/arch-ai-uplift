@@ -251,3 +251,56 @@ recurs.
 
 **Fix.** Recorded in `meta/procedural-memory/universal.md` under
 "A staleness warning is not a mitigation." Not restated here.
+
+---
+
+## 5. Decision log's next number believed to be 25, from a read that had expired
+
+**Date.** 2026-09-14. Formed and caught inside a single session, roughly
+fifteen minutes apart.
+
+**Belief asserted.** That the next available number in
+`docs/decision-log.md` was 25. Acted on rather than said aloud: an entry
+was composed as "25. **Added a third top-level tier...**", an index row
+was written as `| 25 |`, and "decision 25" was written as a
+cross-reference into `practice/README.md`,
+`practice/capability-maturity/README.md`, `docs/component-model.md` and
+(pending) `CLAUDE.md`.
+
+**Actual evidence behind it.** A read of the file about fifteen minutes
+earlier, whose index table ended at row 24 and whose last entry was 24.
+That was true when read. It was not a fact about the file; it was a
+fact about the file *at that moment*, in a repo where the user runs
+concurrent Claude Code sessions — something this project had already
+recorded happening (decision 18's coordination note).
+
+**How it formed.** The number was treated as a property of the document
+rather than as a value allocated at write time. Nothing prompted a
+re-check, because the read had been recent and the turn felt
+continuous — the gap was invisible precisely because no *reasoning* step
+was involved. A fact read once was reused without being re-derived.
+
+**How it propagated.** Into the decision-log entry and index row, and
+into three committed-path files before the collision surfaced. Caught
+before the commit, so nothing shipped with the wrong number, but five
+files needed a renumbering pass.
+
+**Caught by.** A `grep` verification run immediately after the write —
+the same post-edit check that caught entry 4 — which printed two rows
+numbered 25 side by side. Not caught by any reasoning about concurrency,
+despite this repo's own decision log documenting a prior concurrent
+session.
+
+**Worth noting for the eventual analysis.** Entries 1 and 3 share a
+narrow-probe-to-broad-claim shape; entry 4 was a known-bad input used
+anyway. This is a third mechanism: a *correct* observation with an
+unstated expiry, reused after it lapsed. It is the cheapest kind to
+catch and the hardest to notice, because there is no flawed inference to
+inspect — the belief was true when formed, and only the passage of time
+invalidated it. If the catalogue ends up with a taxonomy, "true when
+formed, stale when used" looks like its own branch, and the remedy is
+structural (read-at-write-time) rather than epistemic.
+
+**Fix.** Recorded in `meta/procedural-memory/universal.md` under "A
+long-lived shared file can change under you mid-turn; re-read before
+writing." Not restated here.

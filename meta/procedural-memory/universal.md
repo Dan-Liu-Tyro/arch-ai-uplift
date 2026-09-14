@@ -303,3 +303,36 @@ contradicts a human's recollection of *their own* account, state, or history,
 the source's unreliability is the first hypothesis to test, not theirs.
 Challenging the user's premises is right; doing it from a number I already
 know is untrustworthy is not challenge, it is noise with a warning label on it.
+
+## A long-lived shared file can change under you mid-turn; re-read before writing
+
+**What happened.** Appending an entry to `docs/decision-log.md` — an
+append-only numbered log — I read the file, saw the highest decision number was
+24, and composed the new entry as decision 25, writing cross-references to
+"decision 25" into four other files as I went. Between that read and the write,
+a concurrent Claude Code session working on the same repo had added *its own*
+decision 25. My whole-file read-modify-write landed (purely additive, nothing
+lost), but the log then had two entries numbered 25. The first fix attempt
+failed too: the other session edited the same index row again between my
+inspection and my patch, so a content-matched anchor no longer matched.
+
+**Cost.** Two failed edits and a renumbering pass across five files. No data
+lost — but only because every edit happened to be additive. A read-modify-write
+that reordered or replaced content would have silently discarded the other
+session's uncommitted work, and that additive-ness was luck, not design.
+
+**Rule.** Two parts.
+
+(a) Treat "the highest number or id currently in this file" as a value that
+expires. For anything allocated at write time — a decision number, a log entry
+id, an appended row — read it in the same tool call that writes it, not from an
+earlier read in the same turn. This is a different failure from citing the wrong
+document's numbering (see "Cite by name in living documents, never by number"):
+there the two sources disagreed, here one source changed underneath me.
+
+(b) For a file another session or process may be holding, keep edits additive
+and anchor them on content *you* wrote or on line structure, rather than on a
+content match against someone else's prose. Then a lost race costs a retry
+instead of their work. `git status` listing modified files you don't recognise
+is the tell that another session is live — check it before a long editing pass,
+not after one fails.
