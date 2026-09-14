@@ -113,14 +113,14 @@ principle's `status` and must not be silently absorbed as if it agreed.
   clean, vs. reuse an imperfect existing home) in a case where I recommend
   the *cheaper* option, which would separate the two readings.
 - 2026-09-14 · Reframed an authority question into a governance one: asked
-  whether to replace our maturity ratings with Naz's, then — before I
-  answered — redirected to "treat what's Naz comments as validation
+  whether to replace our maturity ratings with the Head of Architecture's, then — before I
+  answered — redirected to "treat what's [the Head of Architecture]'s comments as validation
   checkpoints to plan and track the progress of this piece of the work",
   with completeness and maturity-scale as the worked examples · this
   conversation · stated · unpromoted — **unconfounded evidence**, unlike the
   2026-09-14 entry above it: this was volunteered against the direction I
   was visibly heading (I was preparing to argue for authoring our own
-  ratings with Naz's as a cross-check), so it reflects the user's own frame
+  ratings with the Head of Architecture's as a cross-check), so it reflects the user's own frame
   rather than deference to a menu I wrote. The move is the interesting part:
   where the question was "whose content wins", the answer supplied was "at
   which gate does the stakeholder decide", which turns a one-off
@@ -129,3 +129,15 @@ principle's `status` and must not be silently absorbed as if it agreed.
   into review-point design — because it would predict how they want other
   externally-owned dependencies handled (`docs/program-roadmap.md`, the
   slide-26 pack, IN-562…IN-570).
+- 2026-09-14 · Treated "visualise our processes as a flow diagram - so its
+  easier to consume and socialise" as a first-class deliverable of the
+  capability assessment, not a presentation nicety, and named it as a
+  validation checkpoint alongside completeness and maturity-scale · this
+  conversation · stated · unpromoted — pairs with the same turn's insistence
+  that the process map's Inputs/Outputs columns be *validated* rather than
+  rebuilt. Both point the same way: an artefact's value is in being
+  consumable and agreed by others, so the work is making an existing shared
+  artefact correct and legible rather than authoring a parallel one. Watch
+  whether this recurs, because it cuts against the instinct to model
+  something afresh in the repo where a Confluence page already carries it —
+  and it would predict a preference for generated views over new sources.

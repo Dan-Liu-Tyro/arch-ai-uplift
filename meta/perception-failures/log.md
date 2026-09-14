@@ -304,3 +304,65 @@ structural (read-at-write-time) rather than epistemic.
 **Fix.** Recorded in `meta/procedural-memory/universal.md` under "A
 long-lived shared file can change under you mid-turn; re-read before
 writing." Not restated here.
+
+---
+
+## 6. IN-563's source of truth and maturity scale asserted from the first page found
+
+**Date.** 2026-09-14.
+
+**Belief asserted.** That the *Architecture Practice Evolution Roadmap*
+(Confluence `ARCH/2291007579`) was IN-563's source of truth, and that
+its five-level practice scale (`Low`…`Established`) was the right
+maturity vocabulary — stated flatly in
+`practice/capability-maturity/README.md` under a heading reading
+"Maturity vocabulary: reuse, do not invent", and in `docs/decision-log.md`
+decision 26. Also asserted that the roadmap "does not contain the layer
+IN-563's own wording names — processes and activities", which was the
+entire justification for building a 32-activity inventory here.
+
+**Actual evidence behind it.** One Confluence page, supplied by the user
+as "source of truth of the ask". That supports "this page is an
+authoritative input" — materially narrower than "this is *the* working
+document and no other model of the activity layer exists". The actual
+working document, *Architecture Capability & Process Map*
+(`AE/2280227087`), was authored by the user, sits in a different space,
+had been edited hours earlier, and already contained 21 activity rows
+with Inputs, Outputs, and a five-level **AI-enablement** scale — the
+layer I claimed was absent, plus the scale I claimed had to be borrowed.
+
+**How it formed.** Two steps. First, a supplied link was treated as an
+exhaustive source rather than one input, so no search was run for an
+existing activity or capability model — not in the `AE` space where the
+rest of this program's material lives, not by title, not by the ticket
+key. Second, "this page lacks X" was inferred from "I have not seen X",
+which is only sound if the page set is known to be complete. The absence
+of a search is what made the second step feel safe.
+
+**How it propagated.** Into a whole session's output before being
+caught: `practice/capability-maturity/README.md`, a 32-row
+`activity-inventory.md`, decision 26, then decision 27 and
+`validation-plan.md` built on top of it, plus four commit messages and
+an `architecture-learning` observation. The inventory's own "Method and
+its known weakness" section reasoned at length about blind spots
+introduced by deriving from one page — correct reasoning, aimed at the
+wrong problem, and reassuring enough to substitute for going to look.
+
+**Caught by.** The user, directly: "I thought [the Process Map] already
+have the inputs and outputs column, just need to validate it, isn't
+it?" — and separately by naming a checkpoint ("visualise our processes
+as a flow diagram") that I had replaced with an invented one, which
+showed the checkpoint set had been reasoned out rather than read.
+
+**Distinct mechanism worth noting.** Entries 1, 3 and 4 share
+narrow-probe-to-broad-claim. This one is different: the probe was not
+narrow, it was *unattempted*. The claim "the source does not contain X"
+was derived from not having looked, while the artefact's visible rigour
+about *other* limitations made the unexamined assumption invisible. A
+document that carefully documents its known weaknesses reads as though
+its foundations were checked.
+
+**Fix.** Recorded in `docs/decision-log.md` decision 28, with decisions
+26 and 27 marked partly superseded. Rule in
+`meta/procedural-memory/universal.md` under "A supplied link is one
+input, not the source set." Not restated here.

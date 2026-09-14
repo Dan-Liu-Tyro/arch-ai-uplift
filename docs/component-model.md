@@ -94,7 +94,7 @@ hard rule in a stronger form:
 
 Stronger because `practice/` content is partly owned *outside this repo
 entirely* — the roadmap page that grounds `practice/capability-maturity/` is
-Naz Chan's, and can be superseded in a meeting this repo never sees. Code
+The Head of Architecture's, and can be superseded in a meeting this repo never sees. Code
 depending on it would break for reasons invisible from the codebase. There is
 no executable code under `practice/` today, so the rule currently governs
 citations and generated content rather than imports; it is stated now rather

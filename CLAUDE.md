@@ -34,7 +34,7 @@ meta/token-tracking/             token usage data + summarize.py
 meta/idea-to-presentation/       idea -> deck/page capability, general-purpose
 meta/CDCD/                       evidence log: conversation-driven co-design
 practice/                        Architecture-stream business work, not software
-practice/capability-maturity/    IN-563: activity model + maturity read
+practice/capability-maturity/    IN-563: initiative -> process-map mapping
 .claude/agents/arc-lite.md       local-agent's persona; lives here (not nested
                                   under components/) because this is where
                                   Claude Code's harness scans for it
@@ -168,6 +168,27 @@ absent.
   changes priorities — but that's a reason to propose a change and ask, never
   to edit the committed phases/milestones unilaterally on the strength of a
   good argument. Flag it, wait for a clear yes, then write it down.
+- **No personal names in anything committed — use the role.** Refer to
+  people by role ("the Head of Architecture", "the initiative's reporter")
+  in every tracked file *and in commit messages*, which are equally
+  permanent. Names are fine in conversation; the boundary is the artefact.
+  Two reasons: a git history is permanent and broadly readable, and Tyro's
+  review standards call out preventing PII exposure — so a name committed
+  once is effectively un-removable. Role titles also age better, staying
+  correct when people change jobs where a name silently misattributes
+  authority. Where a name sits inside a verbatim quote, bracket the
+  substitution — `[the Head of Architecture]` — rather than rewriting the
+  quote silently. For provenance, cite the source page or ticket plus its
+  role owner; that preserves everything provenance is for.
+- **A supplied link is one input, not the source set.** Before building on
+  a page someone hands over, spend one search for an existing artefact
+  covering the same ground — in the space where the work's other material
+  lives, by ticket key, and by obvious titles. Decision 28 exists because
+  this was skipped: a 32-row activity model was derived from the wrong page
+  while the real working document, with the same layer already in it, sat
+  one search away. Never write "the source does not contain X" without
+  having searched for X; "I did not find X in the page supplied" is what is
+  actually known.
 - Keep prose wrapped to ~80 columns to match the existing files.
 - `.idea/` is gitignored (JetBrains); it is present locally but not tracked.
 

@@ -146,6 +146,37 @@ the M rows..." are the specific shape to distrust.
 
 ---
 
+## A supplied link is one input, not the source set
+
+**What happened.** Asked to work on a business initiative, the user supplied a
+Confluence page as "source of truth of the ask". I treated that as the complete
+source set: built a 32-row activity model derived from it, chose its maturity
+vocabulary, and asserted in committed documents that it "does not contain the
+layer the ticket names". The real working document — authored by the user, in a
+different Confluence space, edited hours earlier — already contained that layer
+with inputs, outputs, and a different and more appropriate maturity scale. One
+search would have found it.
+
+**Cost.** A session's output, all of it built on the wrong foundation: two
+committed artefacts, two decision-log entries, four commit messages. The rework
+cost more than the original work.
+
+**Why it felt safe.** "The source does not contain X" was inferred from "I have
+not seen X". That inference is only valid when the source set is known to be
+complete, and a single supplied link never establishes that. Worse, the artefact
+I produced documented its *own* known weaknesses carefully — which made it read
+as rigorous and removed the impulse to check whether its foundation was right.
+
+**Rule.** When someone hands over a link to ground a piece of work, treat it as
+one input and spend one search before building on it: look in the space where
+the work's other material lives, search by the ticket key, and search by the
+obvious artefact titles ("capability map", "process map", "maturity"). Never
+write "the source does not contain X" unless a search for X was actually run —
+say "I did not find X in the page supplied" instead, which is what is known.
+Cheap to do at the start, expensive to discover at the end.
+
+---
+
 ## Proof-read commands the user is expected to paste
 
 **What happened.** I gave a `git branch --set-upstream-to` command with the branch

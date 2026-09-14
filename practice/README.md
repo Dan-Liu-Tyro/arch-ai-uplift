@@ -33,10 +33,11 @@ widening of `meta/`'s charter.
 
 Same shape as the existing rule protecting `components/` from `meta/`, and for a
 stronger reason: `practice/` content is partly owned *outside this repo*
-entirely. Naz Chan owns the Architecture Practice Evolution roadmap; Erini Sadek
-raised IN-563. An artefact here can be superseded by a decision taken in a
-meeting this repo never sees. Code that depended on it would break for reasons
-invisible from the codebase.
+entirely, and often lives in Confluence under active manual edit. IN-563's
+source of truth is a live Confluence page; the Head of Architecture owns the
+practice transformation roadmap it has to reconcile with. An artefact here can
+be superseded by a decision taken in a meeting this repo never sees. Code that
+depended on it would break for reasons invisible from the codebase.
 
 `practice/` contains no executable code, so the rule is currently about
 citations and generated content rather than imports — but it is the rule that
@@ -67,7 +68,7 @@ anyway.
 
 | Area | Purpose | Jira | Status |
 |---|---|---|---|
-| [`capability-maturity/`](capability-maturity/) | Activity-level model of the Architecture practice, its maturity, and where AI-enabled evolution pays off | [IN-563](https://tyropaymentsltd.atlassian.net/browse/IN-563) | Draft activity inventory, not yet assessed |
+| [`capability-maturity/`](capability-maturity/) | Maps AI SDLC initiatives onto the Architecture Capability & Process Map, with current/target AI-maturity per row | [IN-563](https://tyropaymentsltd.atlassian.net/browse/IN-563) | Mapping drafted; CP1 ready to run |
 
 ## Status
 

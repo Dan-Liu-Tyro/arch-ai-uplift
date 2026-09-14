@@ -83,7 +83,8 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 24 | Scaffolded `meta/CDCD` to evidence conversation-driven co-design | `meta` |
 | 25 | Credit-budget control on the authoritative pool; credits are overage, not an allowance | `meta/token-tracking` |
 | 26 | New `practice/` tier; IN-563 capability maturity assessment | `practice`, component-model |
-| 27 | Naz's review modelled as validation checkpoints; they are IN-563's plan of record | `practice/capability-maturity` |
+| 27 | The Head of Architecture's review modelled as validation checkpoints; they are IN-563's plan of record | `practice/capability-maturity` |
+| 28 | IN-563 re-grounded on the Process Map; AI-maturity scale; four real checkpoints; no personal names | `practice/capability-maturity`, CLAUDE.md |
 
 ## Decisions so far (tentative — open to change)
 
@@ -97,74 +98,81 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
    (b) Confluence publish + Rovo-facing grounding outbound, (c) local access
    for Claude Code. Goal: swapping "local file reads" for "a deployed query
    service" later is a transport change, not a redesign.
-3. **Repo is structured as loosely coupled components, not one application.**
-   Six components under `components/`, each with a README stating its purpose,
-   boundary, dependencies, and extraction notes. Rationale: some of these will
-   outgrow this repo and be promoted into their own project or handed to another
-   team — most likely `query-service`, which is the only one needing its own
-   deployment lifecycle — so extraction should be a move operation rather than an
-   untangling exercise. Dependencies point inward to `kg-core`; integration
-   components never import each other. This is the structural expression of
-   decision 2. Full rules in `docs/component-model.md`.
-4. **A `meta/` tier for components that observe the project.** Separate from
-   `components/`, holding work that accumulates knowledge about *how we work*
-   rather than about Tyro's architecture: `architecture-learning` (an
-   evidence-based record of demonstrated architectural style, so later work can
-   apply it deliberately instead of guessing) and `token-tracking` (granular token
-   consumption, so task cost can be reasoned about from data). Hard rule:
-   `components/` must never depend on `meta/`, since that would tie an otherwise
-   extractable component to this project's history. Both meta components are built
-   around evidence and provenance — cited observations, derived metrics — because
-   the failure mode for both is plausible-sounding records nobody can verify.
-   - `architecture-learning`'s goal is a **"digital architect"** that grows more
-     aligned with use, consumer-agnostic so the consumer can be chosen later
-     (session memory, `CLAUDE.md`, or the architecture agent this project is
-     building). Export is one-way — curate here, copy outward — so there is one
-     reviewable source. It records *how* decisions get made and which
-     counter-arguments were accepted, not only conclusions, because a profile
-     optimised for agreement cannot challenge its subject, and being challenged is
-     an explicit requirement.
-   - `procedural-memory` holds operational lessons — mistakes made here and the
-     rules that prevent them — and is separate from `architecture-learning` because
-     the two differ in subject and urgency: the former records the agent's own
-     errors and must take effect immediately, the latter models the user's reasoning
-     and has no consumer yet. The load-bearing part is the pointer from `CLAUDE.md`,
-     since a repo file changes nothing by existing; rules whose violation is
-     expensive are stated inline in `CLAUDE.md` rather than only in the component.
+3. **Repo is structured as loosely coupled components, not one
+   application.** Six components under `components/`, each with a README
+   stating its purpose, boundary, dependencies, and extraction notes.
+   Rationale: some of these will outgrow this repo and be promoted into their
+   own project or handed to another team — most likely `query-service`, which
+   is the only one needing its own deployment lifecycle — so extraction should
+   be a move operation rather than an untangling exercise. Dependencies point
+   inward to `kg-core`; integration components never import each other. This
+   is the structural expression of decision 2. Full rules in
+   `docs/component-model.md`.
+4. **A `meta/` tier for components that observe the project.** Separate
+   from `components/`, holding work that accumulates knowledge about *how we
+   work* rather than about Tyro's architecture: `architecture-learning` (an
+   evidence-based record of demonstrated architectural style, so later work
+   can apply it deliberately instead of guessing) and `token-tracking`
+   (granular token consumption, so task cost can be reasoned about from data).
+   Hard rule: `components/` must never depend on `meta/`, since that would tie
+   an otherwise extractable component to this project's history. Both meta
+   components are built around evidence and provenance — cited observations,
+   derived metrics — because the failure mode for both is plausible-sounding
+   records nobody can verify.
+   - `architecture-learning`'s goal is a **"digital architect"** that grows
+     more aligned with use, consumer-agnostic so the consumer can be chosen
+     later (session memory, `CLAUDE.md`, or the architecture agent this
+     project is building). Export is one-way — curate here, copy outward — so
+     there is one reviewable source. It records *how* decisions get made and
+     which counter-arguments were accepted, not only conclusions, because a
+     profile optimised for agreement cannot challenge its subject, and being
+     challenged is an explicit requirement.
+   - `procedural-memory` holds operational lessons — mistakes made here and
+     the rules that prevent them — and is separate from
+     `architecture-learning` because the two differ in subject and urgency:
+     the former records the agent's own errors and must take effect
+     immediately, the latter models the user's reasoning and has no consumer
+     yet. The load-bearing part is the pointer from `CLAUDE.md`, since a repo
+     file changes nothing by existing; rules whose violation is expensive are
+     stated inline in `CLAUDE.md` rather than only in the component.
      `architecture-learning` is explicitly deprioritised behind the
      challenging-thinking-partner behaviour.
-   - Refined `architecture-learning` again: every entry is a tracked hypothesis or
-     preference, never a settled conclusion. Rationale stated directly — "it's
-     unclear whether we can see [best practice] clearly beforehand", so decisions
-     should be tracked individually over time and marked as supported or
-     contradicted as new evidence arrives, building intuition from a track record
-     rather than asserting one. `form` (`hypothesis`/`preference`) is tracked
-     separately from `kind` (subject matter), and `status`
+   - Refined `architecture-learning` again: every entry is a tracked
+     hypothesis or preference, never a settled conclusion. Rationale stated
+     directly — "it's unclear whether we can see [best practice] clearly
+     beforehand", so decisions should be tracked individually over time and
+     marked as supported or contradicted as new evidence arrives, building
+     intuition from a track record rather than asserting one. `form`
+     (`hypothesis`/`preference`) is tracked separately from `kind` (subject
+     matter), and `status`
      (`active`/`reinforced`/`contested`/`revised`/`abandoned`) replaces a
-     hand-set confidence level. The index generator enforces the one invariant that
-     matters: contradicting evidence can never sit under an unacknowledged status.
-   - `token-tracking` reports cost by day, rolling five-hour window (matching how
-     usage limits are enforced), git branch, effort level, and model. Plan
-     allowance is **not** available locally — verified against the transcripts — so
-     the budget figure has to be supplied by the user. Attribution to features is
-     solved by the `gitBranch` field already present in the data.
-   - Added `docs/backlog.md` for feature ideas that are deferred, not decided
-     against — a dashboard for component/feature status was the first entry, parked
-     because at six components and no code the existing docs already answer "where
-     are we." Made explicit in `CLAUDE.md` that project state (decisions, backlog
-     items, component contracts) must be written into the repo, never left only in
-     Claude's cross-session memory, since the repo is what a future session or a
-     teammate can actually read.
-   - Split `architecture-learning` capture into two mechanisms with deliberately
-     different costs: live, near-zero-cost append to `observations.md` during
-     conversation (the default — a lapse in following this during one session is
-     what prompted the split), and a separate, occasional audit/backfill pass over
-     stored session transcripts (`~/.claude/projects/<slug>/*.jsonl`, the same
-     source `token-tracking` already reads, via the new
-     `architecture-learning/extract_transcript.py`) for whatever live capture
-     missed. Transcript retention is unverified beyond "present today back to
-     project start" — no rotation/cleanup policy is known — so backfill is
-     best-effort recovery, not a substitute for live capture.
+     hand-set confidence level. The index generator enforces the one invariant
+     that matters: contradicting evidence can never sit under an
+     unacknowledged status.
+   - `token-tracking` reports cost by day, rolling five-hour window
+     (matching how usage limits are enforced), git branch, effort level, and
+     model. Plan allowance is **not** available locally — verified against the
+     transcripts — so the budget figure has to be supplied by the user.
+     Attribution to features is solved by the `gitBranch` field already
+     present in the data.
+   - Added `docs/backlog.md` for feature ideas that are deferred, not
+     decided against — a dashboard for component/feature status was the first
+     entry, parked because at six components and no code the existing docs
+     already answer "where are we." Made explicit in `CLAUDE.md` that project
+     state (decisions, backlog items, component contracts) must be written
+     into the repo, never left only in Claude's cross-session memory, since
+     the repo is what a future session or a teammate can actually read.
+   - Split `architecture-learning` capture into two mechanisms with
+     deliberately different costs: live, near-zero-cost append to
+     `observations.md` during conversation (the default — a lapse in following
+     this during one session is what prompted the split), and a separate,
+     occasional audit/backfill pass over stored session transcripts
+     (`~/.claude/projects/<slug>/*.jsonl`, the same source `token-tracking`
+     already reads, via the new `architecture-learning/extract_transcript.py`)
+     for whatever live capture missed. Transcript retention is unverified
+     beyond "present today back to project start" — no rotation/cleanup policy
+     is known — so backfill is best-effort recovery, not a substitute for live
+     capture.
    - **Added a fourth meta component, `perception-failures`, then explicitly
      decided to keep it separate from `architecture-learning` rather than
      merge them — for now.** Raised 2026-09-08 by the user after catching a
@@ -302,12 +310,13 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
    so early Arc Lite answers deserve more scrutiny until real questions have
    exercised `constitution/02-canonical-sources.md` a few times.
 
-10. **Added a local-only HTML relay UI for Arc Lite (`components/local-agent/ui/`),
-    for the user's own single-person use, not a multi-user or production
-    surface.** A stdlib-only Python server relays `POST /ask` to the same
-    headless `claude -p --agent arc-lite` invocation a Claude Code session
-    already makes; a plain HTML/JS chatbox is the frontend. No new
-    dependency to install, no deployment, binds to localhost only.
+10. **Added a local-only HTML relay UI for Arc Lite
+    (`components/local-agent/ui/`), for the user's own single-person use, not
+    a multi-user or production surface.** A stdlib-only Python server relays
+    `POST /ask` to the same headless `claude -p --agent arc-lite` invocation a
+    Claude Code session already makes; a plain HTML/JS chatbox is the
+    frontend. No new dependency to install, no deployment, binds to localhost
+    only.
     - The user explicitly wants the door left open to a future cloud
       deployment, but asked to seed that as an idea, not build toward it now
       — recorded in `docs/backlog.md` rather than scheduled. The one
@@ -596,7 +605,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       `2005500019`, the real Skill Index) → `Skill - Tell Me About Your
       Name` (page `2005434483`, the actual skill definition) → `README`
       (page `1998749707`)'s "About my name" section, the skill's own
-      mandatory canonical source. All authored by the user (Dan Liu).
+      mandatory canonical source. All authored by the user.
     - **What this incidentally confirmed about the real Arc's skill
       architecture** — directly relevant to decision 18's native-vs-
       Confluence-index choice: `00 - Agent Soul` (page `1996390531`)
@@ -1005,16 +1014,19 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
     task) was put to the user rather than configured, since that is
     persistent configuration.
 
-26. **Added a third top-level tier, `practice/`, for the Architecture
-    stream's own business work, and made IN-563's capability maturity
-    assessment its first area.** Raised when the user asked where work on
-    [IN-563](https://tyropaymentsltd.atlassian.net/browse/IN-563)
+26. **[Partly superseded by decision 28 — the source of truth, the
+    maturity scale, and the activity model named below were all wrong; the
+    tier itself stands.]** **Added a third top-level tier, `practice/`, for
+    the Architecture stream's own business work, and made IN-563's capability
+    maturity assessment its first area.** Raised when the user asked where
+    work on [IN-563](https://tyropaymentsltd.atlassian.net/browse/IN-563)
     ("Foundation – Architecture capability maturity assessment", grounded in
-    Naz Chan's Confluence page *Architecture Practice Evolution - Roadmap*,
-    ARCH `2291007579`) should live, how this project could help with it, and
-    how to keep track of it. Both halves of this entry — the tier, and what
-    the deliverable actually is — were put to the user as explicit choices
-    with alternatives, and both recommendations were accepted.
+    The Head of Architecture's Confluence page *Architecture Practice
+    Evolution - Roadmap*, ARCH `2291007579`) should live, how this project
+    could help with it, and how to keep track of it. Both halves of this entry
+    — the tier, and what the deliverable actually is — were put to the user as
+    explicit choices with alternatives, and both recommendations were
+    accepted.
     - **Why none of the three existing homes worked, each rejected on its
       own stated contract rather than on taste.** `docs/` holds *this
       repo's own* design record; its nearest precedent,
@@ -1047,46 +1059,45 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       anywhere a fresh session would look — at larger scale and already
       recurring, so the argument for waiting for a second instance had
       nothing left to wait for.
-    - **The test, stated as a three-way on what a thing *is*, not what it
-      is about** (all three tiers are about architecture): `components/` —
-      does it ship as part of the product; `meta/` — is it useful while
-      building the product without shipping with it; `practice/` — is it
-      work owed to the org that happens not to be software. The hard rule
-      is inherited in a stronger form: **nothing under `components/` or
-      `meta/` may depend on anything under `practice/`**, stronger because
-      `practice/` content is partly owned outside this repo entirely — the
-      grounding roadmap is Naz's and can be superseded in a meeting this
-      repo never sees, so code depending on it would break for reasons
-      invisible from the codebase.
+    - **The test, stated as a three-way on what a thing *is*, not what it is
+      about** (all three tiers are about architecture): `components/` — does
+      it ship as part of the product; `meta/` — is it useful while building
+      the product without shipping with it; `practice/` — is it work owed to
+      the org that happens not to be software. The hard rule is inherited in a
+      stronger form: **nothing under `components/` or `meta/` may depend on
+      anything under `practice/`**, stronger because `practice/` content is
+      partly owned outside this repo entirely — the grounding roadmap is the
+      Head of Architecture's and can be superseded in a meeting this repo
+      never sees, so code depending on it would break for reasons invisible
+      from the codebase.
     - **Second half: what IN-563 actually owes, given its source of truth
-      has already done part of it.** Naz's page rates 15 initiatives across
-      two categories on a five-level scale, with priority action, business
-      value, rank and rationale each, plus a six-item *AI-Assisted
-      Architecture Operations Sub-Goals* table. What it does not contain is
-      the layer IN-563's own description names — **"processes and
+      has already done part of it.** The Head of Architecture's page rates 15
+      initiatives across two categories on a five-level scale, with priority
+      action, business value, rank and rationale each, plus a six-item
+      *AI-Assisted Architecture Operations Sub-Goals* table. What it does not
+      contain is the layer IN-563's own description names — **"processes and
       activities"**. The page rates *initiatives*, which are uplift
-      programmes, not what architects do day to day. Chosen deliverable:
-      the activity layer beneath it, rolling up to Naz's pillars rather
-      than competing with them. Rejected alternatives were treating IN-563
-      as substantially delivered and merely contributing to Naz's page
-      (leaves the activity layer absent), and scoping to the AI-opportunity
-      half only (leaves "mapped capabilities, processes and activities"
-      unaddressed).
+      programmes, not what architects do day to day. Chosen deliverable: the
+      activity layer beneath it, rolling up to the Head of Architecture's
+      pillars rather than competing with them. Rejected alternatives were
+      treating IN-563 as substantially delivered and merely contributing to
+      the Head of Architecture's page (leaves the activity layer absent), and
+      scoping to the AI-opportunity half only (leaves "mapped capabilities,
+      processes and activities" unaddressed).
     - **Why this deliverable earns its keep beyond the ticket:** it is the
       missing input to this repo's longest-open question — decision 6's
       step 1, *"what can Claude Code add on top of what Arc already
       provides?"*, still answered by guesswork. An activity model carrying
       a maturity and AI-opportunity read per activity answers it from
       evidence.
-    - **Maturity vocabulary: reuse, explicitly do not invent a third.**
-      Two are already in play — Naz's five-level practice scale
-      (`Low`/`Emerging`/`Partial`/`In flight`/`Established`) and slide 26 /
-      IN-564's M1/M2/M3 solution-architecture ladder, which decision 15
-      already flags as absent from `docs/program-roadmap.md`'s own
-      milestone language. This work uses the five-level scale, because
-      IN-563 is a practice-wide assessment and that is what that scale
-      measures; M1/M2/M3 stays scoped to the one capability it was defined
-      for.
+    - **Maturity vocabulary: reuse, explicitly do not invent a third.** Two
+      are already in play — the Head of Architecture's five-level practice
+      scale (`Low`/`Emerging`/`Partial`/`In flight`/`Established`) and slide
+      26 / IN-564's M1/M2/M3 solution-architecture ladder, which decision 15
+      already flags as absent from `docs/program-roadmap.md`'s own milestone
+      language. This work uses the five-level scale, because IN-563 is a
+      practice-wide assessment and that is what that scale measures; M1/M2/M3
+      stays scoped to the one capability it was defined for.
     - **What was built:** `practice/README.md` (the tier contract,
       including a provenance requirement — every artefact declares itself
       `snapshot`, `authored here`, or `derived`, generalising the header
@@ -1094,7 +1105,8 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       `practice/capability-maturity/README.md` (the ask, the source of
       truth, what the roadmap already covers and what it doesn't, boundary,
       open questions), and
-      `practice/capability-maturity/activity-inventory.md` — 32 activities
+      `practice/capability-maturity/activity-inventory.md` (since removed by
+      decision 28) — 32 activities
       in five groups, each marked `cited` or `inferred` against the roadmap
       page. `docs/component-model.md` gained the tier and its rule.
     - **Two honest limits written into the artefact rather than discovered
@@ -1129,33 +1141,36 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       `docs/program-roadmap.md` is cited by path from many entries in this
       log, so relocating it breaks cross-references and needs its own pass
       (see Next steps). The slide-26 pack stays outside the repo. The
-      `jira-management` component stays deferred in `docs/backlog.md`,
-      though IN-563 is now its first concrete demand — a local work item
-      that maps to a remote initiative is exactly what that idea was for.
-      Publishing this assessment back to Confluence is also out of scope:
-      decision 5's curate-in-git-publish-outward pattern is the obvious
-      eventual shape, but Naz owns the target page, so that is a
-      conversation to have rather than a mechanism to build unilaterally.
+      `jira-management` component stays deferred in `docs/backlog.md`, though
+      IN-563 is now its first concrete demand — a local work item that maps to
+      a remote initiative is exactly what that idea was for. Publishing this
+      assessment back to Confluence is also out of scope: decision 5's
+      curate-in-git-publish-outward pattern is the obvious eventual shape, but
+      the Head of Architecture owns the target page, so that is a conversation
+      to have rather than a mechanism to build unilaterally.
 
-27. **Naz's review is modelled as validation checkpoints, and those
+27. **[Partly superseded by decision 28 — the checkpoint *model* stands,
+    but the four checkpoints were invented rather than sourced, and the
+    maturity- scale question was answered wrongly.]** **The Head of
+    Architecture's review is modelled as validation checkpoints, and those
     checkpoints — not a row-completion percentage — are IN-563's plan of
-    record.** Raised by the user: "we should treat what's Naz comments as
-    validation checkpoints to plan and track the progress of this piece of
-    the work", with two examples — align on completeness (did we capture
-    everything we do; are the inputs/outputs correct?) and whether the
-    maturity levels are the right ones.
+    record.** Raised by the user: "we should treat what's [the Head of
+    Architecture]'s comments as validation checkpoints to plan and track the
+    progress of this piece of the work", with two examples — align on
+    completeness (did we capture everything we do; are the inputs/outputs
+    correct?) and whether the maturity levels are the right ones.
     - **What this replaced.** The question on the table was whether to
-      replace the activity ratings with Naz's initiative ratings. That
-      would have been wrong on a units mismatch — an initiative rating
-      measures how far an uplift programme has progressed, not how mature
-      the underlying activity is, and 15 of the 24 inherited cells read
+      replace the activity ratings with the Head of Architecture's initiative
+      ratings. That would have been wrong on a units mismatch — an initiative
+      rating measures how far an uplift programme has progressed, not how
+      mature the underlying activity is, and 15 of the 24 inherited cells read
       `In flight`, so copying them down yields an assessment with almost no
       differentiation, biased upward in exactly the places an uplift exists
       *because* the activity is weak. The checkpoint framing is a better
-      answer to the same instinct: Naz is the **validator** of ratings
-      authored here, not the **source** of them. Her page stays the
-      authority on what it covers; her judgement becomes the gate on what
-      it doesn't.
+      answer to the same instinct: the Head of Architecture is the
+      **validator** of ratings authored here, not the **source** of them. Her
+      page stays the authority on what it covers; her judgement becomes the
+      gate on what it doesn't.
     - **Why checkpoints fit this deliverable specifically.** An
       assessment's only real quality gate is whether the practice's own
       architects recognise it as true, so the work is planned around the
@@ -1168,35 +1183,35 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
     - **Three checkpoints, not six, and completeness is bundled with the
       scale question.** CP1 asks completeness *and* whether the maturity
       levels are right; CP2 asks the per-activity ratings; CP3 asks the
-      AI-opportunity read and how the artefact lands relative to Naz's
-      page. The user listed completeness and scale as separate concerns;
-      they are asked together because they are independent — the scale
-      answer stays valid whatever happens to the activity set — so
-      bundling risks no wasted work and costs one conversation on the Head
-      of Architecture's calendar instead of two. Each checkpoint is framed
-      as a question with a yes/no-with-corrections answer rather than a
-      document review, because a gate that asks Naz to read a 32-row table
-      and react will get a rubber stamp or a delay.
+      AI-opportunity read and how the artefact lands relative to the Head of
+      Architecture's page. The user listed completeness and scale as separate
+      concerns; they are asked together because they are independent — the
+      scale answer stays valid whatever happens to the activity set — so
+      bundling risks no wasted work and costs one conversation on the Head of
+      Architecture's calendar instead of two. Each checkpoint is framed as a
+      question with a yes/no-with-corrections answer rather than a document
+      review, because a gate that asks the Head of Architecture to read a
+      32-row table and react will get a rubber stamp or a delay.
     - **The maturity scale is now explicitly provisional.** Decision 26
-      chose Naz's five-level practice scale over the M1/M2/M3 ladder on the
-      reasoning that IN-563 is a practice-wide assessment. That reasoning
-      was made here and never confirmed with her, and the user's second
-      example question puts it on the table. `README.md` now marks the
-      choice provisional pending CP1 rather than settled — rating 32
-      activities on the wrong scale is the most expensive mistake
+      chose the Head of Architecture's five-level practice scale over the
+      M1/M2/M3 ladder on the reasoning that IN-563 is a practice-wide
+      assessment. That reasoning was made here and never confirmed with her,
+      and the user's second example question puts it on the table. `README.md`
+      now marks the choice provisional pending CP1 rather than settled —
+      rating 32 activities on the wrong scale is the most expensive mistake
       available in this area.
-    - **Inputs and outputs are promoted from documentation to a
-      completeness *test*.** The user's completeness question includes
-      "are the inputs/outputs correct?", which the inventory cannot answer
-      — it has no such columns. Modelling them enables three structural
-      checks runnable *before* spending Naz's time: a dangling input (an
-      activity consumes what nothing produces) means a missing activity or
-      an imaginary input; an orphan output means a missing consumer or work
+    - **Inputs and outputs are promoted from documentation to a completeness
+      *test*.** The user's completeness question includes "are the
+      inputs/outputs correct?", which the inventory cannot answer — it has no
+      such columns. Modelling them enables three structural checks runnable
+      *before* spending the Head of Architecture's time: a dangling input (an
+      activity consumes what nothing produces) means a missing activity or an
+      imaginary input; an orphan output means a missing consumer or work
       nobody uses, itself a finding; a weakly-connected group suggests the
-      group was derived from the source's structure rather than observed.
-      This is the same reason the repo chose a graph shape over flat docs —
-      typed relationships surface contradictions a list cannot — applied to
-      the practice's own process model.
+      group was derived from the source's structure rather than observed. This
+      is the same reason the repo chose a graph shape over flat docs — typed
+      relationships surface contradictions a list cannot — applied to the
+      practice's own process model.
     - **What was built:** `practice/capability-maturity/validation-plan.md`
       (the three checkpoints, their entry conditions, what each blocks, the
       structural checks, and a status table), plus `README.md` updates —
@@ -1210,6 +1225,103 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       exact failure the inventory warns about. A separate activity-flow
       view is the alternative. This gates CP1, so it is the next thing to
       decide, not a parked idea.
+
+28. **IN-563 re-grounded on the Architecture Capability & Process Map, which
+    supplies the activity model, the inputs/outputs and the maturity scale;
+    plus a standing convention that no personal names appear in committed
+    artefacts.** Four corrections, all from the user, after decisions 26 and 27
+    were built on the wrong source.
+    - **No personal names in anything committed.** The user's instruction:
+      "remove his name out of the project, replace with Head of architecture
+      role is more appropriate to have no PII data in this project", with the
+      nuance that the name is fine in conversation but "not documented formally
+      in decision, or any other document in this project". A git history is
+      permanent and broadly readable, and Tyro's own review standards call out
+      preventing PII exposure, so a name committed once is effectively
+      un-removable. Role titles also age better: they stay correct when people
+      change roles, whereas a name attached to a decision misattributes
+      authority later. Swept `docs/decision-log.md`,
+      `docs/component-model.md`, `practice/README.md` and
+      `meta/architecture-learning/observations.md`; added the rule to
+      `CLAUDE.md`. Where the name sat inside a verbatim quote of the user, the
+      substitution is bracketed — `[the Head of Architecture]` — rather than
+      rewritten silently, so the quote stays honest. **Not fixed: four earlier
+      commit messages contain the name.** Rewriting them means rewriting
+      history on a shared branch, which is not a call to make unilaterally.
+    - **The source of truth was wrong, and the correct source already
+      contained the layer decision 26 spent a session building.** The real
+      working document is the *Architecture Capability & Process Map*
+      (Confluence `AE/2280227087`), authored by the user in the "AI Powered
+      Delivery" space and under active edit. It already holds 21
+      process/activity rows in four themes, each with **Inputs**,
+      **Process/Activity**, **Outputs**, a description, and five maturity
+      columns. Decision 26 instead derived a 32-activity inventory from the
+      *Practice Evolution Roadmap* (`ARCH/2291007579`) and then reasoned at
+      length about that method's blind spots — all of which was avoidable by
+      finding this page first. `activity-inventory.md` is removed rather than
+      reconciled: it duplicated a page this repo does not own, which is
+      exactly the drift failure decisions 12–16 exist to prevent.
+    - **The maturity scale is the Process Map's five AI-enablement levels**,
+      kept as-is at the user's direction: `Limited`, `Manually managed`,
+      `AI-assisted (human in the loop)`, `AI-driven (human on the loop)`,
+      `Fully autonomous (with human value)`. This measures how much of an
+      activity AI carries and where the human sits relative to the loop, which
+      is the right question for a program whose purpose is moving rows
+      rightward. Decision 26's choice of the Head of Architecture's practice
+      scale (`Low`…`Established`) was wrong — that scale measures uplift-
+      programme progress. `M1`/`M2`/`M3` in initiative titles are not a third
+      scale either but staged increments toward a level; decision 15's open
+      question about them is narrowed, not closed (see the mapping's gap 2).
+    - **What "assessment" concretely means, which was not understood
+      before.** The page's legend defines it: 🌟 marks rows prioritised in the
+      AI SDLC program, a yellow cell marks current state and a green cell
+      marks target state. The deliverable is the page colour-coded — two marks
+      per row — not prose about the practice. The remaining work is to derive
+      those marks from the initiative set (IN-562…IN-571) and decide which
+      further rows the program takes on.
+    - **The four checkpoints are now sourced, not invented.** Decision 27's
+      CP1–CP3 were reasoned out rather than read off anything; the user
+      identified that CP3 in particular ("AI opportunity and disposition") came
+      from nowhere they recognised. The real set: **CP1** completeness and
+      inputs/outputs, which has four unresolved inline comments already sitting
+      on the page from the Head of Architecture — two proposing deletion of
+      *Technology Radar* and *Technical Excellence / Knowledge Sharing* as
+      Platform Engineering's, two questioning whether *Architecture baseline
+      refresh* and *Diagram asset management* are separate processes at all;
+      **CP2** formalise the levels and colour-code current/target per row,
+      including which rows fill the IN-570/IN-571 placeholders; **CP3**
+      visualise the processes as a flow diagram so they are easier to consume
+      and socialise; **CP4** carve out the items the AI SDLC program already
+      covers so the practice transformation roadmap does not duplicate them.
+      CP3 is gated on CP1 rather than CP2, because a flow diagram renders the
+      inputs/outputs columns and needs them correct but does not need ratings —
+      so CP2 and CP3 can run in parallel.
+    - **Three findings the corrected grounding supports**, recorded in
+      `initiative-row-mapping.md`: (1) IN-567 targets *Architecture Sparring
+      Preparation & Jamming*, but that row carries no 🌟 — the cheapest and
+      clearest inconsistency in the area; (2) `AI-Validated` (IN-564) and
+      `AI-Augmented` (IN-566, IN-567) are not level names, while `AI-Assisted`
+      and `AI-Driven` match columns word-for-word, so M2 has no level of its
+      own and the M-ladder is probably finer-grained than the scale; (3) every
+      starred row plus IN-567's falls in *Discovery & Design Guardrails*, with
+      Strategic (5 rows), Execution (7 rows) and Foundational (1 row) carrying
+      no initiative at all — which is the real input to the IN-570/IN-571
+      choice, and a sharper version of the clustering observation decision 26
+      made against the wrong source.
+    - **Every current-state cell is `not-rated`, deliberately.** Initiative
+      titles give target state and the page defines the scale, but neither says
+      where the practice sits today; that read has to come from someone who
+      does the work. Inferring it from whether a row links to a Confluence page
+      would conflate "an artefact exists" with "the process is documented,
+      owned and repeatable", which is the actual level-2 test. Three rows are
+      marked `cannot rate` instead — *Architecture Governance*, *Architecture
+      Debt Management*, *Post Implementation Conformance Check* have no level
+      descriptions on the page, so writing those is a prerequisite to rating.
+    - **Not done, deliberately:** no Jira issue was edited, and no row was
+      proposed *into* IN-570/IN-571. Filling those is a program scope decision
+      and this repo's own rule requires explicit approval for roadmap changes
+      rather than a good argument. Candidates are listed with their
+      counter-arguments as CP2 input only.
 
 ## Constraints identified
 
@@ -1244,14 +1356,14 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 
 ## Open questions (not yet decided)
 
-- **Whether to adopt an MVP-first reframing of decision 5 (Confluence flow) and the schema itself**
-  — see [`docs/mvp-proposal.md`](mvp-proposal.md), recovered from a lapsed
-  session where it was assessed but never decided. Blocks on a real question
-  set and known-canonical/superseded Confluence pages, which only a human
-  architect can supply. Now confirmed by the program roadmap: milestone 2.1
-  ("active Knowledge Graph") is Phase 2, not the current phase, and the AKB's
-  50+-question Golden Evaluation Set is the same ask as the MVP proposal's
-  question set, at program scale.
+- **Whether to adopt an MVP-first reframing of decision 5 (Confluence flow)
+  and the schema itself** — see [`docs/mvp-proposal.md`](mvp-proposal.md),
+  recovered from a lapsed session where it was assessed but never decided.
+  Blocks on a real question set and known-canonical/superseded Confluence
+  pages, which only a human architect can supply. Now confirmed by the program
+  roadmap: milestone 2.1 ("active Knowledge Graph") is Phase 2, not the
+  current phase, and the AKB's 50+-question Golden Evaluation Set is the same
+  ask as the MVP proposal's question set, at program scale.
 - **Claude Cowork's role is undefined here.** The program roadmap's milestone
   1.1 asks explicitly for defining how Rovo, Claude Code, *and* Claude Cowork
   collaborate; this repo's design (`claude-code-access`) only accounts for
@@ -1393,18 +1505,19 @@ Resolved since first draft:
    whether any generation tooling is needed (and if so, its language per
    org standards), and how it's invoked (skill, agent, or something else)
    are all still open.
-11. **Model inputs and outputs per activity, then run CP1** (decisions 26,
-    27). This is IN-563's critical path: CP1 in
-    `practice/capability-maturity/validation-plan.md` asks whether the activity
-    set is complete *and* whether the inputs/outputs are right, and the
-    inventory has no inputs/outputs columns to review. Decide the modelling
-    shape first — two more columns on a 32-row table versus a separate
-    activity-flow view — since most cells would be `inferred` and the wide-table
-    option inflates the artefact's apparent authority. Then run the three
-    structural checks (dangling input, orphan output, group isolation) to narrow
-    the completeness question before it reaches Naz. Until CP1 passes, the
-    inventory is a proposal for correction, not an assessment, and should not be
-    reported as one.
+11. **Run CP1 on the Architecture Capability & Process Map** (decision 28).
+    IN-563's critical path. Four unresolved inline comments from the Head of
+    Architecture are already on the page and are the agenda: two propose
+    deleting *Technology Radar* and *Technical Excellence / Knowledge Sharing*
+    as Platform Engineering's, two ask whether *Architecture baseline refresh*
+    and *Diagram asset management* are separate processes. Also needing
+    resolution: four rows have no Inputs or Outputs at all (the same four),
+    three rows have no maturity-level descriptions so cannot be rated
+    (*Architecture Governance*, *Architecture Debt Management*, *Post
+    Implementation Conformance Check*), and *Sensible Defaults Maintenance* has
+    no Inputs. CP2 and CP3 are both blocked on this; until it passes,
+    `practice/capability-maturity/` holds a proposal for correction, not an
+    assessment, and should not be reported as one.
 12. **Decide whether `docs/program-roadmap.md` moves into `practice/`**
     (decision 26). It is structurally a `practice/` artefact — an
     externally-owned snapshot of the program's Confluence milestone tracker —
