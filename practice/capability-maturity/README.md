@@ -113,6 +113,7 @@ additional rows the program should take on.
 |---|---|
 | [`validation-plan.md`](validation-plan.md) | The four validation checkpoints, what each asks, its entry condition, and current status. **Read this first — it is the plan of record.** |
 | [`initiative-row-mapping.md`](initiative-row-mapping.md) | Proposed mapping of Architecture-stream initiatives (IN-562…IN-571) onto Process Map rows, with proposed current/target levels and the gaps the mapping exposes. |
+| [`missing-row-drafts.md`](missing-row-drafts.md) | Paste-ready maturity-level text for the three rows that have none, so they can be rated at CP2. Architecture Governance drafted; two remaining. |
 
 ## Status
 
@@ -123,7 +124,9 @@ The initiative-to-row mapping and its proposed current/target levels exist in
 for correction*. Progress is tracked against the checkpoints in
 [`validation-plan.md`](validation-plan.md), not against a count of rated rows.
 CP1 has four specific unresolved questions already sitting on the page as
-inline comments, which is where the next conversation starts.
+inline comments, which is where the next conversation starts. One gap the
+mapping found — an initiative whose row was not marked as prioritised — was
+fixed on the page on 2026-09-14.
 
 ## Open questions
 

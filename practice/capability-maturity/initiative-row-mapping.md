@@ -59,9 +59,9 @@ has.
 | Vendor/Product Assessment & Due Diligence | 🌟 | IN-565 | not-rated | **L3** |
 | Solution (or Data) Architecture Discovery & Design | 🌟 | IN-564 → IN-566 → IN-568 | not-rated | **L4** via M1→M2→M3 |
 | Solution (or Data) Architecture Review & Validation | | — | not-rated | — |
-| Architecture Sparring Preparation & Jamming | | IN-567 | not-rated | L3/L4 — see gap 1 |
+| Architecture Sparring Preparation & Jamming | 🌟 | IN-567 | not-rated | L3/L4 — see gap 2 |
 | Architecture Sparring | | — | not-rated | — |
-| Architecture Governance | | — | cannot rate | — |
+| Architecture Governance | | — | draft levels exist | — |
 
 ### Execution Guardrails
 
@@ -79,14 +79,15 @@ IN-562 (PoC of Architecture agent) and IN-563 (this assessment) are deliberately
 unmapped: the first is an enabler that serves several rows rather than moving
 one, the second is the assessment itself.
 
-## Three gaps the mapping exposes
+## Three gaps the mapping exposed (one now closed)
 
-**1. IN-567 has an initiative but its row is not starred.** *Architecture
-Sparring Preparation & Jamming* carries no 🌟 on the page, yet IN-567
-("AI-Augmented Architecture Sparring Submission") targets exactly that row.
-Either the row should be starred or the initiative is scoped against something
-else. This is the cheapest correction in the whole area and the most clearly
-wrong as it stands.
+**1. RESOLVED 2026-09-14 — IN-567's row was unstarred; the page owner added
+the star.** *Architecture Sparring Preparation & Jamming* carried no 🌟 while
+IN-567 ("AI-Augmented Architecture Sparring Submission") targeted exactly that
+row. Kept here rather than deleted because it is the first thing this mapping
+caught and fixed, which is the evidence that mapping initiatives onto rows
+finds real inconsistencies — the remaining two gaps are the same kind of check
+on questions that are harder to settle.
 
 **2. Two initiative titles use vocabulary that is not on the scale, so their
 target level is genuinely ambiguous.** The page's columns include `AI-assisted`
@@ -102,10 +103,11 @@ so, the M-ladder is finer-grained than the five-level scale and should be
 stated as such rather than implying a 1:1. This is a CP2 question and the
 answer changes how three initiatives get reported.
 
-**3. The whole program sits in one theme.** Every starred row, plus IN-567's
-row, falls in *Discovery & Design Guardrails*. **Strategic Guardrails** (5
-rows), **Execution Guardrails** (7 rows) and **Foundational Guardrails** (1
-row) have no initiative at all. Two readings, not yet separable: artefact-heavy
+**3. The whole program sits in one theme.** All four starred rows fall in
+*Discovery & Design Guardrails* — and gap 1's fix made this *more* pronounced,
+not less, since the added star landed in the same theme as the other three.
+**Strategic Guardrails** (5 rows), **Execution Guardrails** (7 rows) and
+**Foundational Guardrails** (1 row) have no initiative at all. Two readings, not yet separable: artefact-heavy
 design work is genuinely where AI pays off first, or it is simply the most
 visible opportunity and the strategic rows were not examined with the same
 lens. The second is worth testing, because the strategic rows — capability

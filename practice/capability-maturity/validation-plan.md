@@ -78,7 +78,10 @@ Also in scope here, because the program has stated flexibility in FY27 Q3–Q4:
 IN-571.
 
 **Entry condition:** CP1 passed, and the three rows missing level descriptions
-have them.
+have them — drafts are accumulating in
+[`missing-row-drafts.md`](missing-row-drafts.md) (Architecture Governance
+done; Architecture Debt Management and Post Implementation Conformance Check
+outstanding), but they are drafts here, not text on the page.
 
 **Blocks:** closing IN-563.
 
