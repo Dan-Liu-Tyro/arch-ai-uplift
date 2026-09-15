@@ -1365,6 +1365,31 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       per-project memory path is derived from. The README records the mismatch
       explicitly in the meantime, so the gap reads as known rather than as
       neglect. See Next steps.
+30. **First bulk-ingestion experiment: full domain set, lean entities, over
+    the originally planned pressure-test slice.** `kg-content/README.md` had
+    called for pressure-testing the schema against a small, hand-picked,
+    fully interconnected set of entities before any bulk authoring. That was
+    superseded rather than completed: ingested all 39 domains from
+    Confluence's "TS - Reference Domain Model - Domain Definitions" (ARCH
+    space) into `components/kg-content/entities/domains/` in one pass,
+    because a concrete downstream consumer — an upcoming task evaluating a
+    reward initiative against Tyro's actual domain boundaries — needs the
+    complete set, not a slice. Breadth was widened; depth was cut to
+    compensate: each entity holds only a short purpose, its category, and a
+    one-line authority summary, with a pointer to a verbatim cache of the
+    full source page (`components/confluence-ingest/sources/reference-domain-model-domain-definitions.md`,
+    that component's first real artifact) rather than a full transcription.
+    `domain` is added to `kg-core/SCHEMA.md` as a seventh, explicitly
+    provisional entity type — no relationship keys yet, category stored as a
+    plain frontmatter field rather than a second entity type, and the
+    "explicit non-authority" field left as an open question because the
+    existing relationship vocabulary has no typed way to assert a negative
+    claim. Framed deliberately as a `meta/CDCD`-style first pass: build the
+    minimum the immediate use needs, let real use expose gaps, and expand or
+    refactor from evidence rather than settling the model now. Full
+    rationale, method, and open questions in
+    `docs/domain-model-experiment.md`; evaluation is explicitly pending
+    until the reward-initiative task actually exercises this data.
 
 ## Constraints identified
 

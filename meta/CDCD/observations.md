@@ -67,3 +67,16 @@ volume ever justifies building that.
   widening CDCD's own stated in-scope list · this conversation,
   `meta/CDCD/README.md`, `meta/CDCD/control-layers.md` ·
   supports:agent-expected-to-counter-argue
+- 2026-09-15 · First time the user invoked CDCD by name themselves to justify
+  a live method choice, rather than the agent naming an already-observed
+  pattern after the fact: told, mid-ingestion of a 39-domain Confluence page
+  into `kg-content`, to drop full field-by-field transcription for "the
+  essence of CDCD" — a first lean pass sized to the immediate use case,
+  reviewed/expanded/refactored later — after the agent had already pushed
+  back once on ingesting the full domain set (arguing for a small
+  pressure-test slice) and been overridden with a concrete downstream
+  reason (a reward-initiative evaluation needing the complete set) ·
+  this conversation, `docs/domain-model-experiment.md`,
+  `components/kg-core/SCHEMA.md` `domain` entry · supports:rigor-can-be-deferred-not-skipped
+  (the deferred parts — relationship keys, full field transcription — were
+  written down as open questions, not silently dropped)

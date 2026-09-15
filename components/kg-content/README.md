@@ -17,6 +17,7 @@ entities/
   reference-architectures/  <slug>.md
   decisions/                <slug>.md
   systems/                  <slug>.md
+  domains/                  <slug>.md
 ```
 
 Filename stem is the entity id. The containing directory carries the type, so ids
@@ -48,12 +49,19 @@ exception to reading through `kg-core`'s schema.
 
 ## Status
 
-One entity (`entities/principles/nfr-priority-third-party-financial-integration.md`,
+One `principle` entity
+(`entities/principles/nfr-priority-third-party-financial-integration.md`,
 status `draft`), migrated from `local-agent`'s retired grounding table rather than
-authored fresh. The schema still needs pressure-testing against three real entities
-that exercise the typed relationships — a principle, a guardrail deriving from it,
-and a pattern requiring that guardrail — before bulk authoring starts; one
-unconnected principle doesn't satisfy that yet.
+authored fresh. The originally planned next step — pressure-testing the schema
+against a small, hand-picked set of interconnected entities (a principle, a
+guardrail deriving from it, a pattern requiring that guardrail) before bulk
+authoring — was superseded rather than completed: `entities/domains/` now holds
+39 `domain` entities, ingested in one pass because a concrete downstream
+consumer needed the full domain set. See
+[`../../docs/domain-model-experiment.md`](../../docs/domain-model-experiment.md)
+for why breadth was chosen over the planned slice, and why the entities
+themselves are deliberately lean (a summary + a pointer to cached source,
+not a transcription) rather than complete.
 
 ## Extraction notes
 

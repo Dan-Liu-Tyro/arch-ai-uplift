@@ -21,8 +21,8 @@ Design goals, in priority order:
 
 ## Entity types
 
-Six types. The split is deliberately about *how a statement behaves*, not about
-subject matter.
+Seven types. The first six splits are deliberately about *how a statement
+behaves*, not about subject matter; `domain` is the exception — see below.
 
 | Type | What it is | Changes | Example |
 |---|---|---|---|
@@ -32,6 +32,33 @@ subject matter.
 | `reference-architecture` | Named composition of patterns for a recurring domain. | Occasionally | "Standard CTAP web service" |
 | `decision` | Dated, specific choice with context. Immutable once made; superseded rather than edited. | Never (append) | "Adopt Schooner for deployment CRDs" |
 | `system` | A real Tyro system, so patterns and guardrails have observable subjects. | Continuously | "Payments gateway" |
+| `domain` | A bounded business domain — purpose, authority, and explicit non-authority over some slice of Tyro's operations. **Provisional.** | Occasionally | "Payments Processing" |
+
+### `domain` is a first real-world pressure test, not a settled type
+
+`kg-content/README.md` originally called for pressure-testing the schema
+against a small, hand-picked set of interconnected entities (a principle, a
+guardrail deriving from it, a pattern requiring that guardrail) before bulk
+authoring. `domain` skipped that gate deliberately: a concrete downstream
+consumer (evaluating a reward initiative against Tyro's actual domain
+boundaries) needed the full domain set now, not a slice, so all 39 domains
+from "TS - Reference Domain Model - Domain Definitions" (Confluence, ARCH
+space) were ingested in one pass rather than pressure-tested incrementally.
+See [`docs/domain-model-experiment.md`](../../docs/domain-model-experiment.md)
+for the full rationale, method, and deviations. Treat everything below about
+`domain` — its body template and its relationship to the rest of the schema —
+as a first approximation, expected to be reviewed and reshaped once the
+downstream use actually exercises it, not as an argued-and-settled type the
+way the other six are.
+
+The 39 ingested domains group into 6 categories (Support & Experience
+Channels, Core Customer & Product Domains, Business Operations Domains,
+Partner Integrations & Value-Add Services Domains, Data & Intelligence
+Domains, Cross-Domain Orchestrators). Category is stored as a plain
+`category` frontmatter string, not a relationship or a second entity type —
+the simpler option, chosen deliberately over modelling category as its own
+node until there's a real reason (a query, a second grouping dimension) that
+a string can't serve.
 
 The `principle` / `guardrail` distinction is the load-bearing one. A principle
 explains *why* and cannot be violated in a checkable sense; a guardrail can be
@@ -83,6 +110,7 @@ entities/
   reference-architectures/  <slug>.md
   decisions/             <slug>.md
   systems/               <slug>.md
+  domains/               <slug>.md
 ```
 
 One entity per file. **Filename stem is the id**, so the filesystem enforces
@@ -138,6 +166,13 @@ review consistent.
 - **reference-architecture** — Context · Composition · Constraints
 - **decision** — Context · Decision · Consequences · Status
 - **system** — Purpose · Architecture summary · Known deviations
+- **domain** — Purpose · Category · Authority · Source · Status note.
+  Deliberately minimal by design, not draft-quality shorthand for a fuller
+  template: a one/two-sentence purpose, a one-line owns/doesn't-own
+  authority summary, and a pointer to the full cached source rather than a
+  transcription of it. See the note above and
+  `docs/domain-model-experiment.md` for why lean-first was chosen over
+  front-loading all seven of the source page's per-domain fields.
 
 `Exceptions` on guardrails and `Known deviations` on systems exist so reality can
 be recorded instead of hidden. A KG that only holds the ideal state will be
@@ -169,3 +204,25 @@ Checkable by script later; a PR review checklist until then.
   contradiction precision directly.
 - Whether `tags` need a controlled vocabulary. Free-text tags degrade into the
   same inconsistency the KG is meant to fix.
+- **`domain` has no relationship keys yet.** All 39 ingested domains carry
+  their "non-authority" and cross-domain references as prose inside the body
+  (e.g. "Transfer execution on rails → Funds Movement Domain"), not as
+  typed frontmatter relationships — so none of that is queryable or
+  contradiction-checkable yet, which is the whole point of the graph
+  (design goal 1 above). Two sub-questions, deliberately left open rather
+  than answered under time pressure:
+  - **Every existing relationship type asserts something is true.**
+    `derives_from`, `requires`, `uses`, `conflicts_with` — all positive
+    claims. A domain's "explicit non-authority" is a positive claim *that a
+    negative holds* ("this domain does NOT own X"), which the current
+    vocabulary has no typed way to express. Whether that needs a genuinely
+    new relationship shape, or can be reframed as a positive claim on the
+    *other* domain (X `has_authority_over` Y, queried for absence rather than
+    presence), is unresolved.
+  - Whether cross-domain references belong on `domain` itself, or are better
+    expressed as `system implements domain` / `pattern uses domain` links
+    from the existing types inward — i.e., whether `domain` needs its own
+    relationship keys at all, versus becoming a target type for existing
+    ones.
+  Resolve once the downstream reward-initiative evaluation actually needs to
+  traverse these — see `docs/domain-model-experiment.md`.
