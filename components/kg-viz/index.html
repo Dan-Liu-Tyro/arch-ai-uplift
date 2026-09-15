@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>kg-viz — architecture knowledge graph</title>
+<!--
+  3d-force-graph's own CDN quick-start loads a single self-contained UMD
+  bundle (it embeds Three.js internally) -- see its README's "via CDN"
+  section. The plain `three` script tag below is a defensive fallback in
+  case that assumption is wrong for the version unpkg resolves to; it is a
+  no-op if unused. This repo has no build step (decision 1, "zero new
+  infra"), so both are loaded directly rather than bundled.
+-->
+<script src="https://unpkg.com/three"></script>
+<script src="https://unpkg.com/3d-force-graph"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: #05070d; overflow: hidden; font-family: -apple-system, "Segoe UI", sans-serif; }
+  #graph { width: 100vw; height: 100vh; }
+
+  #legend, #panel, #stats {
+    position: fixed;
+    background: rgba(10, 12, 20, 0.88);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    color: #e8ecf5;
+    padding: 14px 16px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  #legend { top: 16px; left: 16px; font-size: 13px; min-width: 220px; }
+  #legend h1 { font-size: 14px; margin: 0 0 10px; letter-spacing: 0.02em; color: #fff; }
+  #legend .row { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+  #legend .swatch { width: 12px; height: 12px; border-radius: 50%; flex: none; box-shadow: 0 0 6px currentColor; }
+
+  #stats { top: 16px; right: 16px; font-size: 12px; color: #b8c0d4; max-width: 260px; }
+  #stats strong { color: #ffb454; }
+
+  #panel {
+    top: 16px; right: 16px; width: 320px; max-height: calc(100vh - 32px);
+    overflow-y: auto; font-size: 13px; line-height: 1.5; display: none;
+  }
+  #panel.open { display: block; }
+  #panel h2 { font-size: 16px; margin: 0 0 4px; color: #fff; }
+  #panel .meta { color: #8a93ab; font-size: 12px; margin-bottom: 10px; }
+  #panel .section-label { color: #7fd1ff; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 12px; }
+  #panel .close { position: absolute; top: 10px; right: 12px; cursor: pointer; color: #8a93ab; font-size: 16px; }
+  #panel .close:hover { color: #fff; }
+  #panel .status-draft { color: #ffb454; }
+
+  #hint {
+    position: fixed; bottom: 16px; left: 16px; color: #6b7390; font-size: 12px;
+  }
+</style>
+</head>
+<body>
+  <div id="graph"></div>
+
+  <div id="legend">
+    <h1>kg-viz — knowledge graph</h1>
+    <div id="legend-rows"></div>
+  </div>
+
+  <div id="stats"></div>
+
+  <div id="panel">
+    <span class="close" onclick="closePanel()">✕</span>
+    <div id="panel-body"></div>
+  </div>
+
+  <div id="hint">Drag to rotate · scroll to zoom · click a node to inspect it</div>
+
+<script>
+  var CATEGORY_COLORS = {
+    "support-and-experience-channels": "#3fd0ff",
+    "core-customer-and-product-domains": "#ff5f7e",
+    "business-operations-domains": "#ffb454",
+    "partner-integrations-and-value-add-services-domains": "#8b7bff",
+    "data-and-intelligence-domains": "#4dff9e",
+    "cross-domain-orchestrators": "#ff8ad8",
+    "_uncategorized": "#8a93ab"
+  };
+  var CATEGORY_LABELS = {
+    "support-and-experience-channels": "Support & Experience Channels",
+    "core-customer-and-product-domains": "Core Customer & Product Domains",
+    "business-operations-domains": "Business Operations Domains",
+    "partner-integrations-and-value-add-services-domains": "Partner Integrations & VAS",
+    "data-and-intelligence-domains": "Data & Intelligence Domains",
+    "cross-domain-orchestrators": "Cross-Domain Orchestrators",
+    "_uncategorized": "Uncategorized (e.g. principle)"
+  };
+
+  function colorFor(node) {
+    return CATEGORY_COLORS[node.category || "_uncategorized"] || CATEGORY_COLORS._uncategorized;
+  }
+
+  function buildLegend() {
+    var rows = document.getElementById("legend-rows");
+    Object.keys(CATEGORY_LABELS).forEach(function (key) {
+      var row = document.createElement("div");
+      row.className = "row";
+      var swatch = document.createElement("div");
+      swatch.className = "swatch";
+      swatch.style.background = CATEGORY_COLORS[key];
+      swatch.style.color = CATEGORY_COLORS[key];
+      var label = document.createElement("span");
+      label.textContent = CATEGORY_LABELS[key];
+      row.appendChild(swatch);
+      row.appendChild(label);
+      rows.appendChild(row);
+    });
+  }
+
+  function closePanel() {
+    document.getElementById("panel").classList.remove("open");
+  }
+
+  function renderPanel(node, neighborTitles) {
+    var body = document.getElementById("panel-body");
+    var statusClass = node.status === "draft" ? "status-draft" : "";
+    body.innerHTML =
+      "<h2>" + escapeHtml(node.title) + "</h2>" +
+      "<div class=\"meta\">" + escapeHtml(node.type) +
+        (node.category ? " · " + escapeHtml(CATEGORY_LABELS[node.category] || node.category) : "") +
+        " · <span class=\"" + statusClass + "\">" + escapeHtml(node.status) + "</span></div>" +
+      "<div class=\"section-label\">Purpose</div><div>" + escapeHtml(node.purpose || "—") + "</div>" +
+      (node.authority ? "<div class=\"section-label\">Authority</div><div>" + escapeHtml(node.authority) + "</div>" : "") +
+      "<div class=\"section-label\">Connected to</div><div>" +
+        (neighborTitles.length ? escapeHtml(neighborTitles.join(", ")) : "none resolved — see gap count top-right") +
+      "</div>";
+    document.getElementById("panel").classList.add("open");
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  fetch("graph.json").then(function (r) { return r.json(); }).then(function (data) {
+    buildLegend();
+
+    var byId = {};
+    data.nodes.forEach(function (n) { byId[n.id] = n; });
+
+    var neighbors = {};
+    data.nodes.forEach(function (n) { neighbors[n.id] = new Set(); });
+    var linkSet = new Set();
+    data.links.forEach(function (l) {
+      neighbors[l.source].add(l.target);
+      neighbors[l.target].add(l.source);
+      linkSet.add(l);
+    });
+
+    document.getElementById("stats").innerHTML =
+      data.nodes.length + " nodes · " + data.links.length + " resolved edges<br/>" +
+      "<strong>" + data.stats.unresolved_references.length + "</strong> unresolved cross-domain references " +
+      "(prose that didn't confidently match a modeled domain — a real gap, not hidden)";
+
+    var highlightNodes = new Set();
+    var highlightLinks = new Set();
+    var selected = null;
+
+    var Graph = ForceGraph3D()(document.getElementById("graph"))
+      .backgroundColor("#05070d")
+      .graphData(data)
+      .nodeLabel(function (n) { return n.title; })
+      .nodeVal(function (n) { return n.type === "principle" ? 6 : 3; })
+      .nodeColor(function (n) {
+        if (selected && n.id === selected.id) return "#ffffff";
+        if (highlightNodes.size && !highlightNodes.has(n.id)) return "rgba(120,130,150,0.25)";
+        return colorFor(n);
+      })
+      .linkColor(function (l) {
+        return highlightLinks.has(l) ? "#ffe58a" : "rgba(180,190,210,0.35)";
+      })
+      .linkWidth(function (l) { return highlightLinks.has(l) ? 2 : 0.6; })
+      .linkDirectionalParticles(function (l) { return highlightLinks.has(l) ? 4 : 1; })
+      .linkDirectionalParticleWidth(1.6)
+      .linkDirectionalParticleSpeed(0.006)
+      .linkDirectionalArrowLength(3.5)
+      .linkDirectionalArrowRelPos(1)
+      .onNodeClick(function (node) {
+        selected = node;
+        highlightNodes = new Set([node.id]);
+        (neighbors[node.id] || new Set()).forEach(function (id) { highlightNodes.add(id); });
+        highlightLinks = new Set(data.links.filter(function (l) {
+          return l.source === node.id || l.target === node.id;
+        }));
+        refreshHighlight();
+        var neighborTitles = Array.from(neighbors[node.id] || []).map(function (id) {
+          return byId[id] ? byId[id].title : id;
+        });
+        renderPanel(node, neighborTitles);
+        Graph.cameraPosition({ x: node.x * 1.6, y: node.y * 1.6, z: node.z * 1.6 + 80 }, node, 800);
+      })
+      .onBackgroundClick(function () {
+        selected = null;
+        highlightNodes = new Set();
+        highlightLinks = new Set();
+        refreshHighlight();
+        closePanel();
+      })
+      .onNodeHover(function (node) {
+        document.getElementById("graph").style.cursor = node ? "pointer" : "default";
+      });
+
+    function refreshHighlight() {
+      Graph.nodeColor(Graph.nodeColor())
+        .linkColor(Graph.linkColor())
+        .linkWidth(Graph.linkWidth())
+        .linkDirectionalParticles(Graph.linkDirectionalParticles());
+    }
+  }).catch(function (err) {
+    document.getElementById("graph").innerHTML =
+      "<div style=\"color:#ff8a8a;padding:24px;font-family:monospace\">Failed to load graph.json: " + err + "</div>";
+  });
+</script>
+</body>
+</html>

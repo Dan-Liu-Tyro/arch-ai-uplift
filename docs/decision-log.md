@@ -1390,6 +1390,64 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
     rationale, method, and open questions in
     `docs/domain-model-experiment.md`; evaluation is explicitly pending
     until the reward-initiative task actually exercises this data.
+31. **Added `kg-viz`, a read-only 3D visualization component, for human
+    inspection of the graph.** New row in `docs/component-model.md`'s table
+    and dependency diagram: reads `kg-content` directly (the same
+    frontmatter-regex workaround `local-agent` already uses, since `kg-core`
+    has no implemented query code yet), depended on by nothing. Its edges
+    are derived, at generation time only, from the "→ Other Domain" prose
+    already inside each domain entity's `## Authority` section — `domain`
+    still has no typed relationship keys, so this is a best-effort read of
+    free text, not a curated relationship, and nothing derived is ever
+    written back into `kg-content`. Real evidence from running it once:
+    68 arrow references found across the 39 domain entities, 42 resolved
+    to an unambiguous target domain, 26 left unresolved rather than guessed
+    — mostly one recurring naming ambiguity ("Customer & Identity" in
+    source prose, which doesn't map cleanly onto the now-separately-modeled
+    `customer` and `user-and-identity` domains) plus a handful of generic
+    phrases ("Relevant business domains") and one reference to a domain
+    name not present in the ingested 39 ("Banking Domain"). See
+    `docs/domain-model-experiment.md` for the fuller breakdown and
+    `components/kg-viz/README.md` for the resolution algorithm. Not yet
+    verified rendering in an actual browser — the sandboxed environment it
+    was built in cannot bind a listening socket, so `serve.py` needs to be
+    run from a normal terminal to get the first real look. **Superseded by
+    decision 32**: the 68/42/26 figures and the "no typed relationship
+    keys" premise here describe the prose-inference approach that decision
+    32 replaced, on the same day, once building this component is what
+    exposed the gap. Left as written rather than rewritten, as the record
+    of what was actually tried first.
+32. **`domain` storage changed from one-file-per-entity to a single
+    consolidated, JSON-Schema-backed file — a scoped exception to decision
+    1, for `domain` only.** The other six `kg-core` entity types are
+    unaffected and keep their existing one-file-per-entity shape.
+    `components/kg-content/entities/domains/` (39 markdown files, from
+    decision 30) deleted; replaced by
+    `components/kg-content/entities/domains.json`, shaped by
+    `components/kg-core/schemas/domain.schema.json` (`kg-core`'s first real
+    artifact — everything else there is prose). Reasoning, stated directly:
+    the Architecture team owns these definitions as one coherent,
+    singularly-owned artifact, unlike a guardrail or pattern independently
+    edited by different reviewers over time, so one file beats one-per-entity
+    for portability (no directory-walking to hand this to a UI or another
+    tool) and maintainability (the source changes as a whole). This also
+    resolves the negation question decision 30/31 left open — no schema-level
+    negative primitive was added; the relationship type itself
+    (`not_authoritative_for`) carries the negative claim. Real evidence from
+    re-extracting relationships against the full raw cache (not the lean
+    markdown): 338 references, 296 resolved (87.6%), 42 left as
+    `target_unresolved` — a considered, named set (four single-word
+    abbreviations deliberately never auto-resolved, because "Banking" would
+    wrongly match `banking-vas-integrations` while superficially similar
+    cases would resolve correctly, so none of that class was resolved;
+    generic collective phrases; "Banking Domain" itself, confirmed absent
+    from the source's 39 `## ` headers, not missed by extraction). Full
+    method, evidence, and open questions in
+    `docs/domain-model-experiment.md`'s "Pivot" section;
+    `components/kg-viz/generate.py` simplified to read the structured
+    relationships directly, dropping the string-similarity matching decision
+    31 introduced. The reward-initiative evaluation task — this experiment's
+    actual test — still hasn't run.
 
 ## Constraints identified
 

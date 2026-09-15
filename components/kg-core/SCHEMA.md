@@ -46,19 +46,47 @@ from "TS - Reference Domain Model - Domain Definitions" (Confluence, ARCH
 space) were ingested in one pass rather than pressure-tested incrementally.
 See [`docs/domain-model-experiment.md`](../../docs/domain-model-experiment.md)
 for the full rationale, method, and deviations. Treat everything below about
-`domain` — its body template and its relationship to the rest of the schema —
+`domain` — its storage shape and its relationship to the rest of the schema —
 as a first approximation, expected to be reviewed and reshaped once the
 downstream use actually exercises it, not as an argued-and-settled type the
 way the other six are.
 
+### `domain` is a scoped exception to one-file-per-entity
+
+Every other entity type is one file per entity (see File layout, below).
+`domain` deliberately is not: all 39 domains live in one consolidated file,
+[`kg-content/entities/domains.json`](../kg-content/entities/domains.json),
+shaped by [`schemas/domain.schema.json`](schemas/domain.schema.json) — this
+is `kg-core`'s first real artifact; everything else here is still prose.
+
+The reason is specific to `domain` and doesn't generalize to the other six
+types: the Architecture team owns the domain definitions as one coherent,
+singularly-authored artifact — unlike a guardrail or pattern, which different
+reviewers add and edit independently over time, where file-per-entity keeps
+each change's diff scoped to the one thing it touched. For `domain`, that
+same split works against the content: the source changes as a whole (a
+re-drawn boundary between two domains touches both), so review-as-a-whole is
+the more meaningful diff unit, and a single file is what makes the data
+portable to a UI or another tool with zero directory-walking. If a seventh
+type is ever added that shares `domain`'s ownership shape, this exception
+should be generalized rather than repeated ad hoc; it is not yet a rule about
+`kg-core` in general, only a stated fact about this one type.
+
 The 39 ingested domains group into 6 categories (Support & Experience
 Channels, Core Customer & Product Domains, Business Operations Domains,
 Partner Integrations & Value-Add Services Domains, Data & Intelligence
-Domains, Cross-Domain Orchestrators). Category is stored as a plain
-`category` frontmatter string, not a relationship or a second entity type —
-the simpler option, chosen deliberately over modelling category as its own
-node until there's a real reason (a query, a second grouping dimension) that
-a string can't serve.
+Domains, Cross-Domain Orchestrators), listed in `domains.json`'s own
+top-level `categories` array. Category is stored as a plain `category`
+string on each domain, not a relationship or a second entity type — the
+simpler option, chosen deliberately over modelling category as its own node
+until there's a real reason (a query, a second grouping dimension) that a
+string can't serve.
+
+`domain` does have a real relationship type now: `not_authoritative_for`
+(domain → domain), extracted from the source's "Explicit non-authority"
+lists and resolved to real domain ids wherever that could be done
+confidently — see the Open items entry below on how this resolves what was
+previously an open question about negation.
 
 The `principle` / `guardrail` distinction is the load-bearing one. A principle
 explains *why* and cannot be violated in a checkable sense; a guardrail can be
@@ -110,13 +138,17 @@ entities/
   reference-architectures/  <slug>.md
   decisions/             <slug>.md
   systems/               <slug>.md
-  domains/               <slug>.md
+  domains.json           -- exception: all 39 domains in one file, not a directory
 ```
 
-One entity per file. **Filename stem is the id**, so the filesystem enforces
-uniqueness for free and a reviewer can resolve any reference by path. Ids are
-kebab-case and unprefixed — the directory already carries the type, and
+One entity per file, for every type except `domain` (see the exception
+above). **Filename stem is the id**, so the filesystem enforces uniqueness
+for free and a reviewer can resolve any reference by path. Ids are kebab-case
+and unprefixed — the directory already carries the type, and
 `guardrails/aws-via-jetstream.md` reads better than `guardrail-aws-via-jetstream`.
+`domain` ids follow the same kebab-case, unprefixed convention even though
+they're no longer separate filenames — `domains.json`'s own `id` field is
+what a relationship target resolves against.
 
 Ids are permanent. Renaming breaks every inbound reference, so a retitled entity
 keeps its id; `title` carries the human-facing name.
@@ -146,6 +178,15 @@ Required on every entity: `id`, `type`, `title`, `status`, `owner`, `created`,
 `updated`. Relationship keys are omitted entirely when empty rather than written
 as `[]`, to keep diffs about content.
 
+This YAML-frontmatter contract is for the six file-per-entity types.
+`domain` doesn't have per-entity frontmatter at all — `owner`, `updated`, and
+`source` are stated once at `domains.json`'s top level for all 39 rather than
+repeated 39 times, and `type` is implicit (every item in the `domains` array
+is one) rather than a field. See `schemas/domain.schema.json` for `domain`'s
+actual required fields (`id`, `title`, `category`, `status`, `purpose`,
+`authority`, `relationships`) — a JSON Schema, not YAML frontmatter, doing
+the same job this section does for the other six types.
+
 `owner` is required because unowned architecture knowledge is how the current
 Confluence sprawl happened. `source` preserves provenance during migration so a
 reviewer can check a curated entity against what it came from.
@@ -166,13 +207,16 @@ review consistent.
 - **reference-architecture** — Context · Composition · Constraints
 - **decision** — Context · Decision · Consequences · Status
 - **system** — Purpose · Architecture summary · Known deviations
-- **domain** — Purpose · Category · Authority · Source · Status note.
-  Deliberately minimal by design, not draft-quality shorthand for a fuller
-  template: a one/two-sentence purpose, a one-line owns/doesn't-own
-  authority summary, and a pointer to the full cached source rather than a
-  transcription of it. See the note above and
-  `docs/domain-model-experiment.md` for why lean-first was chosen over
-  front-loading all seven of the source page's per-domain fields.
+
+`domain` has no body template in this sense — it isn't a markdown file, so
+there are no section headings to fix. Its equivalent structure is
+`schemas/domain.schema.json`'s `domain` definition: `purpose` (a string,
+lean by design — not a transcription of the source's full JTBD/core-data/
+invariants lists), `authority.owns` / `authority.not_authoritative_for`
+(short phrases, same leanness), and `relationships` (typed, structured,
+described below). See `docs/domain-model-experiment.md` for why lean-first
+was chosen over front-loading every one of the source page's per-domain
+fields.
 
 `Exceptions` on guardrails and `Known deviations` on systems exist so reality can
 be recorded instead of hidden. A KG that only holds the ideal state will be
@@ -204,25 +248,24 @@ Checkable by script later; a PR review checklist until then.
   contradiction precision directly.
 - Whether `tags` need a controlled vocabulary. Free-text tags degrade into the
   same inconsistency the KG is meant to fix.
-- **`domain` has no relationship keys yet.** All 39 ingested domains carry
-  their "non-authority" and cross-domain references as prose inside the body
-  (e.g. "Transfer execution on rails → Funds Movement Domain"), not as
-  typed frontmatter relationships — so none of that is queryable or
-  contradiction-checkable yet, which is the whole point of the graph
-  (design goal 1 above). Two sub-questions, deliberately left open rather
-  than answered under time pressure:
-  - **Every existing relationship type asserts something is true.**
-    `derives_from`, `requires`, `uses`, `conflicts_with` — all positive
-    claims. A domain's "explicit non-authority" is a positive claim *that a
-    negative holds* ("this domain does NOT own X"), which the current
-    vocabulary has no typed way to express. Whether that needs a genuinely
-    new relationship shape, or can be reframed as a positive claim on the
-    *other* domain (X `has_authority_over` Y, queried for absence rather than
-    presence), is unresolved.
-  - Whether cross-domain references belong on `domain` itself, or are better
-    expressed as `system implements domain` / `pattern uses domain` links
-    from the existing types inward — i.e., whether `domain` needs its own
-    relationship keys at all, versus becoming a target type for existing
-    ones.
-  Resolve once the downstream reward-initiative evaluation actually needs to
-  traverse these — see `docs/domain-model-experiment.md`.
+- **Resolved: `domain` now has a real relationship type, `not_authoritative_for`.**
+  The earlier open question here was whether the schema needed a genuinely new
+  primitive to express a *negative* claim ("this domain does NOT own X"), since
+  every other relationship type (`derives_from`, `requires`, `uses`,
+  `conflicts_with`) asserts something is true. The answer that shipped: name
+  the relationship *type itself* after the negative claim rather than adding a
+  separate true/false flag to a positive-only vocabulary — `{"type":
+  "not_authoritative_for", "target": "..."}` is itself the negative assertion,
+  structurally no different from any other typed edge. This avoids needing a
+  schema-level negation primitive; it does not prove no other entity type will
+  ever need one, but for `domain` specifically the question is closed.
+  Extracting these from the source's prose ("→ Other Domain") required real
+  disambiguation work (some phrases bundle two domains under one legacy name,
+  some are generic collective phrases with no single target) — see
+  `docs/domain-model-experiment.md` for the full method and evidence, and
+  `target_unresolved` in `schemas/domain.schema.json` for how an unresolved
+  reference is kept rather than dropped.
+- Still open: whether cross-domain references should *also* be expressed as
+  `system implements domain` / `pattern uses domain` links from the existing
+  file-per-entity types inward, once any of those six types actually
+  reference a `domain` by id. Not yet exercised by real content.
