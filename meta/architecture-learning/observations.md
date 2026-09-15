@@ -141,3 +141,19 @@ principle's `status` and must not be silently absorbed as if it agreed.
   whether this recurs, because it cuts against the instinct to model
   something afresh in the repo where a Confluence page already carries it —
   and it would predict a preference for generated views over new sources.
+- 2026-09-15 · Chose to rename the repo so the name matches what it now
+  holds, rather than keeping the name and treating the added tiers as
+  lodgers: "I think we should rename the repo to match arch-ai-uplift is
+  more appropriate for this" — offered unprompted when asked how the README
+  should declare the repo's identity · this conversation · stated ·
+  unpromoted — the option chosen was the one I described as costliest
+  (breaking clones, remotes and links), and I had marked a *different*
+  option "(Recommended)", so this is unconfounded by deference. Paired with
+  choosing the ~55-line router over a comprehensive README, the consistent
+  preference is for an artefact that states what is actually true over one
+  that preserves an earlier framing or front-loads convenience. Worth
+  watching against the reverse case: whether a *stale but widely-cited*
+  artefact would also get renamed/corrected, or whether cross-reference
+  cost wins there — `docs/program-roadmap.md`'s pending relocation (next
+  step 12) is the natural test, since it is cited by path from many log
+  entries.

@@ -177,6 +177,36 @@ Cheap to do at the start, expensive to discover at the end.
 
 ---
 
+## "Propose" means present it, not build it
+
+**What happened.** Asked to "review what's our plan and propose a new readme",
+I wrote a 148-line README straight to disk. I even opened with "one thing I want
+to flag before writing", then flagged nothing and wrote the file. The reply was
+"Try again". The same shape had already happened once earlier in the session
+with a find-and-replace sweep, so it cost two wasted cycles.
+
+**Cost.** Two discarded artefacts and two round-trips, on work the user then
+shaped differently once actually asked — they picked a ~55-line router over the
+148-line version, and raised a repo-rename question that changed the framing.
+Neither would have surfaced from reviewing a finished file, because a finished
+file invites accept-or-reject rather than redirection.
+
+**Why it is not just over-eagerness.** The stewardship model in `CLAUDE.md` says
+to record a converged decision without being asked, which makes writing-first
+the right default for most turns. The exception is signalled by the verb: "review",
+"propose", "what do you think", "shall we" are requests for the reasoning, and
+the artefact is what happens *after* agreement. Delegation of routine upkeep is
+not delegation of framing choices.
+
+**Rule.** When the request contains "propose", "review", "suggest", or "what
+would you...", deliver the review and the options as text first, and name the
+choice you would make — but do not write the artefact until the framing is
+agreed. If a question genuinely needs answering before the artefact can be
+written well, ask it *before* drafting, not in the same turn you commit a draft.
+And if you announce you are about to flag something, flag it.
+
+---
+
 ## Proof-read commands the user is expected to paste
 
 **What happened.** I gave a `git branch --set-upstream-to` command with the branch

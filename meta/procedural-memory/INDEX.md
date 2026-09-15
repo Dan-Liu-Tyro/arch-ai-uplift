@@ -43,6 +43,9 @@ policy this exists to serve.
   reading.
 - A supplied link is one input, not the source set — search the space it
   lives in before asserting "the source does not contain X."
+- "Propose"/"review"/"suggest" asks for the reasoning first — present
+  options and a recommendation as text, and don't write the artefact until
+  the framing is agreed.
 - Proof-read any command or commit message the user is expected to paste
   or run, once more, before sending it.
 - Never run a command whose output is a credential, even to debug whether
