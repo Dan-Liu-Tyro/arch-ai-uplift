@@ -212,6 +212,27 @@ holds up once something actually queries this data for a real architecture
 decision. Nothing in the pivot changes that; it only fixed a problem the
 pivot's own trigger (`kg-viz`) exposed before that task got to run.
 
+## Post-pivot fix: three empty `purpose` fields
+
+Caught during review, not by the ingestion script itself: three domains
+(`billing-and-accounts-receivable`, `corporate-finance`,
+`disputes-and-recovery`) landed in `domains.json` with `purpose: ""` —
+a real bug, not a leanness tradeoff, and one that violated
+`domain.schema.json`'s own `minLength: 1` requirement on the same field.
+Root cause looked structural rather than random: all three domains' source
+sections open with an intro line immediately followed by a bulleted or
+numbered list, and whatever extraction step produced the other 36 domains'
+`purpose` values dropped the intro sentence along with the list in these
+three cases specifically, rather than keeping the sentence and only
+dropping the list (which is what happened for the domains flagged as
+"terser than ideal" elsewhere in this doc). Fixed by reading each domain's
+own `### Domain purpose` section in the raw cache directly and writing a
+one-sentence summary from it — not invented, and not copied verbatim
+either, to keep the lean convention intact. `kg-viz/generate.py` re-run
+afterward; counts unchanged (40 nodes, 296/338 resolved edges), confirming
+this was isolated to the three `purpose` strings and didn't touch
+relationships.
+
 ## Open questions
 
 - Whether the lean `purpose`/`authority.owns` compression lost anything a

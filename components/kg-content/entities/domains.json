@@ -1303,7 +1303,7 @@
       "title": "Billing & Accounts Receivable Domain",
       "category": "core-customer-and-product-domains",
       "status": "draft",
-      "purpose": "",
+      "purpose": "Manage what customers owe Tyro by owning the authoritative lifecycle for billing accounts, invoice generation and issuance, and accounts-receivable balances, aging, and collections, kept separate from transaction settlement, the banking ledger, and corporate GL.",
       "authority": {
         "owns": [
           "Billing account/profile management",
@@ -1605,7 +1605,7 @@
       "title": "Corporate Finance Domain",
       "category": "business-operations-domains",
       "status": "draft",
-      "purpose": "",
+      "purpose": "Maintain Tyro's corporate general ledger, accounting periods and close processes, and statutory/management financial reporting as the authoritative source, kept separate from product/customer financial truth such as merchant settlements and banking ledgers.",
       "authority": {
         "owns": [
           "Corporate journal posting & adjustments",
@@ -1851,7 +1851,7 @@
       "title": "Disputes & Recovery Domain",
       "category": "business-operations-domains",
       "status": "draft",
-      "purpose": "",
+      "purpose": "Manage disputes arising from payments acquiring across two coupled workflows: scheme-managed dispute progression (chargebacks, retrieval requests, representment) and Tyro's own economic recovery, publishing authoritative scheme and recovery outcomes to downstream consumers.",
       "authority": {
         "owns": [
           "Dispute case master record and scheme-managed lifecycle truth",

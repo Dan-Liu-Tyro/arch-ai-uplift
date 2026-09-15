@@ -168,7 +168,7 @@
       "type": "domain",
       "category": "core-customer-and-product-domains",
       "status": "draft",
-      "purpose": "",
+      "purpose": "Manage what customers owe Tyro by owning the authoritative lifecycle for billing accounts, invoice generation and issuance, and accounts-receivable balances, aging, and collections, kept separate from transaction settlement, the banking ledger, and corporate GL.",
       "authority": "Owns: Billing account/profile management; Invoice lifecycle; AR sub-ledger management; Credits, adjustments, write-offs; Collections orchestration; Billing dispute intake and tracking; Billing profiles and invoice records; AR balances, aging, payment allocation records; Credit/adjustment/write-off records and audit trail; Collections and billing-dispute state. Not authoritative for: product-quoting-and-pricing; payments-processing; settlement-and-reconciliation; Banking Domain; funds-movement; corporate-finance; customer; user-and-identity."
     },
     {
@@ -204,7 +204,7 @@
       "type": "domain",
       "category": "business-operations-domains",
       "status": "draft",
-      "purpose": "",
+      "purpose": "Maintain Tyro's corporate general ledger, accounting periods and close processes, and statutory/management financial reporting as the authoritative source, kept separate from product/customer financial truth such as merchant settlements and banking ledgers.",
       "authority": "Owns: Corporate journal posting & adjustments; Period close management; Corporate financial reporting; Corporate reconciliation governance; Chart of accounts; Corporate journals and posting history; Accounting periods and close status; Corporate financial statements and reporting artefacts; Corporate reconciliation status metadata and evidence references. Not authoritative for: settlement-and-reconciliation; Banking Domain; accounting-product; payments-processing; product-quoting-and-pricing; billing-and-accounts-receivable; enterprise-data-governance; data-analytics-and-intelligence; ai-and-ml."
     },
     {
@@ -231,7 +231,7 @@
       "type": "domain",
       "category": "business-operations-domains",
       "status": "draft",
-      "purpose": "",
+      "purpose": "Manage disputes arising from payments acquiring across two coupled workflows: scheme-managed dispute progression (chargebacks, retrieval requests, representment) and Tyro's own economic recovery, publishing authoritative scheme and recovery outcomes to downstream consumers.",
       "authority": "Owns: Dispute case master record and scheme-managed lifecycle truth; Evidence coordination references and deadline/SLA artefacts; Final scheme outcomes; Recovery records for liability/economic outcomes; FinancialCommitment intents and their lineage to dispute cases/outcomes; Operational audit trails and correlation metadata. Not authoritative for: payments-processing; settlement-and-reconciliation; funds-movement; payments-accounting; product-quoting-and-pricing; fraud-and-risk-decisioning; risk-compliance-and-regulatory; customer-service-and-support; enterprise-data-governance; data-analytics-and-intelligence; ai-and-ml; payments-customer-configuration."
     },
     {
