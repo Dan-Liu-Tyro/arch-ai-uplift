@@ -9,10 +9,12 @@ knowledge — principles, guardrails, patterns, reference architectures, decisio
 as the grounding source for the Architecture stream's AI agent to uplift the internal 
 business process as well as offer Architecture service to wider steams such as architecture sparring preparation, architecture/design review, etc.
 
-**Status: design phase.** A schema draft and component scaffolding exist; no code,
-build system, or test suite is committed. Do not invent or assume build/lint/test
-commands; there are none. If asked to add tooling, choose per the org language
-standards (Kotlin preferred for complex applications).
+**Status: design phase.** A schema draft and component scaffolding exist. No
+product code, build system, or test suite is committed — the only code that runs
+is `components/local-agent/ui/server.py` plus the stdlib scripts under `meta/`.
+Do not invent or assume build/lint/test commands; there are none. If asked to
+add tooling, choose per the org language standards (Kotlin preferred for
+complex applications).
 
 ## Layout
 

@@ -85,6 +85,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 26 | New `practice/` tier; IN-563 capability maturity assessment | `practice`, component-model |
 | 27 | The Head of Architecture's review modelled as validation checkpoints; they are IN-563's plan of record | `practice/capability-maturity` |
 | 28 | IN-563 re-grounded on the Process Map; AI-maturity scale; four real checkpoints; no personal names | `practice/capability-maturity`, CLAUDE.md |
+| 29 | Root README is a router, not a summary; repo rename agreed in principle | `README.md`, repo identity |
 
 ## Decisions so far (tentative — open to change)
 
@@ -1323,6 +1324,48 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       rather than a good argument. Candidates are listed with their
       counter-arguments as CP2 input only.
 
+29. **The root `README.md` is a router and a status board, not a summary of
+    the project — and the repo will be renamed to match what it now holds.**
+    Two related conclusions from reviewing a root README that had gone 12 days
+    stale: it described `components/` as though it were the whole repo,
+    omitted `practice/` and four of the six `meta/` components, and claimed
+    "no code yet" when a local UI server and four scripts were running.
+    - **Rejected: the comprehensive README.** The first rewrite attempted was
+      148 lines with five tables, restating the four baseline decisions, the
+      constraints, and the working conventions so that a newcomer could
+      orient from one file. It was discarded before being committed, on an
+      objection internal to this repo rather than a stylistic one:
+      `docs/component-model.md` already warns that a duplicated table
+      "existing at all is exactly the kind of second copy" that drifts, and
+      decision 23 deliberately made component status findable *without*
+      adding a dashboard file. A README that explains the baseline decisions
+      is a second copy of this log; one that lists conventions is a second
+      copy of `CLAUDE.md`. The comprehensive version was a dashboard.
+    - **The charter, stated so future edits have a test to fail:** the README
+      owns exactly the two things no other file owns — **routing** (which of
+      the three tiers holds what, and where to start given an intent) and
+      **honest current status** (what is actually built, as against what is
+      designed). Everything else is a link. Any future addition should be
+      checked against "does another file already own this?", and if so it
+      belongs there instead.
+    - **Honest status is load-bearing, not modesty.** The committed version
+      states that 28 decisions have produced one graph entity, that there is
+      no product code or test suite, that Arc Lite has never been driven
+      through real usage, and that the only work with a live deadline sits in
+      `practice/` rather than in the product tier. A newcomer reading the old
+      README would have inferred a far more built system than exists, which
+      is the specific failure a status section prevents.
+    - **Rename agreed in principle: `arch-knowledge-graph` → `arch-ai-uplift`.**
+      The user's reasoning was that the name reflects the original scope, when
+      the knowledge graph *was* the whole project, and no longer describes a
+      three-tier repo whose live delivery is a business assessment. Sequenced
+      deliberately after the README rewrite at the user's direction. Not a
+      doc edit — it touches the git remote, any existing clones, links that
+      reference the path, and the local directory name that Claude Code's
+      per-project memory path is derived from. The README records the mismatch
+      explicitly in the meantime, so the gap reads as known rather than as
+      neglect. See Next steps.
+
 ## Constraints identified
 
 - **The user is likely to be the sole person working the Architecture
@@ -1539,6 +1582,14 @@ Resolved since first draft:
     constraint above). CP2 and CP3 are both blocked on this; until it passes,
     `practice/capability-maturity/` holds a proposal for correction, not an
     assessment, and should not be reported as one.
+13. **Rename the repo to `arch-ai-uplift`** (decision 29). Agreed in
+    principle; sequenced after the README rewrite, which is done. Not a doc
+    edit — it needs the git remote renamed, existing clones re-pointed, the
+    local directory renamed, and a check for anything referencing the old
+    path (`CLAUDE.md`, this log, component READMEs). Renaming the working
+    directory also changes the path Claude Code derives its per-project
+    memory location from, so that state needs moving or it silently
+    orphans. The README states the mismatch until this happens.
 12. **Decide whether `docs/program-roadmap.md` moves into `practice/`**
     (decision 26). It is structurally a `practice/` artefact — an
     externally-owned snapshot of the program's Confluence milestone tracker —
