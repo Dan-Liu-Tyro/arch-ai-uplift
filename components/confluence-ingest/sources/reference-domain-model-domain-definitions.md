@@ -10,13 +10,18 @@ Page last modified (per Confluence, at cache time): 08 Apr, 2026
 Cached: 2026-09-15
 
 This is a verbatim cache of the page body at cache time. The lean domain
-entities under components/kg-content/entities/domains/ deliberately do NOT
-duplicate this full detail (JTBD, core data, invariants, capability
-authority, data authority, non-authority) inline — each entity holds only a
-short purpose and authority summary, with a pointer back here. When real use
-of the knowledge graph exposes a gap that the lean entity can't answer,
-compare against this file first; only re-query the live Confluence page if
-this cache itself looks stale relative to it.
+entities in components/kg-content/entities/domains.json deliberately do NOT
+duplicate this full detail (JTBD, core data, invariants) inline — each
+entity holds only a short purpose and short owns/not_authoritative_for
+phrases, with relationships resolved against this file rather than a
+transcription of it. When real use of the knowledge graph exposes a gap the
+lean entity can't answer, compare against this file first; only re-query the
+live Confluence page if this cache itself looks stale relative to it.
+
+(Originally written against a since-superseded one-file-per-domain
+structure at components/kg-content/entities/domains/ -- see
+docs/domain-model-experiment.md's "Pivot" section. This note was updated
+when that changed; the cached content below was not.)
 -->
 
 # Support & Experience Channels
