@@ -63,7 +63,7 @@ their errors).
 is current state and which is target state for this program?
 
 The scale is settled and stays as-is — the Process Map's own five
-**Organisational Maturity Level** columns, from `Limited` through `Fully
+**Organisational Maturity Level** columns, from `Partial` through `Fully
 autonomous`. See [`README.md`](README.md) for the table and for the two
 vocabularies this corrects.
 

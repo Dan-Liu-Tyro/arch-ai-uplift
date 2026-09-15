@@ -45,7 +45,7 @@ CP1 alongside the other four comments.
 
 | Level | Proposed text |
 |---|---|
-| **Limited** | Governance health is anecdotal. Whether the right solutions reached the forum before delivery is unknown, because the in-scope denominator was never established. |
+| **Partial** | Governance health is anecdotal. Whether the right solutions reached the forum before delivery is unknown, because the in-scope denominator was never established. |
 | **Manually managed** | A scorecard exists with defined metrics, formulas and RAG bands, compiled by hand from forum records on a regular cadence, with the in-scope population assembled manually. |
 | **AI-assisted** (human in the loop) | AI classifies decision outcomes from sparring records, computes the metrics, drafts the scorecard and its trend commentary, and proposes the in-scope population by scanning the portfolio for work that looks like it needed review; an architect validates the numbers and the narrative. |
 | **AI-driven** (human on the loop) | AI maintains governance metrics continuously and detects coverage gaps *as they form* — in-scope work heading to delivery without endorsement — routing them before delivery rather than reporting them after; it also recommends threshold recalibration against the accumulated baseline, with architects deciding. |

@@ -50,7 +50,7 @@ The Process Map's own columns are the scale, and they stay as they are:
 
 | # | Level | Shape of the work |
 |---|---|---|
-| 1 | **Limited** | Implicit, inconsistent, dependent on individual judgement |
+| 1 | **Partial** | Implicit, inconsistent, dependent on individual judgement |
 | 2 | **Manually managed** | Documented, owned, repeatable — done by people |
 | 3 | **AI-assisted** (human in the loop) | AI drafts and checks; a human reviews every output |
 | 4 | **AI-driven** (human on the loop) | AI acts continuously; humans handle exceptions |

@@ -7,7 +7,7 @@ project `IN` under IN-277 (fetched 2026-09-14). **The mapping and the proposed
 levels are authored here and are a proposal for correction, not an assessment**
 — see "What is weak here" before relying on any cell.
 
-Level shorthand, from the page's own columns: **L1** Limited · **L2** Manually
+Level shorthand, from the page's own columns: **L1** Partial · **L2** Manually
 managed · **L3** AI-assisted (human in the loop) · **L4** AI-driven (human on
 the loop) · **L5** Fully autonomous.
 
