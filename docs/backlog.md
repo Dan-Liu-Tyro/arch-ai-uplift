@@ -88,3 +88,21 @@ being worked, or delete it here once it's superseded.
   projects/sessions/users, *if* this project's experience shows it's
   helpful — not decided, and no design attempted yet. Promote to
   `docs/decision-log.md` once someone actually starts designing it.
+- **Reconsider the `kg-core` / `kg-content` separation.** Decision 2 split
+  the schema/validation/traversal contract (`kg-core`) from the curated
+  graph data (`kg-content`) — the ordinary schema-vs-data split, expressed
+  as `docs/component-model.md`'s dependency rules. Raised 2026-09-15: the
+  user finds the split still feels odd, worth naming plainly rather than
+  leaving as a vague discomfort. Today `kg-core` is entirely unimplemented —
+  `SCHEMA.md` prose only, no code or schema file exists — while `kg-content`
+  already holds real, growing data. In practice the "separation" right now
+  is between a spec document and the thing it describes, not between two
+  working pieces of software, which may be most of what's driving the
+  discomfort rather than the schema/data split being wrong in principle. The
+  same-day `domain` consolidation (a single `kg-content/entities/domains.json`
+  plus a real JSON Schema landing in `kg-core/schemas/`) is the first time
+  `kg-core` gets a concrete artifact beyond prose — worth checking whether
+  that changes the feel once it exists, before concluding the split itself
+  needs to go. Not decided; revisit once there's actual substance in
+  `kg-core` to judge the split against, or drop this if it turns out to be
+  self-resolving.
