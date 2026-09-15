@@ -428,3 +428,29 @@ content match against someone else's prose. Then a lost race costs a retry
 instead of their work. `git status` listing modified files you don't recognise
 is the tell that another session is live — check it before a long editing pass,
 not after one fails.
+
+---
+
+## A subagent's "verified" claim about a field can mean presence, not validity
+
+**What happened.** A background agent reported building `domains.json` (39
+domain entities) and stated it had verified "every domain has all 7 required
+fields." Spot-checking the actual values (not just re-trusting the claim)
+turned up three domains with `"purpose": ""` — an empty string, which
+satisfies "the key is present" but violated the JSON Schema's own
+`minLength: 1` on that same field, and would have read as a real, silent
+data gap to anyone using the graph. The agent's own check had validated
+key presence, not content.
+
+**Cost.** None yet — caught in the same turn, before committing, by
+actually reading a sample of the delegated output rather than trusting the
+subagent's summary of its own verification.
+
+**Rule.** When a delegated task reports having "verified" or "checked"
+structured output, that word covers whatever check was actually run, not
+every check the receiving side would assume from the word alone. For any
+field whose type has a degenerate-but-technically-present value (empty
+string, empty list, zero, null-as-string), spot-check a sample of actual
+values directly — don't infer "populated" from "the key exists" or from
+another party's say-so, whether that party is a subagent or a human
+collaborator's status update.

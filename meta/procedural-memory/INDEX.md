@@ -68,3 +68,6 @@ policy this exists to serve.
 - A long-lived shared file can change under you mid-turn — re-read
   immediately before writing, and keep edits additive and anchored on your
   own content, not a content match against someone else's prose.
+- A subagent's "verified" claim about a field can mean presence, not
+  validity — spot-check actual values yourself, don't infer "populated"
+  from "the key exists" or from another party's say-so.
