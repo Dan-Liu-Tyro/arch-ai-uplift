@@ -1474,11 +1474,14 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
     allow-list, which is scoped to the old name, and renaming the directory
     this session is running from risks breaking the session's own working
     directory mid-command with no clean way to verify the failure mode
-    first). See Next steps' item 13. Claude Code's per-project memory
-    (session transcripts and this session's own accumulated cross-session
-    memory files) is copied to the new project-path slug as part of the
-    same pass, per the risk decision 29
-    and `meta/architecture-learning/README.md` both already named.
+    first). See Next steps' item 13. **A third manual step, found only by
+    trying:** copying Claude Code's per-project memory (session transcripts
+    and this session's own accumulated cross-session memory files) to the
+    new project-path slug — the risk decision 29 and
+    `meta/architecture-learning/README.md` both already named — turned out
+    to be blocked the same way: `~/.claude/projects/` is explicitly denied
+    to sandboxed writes, so this could not be prepared in advance either.
+    All three manual steps in Next steps' item 13.
 
 ## Constraints identified
 
@@ -1698,13 +1701,18 @@ Resolved since first draft:
     assessment, and should not be reported as one.
 13. **Rename the repo to `arch-ai-uplift`** (decision 29, executed by
     decision 33). **Done:** GitHub repo renamed, the four content
-    references to the old name updated, per-project memory copy to the new
-    slug prepared. **Still manual, blocked on sandboxed tool access:**
-    `git remote set-url origin` (writing `.git/config` is sandboxed) and
-    the local directory rename itself — both need to be run outside the
-    sandbox (see decision 33 for exact commands and why). The README's
-    "On the name" note and this item stay as-is until both of those are
-    confirmed done, not just the parts a sandboxed session could reach.
+    references to the old name updated. **Three steps left, all blocked on
+    sandboxed tool access, run these in order:**
+    ```
+    ! git remote set-url origin https://github.com/Dan-Liu-Tyro/arch-ai-uplift.git
+    ! mkdir -p ~/.claude/projects/-Users-bliu-code-claude-workspace-arch-ai-uplift/memory && cp -a ~/.claude/projects/-Users-bliu-code-claude-workspace-arch-knowledge-graph/memory/. ~/.claude/projects/-Users-bliu-code-claude-workspace-arch-ai-uplift/memory/
+    ! mv "/Users/bliu/code/claude workspace/arch-knowledge-graph" "/Users/bliu/code/claude workspace/arch-ai-uplift"
+    ```
+    The memory copy is sequenced before the directory `mv` deliberately —
+    doing it after would mean briefly having no memory available to a
+    session already running from the new path. The README's "On the name"
+    note and this item stay as-is until all three are confirmed done, not
+    just the parts a sandboxed session could reach on its own.
 12. **Decide whether `docs/program-roadmap.md` moves into `practice/`**
     (decision 26). It is structurally a `practice/` artefact — an
     externally-owned snapshot of the program's Confluence milestone tracker —
