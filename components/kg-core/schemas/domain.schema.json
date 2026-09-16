@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://tyro.internal/arch-knowledge-graph/kg-core/schemas/domain.schema.json",
+  "$id": "https://tyro.internal/arch-ai-uplift/kg-core/schemas/domain.schema.json",
   "title": "domains.json",
   "description": "Shape of components/kg-content/entities/domains.json -- the single, consolidated file for the `domain` entity type, a scoped exception to kg-core's usual one-file-per-entity convention. See SCHEMA.md's `domain` section for why. No automated validator wired up yet (stdlib-only convention; skipping a jsonschema dependency rather than breaking it -- see kg-core/README.md).",
   "type": "object",

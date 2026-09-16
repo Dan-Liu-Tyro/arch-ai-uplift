@@ -86,6 +86,10 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 27 | The Head of Architecture's review modelled as validation checkpoints; they are IN-563's plan of record | `practice/capability-maturity` |
 | 28 | IN-563 re-grounded on the Process Map; AI-maturity scale; four real checkpoints; no personal names | `practice/capability-maturity`, CLAUDE.md |
 | 29 | Root README is a router, not a summary; repo rename agreed in principle | `README.md`, repo identity |
+| 30 | First bulk-ingestion experiment: full domain set, lean entities | `kg-content/entities/domains/`, `kg-core/SCHEMA.md` |
+| 31 | Added `kg-viz`, read-only 3D graph visualization | `kg-viz`, `component-model.md` |
+| 32 | `domain` storage consolidated to one JSON-Schema-backed file | `kg-content/entities/domains.json`, `kg-core/schemas/` |
+| 33 | Rename executed: `arch-knowledge-graph` → `arch-ai-uplift` | repo identity, `kg-core/schemas/`, `architecture-learning/README.md` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -1448,6 +1452,33 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
     relationships directly, dropping the string-similarity matching decision
     31 introduced. The reward-initiative evaluation task — this experiment's
     actual test — still hasn't run.
+33. **Rename executed: `arch-knowledge-graph` → `arch-ai-uplift`** (decision
+    29's "agreed in principle" acted on). GitHub repo renamed via `gh repo
+    rename` (GitHub redirects the old URL). The four content references to
+    the old name updated: this log (this entry; decision 29's own text is
+    left as written, since it correctly described the state at the time),
+    `kg-core/schemas/domain.schema.json`'s `$id`, and
+    `meta/architecture-learning/README.md`'s worked example of its own
+    transcript-slug mechanism — deliberately not a historical record, since
+    it explains a still-live mechanism using this repo as the example, so it
+    was updated rather than left. `docs/decision-log.md`'s own earlier,
+    genuinely historical mention (the "repo location/name" resolved item,
+    describing initial `git init`) was left alone on the same
+    don't-rewrite-history basis as decision 31. Two steps deliberately left
+    to the user rather than attempted from inside a sandboxed tool call:
+    `git remote set-url origin https://github.com/Dan-Liu-Tyro/arch-ai-uplift.git`
+    (writing `.git/config` is sandboxed — confirmed by trying; `gh repo
+    rename` itself succeeded, only the local remote-URL update failed) and
+    `mv "/Users/bliu/code/claude workspace/arch-knowledge-graph" "/Users/bliu/code/claude workspace/arch-ai-uplift"`
+    (not attempted at all — the new path isn't in the sandbox's current
+    allow-list, which is scoped to the old name, and renaming the directory
+    this session is running from risks breaking the session's own working
+    directory mid-command with no clean way to verify the failure mode
+    first). See Next steps' item 13. Claude Code's per-project memory
+    (session transcripts and this session's own accumulated cross-session
+    memory files) is copied to the new project-path slug as part of the
+    same pass, per the risk decision 29
+    and `meta/architecture-learning/README.md` both already named.
 
 ## Constraints identified
 
@@ -1665,14 +1696,15 @@ Resolved since first draft:
     constraint above). CP2 and CP3 are both blocked on this; until it passes,
     `practice/capability-maturity/` holds a proposal for correction, not an
     assessment, and should not be reported as one.
-13. **Rename the repo to `arch-ai-uplift`** (decision 29). Agreed in
-    principle; sequenced after the README rewrite, which is done. Not a doc
-    edit — it needs the git remote renamed, existing clones re-pointed, the
-    local directory renamed, and a check for anything referencing the old
-    path (`CLAUDE.md`, this log, component READMEs). Renaming the working
-    directory also changes the path Claude Code derives its per-project
-    memory location from, so that state needs moving or it silently
-    orphans. The README states the mismatch until this happens.
+13. **Rename the repo to `arch-ai-uplift`** (decision 29, executed by
+    decision 33). **Done:** GitHub repo renamed, the four content
+    references to the old name updated, per-project memory copy to the new
+    slug prepared. **Still manual, blocked on sandboxed tool access:**
+    `git remote set-url origin` (writing `.git/config` is sandboxed) and
+    the local directory rename itself — both need to be run outside the
+    sandbox (see decision 33 for exact commands and why). The README's
+    "On the name" note and this item stay as-is until both of those are
+    confirmed done, not just the parts a sandboxed session could reach.
 12. **Decide whether `docs/program-roadmap.md` moves into `practice/`**
     (decision 26). It is structurally a `practice/` artefact — an
     externally-owned snapshot of the program's Confluence milestone tracker —

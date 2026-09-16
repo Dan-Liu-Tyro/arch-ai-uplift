@@ -130,9 +130,19 @@ whatever task is active in the current session.
 **Source.** Claude Code writes one `*.jsonl` transcript per session to
 `~/.claude/projects/<slugified-project-path>/*.jsonl` — the same files
 `meta/token-tracking/summarize.py` already reads for cost data. The slug is the
-absolute repo path with `/` replaced by `-`; for this repo that directory is
-`-Users-bliu-code-claude-workspace-arch-knowledge-graph`. Verified present
-2026-08-19: four files, dating back to this project's first session on 2026-08-17.
+absolute repo path with `/` replaced by `-`; for this repo that directory was
+`-Users-bliu-code-claude-workspace-arch-knowledge-graph` up to the
+`arch-ai-uplift` rename (decision 29 and its follow-up in
+`docs/decision-log.md`), and is
+`-Users-bliu-code-claude-workspace-arch-ai-uplift` from that point on. Verified
+present 2026-08-19, pre-rename: four files, dating back to this project's first
+session on 2026-08-17.
+
+**This rename is the concrete instance the "directory name is derived from
+the repo's absolute path" caution under "Things to watch out for" below was
+written in anticipation of.** Sessions and memory from before the rename are
+filed under the old slug and won't show up under the new one — see that
+caution for what to do about it.
 
 **Process.**
 1. List the transcripts in that directory. Each filename is a session UUID with
