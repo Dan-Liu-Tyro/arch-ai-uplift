@@ -11,7 +11,8 @@ business process as well as offer Architecture service to wider steams such as a
 
 **Status: design phase.** A schema draft and component scaffolding exist. No
 product code, build system, or test suite is committed — the only code that runs
-is `components/local-agent/ui/server.py` plus the stdlib scripts under `meta/`.
+is `components/local-agent/ui/server.py`, `components/kg-viz/`'s
+`generate.py` + `serve.py`, plus the stdlib scripts under `meta/`.
 Do not invent or assume build/lint/test commands; there are none. If asked to
 add tooling, choose per the org language standards (Kotlin preferred for
 complex applications).
@@ -24,6 +25,8 @@ docs/backlog.md           parked feature ideas, not yet decided or scheduled
 docs/component-model.md   component boundaries, dependency + promotion rules
 components/kg-core/       schema contract (SCHEMA.md), validation, traversal
 components/kg-content/    the curated graph — entity files, data only
+components/kg-viz/        read-only 3D view of the graph; graph.json is a
+                                  regenerable build artifact, never hand-edited
 components/confluence-ingest/    inbound: Confluence pages → draft entities
 components/confluence-publish/   outbound: entities → generated pages
 components/query-service/        v2, deferred — do not build yet
