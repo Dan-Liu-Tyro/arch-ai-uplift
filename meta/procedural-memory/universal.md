@@ -317,6 +317,18 @@ written above this one: test the narrowest hypothesis (plain command, no
 flags) before generalizing from a failure that included an extra variable.
 See `meta/perception-failures/log.md` entry 7.
 
+**`git push` also works, verified by dry run, same session.** `git push
+--dry-run origin <branch>` printed the correct `<old>..<new> branch ->
+branch` ref-update line and exited 0 — auth and connectivity to the
+remote are fine from inside the sandbox. It also printed `failed to
+store: 100001` above that line, which looks alarming but is a credential
+*helper* (keychain-style cache) failing to persist the token for next
+time, not a push failure — the ref line and exit code are what to trust,
+not the stray line above them. Don't misread that line as "push is
+blocked" on a future occasion; if a real push needs testing, confirm
+with the user first since it's a shared-state action, but the mechanism
+itself is not the blocker.
+
 ---
 
 ## Claude Code caches agent/skill definitions in-session; a mid-session edit doesn't reliably propagate

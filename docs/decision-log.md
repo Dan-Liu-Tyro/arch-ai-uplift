@@ -1548,7 +1548,13 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
   add` + `git commit`, no override, succeeded immediately in the very next
   session on the very same three files. "Git management is delegated"
   reverts to "commit proactively" — see `meta/perception-failures/log.md`
-  entry 7 for the full trace.
+  entry 7 for the full trace. `git push --dry-run` was also verified in
+  that same later session: correct ref-update line, exit 0, auth and
+  connectivity to the remote are fine from the sandbox. (An unrelated
+  `failed to store: 100001` line above it is a credential-cache warning,
+  not a push failure — see `universal.md`.) Actually pushing still needs
+  the user's go-ahead per se, same as any push, since it's a shared-state
+  action — not because the mechanism is blocked.
 - **The user is likely to be the sole person working the Architecture
   stream for this program**, stated directly on 2026-09-08 while assessing
   slide 26's capacity against its FY27 scope. This sharpens rather than
