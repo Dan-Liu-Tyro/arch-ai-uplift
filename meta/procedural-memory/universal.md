@@ -304,6 +304,19 @@ regardless of what's being committed or why. Any workflow that assumed
 sandbox needs correcting to "stage the change and hand the user the exact
 `git commit` command to run themselves" (e.g. via the harness's `!` prefix).
 
+**Correction, same day (2026-09-18), caught by the next session testing
+directly instead of trusting the entry above.** The test that produced the
+correction above only tried `git commit` *with* `dangerouslyDisableSandbox:
+true` explicitly set — and that parameter is disabled by org policy in this
+environment (a no-op, confirmed by this session's own harness reminder), so
+setting it changed nothing except possibly how the failure surfaced. A
+plain `git add` + `git commit`, no override at all, was tried next and
+succeeded on the first attempt, committing the very three files the
+correction above described as uncommittable. The real rule was already
+written above this one: test the narrowest hypothesis (plain command, no
+flags) before generalizing from a failure that included an extra variable.
+See `meta/perception-failures/log.md` entry 7.
+
 ---
 
 ## Claude Code caches agent/skill definitions in-session; a mid-session edit doesn't reliably propagate

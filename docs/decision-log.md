@@ -1540,6 +1540,15 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
   this repo need the user to run them (e.g. via the `!` prefix), which
   changes the "git management is delegated" arrangement from "commit
   proactively" to "stage and hand the exact command to the user."
+  **Wrong — corrected same day, 2026-09-18, by the next session.** The
+  attempt above set `dangerouslyDisableSandbox: true` explicitly and never
+  tried a plain `git commit` without it; the `Operation not permitted` came
+  from that flag (itself disabled by org policy, so it's a no-op that adds
+  nothing) rather than from commits being blocked outright. A plain `git
+  add` + `git commit`, no override, succeeded immediately in the very next
+  session on the very same three files. "Git management is delegated"
+  reverts to "commit proactively" — see `meta/perception-failures/log.md`
+  entry 7 for the full trace.
 - **The user is likely to be the sole person working the Architecture
   stream for this program**, stated directly on 2026-09-08 while assessing
   slide 26's capacity against its FY27 scope. This sharpens rather than

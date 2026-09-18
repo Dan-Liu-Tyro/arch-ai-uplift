@@ -366,3 +366,62 @@ its foundations were checked.
 26 and 27 marked partly superseded. Rule in
 `meta/procedural-memory/universal.md` under "A supplied link is one
 input, not the source set." Not restated here.
+
+---
+
+## 7. "No ordinary commit can be made from inside a sandboxed session"
+
+**Date.** 2026-09-18. Formed in one session, caught in the next, roughly
+an hour apart (filesystem mtimes on the two edited files: 11:48–11:49;
+the correction landed the same day in a fresh session that inherited the
+uncommitted working tree).
+
+**Belief asserted.** That the sandbox blocks `git commit` itself, not
+just writes to `.git/config` — stated flatly in `docs/decision-log.md`'s
+"Constraints identified" section and as a new lesson in
+`meta/procedural-memory/universal.md`, both concluding that routine
+commits in this repo could no longer be made proactively and needed to
+be handed to the user to run via the harness's `!` prefix.
+
+**Actual evidence behind it.** One `git commit` attempt that had
+`dangerouslyDisableSandbox: true` explicitly set, which failed with
+`Operation not permitted` creating `.git/index.lock`. That parameter is
+disabled by org policy in this environment — setting it is a no-op — so
+the attempt tested "commit, with a no-op flag added," not "commit." No
+plain `git commit` without the flag was tried before the broad
+conclusion was written down.
+
+**How it formed.** The existing `universal.md` entry this was appended
+to already named a real, narrower boundary (create/delete/unlink of a
+path under `.claude/agents/`, `.git/config`, etc., not editing tracked
+content in place) — and had already been corrected once before, on
+2026-09-08, for exactly this shape of overgeneralization (entry 1 in
+this log). The new attempt reasoned "committing creates `.git/index.lock`,
+which doesn't exist between commits, so this is the same create/delete
+boundary" — a plausible-sounding mechanism that made the conclusion feel
+consistent with prior evidence, which likely suppressed the instinct to
+re-test with the confounding flag removed.
+
+**How it propagated.** Into `docs/decision-log.md`'s constraints section
+and a new `universal.md` lesson, both asserting the delegation
+arrangement in `CLAUDE.md` and the `git-management-delegated` memory
+had to change from "commit proactively" to "stage and hand the user the
+command." Left uncommitted in the working tree (ironically, since the
+session believed it could not commit), which is what made it visible to
+inspect directly rather than only as git history.
+
+**Caught by.** The next session, asked "where are we at for this
+project?", relaying the uncorrected claim to the user — then, when the
+user's own memory of prior sessions being able to commit and push
+directly contradicted it, testing the narrowest case (`git add` + plain
+`git commit`, no flags) instead of re-reading the existing notes. It
+succeeded on the first try, on the same three files the prior session
+had described as uncommittable.
+
+**Fix.** Recorded as same-day corrections appended directly beneath the
+wrong text in both `docs/decision-log.md`'s constraints section and
+`meta/procedural-memory/universal.md`'s entry — not restated here. The
+underlying rule was already written in `universal.md` before this
+instance ("test an environment hypothesis... before proposing a change");
+this entry is evidence that having the rule on file doesn't guarantee it
+gets applied under a plausible-sounding chain of prior reasoning.
