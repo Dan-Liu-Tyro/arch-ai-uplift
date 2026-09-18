@@ -329,6 +329,25 @@ blocked" on a future occasion; if a real push needs testing, confirm
 with the user first since it's a shared-state action, but the mechanism
 itself is not the blocker.
 
+**Confirmed by a real push, and one trap: `git push -u` exits 0 while
+printing `error:`.** Later the same day the user asked for an actual push;
+it succeeded (`2544fd7..e1b9801  foundation -> foundation`), confirming the
+dry-run finding against the real thing. But `-u` is a *two-part* operation,
+and only the first part can succeed in the sandbox: the ref update lands,
+then writing the upstream into `.git/config` fails with `could not lock
+config file .git/config: Operation not permitted`, because git writes config
+through a `.lock` file it must first create — the same create/delete/unlink
+boundary this entry opens with. The command still exits **0**, since the push
+itself worked. So the guidance above — trust the ref line and the exit code —
+needs one qualification: a zero exit from `push -u` means *the push*
+succeeded, not that the upstream got set. Verify the two parts separately
+(`git log origin/<branch> --oneline -1` for the push, `git status -sb` or
+`git rev-parse --abbrev-ref @{u}` for the tracking link), and expect the
+branch to keep reporting no upstream afterwards. Practical consequence: use
+plain `git push origin <branch>` and skip `-u` in a sandboxed session — the
+flag cannot do its job, and its failure output reads like the push broke when
+it didn't.
+
 ---
 
 ## Claude Code caches agent/skill definitions in-session; a mid-session edit doesn't reliably propagate
