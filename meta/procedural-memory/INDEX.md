@@ -71,3 +71,6 @@ policy this exists to serve.
 - A subagent's "verified" claim about a field can mean presence, not
   validity — spot-check actual values yourself, don't infer "populated"
   from "the key exists" or from another party's say-so.
+- A zero-match search is a fact about your pattern, not about the content —
+  confirm the shape you're matching exists before trusting any count; a
+  mis-specified pattern returns a well-formed number, not an error.

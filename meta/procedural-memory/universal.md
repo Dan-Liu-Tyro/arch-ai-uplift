@@ -494,3 +494,33 @@ string, empty list, zero, null-as-string), spot-check a sample of actual
 values directly — don't infer "populated" from "the key exists" or from
 another party's say-so, whether that party is a subagent or a human
 collaborator's status update.
+
+## A zero-match search is a fact about the pattern, not about the content
+
+**What happened.** Asked to refresh the root `README.md` against current
+status, I needed the number of recorded decisions. I ran
+`grep -cE '^## [0-9]+\.' docs/decision-log.md` and it returned `0` — from a
+file that visibly contains dozens of decisions. The pattern was simply wrong:
+the decisions are a markdown *ordered list* (`1. **Storage: ...**`), not
+`##` headings, so nothing could ever have matched. A follow-up
+`grep -cE '^### [0-9]+\.'` also returned `0` for the same reason. Only
+listing the actual headings showed the real structure, after which counting
+the index-by-area table rows gave the true figure, 34.
+
+**Cost.** None — the zero was obviously absurd against a file I had just
+seen, so I re-derived the format instead of believing it. The cost was one
+wasted round trip, and the near-miss is the point: the README's whole purpose
+is an honest status count, and had the true answer been a plausible-looking
+small number rather than an absurd `0`, "0 decisions recorded" or a silent
+undercount could have shipped into the repo's most-read file with the
+authority of having been computed.
+
+**Rule.** A search returning zero (or a suspiciously round or low count) is
+evidence about your pattern until you have seen the target's actual format.
+This is the complement of the rule above about never asserting counts from
+reading: running a command is necessary but not sufficient, because a
+mis-specified pattern fails silently and returns a well-formed number rather
+than an error. Before trusting any count, confirm the shape you are matching
+actually exists — list the candidate lines (`grep -nE '^#{1,4} '`, `head`,
+`sed -n`) and count the thing you can see. Treat a zero from a file known to
+be non-empty on that dimension as a bug in the query, never as a finding.
