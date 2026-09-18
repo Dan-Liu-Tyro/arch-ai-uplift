@@ -14,21 +14,23 @@ Dependencies point inward: nothing under `components/` may depend on `meta/` or
 `practice/`. [`docs/component-model.md`](docs/component-model.md) owns those
 rules and the criteria for promoting a component out of this repo.
 
-**On the name.** The directory is still `arch-knowledge-graph`, from when the
-knowledge graph was the entire scope. A rename to `arch-ai-uplift` is agreed in
-principle and not yet done.
-
-## Honest status (2026-09-15)
+## Honest status (2026-09-18)
 
 Read this before trusting anything else here: the design record runs well ahead
 of what is actually built.
 
-- **28 decisions recorded; one entity in the knowledge graph.** The design
-  conversation is the mature artefact. The graph itself is barely started.
-- **No product code.** `components/` is contracts and scaffolding. The only
-  code that runs is `components/local-agent/ui/server.py` and four stdlib
-  scripts under `meta/`. There is no build system and no test suite — don't
-  infer commands that don't exist.
+- **34 decisions recorded; the graph holds one hand-authored entity.** The
+  design conversation is the mature artefact. Beyond that single `principle`,
+  `kg-content` holds a 39-domain layer mirrored from Confluence as an
+  ingestion experiment — logged in
+  [`docs/domain-model-experiment.md`](docs/domain-model-experiment.md) and
+  deliberately *not yet* folded into the decision log, pending real downstream
+  use. Five of the seven entity directories are still empty.
+- **No product code.** `components/` is contracts and scaffolding. The code
+  that runs is `components/local-agent/ui/server.py`,
+  `components/kg-viz/`'s `generate.py` + `serve.py` (each fronted by a
+  `*.sh` start/stop wrapper), and four stdlib scripts under `meta/`. There is
+  no build system and no test suite — don't infer commands that don't exist.
 - **Arc Lite is the only usable thing.** A local, deliberately non-production
   mirror of Arc, invokable as an agent from Claude Code. It has never been
   driven through real usage, so its gap log is still empty.
@@ -37,7 +39,7 @@ of what is actually built.
   is milestone 2.1, Apr 2027, so it is deliberately *not* the current job.
 - **The work with a real deadline is in `practice/`, not `components/`.**
   IN-563 is the one piece with a live ticket; its first validation checkpoint
-  is ready to run.
+  (CP1) is ready to run, and CP2/CP3 are blocked behind it.
 
 ## Where to start
 
@@ -46,6 +48,7 @@ of what is actually built.
 | Understand why anything is the way it is | [`docs/decision-log.md`](docs/decision-log.md) — the primary artefact |
 | See where the program is heading | [`docs/program-roadmap.md`](docs/program-roadmap.md) — snapshot; Confluence owns it, re-fetch rather than edit |
 | Work on the graph itself | [`components/kg-core/SCHEMA.md`](components/kg-core/SCHEMA.md) — the critical path |
+| Look at what the graph currently contains | [`components/kg-viz/`](components/kg-viz) — `./kg-viz.sh start`; read-only, `graph.json` is regenerable |
 | Work on IN-563 | [`practice/capability-maturity/`](practice/capability-maturity) — start at `validation-plan.md` |
 | Avoid repeating a known mistake | [`meta/procedural-memory/INDEX.md`](meta/procedural-memory/INDEX.md) |
 

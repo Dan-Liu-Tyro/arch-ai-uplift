@@ -76,8 +76,9 @@ project, or (since decision 22 in `docs/decision-log.md`) it's a general-purpose
 capability useful along the journey without being part of the product's own
 delivery. **`components/` must never depend on `meta/`** — that would tie an
 extractable component to something outside the KG pipeline's own trajectory. The
-repo's only executables live here —
-`token-tracking/summarize.py`, `architecture-learning/reindex.py`, and
+repo's only executables outside `components/` live here —
+`token-tracking/summarize.py`, `token-tracking/budget.py`,
+`architecture-learning/reindex.py`, and
 `architecture-learning/extract_transcript.py`, all stdlib only.
 
 `practice/` (decision 26) is the third tier: the Architecture practice's own
@@ -224,13 +225,13 @@ cross-references:
 3. **Confluence is an output, not the source of truth.** Curate in git → generate
    one structured page per entity → publish to a dedicated clean Confluence space
    → Rovo indexes that space. Architects edit git, never raw Confluence.
-4. **Components over one application.** Six components under `components/`, sized
-   so that pieces which outgrow this repo can be promoted out as a move rather
-   than an untangling. Plus a `meta/` tier for whatever doesn't ship as part of
-   the product — self-observation, or (decision 22) a general-purpose capability
-   useful along the journey but not part of the delivery — and a `practice/`
-   tier (decision 26) for the Architecture stream's own business deliverables,
-   which aren't software at all. See the Layout section above.
+4. **Components over one application.** Eight components under `components/`,
+   sized so that pieces which outgrow this repo can be promoted out as a move
+   rather than an untangling. Plus a `meta/` tier for whatever doesn't ship as
+   part of the product — self-observation, or (decision 22) a general-purpose
+   capability useful along the journey but not part of the delivery — and a
+   `practice/` tier (decision 26) for the Architecture stream's own business
+   deliverables, which aren't software at all. See the Layout section above.
 
 The graph shape is the point: typed relationships (`pattern REQUIRES guardrail`,
 `principle CONFLICTS_WITH pattern`, `decision SUPERSEDES decision`,

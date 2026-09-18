@@ -1769,20 +1769,18 @@ Resolved since first draft:
     constraint above). CP2 and CP3 are both blocked on this; until it passes,
     `practice/capability-maturity/` holds a proposal for correction, not an
     assessment, and should not be reported as one.
-13. **Rename the repo to `arch-ai-uplift`** (decision 29, executed by
-    decision 33). **Done:** GitHub repo renamed, the four content
-    references to the old name updated. **Three steps left, all blocked on
-    sandboxed tool access, run these in order:**
-    ```
-    ! git remote set-url origin https://github.com/Dan-Liu-Tyro/arch-ai-uplift.git
-    ! mkdir -p ~/.claude/projects/-Users-bliu-code-claude-workspace-arch-ai-uplift/memory && cp -a ~/.claude/projects/-Users-bliu-code-claude-workspace-arch-knowledge-graph/memory/. ~/.claude/projects/-Users-bliu-code-claude-workspace-arch-ai-uplift/memory/
-    ! mv "/Users/bliu/code/claude workspace/arch-knowledge-graph" "/Users/bliu/code/claude workspace/arch-ai-uplift"
-    ```
-    The memory copy is sequenced before the directory `mv` deliberately —
-    doing it after would mean briefly having no memory available to a
-    session already running from the new path. The README's "On the name"
-    note and this item stay as-is until all three are confirmed done, not
-    just the parts a sandboxed session could reach on its own.
+13. ~~**Rename the repo to `arch-ai-uplift`**~~ (decision 29, executed by
+    decision 33) — **complete, verified 2026-09-18.** All three
+    sandbox-blocked steps the user had to run by hand are confirmed done:
+    `origin` now points at `.../arch-ai-uplift.git`, the per-project memory
+    directory exists at the new path, and the working directory is
+    `/Users/bliu/code/claude workspace/arch-ai-uplift`. The README's "On the
+    name" note — which existed only to keep the mismatch visible — was
+    removed in the same pass. One harmless residue: the old
+    `arch-knowledge-graph` directory still exists containing nothing but an
+    empty `.claude/`, and the old memory directory under `~/.claude/projects/`
+    also remains; both are local machine state, neither affects the repo, and
+    deleting them is the user's call.
 12. **Decide whether `docs/program-roadmap.md` moves into `practice/`**
     (decision 26). It is structurally a `practice/` artefact — an
     externally-owned snapshot of the program's Confluence milestone tracker —
