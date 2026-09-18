@@ -90,6 +90,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 31 | Added `kg-viz`, read-only 3D graph visualization | `kg-viz`, `component-model.md` |
 | 32 | `domain` storage consolidated to one JSON-Schema-backed file | `kg-content/entities/domains.json`, `kg-core/schemas/` |
 | 33 | Rename executed: `arch-knowledge-graph` → `arch-ai-uplift` | repo identity, `kg-core/schemas/`, `architecture-learning/README.md` |
+| 34 | Programme Stream page re-baselined to FY27 Q2/Q3/Q4; new IN-564 epics cited | Confluence, Jira, program roadmap |
 
 ## Decisions so far (tentative — open to change)
 
@@ -1483,8 +1484,62 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
     to sandboxed writes, so this could not be prepared in advance either.
     All three manual steps in Next steps' item 13.
 
+34. **Confluence "Architecture AI Uplift Programme Stream" page (2121630616)
+    milestones re-baselined to FY27 quarter language, and the two new
+    Foundation milestones reflected in Jira.** Requested directly by the
+    user, not inferred. Tyro's FY27 runs Jul 2026–Jun 2027 (Q1 Jul–Sep, Q2
+    Oct–Dec, Q3 Jan–Mar, Q4 Apr–Jun) — derived from, not assumed on top of,
+    decision 13's own claim that Dec 2026 is "Q2 FY27" and confirmed against
+    IN-562/IN-563's live 2026-09-30 (end of Q1 FY27) due dates. Net effect:
+    - **Phase 1 (Foundation):** Dec 2026 → **FY27 Q2 (Dec 2026)** — no date
+      change, just the quarter label decision 15 asked for and
+      `docs/program-roadmap.md` still lacks.
+    - **Phase 2 (Human-in-the-Loop):** Apr 2027 → **FY27 Q3 (~Mar 2027)** —
+      pulled in about a month.
+    - **Phase 3 (Human-on-the-Loop):** Aug 2027 → **FY27 Q4 (~Jun 2027)** —
+      pulled in about two months.
+    - Milestones 1.1 and 1.2 now cite the Jira initiative/epics actually
+      carrying the work: 1.1 → IN-564 plus epics AIDLC-166 (canonical
+      knowledge base), AIDLC-167 (agent-readable doc standard), AIDLC-170
+      (knowledge lifecycle & hygiene), AIDLC-171 (knowledge/context graph);
+      1.2 → AIDLC-117 (architecture-agent build) and AIDLC-168 (grounded
+      retrieval with citations). These five epics under IN-564 are new since
+      decision 16 last checked Jira (which only knew of AIDLC-117) and are
+      independent confirmation this repo's own shape — canonical curation,
+      a documentation standard, grounding-with-citations, a lifecycle/gap
+      log, and a graph — is the same shape Jira has separately arrived at.
+    - **Pushback made and stood, not silently executed:** compressing Phase
+      2/3 adds schedule pressure on top of the "Constraints identified"
+      section's standing note that the user is likely the sole person
+      carrying this stream against eight FY27 capabilities. Recorded here so
+      the compression isn't read as risk-free just because it was actioned.
+    - **Deliberately not done, on the user's explicit choice over the
+      alternative:** the identical milestone table on
+      ["Activity & Evidence Home"](https://tyropaymentsltd.atlassian.net/wiki/spaces/AE/pages/2212429894)
+      (the page `docs/program-roadmap.md` snapshots) was **not** updated —
+      the user chose "just the linked page" when asked whether to update
+      both. The two Confluence pages now disagree with each other on Phase
+      2/3 dates and initiative detail, the exact "pack disagreeing with
+      itself" failure decision 13 flagged. This is a known, chosen, open gap
+      — see Next steps — not an oversight.
+    - Edited via full-body HTML replacement (the only viable path per the
+      "Constraints identified" entry on `updateConfluencePage`), executed by
+      a forked subagent to keep the ~59KB verbatim payload out of the main
+      session's context; the agent diffed its upload against the original
+      fetch before writing and confirmed only the five intended spots
+      changed. Page version 32 after the edit.
+
 ## Constraints identified
 
+- **The sandbox blocks writes anywhere under `.git/`, not just `.git/config`
+  (decision 33) — `git commit` itself fails, `Operation not permitted` on
+  creating `.git/index.lock`, even with the sandbox override requested.**
+  Found 2026-09-18 trying to commit this session's own decision-log entry.
+  The override is disabled by org policy at the harness level, so there is
+  no path around this from inside a sandboxed session — routine commits in
+  this repo need the user to run them (e.g. via the `!` prefix), which
+  changes the "git management is delegated" arrangement from "commit
+  proactively" to "stage and hand the exact command to the user."
 - **The user is likely to be the sole person working the Architecture
   stream for this program**, stated directly on 2026-09-08 while assessing
   slide 26's capacity against its FY27 scope. This sharpens rather than
@@ -1726,3 +1781,11 @@ Resolved since first draft:
     treating the CDCD hypothesis as more than a working claim. Also
     revisit CDCD's working-title name once there's enough material to
     test it against a reader unfamiliar with the founding conversation.
+14. **Bring "Activity & Evidence Home" (2212429894) and this repo's
+    `docs/program-roadmap.md` into line with decision 34's FY27 Q2/Q3/Q4
+    re-baseline and new IN-564 epic references** — deliberately deferred,
+    not forgotten: the user chose to update only the "Programme Stream"
+    page this round. Until this happens the two Confluence pages disagree
+    with each other on Phase 2/3 dates, and `program-roadmap.md`'s own
+    snapshot (still Apr 2027 / Aug 2027) is stale against both the approved
+    slide-26 quarters and the page it's supposed to mirror.

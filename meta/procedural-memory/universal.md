@@ -289,6 +289,21 @@ what the sandbox permits, since self-expanding tool grants is the exact
 failure mode this design intent guards against — that's a judgment call
 about authorization, not a filesystem limitation.
 
+**Correction, 2026-09-18: the block is not limited to `.git/config` — plain
+`git commit` fails too, for the same underlying reason.** Tried in
+`arch-ai-uplift` with `dangerouslyDisableSandbox: true` explicitly set (that
+parameter is itself disabled by org policy, so it made no difference):
+`git commit` failed with `Operation not permitted` creating
+`.git/index.lock`. That file doesn't exist between commits, so committing
+*creates* a new path under `.git/` — the same create/delete/unlink boundary
+this entry already names, just triggered by git's own internal locking
+rather than by an explicit remote/upstream write. Net effect: no ordinary
+commit can be made from inside a sandboxed session in this environment,
+regardless of what's being committed or why. Any workflow that assumed
+"stage and commit proactively" is achievable end-to-end from inside the
+sandbox needs correcting to "stage the change and hand the user the exact
+`git commit` command to run themselves" (e.g. via the harness's `!` prefix).
+
 ---
 
 ## Claude Code caches agent/skill definitions in-session; a mid-session edit doesn't reliably propagate
