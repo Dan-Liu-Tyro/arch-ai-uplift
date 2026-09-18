@@ -84,13 +84,28 @@ auto-resolved, plus generic collective phrases, plus one domain name
 referenced in the source but never defined as its own section) — a named,
 considered set, not parsing failures.
 
+## Running it
+
+`kg-viz.sh {start|stop|restart|status}` runs the server as a background
+process (pid + log under `.run/`, gitignored) so it doesn't tie up a
+terminal; open `http://127.0.0.1:8766` once it's started. Port 8766 is
+deliberately distinct from the local-agent UI's 8765 so both can run at
+once. Binds to localhost only; nothing is exposed beyond the machine it
+runs on. `serve.py` regenerates `graph.json` from `kg-content` on every
+startup, so `restart` is also how you pick up entity changes — `start`
+echoes the resulting node/edge/unresolved counts as confirmation the data
+is current. Mirrors `components/local-agent/ui/arc-lite.sh` rather than
+introducing a second convention for local UIs.
+
+`python3 serve.py` still works directly if you want it in the foreground.
+
 **Not verified in a real browser.** The sandboxed environment this was built
 in cannot bind a listening socket (`serve.py` fails with `PermissionError:
 [Errno 1] Operation not permitted` when run through it — unrelated to the
-code itself, `generate.py`'s own logic ran and produced valid output in the
-same sandbox). Run `python3 components/kg-viz/serve.py` from a normal
-terminal (outside any sandboxed tool call) and open the printed URL to get
-the first real look at this.
+code itself; `generate.py`'s own logic, and `kg-viz.sh`'s stop/status/
+failure-handling paths, all ran correctly in the same sandbox). Run
+`./kg-viz.sh start` from a normal terminal (outside any sandboxed tool
+call) and open the URL to get the first real look at this.
 
 ## Extraction notes
 
