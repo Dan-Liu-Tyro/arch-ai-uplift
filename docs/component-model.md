@@ -17,13 +17,13 @@ not know about its consumers; this document is how the filesystem enforces it.
 | Component | Responsibility | Status | Likely language |
 |---|---|---|---|
 | `kg-core` | Schema contract, validation, query/traversal logic. Knows nothing about Confluence, Rovo, or Claude. | Schema drafted | Kotlin if it grows into a service; scripts fine while exploring |
-| `kg-content` | The curated graph itself — entity files conforming to the schema. Data, not code. | 1 entity (draft) | n/a (Markdown + YAML) |
+| `kg-content` | The curated graph itself — entity files conforming to the schema. Data, not code. | 1 `principle`, 39 `domain`, 1 overlay graph (all draft) | n/a (Markdown + YAML + JSON) |
 | `confluence-ingest` | Inbound. Reads existing Confluence pages and helps turn them into candidate entities. One-off-ish migration aid. | Not started | Whatever is fastest; this is throwaway-shaped |
 | `confluence-publish` | Outbound. Generates one structured page per entity and publishes to the dedicated space. | Not started | Kotlin or scripts |
 | `query-service` | v2. Network-reachable query interface so cloud-hosted Rovo can reach the graph. Deployed via TAP/CTAP. | Deferred | Kotlin |
 | `claude-code-access` | Local access glue so Claude Code can read and traverse the graph from the filesystem. | Not started | Scripts |
 | `local-agent` | MVP. A local mirror of Arc's advisory role, with zero production access. No longer outside the dependency graph below — see decision 21 in `docs/decision-log.md`. | MVP | Markdown, no code |
-| `kg-viz` | Read-only 3D visualization of the graph for human inspection. Not a consumer that reasons about the graph. | First pass | Scripts + static HTML/JS |
+| `kg-viz` | Read-only visualization for human inspection — two purpose-built views (2D payments flow by default, dense authority graph second). Not a consumer that reasons about the graph. | Third pass; never opened in a browser | Scripts + static HTML/JS |
 
 ## Dependency rules
 

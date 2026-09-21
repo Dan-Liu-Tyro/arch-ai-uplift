@@ -35,6 +35,7 @@
       "title": "Customer Service & Support Domain",
       "category": "support-and-experience-channels",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "This domain is the system of record for support work and outcomes, not for product configuration truth, transaction truth, or customer identity truth.",
       "authority": {
         "owns": [
@@ -104,6 +105,7 @@
       "title": "Digital Channels & Experience Domain",
       "category": "support-and-experience-channels",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "This domain owns the experience layer and channel behaviour, not the underlying product truth. It should be thin, API-driven, and orchestration-focused to support platformisation and reuse.",
       "authority": {
         "owns": [
@@ -188,6 +190,7 @@
       "title": "Payments Channels Domain",
       "category": "support-and-experience-channels",
       "status": "draft",
+      "scope": "acquirer-specific",
       "purpose": "This domain owns checkout/session lifecycle, channel runtime behaviour, device/app channel configuration at runtime, and request shaping/validation. It is the execution layer that bridges merchant configuration and downstream processing. It does not own transaction truth , merchant configuration truth , or settlement logic.",
       "authority": {
         "owns": [
@@ -274,6 +277,7 @@
       "title": "Customer Domain",
       "category": "core-customer-and-product-domains",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "Provide Tyro’s authoritative capability for mastering real-world parties and their relationships so Tyro can maintain a single system of record for customers across products and services. This domain is authoritative for party identity and relationships, not for authentication credentials, sessions/tokens, or low-level access control policy evaluation.",
       "authority": {
         "owns": [
@@ -341,6 +345,7 @@
       "title": "User & Identity Domain",
       "category": "core-customer-and-product-domains",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "Provide Tyro’s authoritative capability for managing system identities and enforcing access through authentication and authorisation controls across customer, partner, and staff channels. This domain is authoritative for system accounts and access control metadata, not for real-world party relationships or customer master identity.",
       "authority": {
         "owns": [
@@ -411,6 +416,7 @@
       "title": "Payments Product Domain",
       "category": "core-customer-and-product-domains",
       "status": "draft",
+      "scope": "acquirer-specific",
       "purpose": "Own Tyro’s merchant acquiring product as a coherent offering across channels , by defining the product-level rules, entitlements, and lifecycle that sit above merchant configuration and below commercial pricing. It provides the authoritative “product view” for acquiring—what capabilities exist, how they’re packaged, and which features apply to which customer cohort—without becoming a system-of-record for transactions or balances.",
       "authority": {
         "owns": [
@@ -506,6 +512,7 @@
       "title": "Payments Customer Configuration Domain",
       "category": "core-customer-and-product-domains",
       "status": "draft",
+      "scope": "acquirer-specific",
       "purpose": "Maintain the authoritative configuration for how a specific customer is set up to accept payments across Tyro’s acquiring channels . This domain is the “control plane” for acquiring: it defines the merchant’s operational setup that downstream runtime and processing domains must follow. This domain is merchant-specific configuration truth. It does not run checkout sessions, does not own transaction truth, does not calculate payouts, and does not own commercial pricing rules.",
       "authority": {
         "owns": [
@@ -593,6 +600,7 @@
       "title": "Payments Processing Domain",
       "category": "core-customer-and-product-domains",
       "status": "draft",
+      "scope": "acquirer-specific",
       "purpose": "Process acquiring card payments from authorisation to clearing, and maintain the authoritative “transaction truth” required for reliable merchant acquiring operations. It is the system of record for payment transaction lifecycle state and clearing evidence, not for merchant configuration, settlement calculation, disputes workflow, accounting journals, rail transfers, or banking ledgers.",
       "authority": {
         "owns": [
@@ -689,6 +697,7 @@
       "title": "Settlement & Reconciliation Domain",
       "category": "core-customer-and-product-domains",
       "status": "draft",
+      "scope": "acquirer-specific",
       "purpose": "Aggregate cleared acquiring transactions, apply fees/adjustments, and produce the authoritative calculation of what Tyro owes each merchant , including settlement batch formation and reconciliation controls. …and to provide reproducible, auditable settlement outcomes suitable for a regulated environment. It is the system of record for merchant settlement calculations, not for executing transfers , not for maintaining the bank ledger , and not for maintaining payments accounting journals/control accounts .",
       "authority": {
         "owns": [
@@ -780,6 +789,8 @@
       "title": "Payments Accounting Domain",
       "category": "core-customer-and-product-domains",
       "status": "draft",
+      "scope": "acquirer-specific",
+      "scope_note": "Called acquirer-specific: the payments sub-ledger. Distinct from the tyro-wide Accounting Product Domain.",
       "purpose": "This domain is the system of record for operational accounting entries and balances for the Payments product. It consumes authoritative source events from Payments Processing, Settlement & Reconciliation, and Product Quoting & Pricing and produces auditable double-entry accounting representations.",
       "authority": {
         "owns": [
@@ -860,6 +871,8 @@
       "title": "Hardware & Asset Management Domain",
       "category": "core-customer-and-product-domains",
       "status": "draft",
+      "scope": "acquirer-specific",
+      "scope_note": "Called acquirer-specific: the managed hardware estate is payment terminals today. Revisit if non-payment assets are brought in.",
       "purpose": "Manage Tyro’s physical payment hardware assets across their lifecycle — procurement to disposal — ensuring we have a canonical record of what devices exist, who owns them, where they are, and their compliance/servicing status. This domain is the system of record for physical assets, not runtime behaviour.",
       "authority": {
         "owns": [
@@ -904,6 +917,7 @@
       "title": "Terminal Fleet & Device Management Domain",
       "category": "core-customer-and-product-domains",
       "status": "draft",
+      "scope": "acquirer-specific",
       "purpose": "This domain ensures terminals are secure, up to date, correctly configured, and observable — without owning financial transaction truth.",
       "authority": {
         "owns": [
@@ -956,6 +970,7 @@
       "title": "Deposits Product Domain",
       "category": "core-customer-and-product-domains",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "This domain is the system of record for deposit account truth, while still separating policy and customer configuration concerns to keep the ledger clean and stable.",
       "authority": {
         "owns": [
@@ -1025,6 +1040,7 @@
       "title": "Lending Product Domain",
       "category": "core-customer-and-product-domains",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "This domain is the system of record for loan lifecycle and servicing truth, while keeping product policy and customer configuration distinct from contract/sub-ledger truth.",
       "authority": {
         "owns": [
@@ -1094,6 +1110,7 @@
       "title": "Credit & Underwriting Domain",
       "category": "core-customer-and-product-domains",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "This domain is the authoritative source for credit decision truth, while the Lending Product domain owns loan contract lifecycle and repayment obligations.",
       "authority": {
         "owns": [
@@ -1164,6 +1181,7 @@
       "title": "Accounting Product Domain",
       "category": "core-customer-and-product-domains",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "This domain exists to deliver a “merchant CFO/finance OS” layer that can integrate with Tyro product data but remains distinct from Tyro’s corporate accounting and from regulated banking ledgers.",
       "authority": {
         "owns": [
@@ -1238,6 +1256,8 @@
       "title": "Funds Movement Domain",
       "category": "core-customer-and-product-domains",
       "status": "draft",
+      "scope": "tyro-wide",
+      "scope_note": "Called tyro-wide: rail execution (BECS/NPP/RTGS) serves banking payouts and merchant settlement alike, though merchant settlement is its highest-volume caller.",
       "purpose": "This domain is the authoritative source for transfer execution state, not the source of “why” a payment is being made, and not the ledger of balances .",
       "authority": {
         "owns": [
@@ -1303,6 +1323,8 @@
       "title": "Billing & Accounts Receivable Domain",
       "category": "core-customer-and-product-domains",
       "status": "draft",
+      "scope": "tyro-wide",
+      "scope_note": "Called tyro-wide: bills every Tyro product, though merchant fee recovery in the acquiring flow is a large share of it.",
       "purpose": "Manage what customers owe Tyro by owning the authoritative lifecycle for billing accounts, invoice generation and issuance, and accounts-receivable balances, aging, and collections, kept separate from transaction settlement, the banking ledger, and corporate GL.",
       "authority": {
         "owns": [
@@ -1368,6 +1390,7 @@
       "title": "Customer Acquisition Domain",
       "category": "business-operations-domains",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "Manage Tyro’s go-to-market engine from market engagement through to a qualified, accepted opportunity and a clean handoff into Customer & Product Onboarding. It does not own customer identity truth, product activation truth, merchant configuration truth, or pricing rule truth.",
       "authority": {
         "owns": [
@@ -1460,6 +1483,7 @@
       "title": "Partnerships Domain",
       "category": "business-operations-domains",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "Maintain the authoritative record and lifecycle for all third-party organisations Tyro engages with as partners, and govern how those partners participate in Tyro’s go-to-market and product ecosystem. It owns the commercial relationship, not the technical integration and not the customer identity model.",
       "authority": {
         "owns": [
@@ -1530,6 +1554,7 @@
       "title": "Groups & Enterprises Domain",
       "category": "business-operations-domains",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "Manage the policies, control structures, and governance rules required to support enterprise and franchise operating models where multiple customer legal entities operate under a shared umbrella . It is authoritative for group governance and policy, not for customer identity master, merchant configuration truth, transaction truth, settlement balances, or pricing engine calculation.",
       "authority": {
         "owns": [
@@ -1605,6 +1630,7 @@
       "title": "Corporate Finance Domain",
       "category": "business-operations-domains",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "Maintain Tyro's corporate general ledger, accounting periods and close processes, and statutory/management financial reporting as the authoritative source, kept separate from product/customer financial truth such as merchant settlements and banking ledgers.",
       "authority": {
         "owns": [
@@ -1674,6 +1700,7 @@
       "title": "Risk, Compliance & Regulatory Domain",
       "category": "business-operations-domains",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "Provide Tyro’s authoritative capability for managing regulatory obligations and compliance controls across the customer lifecycle , ensuring Tyro can operate as a regulated Australian business bank with auditable adherence to applicable regulatory requirements. Operational domains remain authoritative for transaction truth, product lifecycles, and ledger truth. This domain is authoritative for regulatory policy execution and outcomes.",
       "authority": {
         "owns": [
@@ -1762,6 +1789,8 @@
       "title": "Fraud & Risk Decisioning Domain",
       "category": "business-operations-domains",
       "status": "draft",
+      "scope": "tyro-wide",
+      "scope_note": "Called tyro-wide: covers banking and onboarding risk as well as card-present and CNP transaction fraud.",
       "purpose": "Prevent fraud and misuse by providing a low-latency decision engine that produces operational risk outcomes used inline in product flows, primarily in acquiring payments , and optionally in adjacent areas . It does not own AML/CTF compliance monitoring, sanctions screening, or regulatory reporting .",
       "authority": {
         "owns": [
@@ -1851,6 +1880,8 @@
       "title": "Disputes & Recovery Domain",
       "category": "business-operations-domains",
       "status": "draft",
+      "scope": "acquirer-specific",
+      "scope_note": "Called acquirer-specific: scheme chargebacks and recovery. Banking disputes would widen this.",
       "purpose": "Manage disputes arising from payments acquiring across two coupled workflows: scheme-managed dispute progression (chargebacks, retrieval requests, representment) and Tyro's own economic recovery, publishing authoritative scheme and recovery outcomes to downstream consumers.",
       "authority": {
         "owns": [
@@ -1932,6 +1963,7 @@
       "title": "Payments VAS Integrations Domain",
       "category": "partner-integrations-and-value-add-services-domains",
       "status": "draft",
+      "scope": "acquirer-specific",
       "purpose": "Enable and operate value-added services that are invoked within the acquiring payment flow , by integrating Tyro’s acceptance and payment flows with approved third-party providers. It is authoritative for VAS invocation, provider abstraction, and VAS outcomes—not for transaction truth.",
       "authority": {
         "owns": [
@@ -1986,6 +2018,7 @@
       "title": "POS Integration Domain",
       "category": "partner-integrations-and-value-add-services-domains",
       "status": "draft",
+      "scope": "acquirer-specific",
       "purpose": "Define and operate the POS integration surface for Tyro acquiring so POS vendors can initiate and manage payment flows reliably and consistently across supported channels . This domain owns the technical integration model for POS → Tyro , not the commercial partnership and not cross-ecosystem certification governance.",
       "authority": {
         "owns": [
@@ -2007,6 +2040,7 @@
       "title": "Banking VAS Integrations Domain",
       "category": "partner-integrations-and-value-add-services-domains",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "This domain exists to keep the regulated Banking ledger clean and stable while allowing external ecosystem services to plug in modularly. It owns the consent model and partner-facing orchestration of banking workflows—not ledger truth or rail execution.",
       "authority": {
         "owns": [
@@ -2077,6 +2111,7 @@
       "title": "Partner Developer Experience Domain",
       "category": "partner-integrations-and-value-add-services-domains",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "It exists to prevent partner experience and tooling from fragmenting across product-specific integration domains. This domain is authoritative for the experience and tooling layer of partner development—not the product integration specifications, not certification decisions, and not partner commercial lifecycle.",
       "authority": {
         "owns": [
@@ -2163,6 +2198,8 @@
       "title": "Integration Enablement & Certification Domain",
       "category": "partner-integrations-and-value-add-services-domains",
       "status": "draft",
+      "scope": "acquirer-specific",
+      "scope_note": "Called acquirer-specific: scheme and device certification dominate. Partner API enablement leans tyro-wide.",
       "purpose": "This domain owns the certification lifecycle and conformance truth: what is certified, for which versions, with what scope, and whether it is production-eligible.",
       "authority": {
         "owns": [
@@ -2189,6 +2226,7 @@
       "title": "Enterprise Data Governance Domain",
       "category": "data-and-intelligence-domains",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "Provide Tyro’s enterprise-wide data governance, assurance, and control framework so data across domains is trusted, secure, compliant, and reusable — without owning operational business truth or regulatory policy. Risk & Compliance domains remain responsible for regulatory interpretation and policy setting. Enterprise Data Governance enables compliance to those policies through defined data standards and control frameworks.",
       "authority": {
         "owns": [
@@ -2238,6 +2276,7 @@
       "title": "Data Analytics & Intelligence Domain",
       "category": "data-and-intelligence-domains",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "Provide Tyro’s technical foundation and operational capability to ingest, transform, store, and serve data as trusted, reusable data products — enabling analytics and cross-domain insights while not owning operational master truth. Operational domains remain authoritative for business invariants.",
       "authority": {
         "owns": [
@@ -2286,6 +2325,7 @@
       "title": "AI & ML Domain",
       "category": "data-and-intelligence-domains",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "Productionise AI and ML capabilities safely and reliably across Tyro by providing shared lifecycle tooling, operational controls, and governance mechanisms — while keeping business decision authority in relevant domains. This capability is the system of record for AI/ML operational artefacts — not for business decision policy.",
       "authority": {
         "owns": [
@@ -2340,6 +2380,7 @@
       "title": "Customer & Product Onboarding",
       "category": "cross-domain-orchestrators",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "Orchestrate the end-to-end process from prospect → application → assessment → approval → product activation across one or more products . Owns the application workflow state machine and sequencing, while delegating decisions and record creation to authoritative domains.",
       "authority": {
         "owns": [
@@ -2407,6 +2448,7 @@
       "title": "Customer Lifecycle Management",
       "category": "cross-domain-orchestrators",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "Coordinate lifecycle transitions for active customers/products , such as suspension, reactivation, upgrades/downgrades, product add-ons, and offboarding. Ensures lifecycle policies are applied consistently across multiple product domains without embedding cross-domain workflow logic inside them.",
       "authority": {
         "owns": [
@@ -2463,6 +2505,7 @@
       "title": "Product Bundling & Eligibility",
       "category": "cross-domain-orchestrators",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "Define and orchestrate how Tyro sells and manages multi-product bundles , including eligibility checks, bundle composition rules, and cross-product activation coordination. This prevents bundling logic being scattered across product domains and sales tools.",
       "authority": {
         "owns": [
@@ -2519,6 +2562,8 @@
       "title": "Product Quoting & Pricing",
       "category": "cross-domain-orchestrators",
       "status": "draft",
+      "scope": "tyro-wide",
+      "scope_note": "Called tyro-wide: prices all products, though acquiring MSF / interchange-plus pricing is its most complex case.",
       "purpose": "Define, govern, and apply Tyro’s commercial revenue logic across products and channels—so pricing, fees, revenue share, and commissions are consistent, versioned, auditable, and reusable across Payments, Banking, Lending, Financial Management, and partner-led propositions. It is authoritative for commercial policy and calculation, not for scheme fees, ledger entries, invoicing, or settlement.",
       "authority": {
         "owns": [
@@ -2590,6 +2635,7 @@
       "title": "Operational Case Management",
       "category": "cross-domain-orchestrators",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "A shared and generic enterprise capability for operational case management, investigations, evidence handling, and exception workflow orchestration across multiple domains. Manage cross-domain operational exceptions and investigations that require multi-team workflows, evidence, and audit trails—such as reconciliation breaks, disputes coordination, compliance investigations, fraud escalations, and complex operational incidents. This domain owns the workflow of exceptions, not the underlying product records.",
       "authority": {
         "owns": [
@@ -2643,6 +2689,7 @@
       "title": "Customer Notifications & Communications",
       "category": "cross-domain-orchestrators",
       "status": "draft",
+      "scope": "tyro-wide",
       "purpose": "Decide what communications to send, when, and through which channel, based on events from authoritative domains—ensuring regulated communications are compliant, templates are managed, delivery is tracked, and customer communication logic isn’t duplicated across product systems.",
       "authority": {
         "owns": [

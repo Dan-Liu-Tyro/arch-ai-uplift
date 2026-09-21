@@ -2,73 +2,118 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>kg-viz — architecture knowledge graph</title>
+<title>kg-viz — knowledge graph</title>
 <!--
-  3d-force-graph's own CDN quick-start loads a single self-contained UMD
-  bundle (it embeds Three.js internally) -- see its README's "via CDN"
-  section. The plain `three` script tag below is a defensive fallback in
-  case that assumption is wrong for the version unpkg resolves to; it is a
-  no-op if unused. This repo has no build step (decision 1, "zero new
-  infra"), so both are loaded directly rather than bundled.
+  Self-contained: two CDN script tags and no build step, consistent with this
+  repo's zero-new-infra stance (decision 1). 3d-force-graph draws the canvas;
+  three-spritetext gives persistent node labels, which the flow view needs to
+  be readable at all -- a hover-only tooltip makes you probe 26 nodes one at a
+  time to see what you are looking at.
+
+  Two views, deliberately not merged onto one canvas:
+    - payments-target-state: sparse, directed, typed. Fixed swimlane layout
+      (lane = stage, column = flow depth within the stage) so the payment path
+      reads in order. This is the default view.
+    - domain-authority: 39 domains x 296 not_authoritative_for edges, average
+      degree ~15. Force layout. Only legible once you switch groups off, which
+      is why the group toggles exist.
 -->
-<script src="https://unpkg.com/three"></script>
+<script src="https://unpkg.com/three-spritetext"></script>
 <script src="https://unpkg.com/3d-force-graph"></script>
 <style>
-  html, body { margin: 0; padding: 0; background: #05070d; overflow: hidden; font-family: -apple-system, "Segoe UI", sans-serif; }
-  #graph { width: 100vw; height: 100vh; }
-
-  #legend, #panel, #stats {
-    position: fixed;
-    background: rgba(10, 12, 20, 0.88);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 10px;
-    color: #e8ecf5;
-    padding: 14px 16px;
-    backdrop-filter: blur(6px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  }
-
-  #legend { top: 16px; left: 16px; font-size: 13px; min-width: 220px; }
-  #legend h1 { font-size: 14px; margin: 0 0 10px; letter-spacing: 0.02em; color: #fff; }
-  #legend .row { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
-  #legend .swatch { width: 12px; height: 12px; border-radius: 50%; flex: none; box-shadow: 0 0 6px currentColor; }
-
-  #stats { top: 16px; right: 16px; font-size: 12px; color: #b8c0d4; max-width: 260px; }
-  #stats strong { color: #ffb454; }
-
-  #panel {
-    top: 16px; right: 16px; width: 320px; max-height: calc(100vh - 32px);
-    overflow-y: auto; font-size: 13px; line-height: 1.5; display: none;
-  }
-  #panel.open { display: block; }
-  #panel h2 { font-size: 16px; margin: 0 0 4px; color: #fff; }
-  #panel .meta { color: #8a93ab; font-size: 12px; margin-bottom: 10px; }
-  #panel .section-label { color: #7fd1ff; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 12px; }
-  #panel .close { position: absolute; top: 10px; right: 12px; cursor: pointer; color: #8a93ab; font-size: 16px; }
-  #panel .close:hover { color: #fff; }
-  #panel .status-draft { color: #ffb454; }
-
-  #hint {
-    position: fixed; bottom: 16px; left: 16px; color: #6b7390; font-size: 12px;
-  }
+  html, body { margin: 0; height: 100%; background: #05070d; color: #e8ecf4;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; overflow: hidden; }
+  #graph { position: absolute; inset: 0; }
+  .panel-base { position: absolute; background: rgba(12, 16, 26, 0.88);
+    border: 1px solid rgba(120, 140, 180, 0.28); border-radius: 10px;
+    padding: 12px 14px; backdrop-filter: blur(6px); z-index: 5; }
+  #controls { top: 14px; left: 14px; width: 262px; max-height: calc(100vh - 28px);
+    overflow-y: auto; font-size: 12.5px; }
+  #controls h1 { font-size: 13px; margin: 0 0 4px; letter-spacing: 0.02em; color: #fff; }
+  #controls .sub { color: #8d97ad; font-size: 11px; margin: 0 0 12px; line-height: 1.45; }
+  .group-label { text-transform: uppercase; letter-spacing: 0.08em; font-size: 9.5px;
+    color: #7b87a0; margin: 14px 0 6px; font-weight: 600; }
+  .seg { display: flex; gap: 4px; }
+  .seg button { flex: 1; background: rgba(255,255,255,0.05); color: #c6cde0;
+    border: 1px solid rgba(120,140,180,0.25); border-radius: 6px; padding: 5px 4px;
+    font-size: 11px; cursor: pointer; font-family: inherit; }
+  .seg button:hover { background: rgba(255,255,255,0.11); }
+  .seg button.on { background: #2d6cf6; border-color: #2d6cf6; color: #fff; }
+  .row { display: flex; align-items: center; gap: 8px; margin: 5px 0; cursor: pointer;
+    user-select: none; line-height: 1.3; }
+  .row input { accent-color: #2d6cf6; margin: 0; cursor: pointer; flex: none; }
+  .swatch { width: 11px; height: 11px; border-radius: 50%; flex: none;
+    box-shadow: 0 0 6px currentColor; }
+  .row.off { opacity: 0.42; }
+  .count { color: #6f7b93; font-size: 10.5px; margin-left: auto; flex: none; }
+  #stats { bottom: 14px; left: 14px; width: 262px; font-size: 11px; color: #9aa4ba;
+    line-height: 1.5; }
+  #stats b { color: #ffd479; }
+  #detail { top: 14px; right: 14px; width: 330px; max-height: calc(100vh - 28px);
+    overflow-y: auto; display: none; font-size: 12.5px; line-height: 1.5; }
+  #detail.open { display: block; }
+  #detail h2 { font-size: 15px; margin: 0 6px 2px 0; color: #fff; }
+  #detail .meta { color: #8d97ad; font-size: 11px; margin-bottom: 10px; }
+  .section-label { text-transform: uppercase; letter-spacing: 0.08em; font-size: 9.5px;
+    color: #7b87a0; margin: 13px 0 4px; font-weight: 600; }
+  .rel { margin: 0 0 8px; padding-left: 9px; border-left: 2px solid rgba(120,140,180,0.3); }
+  .rel .pred { color: #6fe3a8; font-weight: 600; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.03em; }
+  .rel .pred.inbound { color: #ffb454; }
+  .rel .who { color: #fff; }
+  .rel .payload { color: #9aa4ba; font-size: 11.5px; }
+  .rel .backedge { color: #ff7e8f; font-size: 10.5px; }
+  .close { float: right; cursor: pointer; color: #8d97ad; font-size: 15px; line-height: 1; }
+  .close:hover { color: #fff; }
+  .pill { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 99px;
+    border: 1px solid rgba(120,140,180,0.4); color: #c6cde0; margin: 0 4px 4px 0; }
+  .pill.acq { border-color: #ffb454; color: #ffb454; }
+  .pill.wide { border-color: #6fa8ff; color: #6fa8ff; }
+  #hint { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+    font-size: 11px; color: #67718a; z-index: 4; }
 </style>
 </head>
 <body>
   <div id="graph"></div>
 
-  <div id="legend">
-    <h1>kg-viz — knowledge graph</h1>
-    <div id="legend-rows"></div>
+  <div id="controls" class="panel-base">
+    <h1>kg-viz</h1>
+    <p class="sub" id="view-desc"></p>
+
+    <div class="group-label">View</div>
+    <div class="seg" id="view-seg"></div>
+
+    <div class="group-label">Dimensions</div>
+    <div class="seg" id="dim-seg">
+      <button data-dim="2" class="on">2D plane</button>
+      <button data-dim="3">3D</button>
+    </div>
+
+    <div class="group-label">Scope emphasis</div>
+    <div class="seg" id="scope-seg">
+      <button data-scope="all" class="on">All</button>
+      <button data-scope="acquirer-specific">Acquirer</button>
+      <button data-scope="tyro-wide">Tyro-wide</button>
+    </div>
+
+    <div class="group-label" id="groups-label">Groups</div>
+    <div id="group-rows"></div>
+
+    <div class="group-label">Display</div>
+    <div class="row" id="labels-row">
+      <input type="checkbox" id="labels-cb" checked />
+      <span>Node labels</span>
+    </div>
   </div>
 
-  <div id="stats"></div>
+  <div id="stats" class="panel-base"></div>
 
-  <div id="panel">
-    <span class="close" onclick="closePanel()">✕</span>
-    <div id="panel-body"></div>
+  <div id="detail" class="panel-base">
+    <span class="close" onclick="closeDetail()">&#10005;</span>
+    <div id="detail-body"></div>
   </div>
 
-  <div id="hint">Drag to rotate · scroll to zoom · click a node to inspect it</div>
+  <div id="hint">Click a node to inspect it and its relationships &middot; drag to pan &middot; scroll to zoom</div>
 
 <script>
   var CATEGORY_COLORS = {
@@ -80,140 +125,376 @@
     "cross-domain-orchestrators": "#ff8ad8",
     "_uncategorized": "#8a93ab"
   };
-  var CATEGORY_LABELS = {
-    "support-and-experience-channels": "Support & Experience Channels",
-    "core-customer-and-product-domains": "Core Customer & Product Domains",
-    "business-operations-domains": "Business Operations Domains",
-    "partner-integrations-and-value-add-services-domains": "Partner Integrations & VAS",
-    "data-and-intelligence-domains": "Data & Intelligence Domains",
-    "cross-domain-orchestrators": "Cross-Domain Orchestrators",
-    "_uncategorized": "Uncategorized (e.g. principle)"
+  var KIND_COLORS = {
+    "domain": "#3fd0ff", "actor": "#ffd479", "external": "#ff7e8f",
+    "artefact": "#b79cff", "principle": "#4dff9e"
   };
+  var STAGE_COLORS = ["#8b7bff", "#3fd0ff", "#4dff9e"];
 
-  function colorFor(node) {
-    return CATEGORY_COLORS[node.category || "_uncategorized"] || CATEGORY_COLORS._uncategorized;
+  var COL_SPACING = 230, LANE_HEIGHT = 300, ROW_SPACING = 62;
+
+  var DATA = null, view = null, Graph = null;
+  var dims = 2, scopeMode = "all", showLabels = true;
+  var hiddenGroups = {};     // keyed per view id -> Set of hidden group keys
+  var selected = null;
+  var adjacency = {};
+
+  function groupKeyOf(node) {
+    return view.id === "payments-target-state" ? node.stage : (node.category || "_uncategorized");
   }
 
-  function buildLegend() {
-    var rows = document.getElementById("legend-rows");
-    Object.keys(CATEGORY_LABELS).forEach(function (key) {
-      var row = document.createElement("div");
-      row.className = "row";
-      var swatch = document.createElement("div");
-      swatch.className = "swatch";
-      swatch.style.background = CATEGORY_COLORS[key];
-      swatch.style.color = CATEGORY_COLORS[key];
+  function groupsForView() {
+    if (view.id === "payments-target-state") {
+      return view.stages.map(function (s, i) {
+        return { key: s.id, label: s.ordinal + ". " + s.title, color: STAGE_COLORS[i % STAGE_COLORS.length] };
+      });
+    }
+    var cats = DATA.categories.map(function (c) {
+      return { key: c.id, label: c.title, color: CATEGORY_COLORS[c.id] || CATEGORY_COLORS._uncategorized };
+    });
+    cats.push({ key: "_uncategorized", label: "Uncategorized (e.g. principle)", color: CATEGORY_COLORS._uncategorized });
+    return cats;
+  }
+
+  function colorFor(node) {
+    if (view.id === "payments-target-state") {
+      if (node.kind !== "domain") return KIND_COLORS[node.kind] || KIND_COLORS.domain;
+      var i = view.stages.findIndex(function (s) { return s.id === node.stage; });
+      return STAGE_COLORS[(i < 0 ? 0 : i) % STAGE_COLORS.length];
+    }
+    if (node.type !== "domain") return KIND_COLORS[node.type] || CATEGORY_COLORS._uncategorized;
+    return CATEGORY_COLORS[node.category] || CATEGORY_COLORS._uncategorized;
+  }
+
+  function hiddenSet() {
+    if (!hiddenGroups[view.id]) hiddenGroups[view.id] = {};
+    return hiddenGroups[view.id];
+  }
+
+  function isHidden(node) { return !!hiddenSet()[groupKeyOf(node)]; }
+
+  // Scope never hides -- it dims. Asked for explicitly: a domain filtered out
+  // of an "acquirer" view is often exactly the boundary you are trying to see.
+  function isDimmedByScope(node) {
+    if (scopeMode === "all") return false;
+    if (!node.scope) return true;
+    return node.scope !== scopeMode;
+  }
+
+  function visibleData() {
+    var nodes = view.nodes.filter(function (n) { return !isHidden(n); });
+    var ids = {};
+    nodes.forEach(function (n) { ids[n.id] = true; });
+    var links = view.links.filter(function (l) {
+      return ids[srcId(l)] && ids[tgtId(l)];
+    });
+    return { nodes: nodes, links: links };
+  }
+
+  // After the force engine runs, link.source/target are node objects, not ids.
+  function srcId(l) { return typeof l.source === "object" ? l.source.id : l.source; }
+  function tgtId(l) { return typeof l.target === "object" ? l.target.id : l.target; }
+
+  function buildAdjacency() {
+    adjacency = {};
+    view.nodes.forEach(function (n) { adjacency[n.id] = { out: [], in: [] }; });
+    view.links.forEach(function (l) {
+      var s = srcId(l), t = tgtId(l);
+      if (adjacency[s]) adjacency[s].out.push(l);
+      if (adjacency[t]) adjacency[t].in.push(l);
+    });
+  }
+
+  function applyLayout() {
+    var fixed = view.layout === "layered";
+    view.nodes.forEach(function (n) {
+      if (fixed) {
+        n.fx = n.col * COL_SPACING;
+        n.fy = (n.lane - 1) * LANE_HEIGHT + n.row * ROW_SPACING - LANE_HEIGHT;
+        n.fz = 0;
+      } else {
+        delete n.fx; delete n.fy; delete n.fz;
+      }
+    });
+  }
+
+  function buildControls() {
+    var seg = document.getElementById("view-seg");
+    seg.innerHTML = "";
+    DATA.views.forEach(function (v) {
+      var b = document.createElement("button");
+      b.textContent = v.id === "payments-target-state" ? "Payments flow" : "Authority";
+      b.className = v.id === view.id ? "on" : "";
+      b.onclick = function () { switchView(v.id); };
+      seg.appendChild(b);
+    });
+
+    document.getElementById("view-desc").textContent = view.description;
+    document.getElementById("groups-label").textContent =
+      view.id === "payments-target-state" ? "Stages (show / hide)" : "Domain groups (show / hide)";
+
+    var counts = {};
+    view.nodes.forEach(function (n) {
+      var k = groupKeyOf(n);
+      counts[k] = (counts[k] || 0) + 1;
+    });
+
+    var rows = document.getElementById("group-rows");
+    rows.innerHTML = "";
+    groupsForView().forEach(function (g) {
+      if (!counts[g.key]) return;
+      var row = document.createElement("label");
+      row.className = "row" + (hiddenSet()[g.key] ? " off" : "");
+      var cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = !hiddenSet()[g.key];
+      cb.onchange = function () {
+        if (cb.checked) delete hiddenSet()[g.key];
+        else hiddenSet()[g.key] = true;
+        row.className = "row" + (cb.checked ? "" : " off");
+        refresh();
+      };
+      var sw = document.createElement("span");
+      sw.className = "swatch";
+      sw.style.background = g.color;
+      sw.style.color = g.color;
       var label = document.createElement("span");
-      label.textContent = CATEGORY_LABELS[key];
-      row.appendChild(swatch);
-      row.appendChild(label);
+      label.textContent = g.label;
+      var count = document.createElement("span");
+      count.className = "count";
+      count.textContent = counts[g.key];
+      row.appendChild(cb); row.appendChild(sw); row.appendChild(label); row.appendChild(count);
       rows.appendChild(row);
     });
   }
 
-  function closePanel() {
-    document.getElementById("panel").classList.remove("open");
-  }
-
-  function renderPanel(node, neighborTitles) {
-    var body = document.getElementById("panel-body");
-    var statusClass = node.status === "draft" ? "status-draft" : "";
-    body.innerHTML =
-      "<h2>" + escapeHtml(node.title) + "</h2>" +
-      "<div class=\"meta\">" + escapeHtml(node.type) +
-        (node.category ? " · " + escapeHtml(CATEGORY_LABELS[node.category] || node.category) : "") +
-        " · <span class=\"" + statusClass + "\">" + escapeHtml(node.status) + "</span></div>" +
-      "<div class=\"section-label\">Purpose</div><div>" + escapeHtml(node.purpose || "—") + "</div>" +
-      (node.authority ? "<div class=\"section-label\">Authority</div><div>" + escapeHtml(node.authority) + "</div>" : "") +
-      "<div class=\"section-label\">Connected to</div><div>" +
-        (neighborTitles.length ? escapeHtml(neighborTitles.join(", ")) : "none resolved — see gap count top-right") +
-      "</div>";
-    document.getElementById("panel").classList.add("open");
+  function renderStats() {
+    var vis = visibleData();
+    var el = document.getElementById("stats");
+    var lines = [
+      "<b>" + vis.nodes.length + "</b> of " + view.nodes.length + " nodes &middot; " +
+      "<b>" + vis.links.length + "</b> of " + view.links.length + " edges shown"
+    ];
+    if (view.stats.unresolved_references) {
+      lines.push("<b>" + view.stats.unresolved_references.length + "</b> unresolved cross-domain " +
+        "references — prose that never matched a modelled domain. A real gap, not hidden.");
+    }
+    if (view.stats.back_edges && view.stats.back_edges.length) {
+      lines.push("<b>" + view.stats.back_edges.length + "</b> feedback arc(s), drawn dashed — " +
+        "edges that loop back to an earlier stage.");
+    }
+    if (view.source_notes) {
+      lines.push("Source is WIP; the whiteboard body is not machine-readable, so this is built " +
+        "from its owner's structured text feed.");
+    }
+    el.innerHTML = lines.join("<br/><br/>");
   }
 
   function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c];
+    return String(s === null || s === undefined ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
 
+  function titleOf(id) {
+    var n = view.nodes.find(function (x) { return x.id === id; });
+    return n ? n.title : id;
+  }
+
+  function relHtml(link, direction) {
+    var other = direction === "out" ? tgtId(link) : srcId(link);
+    var arrow = direction === "out" ? "&rarr; " : "&larr; ";
+    return '<div class="rel">' +
+      '<div class="pred' + (direction === "in" ? " inbound" : "") + '">' +
+        escapeHtml(link.label || link.predicate) + "</div>" +
+      '<div class="who">' + arrow + escapeHtml(titleOf(other)) + "</div>" +
+      (link.payload ? '<div class="payload">carries: ' + escapeHtml(link.payload) + "</div>"
+                    : '<div class="payload">' + escapeHtml(link.description || "") + "</div>") +
+      (link.back_edge ? '<div class="backedge">feedback arc (loops to an earlier stage)</div>' : "") +
+      "</div>";
+  }
+
+  function renderDetail(node) {
+    var adj = adjacency[node.id] || { out: [], in: [] };
+    var scopePill = node.scope
+      ? '<span class="pill ' + (node.scope === "acquirer-specific" ? "acq" : "wide") + '">' +
+        escapeHtml(node.scope) + "</span>"
+      : "";
+    var html =
+      "<h2>" + escapeHtml(node.title) + "</h2>" +
+      '<div class="meta">' + escapeHtml(node.kind || node.type) +
+        (node.boundary ? " &middot; " + escapeHtml(node.boundary) : "") +
+        (node.status ? " &middot; " + escapeHtml(node.status) : "") + "</div>" +
+      scopePill +
+      (node.scope_note ? '<div class="payload" style="margin:6px 0 2px">' +
+        escapeHtml(node.scope_note) + "</div>" : "");
+
+    if (node.responsibility) {
+      html += '<div class="section-label">Responsibility in this flow</div><div>' +
+        escapeHtml(node.responsibility) + "</div>";
+    }
+    if (node.purpose) {
+      html += '<div class="section-label">Purpose</div><div>' + escapeHtml(node.purpose) + "</div>";
+    }
+    if (node.touchpoints && node.touchpoints.length) {
+      html += '<div class="section-label">Touchpoints</div><div>' +
+        node.touchpoints.map(function (t) { return '<span class="pill">' + escapeHtml(t) + "</span>"; }).join("") +
+        "</div>";
+    }
+    html += '<div class="section-label">Outbound (' + adj.out.length + ")</div>" +
+      (adj.out.length ? adj.out.map(function (l) { return relHtml(l, "out"); }).join("")
+                      : '<div class="payload">none</div>');
+    html += '<div class="section-label">Inbound (' + adj.in.length + ")</div>" +
+      (adj.in.length ? adj.in.map(function (l) { return relHtml(l, "in"); }).join("")
+                     : '<div class="payload">none</div>');
+    if (node.authority && view.id === "domain-authority") {
+      html += '<div class="section-label">Authority</div><div class="payload">' +
+        escapeHtml(node.authority) + "</div>";
+    }
+    document.getElementById("detail-body").innerHTML = html;
+    document.getElementById("detail").classList.add("open");
+  }
+
+  function closeDetail() {
+    selected = null;
+    document.getElementById("detail").classList.remove("open");
+    repaint();
+  }
+  window.closeDetail = closeDetail;
+
+  function neighbourIds(node) {
+    var adj = adjacency[node.id] || { out: [], in: [] };
+    var set = {};
+    set[node.id] = true;
+    adj.out.forEach(function (l) { set[tgtId(l)] = true; });
+    adj.in.forEach(function (l) { set[srcId(l)] = true; });
+    return set;
+  }
+
+  function repaint() {
+    // Re-assert the accessors so 3d-force-graph re-evaluates colours/labels.
+    Graph.nodeColor(Graph.nodeColor())
+      .linkColor(Graph.linkColor())
+      .linkWidth(Graph.linkWidth())
+      .nodeThreeObject(Graph.nodeThreeObject());
+  }
+
+  function refresh() {
+    buildControls();
+    Graph.graphData(visibleData());
+    renderStats();
+    repaint();
+  }
+
+  function switchView(id) {
+    view = DATA.views.find(function (v) { return v.id === id; });
+    selected = null;
+    document.getElementById("detail").classList.remove("open");
+    buildAdjacency();
+    applyLayout();
+    Graph.numDimensions(dims).graphData(visibleData());
+    buildControls();
+    renderStats();
+    repaint();
+    setTimeout(function () { Graph.zoomToFit(600, 70); }, 350);
+  }
+
   fetch("graph.json").then(function (r) { return r.json(); }).then(function (data) {
-    buildLegend();
+    DATA = data;
+    view = DATA.views.find(function (v) { return v.id === DATA.default_view; }) || DATA.views[0];
+    buildAdjacency();
+    applyLayout();
 
-    var byId = {};
-    data.nodes.forEach(function (n) { byId[n.id] = n; });
-
-    var neighbors = {};
-    data.nodes.forEach(function (n) { neighbors[n.id] = new Set(); });
-    var linkSet = new Set();
-    data.links.forEach(function (l) {
-      neighbors[l.source].add(l.target);
-      neighbors[l.target].add(l.source);
-      linkSet.add(l);
-    });
-
-    document.getElementById("stats").innerHTML =
-      data.nodes.length + " nodes · " + data.links.length + " resolved edges<br/>" +
-      "<strong>" + data.stats.unresolved_references.length + "</strong> unresolved cross-domain references " +
-      "(prose that didn't confidently match a modeled domain — a real gap, not hidden)";
-
-    var highlightNodes = new Set();
-    var highlightLinks = new Set();
-    var selected = null;
-
-    var Graph = ForceGraph3D()(document.getElementById("graph"))
+    Graph = ForceGraph3D()(document.getElementById("graph"))
       .backgroundColor("#05070d")
-      .graphData(data)
+      .numDimensions(dims)
+      .graphData(visibleData())
       .nodeLabel(function (n) { return n.title; })
-      .nodeVal(function (n) { return n.type === "principle" ? 6 : 3; })
+      .nodeRelSize(5)
+      .nodeVal(function (n) { return n.kind === "domain" || n.type === "domain" ? 3 : 2; })
       .nodeColor(function (n) {
-        if (selected && n.id === selected.id) return "#ffffff";
-        if (highlightNodes.size && !highlightNodes.has(n.id)) return "rgba(120,130,150,0.25)";
-        return colorFor(n);
+        var base = colorFor(n);
+        if (selected) {
+          var keep = neighbourIds(selected);
+          if (n.id === selected.id) return "#ffffff";
+          if (!keep[n.id]) return "rgba(110,120,140,0.18)";
+          return base;
+        }
+        if (isDimmedByScope(n)) return "rgba(110,120,140,0.22)";
+        return base;
+      })
+      .nodeThreeObjectExtend(true)
+      .nodeThreeObject(function (n) {
+        if (!showLabels) return null;
+        var dim = (selected && !neighbourIds(selected)[n.id]) || (!selected && isDimmedByScope(n));
+        var sprite = new SpriteText(n.title.replace(/ Domain$/, ""));
+        sprite.color = dim ? "rgba(150,160,180,0.3)" : "#dfe5f0";
+        sprite.textHeight = 6;
+        sprite.position.y = -11;
+        return sprite;
+      })
+      .linkDirectionalArrowLength(function (l) { return view.layout === "layered" ? 4 : 0; })
+      .linkDirectionalArrowRelPos(1)
+      .linkCurvature(function (l) { return l.back_edge ? 0.45 : 0; })
+      .linkLabel(function (l) {
+        return "<b>" + (l.label || l.predicate) + "</b>" + (l.payload ? "<br/>" + l.payload : "");
       })
       .linkColor(function (l) {
-        return highlightLinks.has(l) ? "#ffe58a" : "rgba(180,190,210,0.35)";
+        var s = srcId(l), t = tgtId(l);
+        if (selected) {
+          var on = s === selected.id || t === selected.id;
+          if (!on) return "rgba(110,120,140,0.07)";
+          return l.back_edge ? "#ff7e8f" : "#6fe3a8";
+        }
+        if (l.back_edge) return "rgba(255,126,143,0.55)";
+        return view.layout === "layered" ? "rgba(160,180,215,0.42)" : "rgba(130,150,190,0.16)";
       })
-      .linkWidth(function (l) { return highlightLinks.has(l) ? 2 : 0.6; })
-      .linkDirectionalParticles(function (l) { return highlightLinks.has(l) ? 4 : 1; })
-      .linkDirectionalParticleWidth(1.6)
-      .linkDirectionalParticleSpeed(0.006)
-      .linkDirectionalArrowLength(3.5)
-      .linkDirectionalArrowRelPos(1)
-      .onNodeClick(function (node) {
-        selected = node;
-        highlightNodes = new Set([node.id]);
-        (neighbors[node.id] || new Set()).forEach(function (id) { highlightNodes.add(id); });
-        highlightLinks = new Set(data.links.filter(function (l) {
-          return l.source === node.id || l.target === node.id;
-        }));
-        refreshHighlight();
-        var neighborTitles = Array.from(neighbors[node.id] || []).map(function (id) {
-          return byId[id] ? byId[id].title : id;
-        });
-        renderPanel(node, neighborTitles);
-        Graph.cameraPosition({ x: node.x * 1.6, y: node.y * 1.6, z: node.z * 1.6 + 80 }, node, 800);
+      .linkWidth(function (l) {
+        if (!selected) return view.layout === "layered" ? 0.8 : 0.4;
+        var s = srcId(l), t = tgtId(l);
+        return (s === selected.id || t === selected.id) ? 2.2 : 0.3;
       })
-      .onBackgroundClick(function () {
-        selected = null;
-        highlightNodes = new Set();
-        highlightLinks = new Set();
-        refreshHighlight();
-        closePanel();
+      .onNodeClick(function (n) {
+        selected = (selected && selected.id === n.id) ? null : n;
+        if (selected) renderDetail(selected);
+        else document.getElementById("detail").classList.remove("open");
+        repaint();
       })
-      .onNodeHover(function (node) {
-        document.getElementById("graph").style.cursor = node ? "pointer" : "default";
-      });
+      .onBackgroundClick(closeDetail);
 
-    function refreshHighlight() {
-      Graph.nodeColor(Graph.nodeColor())
-        .linkColor(Graph.linkColor())
-        .linkWidth(Graph.linkWidth())
-        .linkDirectionalParticles(Graph.linkDirectionalParticles());
-    }
+    document.getElementById("dim-seg").querySelectorAll("button").forEach(function (b) {
+      b.onclick = function () {
+        dims = parseInt(b.dataset.dim, 10);
+        document.getElementById("dim-seg").querySelectorAll("button").forEach(function (x) {
+          x.className = x === b ? "on" : "";
+        });
+        Graph.numDimensions(dims);
+        setTimeout(function () { Graph.zoomToFit(600, 70); }, 350);
+      };
+    });
+
+    document.getElementById("scope-seg").querySelectorAll("button").forEach(function (b) {
+      b.onclick = function () {
+        scopeMode = b.dataset.scope;
+        document.getElementById("scope-seg").querySelectorAll("button").forEach(function (x) {
+          x.className = x === b ? "on" : "";
+        });
+        repaint();
+      };
+    });
+
+    document.getElementById("labels-cb").onchange = function (e) {
+      showLabels = e.target.checked;
+      repaint();
+    };
+
+    buildControls();
+    renderStats();
+    setTimeout(function () { Graph.zoomToFit(600, 70); }, 400);
   }).catch(function (err) {
-    document.getElementById("graph").innerHTML =
-      "<div style=\"color:#ff8a8a;padding:24px;font-family:monospace\">Failed to load graph.json: " + err + "</div>";
+    document.getElementById("stats").innerHTML =
+      "Failed to load graph.json: " + escapeHtml(err.message) +
+      "<br/><br/>Run <code>./kg-viz.sh restart</code> to regenerate it.";
   });
 </script>
 </body>

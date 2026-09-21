@@ -4,7 +4,14 @@
   "title": "domains.json",
   "description": "Shape of components/kg-content/entities/domains.json -- the single, consolidated file for the `domain` entity type, a scoped exception to kg-core's usual one-file-per-entity convention. See SCHEMA.md's `domain` section for why. No automated validator wired up yet (stdlib-only convention; skipping a jsonschema dependency rather than breaking it -- see kg-core/README.md).",
   "type": "object",
-  "required": ["schema_version", "source", "owner", "updated", "categories", "domains"],
+  "required": [
+    "schema_version",
+    "source",
+    "owner",
+    "updated",
+    "categories",
+    "domains"
+  ],
   "additionalProperties": false,
   "properties": {
     "schema_version": {
@@ -29,23 +36,42 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "title"],
+        "required": [
+          "id",
+          "title"
+        ],
         "additionalProperties": false,
         "properties": {
-          "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
-          "title": { "type": "string" }
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "title": {
+            "type": "string"
+          }
         }
       }
     },
     "domains": {
       "type": "array",
-      "items": { "$ref": "#/$defs/domain" }
+      "items": {
+        "$ref": "#/$defs/domain"
+      }
     }
   },
   "$defs": {
     "domain": {
       "type": "object",
-      "required": ["id", "title", "category", "status", "purpose", "authority", "relationships"],
+      "required": [
+        "id",
+        "title",
+        "category",
+        "status",
+        "scope",
+        "purpose",
+        "authority",
+        "relationships"
+      ],
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -53,15 +79,34 @@
           "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
           "description": "Permanent, kebab-case, unprefixed -- matches kg-core/SCHEMA.md's id convention for every other entity type even though domain no longer gets its own file."
         },
-        "title": { "type": "string" },
+        "title": {
+          "type": "string"
+        },
         "category": {
           "type": "string",
           "description": "Must be one of the ids listed in the top-level `categories` array. Not enforced as a JSON Schema enum here because it would duplicate `categories` and drift; check it against that array instead."
         },
         "status": {
           "type": "string",
-          "enum": ["draft", "active", "deprecated", "superseded"],
+          "enum": [
+            "draft",
+            "active",
+            "deprecated",
+            "superseded"
+          ],
           "description": "Same vocabulary as every other kg-core entity type (SCHEMA.md's frontmatter contract)."
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "acquirer-specific",
+            "tyro-wide"
+          ],
+          "description": "Whether the domain exists specifically for the payment-acquiring business or serves Tyro as a whole. A judgement made in this repo, not a fact from the source page. Deliberately binary (a three-valued `both` was proposed and rejected) and consumers must dim rather than hide out-of-scope domains -- see SCHEMA.md's `scope` section and decision 35."
+        },
+        "scope_note": {
+          "type": "string",
+          "description": "Present only where the `scope` call is genuinely arguable, recording which way it could have gone and why. Absence means nobody has recorded a doubt yet -- not that the call is certain."
         },
         "purpose": {
           "type": "string",
@@ -69,24 +114,33 @@
         },
         "authority": {
           "type": "object",
-          "required": ["owns", "not_authoritative_for"],
+          "required": [
+            "owns",
+            "not_authoritative_for"
+          ],
           "additionalProperties": false,
           "properties": {
             "owns": {
               "type": "array",
-              "items": { "type": "string" },
+              "items": {
+                "type": "string"
+              },
               "description": "Short capability/data-ownership phrases -- lean by design, not a transcription of the source's full capability-authority and data-authority lists."
             },
             "not_authoritative_for": {
               "type": "array",
-              "items": { "type": "string" },
+              "items": {
+                "type": "string"
+              },
               "description": "Denormalized, human-readable mirror of relationships[]'s targets (resolved domain titles/ids or the raw unresolved phrase) -- kept for quick scanning without cross-referencing ids; relationships[] is the structured source of truth."
             }
           }
         },
         "relationships": {
           "type": "array",
-          "items": { "$ref": "#/$defs/relationship" }
+          "items": {
+            "$ref": "#/$defs/relationship"
+          }
         }
       }
     },
@@ -94,10 +148,18 @@
       "type": "object",
       "oneOf": [
         {
-          "required": ["type", "target"],
+          "required": [
+            "type",
+            "target"
+          ],
           "additionalProperties": false,
           "properties": {
-            "type": { "type": "string", "enum": ["not_authoritative_for"] },
+            "type": {
+              "type": "string",
+              "enum": [
+                "not_authoritative_for"
+              ]
+            },
             "target": {
               "type": "string",
               "description": "A resolved domain id from this same file's domains[]."
@@ -105,10 +167,18 @@
           }
         },
         {
-          "required": ["type", "target_unresolved"],
+          "required": [
+            "type",
+            "target_unresolved"
+          ],
           "additionalProperties": false,
           "properties": {
-            "type": { "type": "string", "enum": ["not_authoritative_for"] },
+            "type": {
+              "type": "string",
+              "enum": [
+                "not_authoritative_for"
+              ]
+            },
             "target_unresolved": {
               "type": "string",
               "description": "Raw phrase from the source that could not be confidently resolved to a known domain id -- kept rather than dropped, per this experiment's 'expose gaps, don't hide them' principle. See docs/domain-model-experiment.md for what these actually are."

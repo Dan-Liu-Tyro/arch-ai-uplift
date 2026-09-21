@@ -20,6 +20,7 @@ entities/
   decisions/                <slug>.md
   systems/                  <slug>.md
   domains.json              -- all 39 domains, one file (see below)
+  graphs/                   <slug>.json -- overlay graphs (see below)
 ```
 
 Filename stem is the entity id, for every type except `domain`. The
@@ -35,6 +36,19 @@ portability (no directory-walking needed to hand this to a UI or another
 tool) and maintainability (the source changes as a whole). See
 `kg-core/SCHEMA.md`'s `domain` section for the full statement of this
 exception, and `kg-core/schemas/domain.schema.json` for the file's shape.
+
+`graphs/` holds **overlay graphs** (decision 35): a named set of typed,
+directed relationships over entities that already exist elsewhere here. A
+node in an overlay either declares a `domain_ref` — in which case its title,
+category, purpose and scope are resolved from `domains.json` and are *not*
+restated — or declares its own `kind` for something the domain model does not
+cover (`actor`, `external`, `artefact`). This is the rule that keeps an
+overlay from becoming a second, diverging copy of the domain model: an
+overlay may add relationships and may add non-domain nodes, but it may never
+re-state a domain fact. Today there is one,
+`graphs/payments-target-state.json`, and it holds the first typed directed
+relationships in this repo — until it landed, every edge in the graph was
+`not_authoritative_for`.
 
 ## Boundary
 
@@ -59,6 +73,9 @@ Never hand-edit it.
 `local-agent`, as of 2026-09-08 (decision 21 in `docs/decision-log.md`) — reads
 entities directly for Arc Lite's grounding, ending that component's prior
 exception to reading through `kg-core`'s schema.
+
+`kg-viz`, which reads `domains.json` and `graphs/*.json` to draw them. It is
+read-only by contract and writes nothing back here.
 
 ## Status
 

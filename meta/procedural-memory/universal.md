@@ -543,3 +543,34 @@ than an error. Before trusting any count, confirm the shape you are matching
 actually exists — list the candidate lines (`grep -nE '^#{1,4} '`, `head`,
 `sed -n`) and count the thing you can see. Treat a zero from a file known to
 be non-empty on that dimension as a bug in the query, never as a finding.
+
+## An arbitrary tie-break becomes a semantic claim once it is rendered
+
+**What happened.** Laying out a directed architecture flow graph as swimlanes
+needed a longest-path ranking, which needs an acyclic graph, and the graph is
+legitimately cyclic (the merchant initiates a payment *and* consumes reports
+about it). I wrote the textbook fix — DFS, and treat any edge pointing at a
+node still on the stack as a feedback arc to exclude from ranking. It ran
+cleanly, reported exactly one problem-free result, and was wrong: because DFS
+picks by visit order, it cut the three telemetry edges feeding Data Analytics,
+which moved a pure sink to the *front* of its lane. A second, earlier version
+had failed the same way for a different reason — ranking the whole graph by
+longest path produced a 16-column, one-node-per-column ribbon that read as a
+chain and discarded the stage decomposition the source actually used.
+
+**Cost.** Two rebuilds of the same function, both caught in the same turn by
+printing the resulting layout grid and asserting invariants, rather than by
+trusting that a clean run meant a correct one. Had I only checked "no node
+left unranked" — which passed in every version, including both wrong ones —
+the broken layout would have shipped as the default view.
+
+**Rule.** When an algorithm has to break a tie that the input does not
+determine — which cycle edge to cut, which of several equal-cost orderings to
+emit, which duplicate to keep — the choice is invisible in the code and
+load-bearing in the output. Derive the tie-break from the data model (here:
+cut the edge that lands in an earlier declared stage, which is what a feedback
+arc *means*) so the result is a property of the model rather than of iteration
+order. And verify by rendering the actual artefact — print the grid, the
+ordering, the chosen survivor — not by checking that the algorithm terminated
+without error. "It ran and nothing was left over" is satisfied equally well by
+the correct answer and by an arbitrary one.

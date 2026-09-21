@@ -74,3 +74,6 @@ policy this exists to serve.
 - A zero-match search is a fact about your pattern, not about the content —
   confirm the shape you're matching exists before trusting any count; a
   mis-specified pattern returns a well-formed number, not an error.
+- An algorithm's arbitrary tie-break becomes a semantic claim in its output —
+  derive it from the data model, not from iteration order, and verify by
+  rendering the artefact, not by checking the run completed.

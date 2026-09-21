@@ -157,3 +157,31 @@ principle's `status` and must not be silently absorbed as if it agreed.
   cost wins there — `docs/program-roadmap.md`'s pending relocation (next
   step 12) is the natural test, since it is cited by path from many log
   entries.
+- 2026-09-18 · Rejected a three-valued scope tag in favour of a binary tag
+  whose UI switch *dims* rather than filters, when offered
+  `acquirer-specific | tyro-wide | both` as the "recommended" option against
+  binary-plus-dimming and strict-binary-filter · this conversation · stated ·
+  unpromoted — I had argued that a strict binary forces a false choice on
+  shared domains (Customer, Funds Movement, Billing) and recommended adding
+  `both`. The choice made was neither of my framings' conclusions: keep the
+  model binary and coarse, but fix the *view* so coarseness costs nothing,
+  because "a domain filtered out of an acquiring view is often exactly the
+  boundary you are trying to see." Pattern to watch: when a modelling
+  objection is raised, the preferred resolution may be to absorb it in
+  presentation rather than to add a category to the model — which is the same
+  instinct as the earlier lean-domain-modelling choice (add fields only when
+  real use exposes a gap), applied to enums. Would be contradicted by a future
+  case where a middle category is added to the data rather than handled in a
+  view.
+- 2026-09-18 · Stated the standard the visualization had to meet as fitness
+  for a task, not richness: "3D should fit the purpose of usefulness. Not just
+  fancy" — then specified usefulness concretely as group show/hide, a laid-out
+  2D plane as the default, ordering that follows the real payment flow, and
+  selecting a node revealing its neighbours *with the relationship described* ·
+  this conversation · stated · unpromoted — note the requested features are all
+  about *reading* the graph (filter, order, label, explain), none about visual
+  richness, and the one explicitly 3D thing already built was demoted to a
+  toggle. Consistent with the preference for artefacts that state what is
+  actually true (the unresolved-reference count kept visible on screen) over
+  ones that look finished. Related principle already recorded:
+  `principles/generated-outputs-are-not-sources.md`.

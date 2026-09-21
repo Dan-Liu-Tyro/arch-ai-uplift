@@ -213,10 +213,56 @@ there are no section headings to fix. Its equivalent structure is
 `schemas/domain.schema.json`'s `domain` definition: `purpose` (a string,
 lean by design — not a transcription of the source's full JTBD/core-data/
 invariants lists), `authority.owns` / `authority.not_authoritative_for`
-(short phrases, same leanness), and `relationships` (typed, structured,
-described below). See `docs/domain-model-experiment.md` for why lean-first
-was chosen over front-loading every one of the source page's per-domain
-fields.
+(short phrases, same leanness), `scope` (below), and `relationships` (typed,
+structured, described below). See `docs/domain-model-experiment.md` for why
+lean-first was chosen over front-loading every one of the source page's
+per-domain fields.
+
+### `scope` on `domain` (decision 35)
+
+Every domain carries `scope`, one of `acquirer-specific` or `tyro-wide`, plus
+an optional `scope_note`. The value is a **judgement made in this repo**, not
+a fact taken from the source page, and the note exists to say so wherever the
+call is arguable — eight of the 39 carry one today.
+
+Two design points worth keeping:
+
+- **It is binary on purpose, and consumers must not filter on it
+  destructively.** A three-valued version (`both`) was proposed and
+  rejected by the user in favour of binary-plus-dimming, because a domain
+  excluded from an "acquiring" view is frequently the boundary being
+  investigated. A consumer that *hides* out-of-scope domains is misusing this
+  field; `kg-viz` dims them.
+- **An absent `scope_note` is not a claim of certainty**, only that nobody
+  has recorded a reason to doubt the call yet.
+
+### Overlay graphs (`entities/graphs/<slug>.json`, decision 35)
+
+A named set of typed, directed relationships over entities that already exist
+elsewhere in `kg-content`. This is how the repo gets edge types beyond
+`not_authoritative_for` without every entity type having to grow a
+relationship block first.
+
+The governing rule is **reference, never restate**: a node either declares a
+`domain_ref` (title, category, purpose and scope are resolved from
+`domains.json` at read time) or declares its own `kind` for something the
+domain model does not model at all — `actor`, `external`, `artefact`. An
+overlay may add relationships and non-domain nodes; it may never hold a copy
+of a domain fact. Without that rule an overlay silently becomes a second,
+diverging domain model, and the two drift with no signal that they have.
+
+Each edge carries `source`, `target`, `predicate`, `payload` (what data
+crosses the edge) and `stage`. Predicates are **free text today and
+deliberately uncontrolled** — `payments-target-state.json` alone uses 36
+distinct ones. That is a known open item, not a settled decision: a
+controlled vocabulary is what would let contradiction detection work across
+two overlays, and there is currently only one overlay, so there is no
+evidence yet about which predicates recur. Revisit when a second lands.
+
+Overlay graphs are also where **cycles are legitimate** — the merchant
+initiates a payment *and* consumes reports about it — so a consumer that
+needs a ranking must choose which arc to treat as feedback and should say so
+rather than assume acyclicity.
 
 `Exceptions` on guardrails and `Known deviations` on systems exist so reality can
 be recorded instead of hidden. A KG that only holds the ideal state will be

@@ -1,22 +1,44 @@
 # kg-viz
 
-A read-only, browser-based 3D visualization of the knowledge graph in
-`kg-content`, for human inspection — not a consumer that reasons about the
-graph, just a way to look at it.
+A read-only, browser-based view of the knowledge graph in `kg-content`, for
+human inspection — not a consumer that reasons about the graph, just a way to
+look at it.
+
+**The form has to earn its place.** The first pass was a single 3D
+force-directed graph, and the user's verdict was that "3D should fit the
+purpose of usefulness. Not just fancy." So the default is now a **2D plane**,
+3D is a toggle rather than the entry point, and the component carries two
+separate views because one canvas could not serve both questions (decision 35
+in `docs/decision-log.md`).
+
+## The two views
+
+| View | Shape | Layout | What it answers |
+| --- | --- | --- | --- |
+| `payments-target-state` (**default**) | 26 nodes, 43 directed edges, 36 distinct predicates | Swimlanes: lane = stage, column = flow depth within the stage | How does a payment actually flow, and what does each hop carry? |
+| `domain-authority` | 40 nodes, 296 edges, one predicate | 2D/3D force | Which domains disclaim authority to which others? |
+
+They are deliberately not drawn together. `domain-authority` averages degree
+~15 over 39 domains and renders as a hairball — it is only readable once you
+switch groups off, which is why the group toggles exist. The flow view is
+sparse and reads in order.
 
 ## Boundary
 
 **In scope**
 
 - Generating `graph.json` from whatever currently exists in `kg-content`
-  (`generate.py`).
-- Serving that JSON plus a static, self-contained HTML page that renders it
-  as an interactive 3D force-directed graph (`serve.py`, `index.html`).
+  (`generate.py`), as one file containing both views.
+- Serving that JSON plus a static, self-contained HTML page (`serve.py`,
+  `index.html`).
 - Reading `domain`'s structured `not_authoritative_for` relationships
   directly from `kg-content/entities/domains.json` and rendering them as
   edges. (First pass derived edges by fuzzy-matching prose; retired once
   `domain` got real relationships — see "How the edges are derived", below,
   and `docs/domain-model-experiment.md`'s "Pivot" section for why.)
+- Computing *layout only* — swimlane assignment and feedback-arc detection —
+  from the relationships the content already declares. Layout is presentation,
+  so it belongs here; the relationships themselves are content and do not.
 
 **Out of scope**
 
@@ -42,6 +64,13 @@ second permanently-diverging access path. `domain`'s own path doesn't have
 that problem — `domains.json` already *is* the structured shape, per its
 own scoped exception in `kg-core/SCHEMA.md`.
 
+Also reads `kg-content/entities/graphs/*.json` (today just
+`payments-target-state.json`) for overlay graphs. Those files reference
+domains by `domain_ref` rather than restating them, so this component
+resolves each ref against `domains.json` and reports any that no longer
+resolve as `stats.unresolved_domain_refs` instead of silently dropping the
+node.
+
 ## Depended on by
 
 Nothing yet. Purely a human-facing inspection tool today.
@@ -66,23 +95,80 @@ approach is retired: relationships are first-class structured data in
 rather than inferred every time this script runs — `generate.py` no longer
 does any string matching at all.
 
+### The flow view's edges are real, the authority view's descriptions are not
+
+`payments-target-state.json` carries a `predicate` and a `payload` on every
+edge, so the detail panel quotes what an edge actually means and what data
+crosses it. `not_authoritative_for` edges have no such prose: ingestion kept
+only the resolved target id, and the phrase that produced each edge was
+dropped. Their descriptions are therefore **generated from the predicate**,
+stating the direction and that it is a negative assertion, rather than quoted
+from the source. Re-deriving them by matching prose is exactly the retired
+fuzzy-matching pass and should not be reintroduced; carrying the phrase
+through ingestion is the real fix. See "Known gaps".
+
+## What the UI does
+
+- **View switch** — flow (default) or authority.
+- **2D / 3D** — 2D is the default. 3D is genuinely useful on the dense
+  authority graph, where a third dimension reduces occlusion; it adds little
+  to the flow view, which is a plane by construction.
+- **Group show/hide** — checkboxes per stage (flow) or per domain category
+  (authority), with live counts. Hiding a group drops its nodes *and* every
+  edge touching them, so no dangling edges are drawn.
+- **Scope emphasis** — All / Acquirer / Tyro-wide. **Dims, never hides**, per
+  decision 35: a domain filtered out of an acquiring view is often the
+  boundary you are trying to see.
+- **Click a node** — highlights it and everything linked to it, dims the
+  rest, and opens a panel listing every inbound and outbound relationship
+  with its predicate, payload, and whether it is a feedback arc.
+- **Feedback arcs** drawn dashed/curved and counted in the stats box.
+
 ## Status
 
-Second pass, built directly (no build system — plain stdlib Python + a
-CDN-loaded `3d-force-graph` script tag, consistent with this repo's "zero new
-infra" stance, decision 1). `generate.py` now reads `domain`'s structured
-`not_authoritative_for` relationships straight out of
-`kg-content/entities/domains.json` — no prose parsing or fuzzy matching left
-in this component at all, that logic was retired in the pivot (see "How the
-edges are derived" above). Current graph: 40 nodes (39 domains + the one
-`principle` entity, unconnected), 296 resolved edges out of 338 total
-cross-domain references extracted at ingestion time, 42 left as
-`target_unresolved` in `domains.json` rather than guessed. See
-`docs/domain-model-experiment.md`'s "Pivot" section for what the unresolved
-42 actually are (mostly four single-word abbreviations deliberately never
-auto-resolved, plus generic collective phrases, plus one domain name
-referenced in the source but never defined as its own section) — a named,
-considered set, not parsing failures.
+Third pass. No build system — plain stdlib Python plus two CDN script tags
+(`3d-force-graph`, `three-spritetext` for persistent labels), consistent with
+this repo's "zero new infra" stance (decision 1).
+
+Current content, as reported by `generate.py` rather than asserted here:
+
+- `domain-authority` — 40 nodes (39 domains + the one unconnected `principle`
+  entity), 296 resolved edges out of 338 total cross-domain references
+  extracted at ingestion, 42 left as `target_unresolved` in `domains.json`
+  rather than guessed. See `docs/domain-model-experiment.md`'s "Pivot"
+  section for what the unresolved 42 actually are (mostly four single-word
+  abbreviations deliberately never auto-resolved, plus generic collective
+  phrases, plus one domain name referenced in the source but never defined as
+  its own section) — a named, considered set, not parsing failures.
+- `payments-target-state` — 26 nodes (17 `domain_ref`, 6 actors, 2 external
+  systems, 1 artefact), 43 edges, 36 distinct predicates, 3 lanes, 7 columns
+  at the widest lane, 0 unresolved `domain_ref`s, 1 feedback arc.
+
+## Known gaps
+
+- **Never verified in a real browser.** The sandbox this was built in cannot
+  bind a listening socket (`serve.py` fails with `PermissionError: [Errno 1]
+  Operation not permitted`). What *was* verified: `generate.py`'s output and
+  layout invariants (every forward edge runs left-to-right within its lane,
+  no two nodes share a position, no node unranked), and the page's own
+  JavaScript executed against the real `graph.json` under a stubbed DOM in
+  node — covering init, view switching, group hide (26→21 nodes and 43→32
+  edges with no dangling links), and scope dimming (0/7 in-scope dimmed,
+  10/10 out-of-scope dimmed). What that cannot cover is anything three.js
+  actually draws: label legibility, arrowheads, camera framing, colour
+  contrast. Treat the visual design as unreviewed.
+- **Per-edge prose is missing for authority edges** — see above.
+- **`scope` is a judgement, not a sourced fact.** 12/27 split, assigned here
+  rather than taken from any Confluence page. Eight domains carry a
+  `scope_note` marking the call as arguable; the rest are asserted. Correct
+  them in `domains.json`, not in the UI.
+- **The flow graph's source is WIP and partly unreadable.** Its origin is a
+  Confluence whiteboard whose body the Atlassian connector cannot fetch, so
+  the data comes from a structured text feed page its owner wrote for this
+  purpose. Decision 35 records the exact failure modes and why a
+  similar-looking older page by another author was *not* used.
+- **Only one flow graph exists.** Nothing yet validates that a second
+  overlay would not need schema changes.
 
 ## Running it
 
@@ -99,13 +185,9 @@ introducing a second convention for local UIs.
 
 `python3 serve.py` still works directly if you want it in the foreground.
 
-**Not verified in a real browser.** The sandboxed environment this was built
-in cannot bind a listening socket (`serve.py` fails with `PermissionError:
-[Errno 1] Operation not permitted` when run through it — unrelated to the
-code itself; `generate.py`'s own logic, and `kg-viz.sh`'s stop/status/
-failure-handling paths, all ran correctly in the same sandbox). Run
-`./kg-viz.sh start` from a normal terminal (outside any sandboxed tool
-call) and open the URL to get the first real look at this.
+Run `./kg-viz.sh start` from a normal terminal (outside any sandboxed tool
+call) and open the URL. Nobody has seen this in a browser yet — see "Known
+gaps" above for exactly what is and is not verified.
 
 ## Extraction notes
 

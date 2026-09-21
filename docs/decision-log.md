@@ -91,6 +91,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 32 | `domain` storage consolidated to one JSON-Schema-backed file | `kg-content/entities/domains.json`, `kg-core/schemas/` |
 | 33 | Rename executed: `arch-knowledge-graph` → `arch-ai-uplift` | repo identity, `kg-core/schemas/`, `architecture-learning/README.md` |
 | 34 | Programme Stream page re-baselined to FY27 Q2/Q3/Q4; new IN-564 epics cited | Confluence, Jira, program roadmap |
+| 35 | `kg-viz` split into two purpose-built views; first typed directed graph; `scope` tag on `domain` | `kg-viz`, `kg-content/entities/graphs/`, `kg-core/SCHEMA.md` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -1528,6 +1529,69 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       session's context; the agent diffed its upload against the original
       fetch before writing and confirmed only the five intended spots
       changed. Page version 32 after the edit.
+35. **`kg-viz` reworked from one 3D force graph into two purpose-built
+    views; first typed, directed graph in `kg-content`; `scope` tag on
+    `domain`.** Triggered by the user's verdict on the first pass: *"3D
+    should fit the purpose of usefulness. Not just fancy."* Four changes,
+    all revisable:
+    - **Two views, not one canvas.** `payments-target-state` (26 nodes, 43
+      directed typed edges) is now the **default** view; `domain-authority`
+      (40 nodes, 296 `not_authoritative_for` edges) is the second. They are
+      deliberately not merged: the authority graph averages degree ~15 and
+      renders as a hairball, while the flow graph is sparse and readable.
+      `graph.json`'s shape changed from `{nodes, links, stats}` to
+      `{categories, default_view, views[]}` — it remains a disposable build
+      artifact, so this is not a migration.
+    - **First typed, directed relationships in the graph.** Until now every
+      edge in `kg-content` was a single predicate (`not_authoritative_for`),
+      which meant the graph could not do the contradiction detection or
+      dependency tracing that `CLAUDE.md` names as the reason to be a graph
+      at all. `entities/graphs/payments-target-state.json` adds 43 edges
+      across 36 distinct predicates, each with a `payload` and a stage.
+      Nodes that are domains are declared as a `domain_ref` and resolved
+      against `domains.json` at generation time, so **domain facts are
+      referenced, never duplicated** — the overlay can go stale only by
+      pointing at an id that no longer exists, which `generate.py` reports
+      as `unresolved_domain_refs` (currently zero of 17).
+    - **`scope` on every domain, binary, and the UI dims rather than
+      hides.** 12 domains `acquirer-specific`, 27 `tyro-wide`. The user was
+      offered a three-valued tag (`both`) and a strict binary filter, and
+      chose binary-plus-dimming explicitly: a domain filtered *out* of an
+      acquiring view is often the boundary you are trying to see, so
+      removing it defeats the purpose. Eight domains carry a `scope_note`
+      recording that the call was arguable and why (`funds-movement`,
+      `billing-and-accounts-receivable`, `fraud-and-risk-decisioning`,
+      `product-quoting-and-pricing`, `hardware-and-asset-management`,
+      `integration-enablement-and-certification`, `disputes-and-recovery`,
+      `payments-accounting`) rather than presenting 39 confident
+      classifications.
+    - **Swimlane layout, and one honest feedback arc.** Layout is
+      lane = stage, column = longest-path depth *within* that stage. Two
+      earlier attempts were wrong and are recorded because the reason
+      generalises: ranking the whole graph by longest path produced a
+      16-column, one-node-per-column ribbon that read as a chain and threw
+      away the source's own stage decomposition; and choosing back-edges by
+      DFS order cut the three telemetry edges into Data Analytics, pushing a
+      pure sink to the *front* of its lane. Back-edges are now chosen by the
+      model (an edge landing in an earlier stage) rather than by iteration
+      order, which leaves exactly one: cross-domain reports → merchant. It
+      is drawn dashed and counted, not dropped.
+    - **Source caveat that must not be lost.** The origin is a Confluence
+      **whiteboard** (1823277126) whose body is *not* readable through the
+      Atlassian connector — `getConfluencePage` 404s on it, the whiteboard
+      REST endpoint returns "Could not find whiteboard", and
+      `getTeamworkGraphObject` returns metadata with `bodyValue: null`. Only
+      a ~260-character search-index extract is machine-readable. The data
+      therefore comes from a structured text feed page (2382233611) the
+      whiteboard's owner authored for this purpose. Both are WIP and the
+      graph's `status` is `draft`. A separate, older page by a different
+      (now deactivated) author,
+      ["Payments Authorisation Target vs Current State Reference
+      Architecture"](https://tyropaymentsltd.atlassian.net/wiki/spaces/~712020aff4ef8556f94e789f49c6495abd09f9/pages/1793720389),
+      describes a *different* decomposition — it introduces a "Client
+      Integration Domain" that does not exist in `domains.json` at all — and
+      was deliberately **not** used as the source. Decision 28's lesson
+      applied on purpose: it would have been the wrong page.
 
 ## Constraints identified
 
