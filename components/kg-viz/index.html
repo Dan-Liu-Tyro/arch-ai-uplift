@@ -494,7 +494,7 @@
   }).catch(function (err) {
     document.getElementById("stats").innerHTML =
       "Failed to load graph.json: " + escapeHtml(err.message) +
-      "<br/><br/>Run <code>./kg-viz.sh restart</code> to regenerate it.";
+      "<br/><br/>Run <code>./graph.sh restart</code> to regenerate it.";
   });
 </script>
 </body>

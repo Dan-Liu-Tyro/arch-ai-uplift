@@ -147,16 +147,29 @@ Current content, as reported by `generate.py` rather than asserted here:
 ## Known gaps
 
 - **Never verified in a real browser.** The sandbox this was built in cannot
-  bind a listening socket (`serve.py` fails with `PermissionError: [Errno 1]
-  Operation not permitted`). What *was* verified: `generate.py`'s output and
-  layout invariants (every forward edge runs left-to-right within its lane,
-  no two nodes share a position, no node unranked), and the page's own
-  JavaScript executed against the real `graph.json` under a stubbed DOM in
-  node — covering init, view switching, group hide (26→21 nodes and 43→32
-  edges with no dangling links), and scope dimming (0/7 in-scope dimmed,
-  10/10 out-of-scope dimmed). What that cannot cover is anything three.js
+  bind a listening socket (`serve.py`'s `HTTPServer(...)` call fails with
+  `PermissionError: [Errno 1] Operation not permitted`). What *was* verified:
+  `generate.py`'s output and layout invariants (every forward edge runs
+  left-to-right within its lane, no two nodes share a position, no node
+  unranked); both data files against their schemas and for referential
+  integrity; `serve.summarize(generate.generate())`, which is the whole of
+  `serve.py` that runs before the blocked bind; and the page's own JavaScript
+  executed against the real `graph.json` under a stubbed DOM in node —
+  covering init, view switching, group hide (26→21 nodes and 43→32 edges with
+  no dangling links), and scope dimming (0/7 in-scope dimmed, 10/10
+  out-of-scope dimmed). What none of that covers is anything three.js
   actually draws: label legibility, arrowheads, camera framing, colour
-  contrast. Treat the visual design as unreviewed.
+  contrast. **Treat the visual design as unreviewed.**
+
+  An earlier version of this list omitted `serve.py` entirely, on the
+  reasoning that the socket restriction made it untestable here. That was
+  wrong in a way worth keeping written down: the restriction applies to one
+  call, and a later change to `generate.generate()`'s return shape broke
+  `serve.py` several lines *earlier*, shipping a start command that always
+  failed. `summarize()` exists as a separate function specifically so the
+  pre-bind path can be exercised without a socket. See
+  `meta/perception-failures/log.md` entry 8 and the matching rule in
+  `meta/procedural-memory/universal.md`.
 - **Per-edge prose is missing for authority edges** — see above.
 - **`scope` is a judgement, not a sourced fact.** 12/27 split, assigned here
   rather than taken from any Confluence page. Eight domains carry a
@@ -172,20 +185,30 @@ Current content, as reported by `generate.py` rather than asserted here:
 
 ## Running it
 
-`kg-viz.sh {start|stop|restart|status}` runs the server as a background
+`graph.sh {start|stop|restart|status}` runs the server as a background
 process (pid + log under `.run/`, gitignored) so it doesn't tie up a
 terminal; open `http://127.0.0.1:8766` once it's started. Port 8766 is
 deliberately distinct from the local-agent UI's 8765 so both can run at
 once. Binds to localhost only; nothing is exposed beyond the machine it
 runs on. `serve.py` regenerates `graph.json` from `kg-content` on every
 startup, so `restart` is also how you pick up entity changes — `start`
-echoes the resulting node/edge/unresolved counts as confirmation the data
-is current. Mirrors `components/local-agent/ui/arc-lite.sh` rather than
-introducing a second convention for local UIs.
+echoes the resulting per-view counts as confirmation the data is current.
+Mirrors `components/local-agent/ui/arc-lite.sh` rather than introducing a
+second convention for local UIs.
+
+The script is named `graph.sh` and the pid/log inside `.run/` are named
+after the *component* (`kg-viz.log`), so renaming the script does not move
+them. `.run/kg-viz.log` is append-only across runs, and both the success
+banner and the failure output read only the bytes appended by the current
+attempt — an earlier version used `grep -m1` over the whole file and
+reported the *oldest* run's counts as if they were current. On failure the
+script now prints that attempt's error inline rather than only naming the
+log file, because the log's most eye-catching traceback frequently belongs
+to some previous run.
 
 `python3 serve.py` still works directly if you want it in the foreground.
 
-Run `./kg-viz.sh start` from a normal terminal (outside any sandboxed tool
+Run `./graph.sh start` from a normal terminal (outside any sandboxed tool
 call) and open the URL. Nobody has seen this in a browser yet — see "Known
 gaps" above for exactly what is and is not verified.
 

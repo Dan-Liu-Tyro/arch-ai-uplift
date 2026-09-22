@@ -77,3 +77,6 @@ policy this exists to serve.
 - An algorithm's arbitrary tie-break becomes a semantic claim in its output —
   derive it from the data model, not from iteration order, and verify by
   rendering the artefact, not by checking the run completed.
+- One blocked line does not make a file untestable — scope "can't test that
+  here" to the blocked call, name skipped checks in any verification list,
+  and re-grep every reader when a shared return shape changes.

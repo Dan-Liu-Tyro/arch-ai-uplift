@@ -48,7 +48,7 @@ of what is actually built.
 | Understand why anything is the way it is | [`docs/decision-log.md`](docs/decision-log.md) — the primary artefact |
 | See where the program is heading | [`docs/program-roadmap.md`](docs/program-roadmap.md) — snapshot; Confluence owns it, re-fetch rather than edit |
 | Work on the graph itself | [`components/kg-core/SCHEMA.md`](components/kg-core/SCHEMA.md) — the critical path |
-| Look at what the graph currently contains | [`components/kg-viz/`](components/kg-viz) — `./kg-viz.sh start`; read-only, `graph.json` is regenerable |
+| Look at what the graph currently contains | [`components/kg-viz/`](components/kg-viz) — `./graph.sh start`; read-only, `graph.json` is regenerable |
 | Work on IN-563 | [`practice/capability-maturity/`](practice/capability-maturity) — start at `validation-plan.md` |
 | Avoid repeating a known mistake | [`meta/procedural-memory/INDEX.md`](meta/procedural-memory/INDEX.md) |
 

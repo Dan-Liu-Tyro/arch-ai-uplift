@@ -28,13 +28,31 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         pass
 
 
+def summarize(result) -> str:
+    """Kept separate from main() so the regenerate-and-report path is testable
+    without binding a socket. It was not, and that cost a broken start: when
+    graph.json grew from {nodes, links, stats} to {categories, views[]}, this
+    summary still indexed result['nodes'] and raised KeyError before bind, so
+    the server died on startup with a traceback that looked like a port
+    problem.
+    """
+    parts = []
+    for view in result["views"]:
+        stats = view["stats"]
+        detail = ""
+        if "unresolved_references" in stats:
+            detail = f", {len(stats['unresolved_references'])} unresolved refs"
+        elif "columns" in stats:
+            detail = f", {stats['columns']} flow columns"
+        parts.append(
+            f"{view['id']} ({len(view['nodes'])} nodes, "
+            f"{len(view['links'])} edges{detail})"
+        )
+    return "kg-viz: regenerated graph.json — " + "; ".join(parts)
+
+
 def main():
-    result = generate.generate()
-    print(
-        f"kg-viz: regenerated graph.json "
-        f"({len(result['nodes'])} nodes, {len(result['links'])} edges, "
-        f"{len(result['stats']['unresolved_references'])} unresolved references)"
-    )
+    print(summarize(generate.generate()))
     server = http.server.HTTPServer((HOST, PORT), Handler)
     print(f"kg-viz UI: http://{HOST}:{PORT}  (Ctrl+C to stop)")
     try:

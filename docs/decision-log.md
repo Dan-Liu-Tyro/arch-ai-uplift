@@ -1592,6 +1592,22 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       Integration Domain" that does not exist in `domains.json` at all — and
       was deliberately **not** used as the source. Decision 28's lesson
       applied on purpose: it would have been the wrong page.
+    - **Follow-up, 2026-09-22 — decision 35 shipped a broken start command.**
+      Changing `generate.generate()`'s return shape broke `serve.py`, which
+      still indexed `result['nodes']` and raised `KeyError: 'nodes'` before
+      reaching its socket bind, so `./graph.sh start` failed every time. It
+      was missed because `serve.py` had been filed as untestable in this
+      sandbox (it cannot bind a socket) and was therefore excluded from a
+      verification pass that covered everything else — the restriction
+      applies to one call, not the file. Fixed by extracting
+      `serve.summarize()` so the pre-bind path can be exercised without a
+      socket, and the script now prints the current attempt's error inline
+      instead of only naming an append-only log whose most obvious traceback
+      often belongs to an earlier run. Recorded as
+      `meta/perception-failures/log.md` entry 8 with its rule in
+      `meta/procedural-memory/universal.md`. The wrapper was also renamed
+      `kg-viz.sh` → `graph.sh` by the user; the rename was unrelated to the
+      failure, though the failure message invited that diagnosis.
 
 ## Constraints identified
 

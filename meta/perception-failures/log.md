@@ -425,3 +425,56 @@ underlying rule was already written in `universal.md` before this
 instance ("test an environment hypothesis... before proposing a change");
 this entry is evidence that having the rule on file doesn't guarantee it
 gets applied under a plausible-sounding chain of prior reasoning.
+
+## 8. `serve.py`'s only failure mode believed to be the sandbox's socket restriction
+
+**The belief.** That `components/kg-viz/serve.py` was working code whose
+only obstacle was environmental — the sandbox cannot `bind()` — and
+therefore that it was *unverifiable here* and needed no further attention.
+Stated flatly in `components/kg-viz/README.md` ("unrelated to the code
+itself"), in the commit message for decision 35 ("the sandbox cannot bind a
+socket, so nobody has opened this in a browser"), and to the user in a
+status report that listed what was and was not verified without ever
+listing `serve.py` as a risk.
+
+**Why it was wrong.** True when first formed, on 2026-09-18, before
+`generate.generate()`'s return shape changed. In the same session I then
+changed that return value from `{nodes, links, stats}` to
+`{categories, default_view, views[]}` — and `serve.py` reads it, printing
+`result['nodes']`. From that moment `serve.py` raised `KeyError: 'nodes'`
+on every start, *before* reaching the `bind()` call. The belief was not an
+overgeneralization from narrow evidence (the shape of entries 1 and 7) but
+a **stale conclusion that stopped being re-derived once it had an
+explanation attached**: "serve.py fails for environmental reasons" was
+accurate, then became a cached verdict that survived the very refactor that
+invalidated it.
+
+**The compounding error, which is the more interesting one.** The
+environmental limit applied to *one line* of `serve.py`, and I treated it
+as applying to the whole file. Verification that session was thorough
+elsewhere — layout invariants asserted, both data files checked against
+their schemas and for referential integrity, `index.html`'s JavaScript
+executed against real data under a stubbed DOM in node — but `serve.py`
+was silently excluded from all of it, because it had already been filed
+under "can't test that here." The crashing code path needed no socket at
+all; `python3 -c "import serve, generate; serve.summarize(generate.generate())"`
+would have caught it in one call. A single true unverifiable line made an
+entire testable unit invisible.
+
+**How it propagated.** Into the component README's "Known gaps" (which
+framed the browser as the only unverified surface), the decision-35 commit
+message, and a status report to the user that explicitly enumerated
+verification coverage — the worst place for the omission, because
+enumerating coverage implies the enumeration is complete.
+
+**Caught by.** The user, running `./graph.sh start` from a real terminal
+and hitting "Failed to start", four days later. Not caught by any check in
+the session that broke it. Worth noting the user's own hypothesis was that
+their rename of the script had caused it, which is the diagnosis the
+failure message invited; reading the log first (rather than reasoning about
+the rename) is what surfaced the `KeyError`.
+
+**Fix.** The regenerate-and-report path was extracted into
+`serve.summarize()` specifically so it can be called without binding, and
+the rule is recorded in `meta/procedural-memory/universal.md` — not
+restated here.

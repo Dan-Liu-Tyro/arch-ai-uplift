@@ -574,3 +574,35 @@ order. And verify by rendering the actual artefact — print the grid, the
 ordering, the chosen survivor — not by checking that the algorithm terminated
 without error. "It ran and nothing was left over" is satisfied equally well by
 the correct answer and by an arbitrary one.
+
+## One blocked line does not make a file untestable
+
+**What happened.** `components/kg-viz/serve.py` cannot complete in this
+sandbox: it calls `HTTPServer(...)`, and binding a socket is denied. I
+recorded that correctly, and then treated the whole file as unverifiable
+here. In the same session I changed the return shape of the function
+`serve.py` consumes, from `{nodes, links, stats}` to
+`{categories, views[]}`, updated every other consumer, and never touched
+`serve.py` — which still indexed `result['nodes']`. It raised
+`KeyError: 'nodes'` on every startup, several lines *before* the call that
+needs a socket. The user hit it four days later as "Failed to start", and
+reasonably guessed their own rename of the wrapper script had caused it.
+
+**Cost.** A broken start command shipped as the documented way to run the
+component, and a status report to the user that enumerated verification
+coverage with this gap unmentioned — worse than saying nothing, because an
+enumeration implies completeness. Diagnosis took one log read; the fix,
+one line. The check that would have caught it was
+`python3 -c "import serve, generate; serve.summarize(generate.generate())"`.
+
+**Rule.** When an environment restriction blocks part of a code path, scope
+the exclusion to the blocked call, not the file, the module, or the
+feature. Ask what fraction of that unit runs *before* the blocked line and
+test that fraction — and when a summary or banner sits in front of a
+blocked operation, factor it out so it can be called directly. Two
+specific traps to watch: a verification list that names everything checked
+will read as exhaustive, so anything consciously skipped has to be named in
+it; and "I can't test that here" is a conclusion with a shelf life — it
+expires the moment you change something the untestable code depends on. On
+any change to a shared return shape or signature, grep for every reader
+rather than relying on recall of which ones you edited.

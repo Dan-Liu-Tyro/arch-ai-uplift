@@ -12,7 +12,7 @@ business process as well as offer Architecture service to wider steams such as a
 **Status: design phase.** A schema draft and component scaffolding exist. No
 product code, build system, or test suite is committed — the only code that runs
 is `components/local-agent/ui/server.py`, `components/kg-viz/`'s
-`generate.py` + `serve.py` (both fronted by `kg-viz.sh`, the same
+`generate.py` + `serve.py` (both fronted by `graph.sh`, the same
 start/stop/restart pattern as `local-agent/ui/arc-lite.sh`), plus the
 stdlib scripts under `meta/`.
 Do not invent or assume build/lint/test commands; there are none. If asked to
