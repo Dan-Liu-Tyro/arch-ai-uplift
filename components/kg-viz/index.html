@@ -18,8 +18,22 @@
       degree ~15. Force layout. Only legible once you switch groups off, which
       is why the group toggles exist.
 -->
-<script src="https://unpkg.com/three-spritetext"></script>
-<script src="https://unpkg.com/3d-force-graph"></script>
+<!--
+  Order matters: 3d-force-graph bundles its own THREE, and three-spritetext
+  must attach to that same instance. Loading spritetext first can leave two
+  THREE copies in the page, and a sprite built from the wrong one is not a
+  valid object in the graph's scene. This is the order 3d-force-graph's own
+  examples use.
+
+  These are the component's only external dependency, and they are a real
+  single point of failure: if the network blocks unpkg, nothing renders. The
+  boot check below turns that into a legible on-screen message instead of a
+  blank page, and `vendor/` is the documented escape hatch -- drop the two
+  files there and the page prefers them.
+-->
+<!-- Loaded by the sequential loader at the bottom of this file, vendor first
+     then CDN, so the order above is guaranteed and a blocked CDN produces a
+     readable message rather than a blank page. -->
 <style>
   html, body { margin: 0; height: 100%; background: #05070d; color: #e8ecf4;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; overflow: hidden; }
@@ -71,6 +85,17 @@
   .pill.wide { border-color: #6fa8ff; color: #6fa8ff; }
   #hint { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
     font-size: 11px; color: #67718a; z-index: 4; }
+  /* Deliberately loud and centred. A silent blank canvas cost a round trip
+     with the user; anything that stops the graph drawing must announce itself
+     on screen, not only in the devtools console. */
+  #notes { position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+    max-width: 620px; display: none; z-index: 9; background: rgba(60, 14, 20, 0.94);
+    border: 1px solid #ff7e8f; border-radius: 10px; padding: 12px 16px;
+    font-size: 12.5px; line-height: 1.55; color: #ffdfe3; }
+  #notes.open { display: block; }
+  #notes h3 { margin: 0 0 6px; font-size: 13px; color: #fff; }
+  #notes code { background: rgba(0,0,0,0.35); padding: 1px 5px; border-radius: 4px; }
+  #notes div + div { margin-top: 6px; }
 </style>
 </head>
 <body>
@@ -115,6 +140,8 @@
 
   <div id="hint">Click a node to inspect it and its relationships &middot; drag to pan &middot; scroll to zoom</div>
 
+  <div id="notes"><h3>kg-viz diagnostics</h3><div id="notes-body"></div></div>
+
 <script>
   var CATEGORY_COLORS = {
     "support-and-experience-channels": "#3fd0ff",
@@ -135,6 +162,29 @@
 
   var DATA = null, view = null, Graph = null;
   var dims = 2, scopeMode = "all", showLabels = true;
+  var LABELS_AVAILABLE = false;   // set once the SpriteText global is confirmed
+
+  // Anything that prevents the graph drawing goes on screen. Errors thrown
+  // inside the render loop never reach the fetch().catch() below, which is
+  // why a broken node accessor previously produced a blank canvas next to a
+  // perfectly healthy control panel.
+  function note(html) {
+    var body = document.getElementById("notes-body");
+    var line = document.createElement("div");
+    line.innerHTML = html;
+    body.appendChild(line);
+    document.getElementById("notes").classList.add("open");
+  }
+
+  window.addEventListener("error", function (e) {
+    note("<b>JavaScript error:</b> " + escapeHtml(e.message) +
+      (e.filename ? " <code>" + escapeHtml(String(e.filename).split("/").pop()) +
+        ":" + e.lineno + "</code>" : ""));
+  });
+  window.addEventListener("unhandledrejection", function (e) {
+    note("<b>Unhandled promise rejection:</b> " +
+      escapeHtml((e.reason && e.reason.message) || String(e.reason)));
+  });
   var hiddenGroups = {};     // keyed per view id -> Set of hidden group keys
   var selected = null;
   var adjacency = {};
@@ -212,6 +262,13 @@
         n.fx = n.col * COL_SPACING;
         n.fy = (n.lane - 1) * LANE_HEIGHT + n.row * ROW_SPACING - LANE_HEIGHT;
         n.fz = 0;
+        // Seed x/y/z as well, not just the fx/fy/fz pins. zoomToFit() reads
+        // x/y/z to compute bounds, and a node whose x is still undefined
+        // yields NaN bounds and a camera that points nowhere -- which looks
+        // exactly like an empty canvas. The force engine would normally copy
+        // fx->x on init, but seeding directly removes the dependency on that
+        // having happened before the first fit.
+        n.x = n.fx; n.y = n.fy; n.z = 0;
       } else {
         delete n.fx; delete n.fy; delete n.fz;
       }
@@ -399,6 +456,49 @@
     setTimeout(function () { Graph.zoomToFit(600, 70); }, 350);
   }
 
+  // Framing is done from a real measurement rather than a blind timeout,
+  // because "camera pointed at NaN" and "nothing was drawn" look identical.
+  function frameGraph() {
+    var vis = visibleData();
+    if (!vis.nodes.length) return;
+    var finite = vis.nodes.filter(function (n) {
+      return isFinite(n.x) && isFinite(n.y);
+    });
+    if (!finite.length) {
+      note("<b>Nodes have no finite coordinates</b> — the camera has nothing " +
+        "to frame, so the canvas is empty. This is a layout bug, not a data " +
+        "problem: " + vis.nodes.length + " nodes were handed to the renderer.");
+      return;
+    }
+    if (finite.length < vis.nodes.length) {
+      note("<b>" + (vis.nodes.length - finite.length) + " of " + vis.nodes.length +
+        "</b> nodes have non-finite coordinates and will not be drawn.");
+    }
+    Graph.zoomToFit(600, 70);
+  }
+
+  function boot() {
+    LABELS_AVAILABLE = typeof SpriteText === "function";
+
+    if (typeof ForceGraph3D !== "function") {
+      note("<b>3d-force-graph did not load.</b> The page is served from " +
+        "localhost but the library comes from <code>unpkg.com</code>, so this " +
+        "is usually a blocked network. Fix: download " +
+        "<code>3d-force-graph.min.js</code> and " +
+        "<code>three-spritetext.min.js</code> into " +
+        "<code>components/kg-viz/vendor/</code> — they are preferred over the " +
+        "CDN when present.");
+      return;
+    }
+    if (!LABELS_AVAILABLE) {
+      note("<b>three-spritetext did not load</b> — the graph renders, but " +
+        "nodes have no text labels (hover still shows titles). Vendor it into " +
+        "<code>components/kg-viz/vendor/</code> to fix.");
+    }
+    start();
+  }
+
+  function start() {
   fetch("graph.json").then(function (r) { return r.json(); }).then(function (data) {
     DATA = data;
     view = DATA.views.find(function (v) { return v.id === DATA.default_view; }) || DATA.views[0];
@@ -425,13 +525,28 @@
       })
       .nodeThreeObjectExtend(true)
       .nodeThreeObject(function (n) {
-        if (!showLabels) return null;
-        var dim = (selected && !neighbourIds(selected)[n.id]) || (!selected && isDimmedByScope(n));
-        var sprite = new SpriteText(n.title.replace(/ Domain$/, ""));
-        sprite.color = dim ? "rgba(150,160,180,0.3)" : "#dfe5f0";
-        sprite.textHeight = 6;
-        sprite.position.y = -11;
-        return sprite;
+        // Returning null falls back to the library's default sphere. This
+        // accessor is called from inside the render loop for *every* node, so
+        // anything that throws here takes out the whole scene while leaving
+        // the rest of the page working -- an empty canvas with a healthy
+        // control panel. `SpriteText` is the realistic way that happens: it
+        // is a second CDN script and it has to bind to the same THREE
+        // instance 3d-force-graph bundles. Never assume it is there.
+        if (!showLabels || !LABELS_AVAILABLE) return null;
+        try {
+          var dim = (selected && !neighbourIds(selected)[n.id]) || (!selected && isDimmedByScope(n));
+          var sprite = new SpriteText(String(n.title).replace(/ Domain$/, ""));
+          sprite.color = dim ? "rgba(150,160,180,0.3)" : "#dfe5f0";
+          sprite.textHeight = 6;
+          sprite.position.y = -11;
+          return sprite;
+        } catch (e) {
+          // Degrade to unlabelled spheres once, loudly, instead of failing
+          // every frame in silence.
+          LABELS_AVAILABLE = false;
+          note("Node labels disabled: SpriteText failed (" + e.message + "). Graph still renders.");
+          return null;
+        }
       })
       .linkDirectionalArrowLength(function (l) { return view.layout === "layered" ? 4 : 0; })
       .linkDirectionalArrowRelPos(1)
@@ -488,14 +603,41 @@
       repaint();
     };
 
+    Graph.onEngineStop(function () { frameGraph(); });
+
     buildControls();
     renderStats();
-    setTimeout(function () { Graph.zoomToFit(600, 70); }, 400);
+    setTimeout(frameGraph, 400);
   }).catch(function (err) {
-    document.getElementById("stats").innerHTML =
-      "Failed to load graph.json: " + escapeHtml(err.message) +
-      "<br/><br/>Run <code>./graph.sh restart</code> to regenerate it.";
+    note("<b>Could not load graph.json:</b> " + escapeHtml(err.message) +
+      "<br/>Run <code>./graph.sh restart</code> to regenerate it.");
   });
+  }
+
+  // Vendor copy first, CDN second. Sequential on purpose: three-spritetext
+  // must attach to the THREE instance 3d-force-graph bundles, so it cannot
+  // start loading until that one is in place.
+  function loadFirstAvailable(urls, done) {
+    var i = 0;
+    (function attempt() {
+      if (i >= urls.length) { done(false); return; }
+      var s = document.createElement("script");
+      s.src = urls[i++];
+      s.onload = function () { done(true); };
+      s.onerror = attempt;
+      document.head.appendChild(s);
+    })();
+  }
+
+  loadFirstAvailable(
+    ["vendor/3d-force-graph.min.js", "https://unpkg.com/3d-force-graph"],
+    function () {
+      loadFirstAvailable(
+        ["vendor/three-spritetext.min.js", "https://unpkg.com/three-spritetext"],
+        function () { boot(); }
+      );
+    }
+  );
 </script>
 </body>
 </html>
