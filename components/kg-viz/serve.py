@@ -21,8 +21,35 @@ PORT = 8766  # local-agent's UI server uses 8765; kept distinct so both can run 
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
+    """Static file handler that refuses to let the browser cache anything.
+
+    This is a local inspection tool whose two served files change constantly:
+    `index.html` every time the UI is edited, `graph.json` on every start.
+    Browser caching bought nothing and cost a full debugging round trip --
+    a fix was reported as "same thing", with the user quoting a diagnostic
+    message that had already been deleted from disk, because the page in the
+    browser was the previous version. Expecting a human to remember a
+    cache-bypassing reload is not a design; sending the headers is.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(UI_DIR), **kwargs)
+
+    def end_headers(self):
+        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        super().end_headers()
+
+    def do_GET(self):
+        # SimpleHTTPRequestHandler answers 304 Not Modified from
+        # If-Modified-Since on its own, which would hand back a cached page
+        # regardless of the headers above. Drop the conditional headers so
+        # every request is served in full.
+        for conditional in ("If-Modified-Since", "If-None-Match"):
+            if conditional in self.headers:
+                del self.headers[conditional]
+        super().do_GET()
 
     def log_message(self, fmt, *args):
         pass

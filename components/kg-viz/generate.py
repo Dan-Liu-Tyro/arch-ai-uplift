@@ -30,6 +30,7 @@ kg-content: `python3 components/kg-viz/generate.py`
 
 from __future__ import annotations
 
+import datetime
 import json
 import re
 from pathlib import Path
@@ -368,6 +369,9 @@ def generate() -> dict:
         views.append(payments)
     graph = {
         "generated_from": "components/kg-content",
+        # Surfaced in the UI so "am I looking at current data?" is answerable
+        # by reading the screen rather than by trusting a reload.
+        "generated_at": datetime.datetime.now().replace(microsecond=0).isoformat(),
         "categories": domains_data["categories"],
         "default_view": "payments-target-state" if payments else "domain-authority",
         "views": views,

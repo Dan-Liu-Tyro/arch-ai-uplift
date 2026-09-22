@@ -172,6 +172,14 @@
 
   var COL_SPACING = 230, LANE_HEIGHT = 300, ROW_SPACING = 62;
 
+  // Shown bottom-left. Bump this on any edit to this file. It exists because
+  // a stale cached page is indistinguishable from a fix that did not work:
+  // one round trip was spent on a report quoting a diagnostic string that had
+  // already been deleted from disk. serve.py now sends no-store, so this is
+  // the belt to that braces -- if the revision on screen is not the one you
+  // expect, you are not looking at the current page.
+  var PAGE_REVISION = "2026-09-22c — HTML labels, no three-spritetext";
+
   var DATA = null, view = null, Graph = null;
   var dims = 2, scopeMode = "all", showLabels = true;
   // Anything that prevents the graph drawing goes on screen. Errors thrown
@@ -354,6 +362,8 @@
       lines.push("Source is WIP; the whiteboard body is not machine-readable, so this is built " +
         "from its owner's structured text feed.");
     }
+    lines.push('<span style="color:#67718a">page ' + escapeHtml(PAGE_REVISION) +
+      "<br/>data generated " + escapeHtml(DATA.generated_at || "unknown") + "</span>");
     el.innerHTML = lines.join("<br/><br/>");
   }
 

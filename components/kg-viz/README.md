@@ -223,6 +223,19 @@ to some previous run.
 
 `python3 serve.py` still works directly if you want it in the foreground.
 
+**The server sends `no-store` on every response, and suppresses 304s.** Both
+served files change constantly — `index.html` on every UI edit, `graph.json`
+on every start — and a cached page is indistinguishable from a fix that did
+not work. One debugging round trip was lost to exactly that: a fix was
+reported as "same thing", quoting a diagnostic string that had already been
+deleted from disk. Note that `serve.py` reads both files from disk per
+request, so a *restart* is only needed to regenerate `graph.json`; an edit to
+`index.html` needs nothing but a reload. Two freshness markers are printed in
+the stats box, bottom left: `PAGE_REVISION` (a constant in `index.html`, bump
+it when editing that file) and `graph.json`'s `generated_at`. If the revision
+on screen is not the one you expect, you are not looking at the current
+page.
+
 Run `./graph.sh start` from a normal terminal (outside any sandboxed tool
 call) and open the URL. Nobody has seen this in a browser yet — see "Known
 gaps" above for exactly what is and is not verified.
