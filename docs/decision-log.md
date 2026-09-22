@@ -93,6 +93,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 34 | Programme Stream page re-baselined to FY27 Q2/Q3/Q4; new IN-564 epics cited | Confluence, Jira, program roadmap |
 | 35 | `kg-viz` split into two purpose-built views; first typed directed graph; `scope` tag on `domain` | `kg-viz`, `kg-content/entities/graphs/`, `kg-core/SCHEMA.md` |
 | 36 | `kg-viz` de-serverised: `serve.py`/`graph.sh` deleted, `index.html` opened from disk | `kg-viz`, `CLAUDE.md`, component-model |
+| 37 | `kg-viz` starts empty and opens any compatible graph file; `graph-data.js` dropped | `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -1652,6 +1653,39 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       right response is to remove machinery rather than add more of it, and to
       make the page report its own state — see the "Constraints identified"
       entry.
+37. **The viewer starts empty and opens any compatible graph file by explicit
+    choice.** The user's call, on seeing the auto-loading version: *"I don't
+    like it, make the vis graph viewer start with empty, allow to open and
+    browse for any compatible graph, I can select graph.json and then page can
+    load it. Default to graph.json."* Implemented as asked.
+    - **`graph-data.js` is deleted and `generate.py` writes only `graph.json`
+      again.** That wrapper existed solely to let the page auto-load from
+      `file://` (origin `null` blocks `fetch`; a `<script src>` is
+      unaffected). With no auto-load there is nothing for it to do. It was
+      costing a second 238KB artifact that had to stay in step with
+      `graph.json`, plus two filenames one token apart — which had already
+      produced the question "what's the purpose of graph.js?" The naming
+      confusion was the tell that the mechanism was carrying its weight badly.
+    - **What "compatible" means, stated once:** any JSON with a top-level
+      `views` array. `graph.json` is the named default in the prompt, but
+      nothing is special-cased to it — the component is now a viewer for graph
+      files rather than a display of one graph. That also makes it usable for
+      a second overlay without touching the page.
+    - **Reopening is a first-class operation, not a reload.** An *Open another
+      graph…* control sits in the left panel. Switching files clears the
+      previous graph's hidden groups and selection — stale filters silently
+      narrowing a newly opened graph would be a nasty, near-invisible bug —
+      and reuses the existing renderer rather than constructing a second WebGL
+      context on the same element. Both are asserted in the test harness
+      (scenario E: one renderer across two loads, 21 visible nodes returning
+      to 26).
+    - **Empty means empty.** The control and stats panels stay hidden until a
+      graph is open, because a viewer showing zero counts and no stages reads
+      as broken rather than as waiting. Invalid input is rejected by name and
+      reason instead of rendering an empty canvas.
+    - **This partially reverses decision 36's loading mechanism, not its
+      substance.** No server, still; only the route the data takes into the
+      page has changed, from a generated blob to a user-chosen file.
 
 ## Constraints identified
 

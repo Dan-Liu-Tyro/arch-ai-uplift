@@ -25,25 +25,19 @@ sparse and reads in order.
 
 ## Files, and what each is responsible for
 
-6 files, 5 of them tracked. Nothing else belongs in this directory.
+5 files, 5 of them tracked. Nothing else belongs in this directory.
 
-| File | Tracked | Responsibility | Who writes it |
-| --- | --- | --- | --- |
-| `generate.py` | yes | **The only executable.** Reads `kg-content`, resolves the overlay's `domain_ref`s against `domains.json`, computes the swimlane layout (feedback-arc detection, then longest-path depth within each stage), and writes the two output files below. The single place any derivation happens. | a human, by hand |
-| `index.html` | yes | **The entire UI**, in one self-contained file: markup, CSS, and all view/filter/label/selection behaviour. Reads the generated data; derives nothing from `kg-content` itself. Opened directly from disk. | a human, by hand |
-| `graph.json` | yes | **The canonical generated artifact.** Both views, their nodes, typed edges, computed layout coordinates, and per-view stats. Portable and readable on its own, which is why it stays tracked — a future `kg-core` or publish step can consume it. **Never hand-edit; it is overwritten on every run.** | `generate.py` |
-| `graph-data.js` | **no** (gitignored) | **Byte-for-byte the same payload as `graph.json`**, wrapped as `window.KG_GRAPH = {...};`. Exists for exactly one reason: a page opened as `file://` has origin `null`, so `fetch("graph.json")` is blocked, while a `<script src>` is not. Its presence is what makes the page work with no server and no file picker. Untracked because duplicating 238KB in git on every regeneration buys nothing a reviewer can use. | `generate.py` |
-| `README.md` | yes | This file: the component's contract. | a human, by hand |
-| `vendor/README.md` | yes | How and why to place a local copy of `3d-force-graph` here when the CDN is unreachable. The `.js` file it describes is gitignored. | a human, by hand |
+| File | Responsibility | Who writes it |
+| --- | --- | --- |
+| `generate.py` | **The only executable.** Reads `kg-content`, resolves the overlay's `domain_ref`s against `domains.json`, computes the swimlane layout (feedback-arc detection, then longest-path depth within each stage), and writes `graph.json`. The single place any derivation happens. | a human, by hand |
+| `index.html` | **The entire viewer**, in one self-contained file: markup, CSS, and all loading/view/filter/label/selection behaviour. Derives nothing from `kg-content`; renders whatever graph file it is given. Opened directly from disk. | a human, by hand |
+| `graph.json` | **The generated graph.** Both views, their nodes, typed edges, computed layout coordinates, and per-view stats. This is the default file to open, and the only output of `generate.py`. **Never hand-edit; it is overwritten on every run.** | `generate.py` |
+| `README.md` | This file: the component's contract. | a human, by hand |
+| `vendor/README.md` | How and why to place a local copy of `3d-force-graph` here when the CDN is unreachable. The `.js` file it describes is gitignored. | a human, by hand |
 
-**There is no `graph.js`.** If you are looking for one, the file meant is
-`graph-data.js` — the `file://` loading wrapper described above. The two
-generated files are deliberately named for what they are: `graph.json` is the
-data, `graph-data.js` is the same data in a form a browser will load from
-disk.
-
-Deleted by decision 36 and not coming back: `serve.py` and `graph.sh`. This
-component has no server and needs no process — see "Opening it".
+Deleted and not coming back: `serve.py` and `graph.sh` (decision 36 — this
+component has no server), and `graph-data.js` (decision 37 — a bundled data
+blob that existed only to let the page auto-load, which it no longer does).
 
 ## Boundary
 
@@ -151,11 +145,12 @@ through ingestion is the real fix. See "Known gaps".
 
 ## Status
 
-Third pass. No build system — plain stdlib Python plus a single CDN script
+Fifth pass. No build system — plain stdlib Python plus a single CDN script
 tag (`3d-force-graph`), consistent with this repo's "zero new infra" stance
 (decision 1). Node labels are plain HTML positioned over the canvas with
 `graph2ScreenCoords()`; see `vendor/README.md` for why the `three-spritetext`
-dependency was removed rather than vendored.
+dependency was removed rather than vendored. The viewer is file-driven: it
+holds no data of its own and starts empty.
 
 Current content, as reported by `generate.py` rather than asserted here:
 
@@ -224,55 +219,57 @@ Current content, as reported by `generate.py` rather than asserted here:
 
 ## Opening it
 
-**There is no server.** Open `index.html` directly — double-click it, or
-`open components/kg-viz/index.html`. That is the whole procedure.
+**No server, and it starts empty.** Open `index.html` from disk, then open a
+graph file:
 
 ```bash
-python3 components/kg-viz/generate.py   # after any kg-content change
-open components/kg-viz/index.html
+python3 components/kg-viz/generate.py    # after any kg-content change
+open components/kg-viz/index.html        # then choose graph.json
 ```
 
-`generate.py` writes two files with identical content: `graph.json`, the
-canonical portable artifact, and `graph-data.js`, the same payload wrapped as
-`window.KG_GRAPH = {...};`. The wrapper exists for one reason: a page opened
-as `file://` has origin `null`, so `fetch("graph.json")` is blocked outright,
-while a `<script src>` is not — script tags predate CORS and were never
-retrofitted with it. With `graph-data.js` present the page loads its data with
-no server and no interaction.
+The viewer shows an **Open a graph** prompt on load. Choose the file, or drop
+any `.json` file onto the window. `graph.json` in the same folder is the
+expected default and is what the prompt names, but nothing is special-cased to
+it — this is a viewer for any compatible graph file, meaning any JSON with a
+top-level `views` array. **Open another graph…** in the left panel switches
+files at any time; the previous graph's filters and selection are cleared on
+each load, and the renderer is reused rather than rebuilt.
 
-If `graph-data.js` is missing (it is gitignored — see below), the page says so
-and offers to load `graph.json` by **drag-and-drop or a file picker**. A file
-chosen through an `<input>` is readable by explicit user grant, which is why
-that path works under `file://` where `fetch` does not. A dropped file that is
-not a kg-viz graph is rejected with a specific message rather than rendering
-as an empty canvas.
+A file that is valid JSON but not a graph, or not valid JSON at all, is
+rejected with a message naming the file and the reason — never by rendering an
+empty canvas.
+
+### Why it starts empty rather than auto-loading (decision 37)
+
+An earlier version auto-loaded a generated `graph-data.js` that assigned
+`window.KG_GRAPH`, because a page opened as `file://` has origin `null` and so
+cannot `fetch("graph.json")`, while a `<script src>` can. That worked, and was
+dropped anyway: it made the page a hard-wired display of one file, produced a
+second 238KB artifact that had to stay in step with `graph.json`, and gave the
+component two names one token apart (`graph.json` / `graph-data.js`) that
+immediately caused confusion about which was which. Loading by explicit choice
+needs no wrapper, because a file the user selects or drops is readable by
+grant rather than by origin.
 
 ### Why the server was removed (decision 36)
 
 `serve.py` and `graph.sh` are deleted. Nothing about this component ever
-needed a process: it serves two static files to one local reader. What the
-server did contribute was failure modes, and they cost several rounds of
-debugging between them — a startup crash when `generate.generate()`'s return
-shape changed and `serve.py` was the one consumer not updated; HTTP caching
-that served a two-commit-old page while a fix was reported as "same thing";
-and a stale-log problem where a failure pointed at an append-only file whose
-most obvious traceback belonged to an earlier run. None of those are possible
-without a server. `file://` reloads read from disk.
+needed a process: it serves static files to one local reader. What the server
+did contribute was failure modes, and they cost several rounds of debugging
+between them — a startup crash when `generate.generate()`'s return shape
+changed and `serve.py` was the one consumer not updated; HTTP caching that
+served a two-commit-old page while a fix was reported as "same thing"; and a
+stale-log problem where a failure pointed at an append-only file whose most
+obvious traceback belonged to an earlier run. None of those are possible
+without a server.
 
-### Freshness is still shown, because a picker is a cache by another name
+### Freshness is shown, because a picker is a cache by another name
 
-The page shows whatever was last loaded, so the stats box (bottom left)
-always prints three things: `PAGE_REVISION` (a constant in `index.html` —
-bump it when editing that file), which file the data came from, and
+The page displays whatever was last opened, so the stats box (bottom left)
+always prints three things: `PAGE_REVISION` (a constant in `index.html` — bump
+it when editing that file), **which file the data came from**, and
 `graph.json`'s `generated_at`. Without those, stale data looks exactly like
-current data, which is the trap the removed HTTP cache already demonstrated.
-
-### `graph-data.js` is gitignored
-
-It is a byte-for-byte duplicate of `graph.json` (~238KB each), and tracking
-both would double the diff churn on every regeneration for no review value.
-`graph.json` stays tracked. The cost is that a fresh clone shows the picker
-until `generate.py` is run once — which the picker says, in those words.
+current data, which is the trap the removed HTTP cache already sprang.
 
 ## Extraction notes
 

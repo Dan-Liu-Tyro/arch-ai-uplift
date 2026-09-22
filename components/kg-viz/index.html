@@ -39,6 +39,11 @@
   .panel-base { position: absolute; background: rgba(12, 16, 26, 0.88);
     border: 1px solid rgba(120, 140, 180, 0.28); border-radius: 10px;
     padding: 12px 14px; backdrop-filter: blur(6px); z-index: 5; }
+  /* Both panels stay hidden until a graph is actually open -- they describe
+     a loaded graph, and an empty viewer showing zero counts and no stages
+     reads as broken rather than as waiting. */
+  #controls, #stats { display: none; }
+  #controls.ready, #stats.ready { display: block; }
   #controls { top: 14px; left: 14px; width: 262px; max-height: calc(100vh - 28px);
     overflow-y: auto; font-size: 12.5px; }
   #controls h1 { font-size: 13px; margin: 0 0 4px; letter-spacing: 0.02em; color: #fff; }
@@ -154,6 +159,11 @@
     <div class="seg" style="margin-top: 8px;">
       <button id="fit-btn">Fit to view</button>
     </div>
+
+    <div class="group-label">Graph file</div>
+    <div class="seg">
+      <button id="open-btn">Open another graph…</button>
+    </div>
   </div>
 
   <div id="stats" class="panel-base"></div>
@@ -167,27 +177,23 @@
 
   <div id="notes"><h3>kg-viz diagnostics</h3><div id="notes-body"></div></div>
 
-  <!-- Only shown if graph-data.js is missing. Opening this file directly
-       normally needs no interaction at all. -->
+  <!-- The normal entry point, not a fallback: the viewer starts empty and
+       every graph is opened by explicit choice. -->
   <div id="picker">
     <div class="box">
-      <h3>Load a graph file</h3>
-      <p><code>graph-data.js</code> wasn't found next to this page, so the data
-      couldn't load automatically.</p>
-      <p><b>Drop <code>graph.json</code> anywhere on this window</b>, or</p>
+      <h3>Open a graph</h3>
+      <p>This viewer starts empty and will display any compatible graph file —
+      one with a top-level <code>views</code> array.</p>
+      <p>The default is <code>graph.json</code>, in this same folder.</p>
       <button id="pick-btn">Choose graph.json…</button>
       <input type="file" id="file-input" accept=".json,application/json" hidden />
-      <p class="fine">To skip this step in future, run
-      <code>python3 generate.py</code> in <code>components/kg-viz/</code> —
-      it writes both <code>graph.json</code> and the <code>graph-data.js</code>
-      this page loads on its own.</p>
+      <p class="fine">Or drop a <code>.json</code> file anywhere on this
+      window. Regenerate <code>graph.json</code> from the knowledge graph with
+      <code>python3 generate.py</code>; you can reopen or switch files at any
+      time from the left panel.</p>
     </div>
   </div>
 
-  <!-- Deliberately last, and deliberately not in <head>: it only assigns a
-       global, and failing to find it is a supported state (the picker above
-       handles it) rather than an error. -->
-  <script src="graph-data.js" onerror="window.__noGraphData = true"></script>
 
 <script>
   var CATEGORY_COLORS = {
@@ -214,8 +220,8 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-22d — no server; open this file directly";
-  var LOADED_FROM = "graph-data.js";
+  var PAGE_REVISION = "2026-09-22e — starts empty; open any compatible graph";
+  var LOADED_FROM = "(nothing loaded)";
 
   var DATA = null, view = null, Graph = null;
   var dims = 2, scopeMode = "all", showLabels = true;
@@ -598,24 +604,17 @@
     Graph.zoomToFit(600, 70);
   }
 
-  // ---- Getting the data in, with no server --------------------------------
+  // ---- Getting the data in -------------------------------------------------
   //
-  // Three routes, in order of preference:
-  //   1. graph-data.js already assigned window.KG_GRAPH. Zero friction, and
-  //      what normally happens.
-  //   2. fetch("graph.json") -- works if this page happens to be served over
-  //      http, which nothing here requires any more.
-  //   3. The user picks or drops graph.json. A file chosen through an <input>
-  //      is read by explicit grant, so it works under file:// where fetch()
-  //      is blocked outright.
-  function loadData() {
-    if (window.KG_GRAPH) return Promise.resolve(window.KG_GRAPH);
-    if (location.protocol !== "file:") {
-      return fetch("graph.json").then(function (r) { return r.json(); });
-    }
-    return null;   // caller shows the picker
-  }
-
+  // The viewer starts empty and always loads by explicit choice: pick or drop
+  // a file. There is deliberately no auto-load -- no fetch, no bundled data
+  // blob -- so this page is a *viewer for any compatible graph file* rather
+  // than a hard-wired display of one. `graph.json` is the expected default
+  // and is what the picker names, but nothing is special-cased to it.
+  //
+  // A file chosen through an <input> or dropped is readable by explicit user
+  // grant, which is why this works from file:// where fetch() is blocked
+  // outright (the page's origin is `null`).
   function readFile(file) {
     var reader = new FileReader();
     reader.onload = function () {
@@ -675,18 +674,37 @@
         "<code>vendor/README.md</code>.");
       return;
     }
-    var pending = loadData();
-    if (pending) start(pending);
-    else showPicker();
+    showPicker();
   }
 
+  // Called once per opened file. The renderer and its one-time wiring live in
+  // ensureGraph() below, so opening a second graph re-points the existing
+  // canvas instead of stacking another WebGL context on the same div.
   function start(data) {
-  Promise.resolve(data).then(function (data) {
     DATA = data;
     view = DATA.views.find(function (v) { return v.id === DATA.default_view; }) || DATA.views[0];
+
+    // Per-graph state must not survive a file switch: a hidden group or a
+    // selected node from the previous graph would silently filter this one.
+    hiddenGroups = {};
+    selected = null;
+    document.getElementById("detail").classList.remove("open");
+
     buildAdjacency();
     applyLayout();
+    ensureGraph();
+    Graph.numDimensions(dims).graphData(visibleData());
 
+    document.getElementById("controls").classList.add("ready");
+    document.getElementById("stats").classList.add("ready");
+    buildControls();
+    renderStats();
+    rebuildLabels();
+    setTimeout(frameGraph, 400);
+  }
+
+  function ensureGraph() {
+    if (Graph) return;
     Graph = ForceGraph3D()(document.getElementById("graph"))
       .backgroundColor("#05070d")
       .numDimensions(dims)
@@ -779,18 +797,13 @@
       Graph.width(host.clientWidth).height(host.clientHeight);
     });
 
+    document.getElementById("open-btn").onclick = function () {
+      document.getElementById("file-input").click();
+    };
+
     labelLoop();
 
     Graph.onEngineStop(function () { frameGraph(); });
-
-    buildControls();
-    renderStats();
-    rebuildLabels();
-    setTimeout(frameGraph, 400);
-  }).catch(function (err) {
-    note("<b>Could not render the graph:</b> " + escapeHtml(err.message) +
-      "<br/>Regenerate the data with <code>python3 generate.py</code> and reload.");
-  });
   }
 
   // Vendor copy first, CDN second. One library only -- labels are HTML now,

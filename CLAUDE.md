@@ -27,11 +27,11 @@ docs/backlog.md           parked feature ideas, not yet decided or scheduled
 docs/component-model.md   component boundaries, dependency + promotion rules
 components/kg-core/       schema contract (SCHEMA.md), validation, traversal
 components/kg-content/    the curated graph — entity files, data only
-components/kg-viz/        read-only view of the graph, two purpose-built
-                                  views (2D flow default, 3D a toggle); no
-                                  server -- open index.html from disk;
-                                  graph.json is a regenerable build
-                                  artifact, never hand-edited
+components/kg-viz/        read-only viewer, two purpose-built views (2D
+                                  flow default, 3D a toggle); no server --
+                                  open index.html from disk, then open any
+                                  compatible graph file (default graph.json,
+                                  a regenerable artifact, never hand-edited)
 components/confluence-ingest/    inbound: Confluence pages → draft entities
 components/confluence-publish/   outbound: entities → generated pages
 components/query-service/        v2, deferred — do not build yet
