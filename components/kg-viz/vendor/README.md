@@ -1,46 +1,48 @@
-# vendor/ — optional local copies of the two browser libraries
+# vendor/ — optional local copy of the one browser library
 
-`index.html` loads its two dependencies from here **first**, and falls back to
-`unpkg.com` only if these files are absent:
+`index.html` loads its single dependency from here **first**, and falls back
+to `unpkg.com` only if this file is absent:
 
 | Expected filename | Upstream |
 | --- | --- |
 | `3d-force-graph.min.js` | `https://unpkg.com/3d-force-graph` |
-| `three-spritetext.min.js` | `https://unpkg.com/three-spritetext` |
 
 ## Why this exists
 
 The CDN is the component's only external dependency and its only real single
 point of failure — on a network that blocks `unpkg.com`, nothing renders. The
-page now says so on screen instead of showing a blank canvas, and this
-directory is the fix it points at.
-
-Load order matters and is enforced by the loader in `index.html`:
-`3d-force-graph` bundles its own copy of THREE, and `three-spritetext` has to
-attach to *that* instance. If `three-spritetext` ends up bound to a different
-THREE — or fails to initialise because it expected a global one — then
-`SpriteText` is either missing or produces objects the graph's scene rejects.
-That is the most likely cause of a graph that does not draw while the control
-panel works perfectly, so `index.html` treats labels as optional and degrades
-to unlabelled spheres rather than throwing once per node inside the render
-loop.
-
-## Populating it
+page says so on screen instead of showing a blank canvas, and this directory
+is the fix it points at.
 
 ```bash
 cd components/kg-viz/vendor
-curl -Lo 3d-force-graph.min.js   https://unpkg.com/3d-force-graph
-curl -Lo three-spritetext.min.js https://unpkg.com/three-spritetext
+curl -Lo 3d-force-graph.min.js https://unpkg.com/3d-force-graph
 ```
 
-Then `../graph.sh restart` and reload. The page prefers these automatically;
-there is nothing to configure.
+Then `../graph.sh restart` and reload. The page prefers this copy
+automatically; there is nothing to configure.
 
-## Why the `.js` files are gitignored
+## There used to be a second library, and why there isn't now
 
-They are third-party minified builds. Tyro's code-search standard is not to
-pull copyrighted public source into our repositories, and a vendored blob also
-has no review value in a diff — a reviewer cannot judge a change to a
-minified bundle. Keeping them local preserves the offline escape hatch without
+Node labels were `SpriteText` objects from `three-spritetext`. In a real
+browser that library failed with an opaque cross-origin `"Script error."`
+while `3d-force-graph` loaded normally — it expects a global `THREE`, and
+`3d-force-graph` bundles its own copy without exposing it. Because the label
+accessor ran inside the render loop, *every* node threw, so the canvas stayed
+empty next to a fully working control panel.
+
+Vendoring it would not have helped: the script was reaching the browser and
+failing during execution, not failing to download. Labels are now plain HTML
+positioned with `graph2ScreenCoords()`, which removes the dependency
+altogether and is better anyway — text stays crisp at any zoom instead of
+being a scaled texture, it is styleable in CSS, and it cannot take the scene
+down. **Do not reintroduce a THREE-dependent text library here.**
+
+## Why the `.js` file is gitignored
+
+It is a third-party minified build. Tyro's code-search standard is not to
+pull copyrighted public source into our repositories, and a vendored bundle
+also has no review value in a diff — a reviewer cannot judge a change to
+minified output. Keeping it local preserves the offline escape hatch without
 committing someone else's distribution. Only this README is tracked, so the
 mechanism stays discoverable when the directory is empty.

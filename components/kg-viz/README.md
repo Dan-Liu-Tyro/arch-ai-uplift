@@ -123,12 +123,17 @@ through ingestion is the real fix. See "Known gaps".
   rest, and opens a panel listing every inbound and outbound relationship
   with its predicate, payload, and whether it is a feedback arc.
 - **Feedback arcs** drawn dashed/curved and counted in the stats box.
+- **Fit to view** — re-frames the camera. Framing also happens automatically
+  on `onEngineStop`, but a manual control matters because a camera pointed
+  somewhere empty is indistinguishable from a graph that failed to draw.
 
 ## Status
 
-Third pass. No build system — plain stdlib Python plus two CDN script tags
-(`3d-force-graph`, `three-spritetext` for persistent labels), consistent with
-this repo's "zero new infra" stance (decision 1).
+Third pass. No build system — plain stdlib Python plus a single CDN script
+tag (`3d-force-graph`), consistent with this repo's "zero new infra" stance
+(decision 1). Node labels are plain HTML positioned over the canvas with
+`graph2ScreenCoords()`; see `vendor/README.md` for why the `three-spritetext`
+dependency was removed rather than vendored.
 
 Current content, as reported by `generate.py` rather than asserted here:
 
@@ -146,9 +151,19 @@ Current content, as reported by `generate.py` rather than asserted here:
 
 ## Known gaps
 
-- **Never verified in a real browser.** The sandbox this was built in cannot
-  bind a listening socket (`serve.py`'s `HTTPServer(...)` call fails with
-  `PermissionError: [Errno 1] Operation not permitted`). What *was* verified:
+- **Partly verified in a real browser, as of 2026-09-22.** The user ran it and
+  supplied a screenshot: both control panels populate correctly, the stats box
+  reports 26 of 26 nodes and 43 of 43 edges, and the graph draws. Two defects
+  that only a browser could surface were found and fixed — `three-spritetext`
+  throwing inside the render loop (blank canvas beside a working panel) and
+  nodes rendering as near-invisible specks against a 230-unit column spacing.
+  Still unconfirmed after those fixes: whether the swimlane layout reads
+  correctly, whether labels collide, and camera framing.
+
+  The sandbox this is built in cannot bind a listening socket (`serve.py`'s
+  `HTTPServer(...)` call fails with `PermissionError: [Errno 1] Operation not
+  permitted`), so none of that can be checked from here. What *is* verified
+  mechanically:
   `generate.py`'s output and layout invariants (every forward edge runs
   left-to-right within its lane, no two nodes share a position, no node
   unranked); both data files against their schemas and for referential
