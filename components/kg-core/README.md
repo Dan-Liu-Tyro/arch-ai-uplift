@@ -4,6 +4,23 @@ The schema contract and the logic for reading and traversing the graph. This is
 the component everything else depends on, and the one that must stay ignorant of
 its consumers.
 
+## Files, and what each is responsible for
+
+All prose and JSON Schema; **no code is implemented yet** (see Status).
+
+| File | Responsibility |
+| --- | --- |
+| `SCHEMA.md` | **The contract in prose, and the authority on intent.** Entity types, relationship types, frontmatter shape, body templates, validation rules, and the open items still undecided. Where a `*.schema.json` and this file appear to disagree, this file states the reasoning and the JSON file is the mechanical check — fix the JSON. |
+| `schemas/domain.schema.json` | Machine-checkable shape of `kg-content/entities/domains.json` — the consolidated file holding all 39 `domain` entities, a scoped exception to one-file-per-entity. Includes the `scope` enum (`acquirer-specific` / `tyro-wide`) and `scope_note`. |
+| `schemas/graph.schema.json` | Machine-checkable shape of `kg-content/entities/graphs/<slug>.json` — overlay graphs: stages, nodes (either a `domain_ref` or a locally declared `kind`), and typed edges carrying a `predicate` and `payload`. Added by decision 35. |
+
+Neither schema is wired to a validator: adding `jsonschema` would break the
+repo's stdlib-only convention, so they are currently checked by reading and by
+ad-hoc scripts. `SCHEMA.md`'s "Validation rules" section lists what an
+implemented validator would have to enforce, including the rules JSON Schema
+cannot express — notably that an overlay node with a `domain_ref` must not
+restate any domain fact.
+
 ## Boundary
 
 **In scope**

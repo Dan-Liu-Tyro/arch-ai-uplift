@@ -23,6 +23,28 @@ They are deliberately not drawn together. `domain-authority` averages degree
 switch groups off, which is why the group toggles exist. The flow view is
 sparse and reads in order.
 
+## Files, and what each is responsible for
+
+6 files, 5 of them tracked. Nothing else belongs in this directory.
+
+| File | Tracked | Responsibility | Who writes it |
+| --- | --- | --- | --- |
+| `generate.py` | yes | **The only executable.** Reads `kg-content`, resolves the overlay's `domain_ref`s against `domains.json`, computes the swimlane layout (feedback-arc detection, then longest-path depth within each stage), and writes the two output files below. The single place any derivation happens. | a human, by hand |
+| `index.html` | yes | **The entire UI**, in one self-contained file: markup, CSS, and all view/filter/label/selection behaviour. Reads the generated data; derives nothing from `kg-content` itself. Opened directly from disk. | a human, by hand |
+| `graph.json` | yes | **The canonical generated artifact.** Both views, their nodes, typed edges, computed layout coordinates, and per-view stats. Portable and readable on its own, which is why it stays tracked — a future `kg-core` or publish step can consume it. **Never hand-edit; it is overwritten on every run.** | `generate.py` |
+| `graph-data.js` | **no** (gitignored) | **Byte-for-byte the same payload as `graph.json`**, wrapped as `window.KG_GRAPH = {...};`. Exists for exactly one reason: a page opened as `file://` has origin `null`, so `fetch("graph.json")` is blocked, while a `<script src>` is not. Its presence is what makes the page work with no server and no file picker. Untracked because duplicating 238KB in git on every regeneration buys nothing a reviewer can use. | `generate.py` |
+| `README.md` | yes | This file: the component's contract. | a human, by hand |
+| `vendor/README.md` | yes | How and why to place a local copy of `3d-force-graph` here when the CDN is unreachable. The `.js` file it describes is gitignored. | a human, by hand |
+
+**There is no `graph.js`.** If you are looking for one, the file meant is
+`graph-data.js` — the `file://` loading wrapper described above. The two
+generated files are deliberately named for what they are: `graph.json` is the
+data, `graph-data.js` is the same data in a form a browser will load from
+disk.
+
+Deleted by decision 36 and not coming back: `serve.py` and `graph.sh`. This
+component has no server and needs no process — see "Opening it".
+
 ## Boundary
 
 **In scope**
