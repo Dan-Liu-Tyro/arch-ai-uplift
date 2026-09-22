@@ -11,10 +11,10 @@ business process as well as offer Architecture service to wider steams such as a
 
 **Status: design phase.** A schema draft and component scaffolding exist. No
 product code, build system, or test suite is committed — the only code that runs
-is `components/local-agent/ui/server.py`, `components/kg-viz/`'s
-`generate.py` + `serve.py` (both fronted by `graph.sh`, the same
-start/stop/restart pattern as `local-agent/ui/arc-lite.sh`), plus the
-stdlib scripts under `meta/`.
+is `components/local-agent/ui/server.py`, `components/kg-viz/generate.py`,
+plus the stdlib scripts under `meta/`. `kg-viz` deliberately has **no**
+server any more (decision 36) -- `index.html` is opened directly from
+disk; do not reintroduce one.
 Do not invent or assume build/lint/test commands; there are none. If asked to
 add tooling, choose per the org language standards (Kotlin preferred for
 complex applications).
@@ -28,7 +28,8 @@ docs/component-model.md   component boundaries, dependency + promotion rules
 components/kg-core/       schema contract (SCHEMA.md), validation, traversal
 components/kg-content/    the curated graph — entity files, data only
 components/kg-viz/        read-only view of the graph, two purpose-built
-                                  views (2D flow default, 3D a toggle);
+                                  views (2D flow default, 3D a toggle); no
+                                  server -- open index.html from disk;
                                   graph.json is a regenerable build
                                   artifact, never hand-edited
 components/confluence-ingest/    inbound: Confluence pages → draft entities

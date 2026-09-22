@@ -19,8 +19,9 @@ cd components/kg-viz/vendor
 curl -Lo 3d-force-graph.min.js https://unpkg.com/3d-force-graph
 ```
 
-Then `../graph.sh restart` and reload. The page prefers this copy
-automatically; there is nothing to configure.
+Then reload `index.html`. The page prefers this copy automatically; there
+is nothing to configure. The path is relative to the page, so it resolves
+under `file://` exactly as it did over http.
 
 ## There used to be a second library, and why there isn't now
 

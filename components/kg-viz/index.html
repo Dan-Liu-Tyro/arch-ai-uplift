@@ -104,6 +104,19 @@
   #notes h3 { margin: 0 0 6px; font-size: 13px; color: #fff; }
   #notes code { background: rgba(0,0,0,0.35); padding: 1px 5px; border-radius: 4px; }
   #notes div + div { margin-top: 6px; }
+  #picker { position: absolute; inset: 0; display: none; z-index: 20;
+    background: rgba(5, 7, 13, 0.92); align-items: center; justify-content: center; }
+  #picker.open { display: flex; }
+  #picker .box { max-width: 460px; padding: 26px 30px; border-radius: 12px;
+    border: 1px dashed rgba(120, 140, 180, 0.5); background: rgba(12, 16, 26, 0.95);
+    font-size: 13px; line-height: 1.6; }
+  #picker.hot .box { border-color: #2d6cf6; background: rgba(20, 34, 66, 0.95); }
+  #picker h3 { margin: 0 0 10px; font-size: 15px; color: #fff; }
+  #picker p { margin: 0 0 10px; color: #b9c2d4; }
+  #picker code { background: rgba(0,0,0,0.4); padding: 1px 5px; border-radius: 4px; }
+  #picker button { background: #2d6cf6; color: #fff; border: 0; border-radius: 7px;
+    padding: 9px 16px; font-size: 13px; font-family: inherit; cursor: pointer; }
+  #picker .fine { font-size: 11.5px; color: #7b87a0; margin-top: 16px; }
 </style>
 </head>
 <body>
@@ -154,6 +167,28 @@
 
   <div id="notes"><h3>kg-viz diagnostics</h3><div id="notes-body"></div></div>
 
+  <!-- Only shown if graph-data.js is missing. Opening this file directly
+       normally needs no interaction at all. -->
+  <div id="picker">
+    <div class="box">
+      <h3>Load a graph file</h3>
+      <p><code>graph-data.js</code> wasn't found next to this page, so the data
+      couldn't load automatically.</p>
+      <p><b>Drop <code>graph.json</code> anywhere on this window</b>, or</p>
+      <button id="pick-btn">Choose graph.json…</button>
+      <input type="file" id="file-input" accept=".json,application/json" hidden />
+      <p class="fine">To skip this step in future, run
+      <code>python3 generate.py</code> in <code>components/kg-viz/</code> —
+      it writes both <code>graph.json</code> and the <code>graph-data.js</code>
+      this page loads on its own.</p>
+    </div>
+  </div>
+
+  <!-- Deliberately last, and deliberately not in <head>: it only assigns a
+       global, and failing to find it is a supported state (the picker above
+       handles it) rather than an error. -->
+  <script src="graph-data.js" onerror="window.__noGraphData = true"></script>
+
 <script>
   var CATEGORY_COLORS = {
     "support-and-experience-channels": "#3fd0ff",
@@ -175,10 +210,12 @@
   // Shown bottom-left. Bump this on any edit to this file. It exists because
   // a stale cached page is indistinguishable from a fix that did not work:
   // one round trip was spent on a report quoting a diagnostic string that had
-  // already been deleted from disk. serve.py now sends no-store, so this is
-  // the belt to that braces -- if the revision on screen is not the one you
-  // expect, you are not looking at the current page.
-  var PAGE_REVISION = "2026-09-22c — HTML labels, no three-spritetext";
+  // already been deleted from disk. There is no server or HTTP cache in the
+  // way any more, but a file:// page can still be reloaded from a browser's
+  // memory cache -- if the revision on screen is not the one you expect, you
+  // are not looking at the current page.
+  var PAGE_REVISION = "2026-09-22d — no server; open this file directly";
+  var LOADED_FROM = "graph-data.js";
 
   var DATA = null, view = null, Graph = null;
   var dims = 2, scopeMode = "all", showLabels = true;
@@ -362,8 +399,13 @@
       lines.push("Source is WIP; the whiteboard body is not machine-readable, so this is built " +
         "from its owner's structured text feed.");
     }
+    // Provenance and freshness, always visible. A file picker is a cache by
+    // another name -- the page shows whatever was last loaded -- so which
+    // file it came from and when that data was generated have to be on
+    // screen, or stale data is indistinguishable from current data.
     lines.push('<span style="color:#67718a">page ' + escapeHtml(PAGE_REVISION) +
-      "<br/>data generated " + escapeHtml(DATA.generated_at || "unknown") + "</span>");
+      "<br/>data from " + escapeHtml(LOADED_FROM) +
+      ", generated " + escapeHtml(DATA.generated_at || "unknown") + "</span>");
     el.innerHTML = lines.join("<br/><br/>");
   }
 
@@ -556,6 +598,72 @@
     Graph.zoomToFit(600, 70);
   }
 
+  // ---- Getting the data in, with no server --------------------------------
+  //
+  // Three routes, in order of preference:
+  //   1. graph-data.js already assigned window.KG_GRAPH. Zero friction, and
+  //      what normally happens.
+  //   2. fetch("graph.json") -- works if this page happens to be served over
+  //      http, which nothing here requires any more.
+  //   3. The user picks or drops graph.json. A file chosen through an <input>
+  //      is read by explicit grant, so it works under file:// where fetch()
+  //      is blocked outright.
+  function loadData() {
+    if (window.KG_GRAPH) return Promise.resolve(window.KG_GRAPH);
+    if (location.protocol !== "file:") {
+      return fetch("graph.json").then(function (r) { return r.json(); });
+    }
+    return null;   // caller shows the picker
+  }
+
+  function readFile(file) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      var parsed;
+      try {
+        parsed = JSON.parse(reader.result);
+      } catch (e) {
+        note("<b>" + escapeHtml(file.name) + " is not valid JSON:</b> " +
+          escapeHtml(e.message));
+        return;
+      }
+      if (!parsed.views) {
+        note("<b>" + escapeHtml(file.name) + " is not a kg-viz graph file.</b> " +
+          "Expected a top-level <code>views</code> array — this looks like a " +
+          "different JSON file. Use the <code>graph.json</code> next to this page.");
+        return;
+      }
+      LOADED_FROM = file.name;
+      document.getElementById("picker").classList.remove("open");
+      start(parsed);
+    };
+    reader.onerror = function () {
+      note("<b>Could not read " + escapeHtml(file.name) + ".</b>");
+    };
+    reader.readAsText(file);
+  }
+
+  function showPicker() {
+    document.getElementById("picker").classList.add("open");
+    var input = document.getElementById("file-input");
+    input.onchange = function () { if (input.files[0]) readFile(input.files[0]); };
+    document.getElementById("pick-btn").onclick = function () { input.click(); };
+    ["dragenter", "dragover"].forEach(function (evt) {
+      document.body.addEventListener(evt, function (e) {
+        e.preventDefault();
+        document.getElementById("picker").classList.add("hot");
+      });
+    });
+    document.body.addEventListener("dragleave", function () {
+      document.getElementById("picker").classList.remove("hot");
+    });
+    document.body.addEventListener("drop", function (e) {
+      e.preventDefault();
+      document.getElementById("picker").classList.remove("hot");
+      if (e.dataTransfer.files[0]) readFile(e.dataTransfer.files[0]);
+    });
+  }
+
   function boot() {
     if (typeof ForceGraph3D !== "function") {
       note("<b>3d-force-graph did not load.</b> The page is served from " +
@@ -567,11 +675,13 @@
         "<code>vendor/README.md</code>.");
       return;
     }
-    start();
+    var pending = loadData();
+    if (pending) start(pending);
+    else showPicker();
   }
 
-  function start() {
-  fetch("graph.json").then(function (r) { return r.json(); }).then(function (data) {
+  function start(data) {
+  Promise.resolve(data).then(function (data) {
     DATA = data;
     view = DATA.views.find(function (v) { return v.id === DATA.default_view; }) || DATA.views[0];
     buildAdjacency();
@@ -678,8 +788,8 @@
     rebuildLabels();
     setTimeout(frameGraph, 400);
   }).catch(function (err) {
-    note("<b>Could not load graph.json:</b> " + escapeHtml(err.message) +
-      "<br/>Run <code>./graph.sh restart</code> to regenerate it.");
+    note("<b>Could not render the graph:</b> " + escapeHtml(err.message) +
+      "<br/>Regenerate the data with <code>python3 generate.py</code> and reload.");
   });
   }
 

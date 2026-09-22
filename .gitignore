@@ -4,3 +4,4 @@
 .DS_Store
 .DS_Store
 components/kg-viz/vendor/*.js
+components/kg-viz/graph-data.js

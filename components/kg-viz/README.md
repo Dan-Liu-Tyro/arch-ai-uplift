@@ -29,8 +29,8 @@ sparse and reads in order.
 
 - Generating `graph.json` from whatever currently exists in `kg-content`
   (`generate.py`), as one file containing both views.
-- Serving that JSON plus a static, self-contained HTML page (`serve.py`,
-  `index.html`).
+- A static, self-contained `index.html` that renders it, opened directly
+  from disk. No server, by decision 36 — see "Opening it".
 - Reading `domain`'s structured `not_authoritative_for` relationships
   directly from `kg-content/entities/domains.json` and rendering them as
   edges. (First pass derived edges by fuzzy-matching prose; retired once
@@ -160,29 +160,31 @@ Current content, as reported by `generate.py` rather than asserted here:
   Still unconfirmed after those fixes: whether the swimlane layout reads
   correctly, whether labels collide, and camera framing.
 
-  The sandbox this is built in cannot bind a listening socket (`serve.py`'s
-  `HTTPServer(...)` call fails with `PermissionError: [Errno 1] Operation not
-  permitted`), so none of that can be checked from here. What *is* verified
-  mechanically:
-  `generate.py`'s output and layout invariants (every forward edge runs
-  left-to-right within its lane, no two nodes share a position, no node
-  unranked); both data files against their schemas and for referential
-  integrity; `serve.summarize(generate.generate())`, which is the whole of
-  `serve.py` that runs before the blocked bind; and the page's own JavaScript
-  executed against the real `graph.json` under a stubbed DOM in node —
-  covering init, view switching, group hide (26→21 nodes and 43→32 edges with
-  no dangling links), and scope dimming (0/7 in-scope dimmed, 10/10
-  out-of-scope dimmed). What none of that covers is anything three.js
-  actually draws: label legibility, arrowheads, camera framing, colour
-  contrast. **Treat the visual design as unreviewed.**
+  Nothing browser-facing can be checked from the sandbox this is built in.
+  It denies socket operations broadly — which is why the server could never
+  bind, why `curl http://127.0.0.1` fails with "Operation not permitted",
+  and why headless Chrome aborts at startup (it creates a Unix-domain socket
+  for its process singleton). Browser automation is also prohibited by
+  organisational policy. So the user's eyes are the only observer, and the
+  page is built to report its own state.
 
-  An earlier version of this list omitted `serve.py` entirely, on the
-  reasoning that the socket restriction made it untestable here. That was
-  wrong in a way worth keeping written down: the restriction applies to one
-  call, and a later change to `generate.generate()`'s return shape broke
-  `serve.py` several lines *earlier*, shipping a start command that always
-  failed. `summarize()` exists as a separate function specifically so the
-  pre-bind path can be exercised without a socket. See
+  What *is* verified mechanically: `generate.py`'s output and layout
+  invariants (every forward edge runs left-to-right within its lane, no two
+  nodes share a position, no node unranked); both data files against their
+  schemas and for referential integrity; and the page's own JavaScript run
+  against the real `graph.json` under a stubbed DOM in node — four scenarios
+  covering a healthy auto-load, a NaN projection, a blocked library, and the
+  file-picker path including malformed and wrong-shape JSON. What none of
+  that covers is anything three.js actually draws: label legibility,
+  arrowheads, camera framing, colour contrast. **Treat the visual design as
+  unreviewed.**
+
+  An earlier version of this list omitted the now-deleted `serve.py`
+  entirely, on the reasoning that the socket restriction made it untestable
+  here. That was wrong in a way worth keeping written down even though the
+  file is gone: the restriction applied to one call, and a later change to
+  `generate.generate()`'s return shape broke `serve.py` several lines
+  *earlier*, shipping a start command that always failed. See
   `meta/perception-failures/log.md` entry 8 and the matching rule in
   `meta/procedural-memory/universal.md`.
 - **Per-edge prose is missing for authority edges** — see above.
@@ -198,47 +200,57 @@ Current content, as reported by `generate.py` rather than asserted here:
 - **Only one flow graph exists.** Nothing yet validates that a second
   overlay would not need schema changes.
 
-## Running it
+## Opening it
 
-`graph.sh {start|stop|restart|status}` runs the server as a background
-process (pid + log under `.run/`, gitignored) so it doesn't tie up a
-terminal; open `http://127.0.0.1:8766` once it's started. Port 8766 is
-deliberately distinct from the local-agent UI's 8765 so both can run at
-once. Binds to localhost only; nothing is exposed beyond the machine it
-runs on. `serve.py` regenerates `graph.json` from `kg-content` on every
-startup, so `restart` is also how you pick up entity changes — `start`
-echoes the resulting per-view counts as confirmation the data is current.
-Mirrors `components/local-agent/ui/arc-lite.sh` rather than introducing a
-second convention for local UIs.
+**There is no server.** Open `index.html` directly — double-click it, or
+`open components/kg-viz/index.html`. That is the whole procedure.
 
-The script is named `graph.sh` and the pid/log inside `.run/` are named
-after the *component* (`kg-viz.log`), so renaming the script does not move
-them. `.run/kg-viz.log` is append-only across runs, and both the success
-banner and the failure output read only the bytes appended by the current
-attempt — an earlier version used `grep -m1` over the whole file and
-reported the *oldest* run's counts as if they were current. On failure the
-script now prints that attempt's error inline rather than only naming the
-log file, because the log's most eye-catching traceback frequently belongs
-to some previous run.
+```bash
+python3 components/kg-viz/generate.py   # after any kg-content change
+open components/kg-viz/index.html
+```
 
-`python3 serve.py` still works directly if you want it in the foreground.
+`generate.py` writes two files with identical content: `graph.json`, the
+canonical portable artifact, and `graph-data.js`, the same payload wrapped as
+`window.KG_GRAPH = {...};`. The wrapper exists for one reason: a page opened
+as `file://` has origin `null`, so `fetch("graph.json")` is blocked outright,
+while a `<script src>` is not — script tags predate CORS and were never
+retrofitted with it. With `graph-data.js` present the page loads its data with
+no server and no interaction.
 
-**The server sends `no-store` on every response, and suppresses 304s.** Both
-served files change constantly — `index.html` on every UI edit, `graph.json`
-on every start — and a cached page is indistinguishable from a fix that did
-not work. One debugging round trip was lost to exactly that: a fix was
-reported as "same thing", quoting a diagnostic string that had already been
-deleted from disk. Note that `serve.py` reads both files from disk per
-request, so a *restart* is only needed to regenerate `graph.json`; an edit to
-`index.html` needs nothing but a reload. Two freshness markers are printed in
-the stats box, bottom left: `PAGE_REVISION` (a constant in `index.html`, bump
-it when editing that file) and `graph.json`'s `generated_at`. If the revision
-on screen is not the one you expect, you are not looking at the current
-page.
+If `graph-data.js` is missing (it is gitignored — see below), the page says so
+and offers to load `graph.json` by **drag-and-drop or a file picker**. A file
+chosen through an `<input>` is readable by explicit user grant, which is why
+that path works under `file://` where `fetch` does not. A dropped file that is
+not a kg-viz graph is rejected with a specific message rather than rendering
+as an empty canvas.
 
-Run `./graph.sh start` from a normal terminal (outside any sandboxed tool
-call) and open the URL. Nobody has seen this in a browser yet — see "Known
-gaps" above for exactly what is and is not verified.
+### Why the server was removed (decision 36)
+
+`serve.py` and `graph.sh` are deleted. Nothing about this component ever
+needed a process: it serves two static files to one local reader. What the
+server did contribute was failure modes, and they cost several rounds of
+debugging between them — a startup crash when `generate.generate()`'s return
+shape changed and `serve.py` was the one consumer not updated; HTTP caching
+that served a two-commit-old page while a fix was reported as "same thing";
+and a stale-log problem where a failure pointed at an append-only file whose
+most obvious traceback belonged to an earlier run. None of those are possible
+without a server. `file://` reloads read from disk.
+
+### Freshness is still shown, because a picker is a cache by another name
+
+The page shows whatever was last loaded, so the stats box (bottom left)
+always prints three things: `PAGE_REVISION` (a constant in `index.html` —
+bump it when editing that file), which file the data came from, and
+`graph.json`'s `generated_at`. Without those, stale data looks exactly like
+current data, which is the trap the removed HTTP cache already demonstrated.
+
+### `graph-data.js` is gitignored
+
+It is a byte-for-byte duplicate of `graph.json` (~238KB each), and tracking
+both would double the diff churn on every regeneration for no review value.
+`graph.json` stays tracked. The cost is that a fresh clone shows the picker
+until `generate.py` is run once — which the picker says, in those words.
 
 ## Extraction notes
 

@@ -92,6 +92,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 33 | Rename executed: `arch-knowledge-graph` → `arch-ai-uplift` | repo identity, `kg-core/schemas/`, `architecture-learning/README.md` |
 | 34 | Programme Stream page re-baselined to FY27 Q2/Q3/Q4; new IN-564 epics cited | Confluence, Jira, program roadmap |
 | 35 | `kg-viz` split into two purpose-built views; first typed directed graph; `scope` tag on `domain` | `kg-viz`, `kg-content/entities/graphs/`, `kg-core/SCHEMA.md` |
+| 36 | `kg-viz` de-serverised: `serve.py`/`graph.sh` deleted, `index.html` opened from disk | `kg-viz`, `CLAUDE.md`, component-model |
 
 ## Decisions so far (tentative — open to change)
 
@@ -1608,8 +1609,74 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       `meta/procedural-memory/universal.md`. The wrapper was also renamed
       `kg-viz.sh` → `graph.sh` by the user; the rename was unrelated to the
       failure, though the failure message invited that diagnosis.
+36. **`kg-viz` has no server: `serve.py` and `graph.sh` deleted, `index.html`
+    opened directly from disk.** Proposed by the user — "if we completely drop
+    the idea of having server at all, just a simple html with capability to
+    load a local graph file to display it. Any problem with that?" — and
+    adopted, because the answer was no.
+    - **Nothing here ever needed a process.** The component serves two static
+      files to one local reader. What the server contributed was failure
+      modes, and they consumed most of four debugging rounds: a startup crash
+      when `generate.generate()`'s return shape changed and `serve.py` was the
+      one consumer not updated; HTTP caching that served a two-commit-old page
+      while the fix was reported as "same thing"; and an append-only log whose
+      most eye-catching traceback belonged to an earlier run. None of those
+      are reachable without a server.
+    - **How the data gets in, since `file://` blocks `fetch`.** A page opened
+      from disk has origin `null`, so `fetch("graph.json")` is denied, but a
+      `<script src>` is not — script tags predate CORS and were never
+      retrofitted with it. `generate.py` therefore writes the same payload
+      twice: `graph.json` (canonical, tracked) and `graph-data.js`
+      (`window.KG_GRAPH = {...};`, gitignored as a byte-for-byte duplicate
+      that would otherwise double diff churn). If the wrapper is missing the
+      page offers drag-and-drop or a file picker, which works under `file://`
+      because a file chosen through an `<input>` is read by explicit user
+      grant. Wrong-shape and malformed JSON are rejected with specific
+      messages rather than rendering as an empty canvas.
+    - **This reverses part of the "mirror `local-agent`'s server" decision**
+      that produced `serve.py` and `graph.sh` in the first place. Consistency
+      with a sibling component was the wrong tie-breaker: `local-agent`'s UI
+      genuinely needs a process because it shells out to `claude -p`, whereas
+      this one only ever needed a file. Copying a neighbour's shape is not the
+      same as needing its machinery.
+    - **A picker is a cache by another name**, so the stats box now always
+      prints three things: `PAGE_REVISION`, which file the data came from, and
+      `graph.json`'s `generated_at`. Without that, stale data looks exactly
+      like current data — the trap the removed HTTP cache had already sprung.
+    - **Context that made this the right call: nobody but the user can see
+      this page.** The sandbox denies socket operations broadly, so the server
+      could not bind, `curl http://127.0.0.1` fails with "Operation not
+      permitted", and headless Chrome aborts at startup creating its
+      process-singleton socket. Browser automation is separately prohibited by
+      organisational policy. With verification impossible from inside, the
+      right response is to remove machinery rather than add more of it, and to
+      make the page report its own state — see the "Constraints identified"
+      entry.
 
 ## Constraints identified
+
+- **Nothing browser-facing can be verified from inside this session, and the
+  reason is one restriction with three faces.** The sandbox denies socket
+  operations broadly: a local server cannot `bind()`, `curl
+  http://127.0.0.1:<port>` fails with "Immediate connect fail ... Operation
+  not permitted", and headless Chrome aborts at startup because it creates a
+  Unix-domain socket for its process singleton. Separately, **browser
+  automation via the Claude in Chrome extension is prohibited by
+  organisational policy** (stated by the user 2026-09-22), so that route is
+  closed on policy grounds rather than technical ones. `jsdom` and
+  `puppeteer` are not installed and there is no package manager step in this
+  repo to add them.
+
+  The practical consequence, which shaped decision 36: the user's eyes are
+  the only observer of anything rendered. Two things follow. Build
+  self-diagnosis into any page — render errors into the DOM rather than only
+  the console, and print a visible build revision plus a data timestamp, so
+  "am I looking at the current version?" is answerable without devtools. And
+  prefer removing machinery over adding it, since every moving part is one
+  more thing that can fail unobserved. Asking the user for a screenshot or a
+  page-source paste is a legitimate and often decisive step, not a last
+  resort: a source dump is what settled "stale cache or failed fix?" after
+  reasoning from the filesystem could not.
 
 - **The sandbox blocks writes anywhere under `.git/`, not just `.git/config`
   (decision 33) — `git commit` itself fails, `Operation not permitted` on
