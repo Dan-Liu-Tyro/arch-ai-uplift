@@ -59,7 +59,33 @@ no useful provenance in a diff:
 
 | Date | Version | Obtained via |
 | --- | --- | --- |
-| _(not yet populated)_ | | |
+| 2026-09-23 | 1.80.0 | https://unpkg.com/3d-force-graph |
+
+## Licence — OPEN, needs confirming before this leaves the branch
+
+The committed bundle contains **no licence text**: its only header is
+`// Version 1.80.0 3d-force-graph - https://github.com/vasturiano/3d-force-graph`.
+Upstream is believed to be MIT, which is usual for that author's packages,
+but **that has not been verified** — it could not be checked from the
+environment this was committed in, which has no network access.
+
+This matters because Tyro's code standards call out not taking copyrighted
+public source into our repositories, and this commit does exactly that
+deliberately, to satisfy the offline requirement. The trade is defensible for
+a permissively licensed library and indefensible otherwise, so the licence is
+a real open item rather than a formality.
+
+To settle it, from a machine with a connection:
+
+```bash
+curl -sL https://raw.githubusercontent.com/vasturiano/3d-force-graph/master/LICENSE | head -3
+```
+
+Then record the result here and, if MIT or similar, commit the licence text
+alongside the bundle as that licence generally requires the notice to travel
+with the copy. If the licence turns out to be unsuitable, the escape route is
+already planned: `docs/backlog.md`'s hand-written SVG renderer removes this
+dependency entirely.
 
 ## This dependency is scheduled for removal
 

@@ -26,7 +26,7 @@ FORCE=0
 SOURCES=(
   "https://unpkg.com/3d-force-graph"
   "https://cdn.jsdelivr.net/npm/3d-force-graph/dist/3d-force-graph.min.js"
-  "https://cdnjs.cloudflare.com/ajax/libs/3d-force-graph/1.73.3/3d-force-graph.min.js"
+  "https://cdnjs.cloudflare.com/ajax/libs/3d-force-graph/1.80.0/3d-force-graph.min.js"
 )
 
 say() { printf '%s\n' "$*"; }
