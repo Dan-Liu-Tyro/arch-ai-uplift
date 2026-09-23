@@ -53,3 +53,31 @@ the user asked what "decision 3" actually was.
 they're independently maintained. Quote the decision's name, not a number, from
 either document. If a number is unavoidable, verify it against
 `docs/decision-log.md` specifically, since that is the canonical numbered list.
+
+---
+
+## `PAGE_REVISION` only works as a staleness signal if it is actually bumped every time
+
+**What happened.** `components/kg-viz/src/state.js` carries a comment stating
+its own convention plainly: "Bump this on any edit to this file" — `PAGE_REVISION`
+exists specifically so a stale browser-cached `file://` page is distinguishable
+from a genuine fix that did not work, a problem this component had already hit
+more than once. Across a session that shipped a real feature (a "Load default"
+button) and several file renames touching `state.js`'s own file and its
+neighbours, `PAGE_REVISION` was bumped once early on and then left unchanged for
+every subsequent edit. When the user later reported a rendering symptom (missing
+stage bands) and I checked the screenshot's revision string against the repo, it
+matched — but that match was meaningless: it would have matched an old cached
+page just as well as the current one, since the string had not changed either
+way. The one signal built to make that distinction stayed silent through the
+exact situation it exists for.
+
+**Cost.** Lost the ability to use the component's own designed diagnostic at the
+moment it was needed; had to reason about cache-vs-bug from code inspection alone
+instead of a five-second string comparison.
+
+**Rule.** Treat `PAGE_REVISION` as part of the diff for *any* change under
+`components/kg-viz/src/`, not just the one that happens to prompt a rebuild —
+bump it in the same edit, every time, even for a change that feels unrelated to
+rendering. A convention stated once in a comment does not enforce itself; only
+actually following it on every edit does.

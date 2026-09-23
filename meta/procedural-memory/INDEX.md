@@ -22,6 +22,9 @@ policy this exists to serve.
   request — capture is near-zero-cost and is lost if deferred.
 - Cite decisions by name, not number — `CLAUDE.md`'s summary and
   `docs/decision-log.md`'s own numbering aren't guaranteed to agree.
+- Bump `kg-viz`'s `PAGE_REVISION` in the same edit as any change under
+  `src/`, every time — it only catches a stale cached page if it actually
+  changes.
 
 ## Universal (`universal.md`)
 
