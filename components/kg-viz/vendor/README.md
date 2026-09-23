@@ -34,13 +34,25 @@ going unnoticed.
 
 ```bash
 cd components/kg-viz/vendor
-curl -Lo 3d-force-graph.min.js https://unpkg.com/3d-force-graph
+./fetch-renderer.sh            # or --force to re-fetch / update
 ```
 
-Behind a network that blocks public CDNs, `npm pack 3d-force-graph` usually
-works through an internal registry mirror; unpack the tarball and copy
-`dist/3d-force-graph.min.js` here. Either way, commit the result — after that
-every clone works offline with no further setup.
+The script tries unpkg, jsdelivr and cdnjs in turn, then `npm pack
+3d-force-graph` — which often works through an internal registry mirror on a
+network that blocks public CDNs. **It validates what came back instead of
+trusting a 200 response**: a captive portal or proxy error page arrives as a
+cheerful 200 full of HTML, so the result is checked for plausible size, for
+not being HTML, and for actually containing the `ForceGraph3D` symbol. On
+success it records the version in the table below and runs `../verify.js`; on
+total failure it writes nothing and leaves the previous state intact.
+
+If every source is blocked, the file can simply be placed by hand — download
+`https://unpkg.com/3d-force-graph` on any machine that can reach it and copy
+the result to `3d-force-graph.min.js` here. It is a plain static file; how it
+arrives does not matter.
+
+Either way, **commit the result** — after that every clone works offline with
+no further setup.
 
 Record the version below when you update it, since a minified bundle carries
 no useful provenance in a diff:

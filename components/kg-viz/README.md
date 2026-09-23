@@ -35,7 +35,8 @@ sparse and reads in order.
 | `verify.js` | **The checks behind this component's claims.** Runs `index.html`'s own JavaScript against the real `graph.json` under a stubbed DOM and asserts what can be asserted without pixels: empty start, load-by-file with validation, reopening, camera fit arithmetic, label non-overlap, and the offline invariants. Plain `node`, no dependencies. `node verify.js`. | a human, by hand |
 | `vendor/3d-force-graph.min.js` | The renderer, committed so a clone works with no network (decision 38). Third-party minified build; provenance recorded in `vendor/README.md`. | fetched once, then committed |
 | `README.md` | This file: the component's contract. | a human, by hand |
-| `vendor/README.md` | How and why to place a local copy of `3d-force-graph` here when the CDN is unreachable. The `.js` file it describes is gitignored. | a human, by hand |
+| `vendor/README.md` | Why the renderer is vendored and committed, how to populate it, and the version/provenance table. | a human, by hand |
+| `vendor/fetch-renderer.sh` | One-time bootstrap: fetches the renderer from whichever of four sources the network allows, validates it is really the library rather than a proxy error page, records its version, and runs `verify.js`. Needed once per machine until the `.js` is committed; after that only for updates. | a human, by hand |
 
 Deleted and not coming back: `serve.py` and `graph.sh` (decision 36 — this
 component has no server), and `graph-data.js` (decision 37 — a bundled data
