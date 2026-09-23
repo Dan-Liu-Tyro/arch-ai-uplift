@@ -13,14 +13,19 @@ business process as well as offer Architecture service to wider steams such as a
 product code, build system, or test suite is committed — the only code that runs
 is `components/local-agent/ui/server.py`, `components/kg-viz/generate.py`,
 plus the stdlib scripts under `meta/`. `kg-viz` deliberately has **no**
-server any more (decision 36) -- `index.html` is opened directly from
-disk; do not reintroduce one.
-There is no build system and no lint step. The **one** test command is
-`node components/kg-viz/verify.js` (plain node, no dependencies) -- it exists
-because nothing `kg-viz` renders can be observed from a session here. Do not
-invent or assume any other build/lint/test commands. If asked to add tooling,
-choose per the org language standards (Kotlin preferred for complex
-applications).
+server any more (decision 36) -- `knowledge-visualizer.html` is opened
+directly from disk; do not reintroduce one.
+There is no build system and no lint step, with one narrow exception:
+`kg-viz`'s own `build.py` (decision 39) concatenates its `src/*.js` files
+into `knowledge-visualizer.html`, because the source is now split by concern
+while the shipped page must stay one self-contained file. It is stdlib
+Python, no bundler, and does not extend to the rest of the repo. The **one**
+test command is `node components/kg-viz/verify.js` (plain node, no
+dependencies) -- it exists because nothing `kg-viz` renders can be observed
+from a session here, and it now also checks that `knowledge-visualizer.html`
+is not stale against `src/`. Do not invent or assume any other build/lint/test
+commands. If asked to add tooling, choose per the org language standards
+(Kotlin preferred for complex applications).
 
 ## Layout
 
@@ -32,9 +37,12 @@ components/kg-core/       schema contract (SCHEMA.md), validation, traversal
 components/kg-content/    the curated graph — entity files, data only
 components/kg-viz/        read-only viewer, two purpose-built views (2D
                                   flow default, 3D a toggle); no server --
-                                  open index.html from disk, then open any
-                                  compatible graph file (default graph.json,
-                                  a regenerable artifact, never hand-edited)
+                                  open knowledge-visualizer.html from disk,
+                                  then open any compatible graph file
+                                  (default payments-target-state.json, a
+                                  regenerable artifact, never hand-edited);
+                                  knowledge-visualizer.html is itself
+                                  generated too, by build.py from src/*.js
 components/confluence-ingest/    inbound: Confluence pages → draft entities
 components/confluence-publish/   outbound: entities → generated pages
 components/query-service/        v2, deferred — do not build yet

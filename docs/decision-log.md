@@ -95,6 +95,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 36 | `kg-viz` de-serverised: `serve.py`/`graph.sh` deleted, `index.html` opened from disk | `kg-viz`, `CLAUDE.md`, component-model |
 | 37 | `kg-viz` starts empty and opens any compatible graph file; `graph-data.js` dropped | `kg-viz` |
 | 38 | `kg-viz` offline-only: renderer vendored and committed, no remote loads | `kg-viz`, `.gitignore`, backlog |
+| 39 | `kg-viz` UI renamed "Knowledge Visualizer"; `index.html`→`knowledge-visualizer.html`, `graph.json`→`payments-target-state.json`; source split under `src/`, compiled by `build.py` | `kg-viz`, `CLAUDE.md`, `README.md` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -1726,6 +1727,79 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       make the rendering verifiable as text rather than only by a human
       looking at a screen. It was not done now because the 296-edge authority
       view still needs the library's force layout.
+
+39. **`kg-viz`'s UI is renamed "Knowledge Visualizer"; `index.html` and
+    `graph.json` are renamed to match; the JS source is split under `src/`
+    and compiled by a new `build.py`.** Three related requests in one
+    session: rename the on-screen name (correct spelling, not the
+    typo "visualizor" as typed), rename the two files to match, and
+    restructure the source for maintainability given the viewer's growing
+    number of dimensions (2D/3D, stages, views).
+    - **UI rename.** `<title>`, the left-panel `<h1>`, the diagnostics
+      heading, and the "not a ... graph file" error note all now say
+      "Knowledge Visualizer". `verify.js`'s scenario D regex was updated in
+      lockstep — it matches that exact error text, so the rename would
+      otherwise have gone untested until someone actually hit the error.
+    - **`index.html` → `knowledge-visualizer.html`.** Uncontested: a clean
+      match for the UI rename, no content mismatch.
+    - **`graph.json` → `payments-target-state.json`, with a known mismatch
+      accepted.** Raised and flagged before doing it: the compiled output
+      contains *both* views (`payments-target-state`, 26 nodes, and
+      `domain-authority`, 40 nodes/296 edges), so naming it after one view
+      describes only part of what it contains, and cuts against decision
+      37's point that the viewer is generic rather than special-cased to one
+      file. Asked twice; the user reaffirmed the rename anyway, since
+      `payments-target-state` is the default and primary view. Recorded in
+      `components/kg-viz/README.md`'s "Known gaps" as a deliberate,
+      acknowledged tradeoff rather than an oversight.
+    - **A second naming collision, surfaced by the rename.** The *source*
+      overlay `kg-content/entities/graphs/payments-target-state.json` (one
+      view, hand-authored) and this component's own *compiled* output
+      `components/kg-viz/payments-target-state.json` (both views, generated)
+      now share an identical filename in different directories. This isn't
+      new confusion introduced by the rename — `generate.py`'s docstring
+      already distinguished them by role — but it is now a literal filename
+      match rather than a similar one, so `README.md`'s "Depends on" section
+      spells out which is which.
+    - **Source split under `src/`, compiled by `build.py` (the "compile-wise
+      single file, source-wise structured" request).** The user's framing:
+      keep the shipped artifact as one file (required by decision 36's
+      file:// no-server constraint — `<script type="module">` is blocked by
+      CORS when loaded from a `file://` origin, so real ES modules were never
+      an option here), but stop asking one ~950-line `<script>` block to
+      hold ~40 functions across every concern the viewer has accumulated.
+      Split into `state.js`, `graph-model.js`, `controls-panel.js`,
+      `labels.js`, `bands.js`, `camera.js`, `data-loading.js`, `renderer.js`,
+      and `bootstrap.js`, plus `src/shell.html` for the static markup/CSS.
+      `build.py` concatenates them (`MODULE_ORDER`, stdlib Python, mirroring
+      `generate.py`'s own convention) into `knowledge-visualizer.html`, which
+      is now a generated artifact and must never be hand-edited — the same
+      rule `payments-target-state.json` already followed, for the same
+      reason.
+    - **This is the one narrow exception to "no build system."** `CLAUDE.md`
+      previously stated that fact about the repo without qualification; it
+      now carves out `build.py` explicitly, since it would otherwise have
+      gone stale the moment this landed. The concatenation order is chosen
+      for readability, not correctness — everything lands in one `<script>`
+      tag, so `function` declarations hoist regardless of file order, and
+      the only file whose position actually matters is `bootstrap.js`
+      (its trailing `loadLibrary(...)` call is the sole top-level
+      side-effecting statement, so it is concatenated last).
+    - **A real bug surfaced by the split, fixed in passing.** `shortTitle`
+      and `var labelEls = {}` were each declared twice, verbatim, in the
+      original single file (harmless only because both copies were
+      identical) — exactly the kind of duplicate an unstructured ~950-line
+      script block lets slip through unnoticed. Collapsed to one each while
+      moving that code into `labels.js`.
+    - **`verify.js` gained an eleventh scenario (K).** Splitting the source
+      creates a new failure mode that did not exist before: editing
+      `src/*.js` and forgetting to run `build.py`, leaving
+      `knowledge-visualizer.html` silently stale while every other scenario
+      keeps testing the old compiled code. Scenario K reconstructs
+      `build.py`'s own concatenation in plain node (not by shelling out to
+      `python3`, so the file's "requires only node" claim stays true) and
+      fails if it does not match the committed `knowledge-visualizer.html`
+      byte-for-byte.
 
 ## Constraints identified
 

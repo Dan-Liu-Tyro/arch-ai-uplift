@@ -29,9 +29,12 @@ of what is actually built.
 - **No product code.** `components/` is contracts and scaffolding. The code
   that runs is `components/local-agent/ui/server.py` (fronted by a `*.sh`
   start/stop wrapper), `components/kg-viz/generate.py`, and four stdlib
-  scripts under `meta/`. `kg-viz` has no server at all — its `index.html`
-  is opened straight from disk. There is no build system and no test
-  suite — don't infer commands that don't exist.
+  scripts under `meta/`. `kg-viz` has no server at all — its
+  `knowledge-visualizer.html` is opened straight from disk. There is no
+  build system or test suite for the repo at large — don't infer commands
+  that don't exist — except within `kg-viz` itself: `build.py` compiles
+  `src/*.js` into `knowledge-visualizer.html`, and `verify.js` is the one
+  test command (`node components/kg-viz/verify.js`).
 - **Arc Lite is the only usable thing.** A local, deliberately non-production
   mirror of Arc, invokable as an agent from Claude Code. It has never been
   driven through real usage, so its gap log is still empty.
@@ -49,7 +52,7 @@ of what is actually built.
 | Understand why anything is the way it is | [`docs/decision-log.md`](docs/decision-log.md) — the primary artefact |
 | See where the program is heading | [`docs/program-roadmap.md`](docs/program-roadmap.md) — snapshot; Confluence owns it, re-fetch rather than edit |
 | Work on the graph itself | [`components/kg-core/SCHEMA.md`](components/kg-core/SCHEMA.md) — the critical path |
-| Look at what the graph currently contains | [`components/kg-viz/`](components/kg-viz) — open `index.html` directly, no server; read-only, `graph.json` is regenerable |
+| Look at what the graph currently contains | [`components/kg-viz/`](components/kg-viz) — open `knowledge-visualizer.html` directly, no server; read-only, `payments-target-state.json` is regenerable |
 | Work on IN-563 | [`practice/capability-maturity/`](practice/capability-maturity) — start at `validation-plan.md` |
 | Avoid repeating a known mistake | [`meta/procedural-memory/INDEX.md`](meta/procedural-memory/INDEX.md) |
 

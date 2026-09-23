@@ -1,7 +1,7 @@
 # vendor/ — the renderer, committed on purpose
 
-`index.html` loads exactly one script, from here, with **no remote
-fallback**:
+`knowledge-visualizer.html` loads exactly one script, from here, with **no
+remote fallback**:
 
 | Expected filename | Upstream |
 | --- | --- |
@@ -24,8 +24,9 @@ because the alternative fails the requirement.
 
 **What was never happening, so the risk is not overstated:** the page has no
 `fetch`, `XMLHttpRequest`, `sendBeacon`, `WebSocket`, `<form>`, `<img>` or
-`postMessage` path at all, and `graph.json` is read from disk. No graph
-content has ever left the machine. The library download was the only outbound
+`postMessage` path at all, and `payments-target-state.json` is read from
+disk. No graph content has ever left the machine. The library download was
+the only outbound
 request. Both the loader and the absence of egress paths are asserted by the
 test harness (scenarios C and C2), so a regression fails a test rather than
 going unnoticed.

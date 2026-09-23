@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate graph.json from kg-content, for kg-viz's browser UI to render.
+"""Generate payments-target-state.json from kg-content, for kg-viz's browser UI to render.
 
 Stdlib only, no deps. Emits *two views* over the same content, because they
 answer different questions and drawing them on one canvas is unreadable:
@@ -24,8 +24,8 @@ docs/domain-model-experiment.md for why. Every other entity type is still one
 file per entity, parsed by regex the same way
 components/local-agent/ui/server.py already does, to avoid a YAML dependency.
 
-Run directly to regenerate graph.json from whatever is currently in
-kg-content: `python3 components/kg-viz/generate.py`
+Run directly to regenerate payments-target-state.json from whatever is
+currently in kg-content: `python3 components/kg-viz/generate.py`
 """
 
 from __future__ import annotations
@@ -39,11 +39,11 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 KG_CONTENT_ENTITIES = REPO_ROOT / "components" / "kg-content" / "entities"
 DOMAINS_JSON = KG_CONTENT_ENTITIES / "domains.json"
 GRAPHS_DIR = KG_CONTENT_ENTITIES / "graphs"
-# The only output. index.html starts empty and loads whatever file the user
-# opens, so there is no bundled-data variant of this to keep in step -- an
-# earlier `graph-data.js` wrapper existed to let the page auto-load from
-# file://, and was dropped when the viewer became explicitly file-driven.
-OUTPUT = Path(__file__).resolve().parent / "graph.json"
+# The only output. knowledge-visualizer.html starts empty and loads whatever
+# file the user opens, so there is no bundled-data variant of this to keep in
+# step -- an earlier `graph-data.js` wrapper existed to let the page auto-load
+# from file://, and was dropped when the viewer became explicitly file-driven.
+OUTPUT = Path(__file__).resolve().parent / "payments-target-state.json"
 
 FRONTMATTER_KV_RE = re.compile(r"^([a-z_]+):\s*(.+?)\s*$", re.MULTILINE)
 

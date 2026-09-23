@@ -12,9 +12,10 @@
 // camera, labels covering nodes, a start command that always failed -- cost a
 // round trip through them to find.
 //
-// So this file executes index.html's own JavaScript against the real
-// graph.json under a stubbed DOM, and asserts what can be asserted without
-// pixels. It is not a substitute for looking at the page; it is the floor
+// So this file executes knowledge-visualizer.html's own JavaScript against
+// the real payments-target-state.json under a stubbed DOM, and asserts what
+// can be asserted without pixels. It is not a substitute for looking at the
+// page; it is the floor
 // below which things cannot silently break. Scenarios C and C2 in particular
 // are what make decision 38's offline guarantee enforced rather than merely
 // intended.
@@ -23,9 +24,9 @@
 // the repo's stdlib-only convention. Exits non-zero on any failure.
 
 const fs = require('fs');
-const html = fs.readFileSync('index.html', 'utf8');
+const html = fs.readFileSync('knowledge-visualizer.html', 'utf8');
 const js = html.match(/<script>([\s\S]*?)<\/script>/)[1];
-const data = JSON.parse(fs.readFileSync('graph.json', 'utf8'));
+const data = JSON.parse(fs.readFileSync('payments-target-state.json', 'utf8'));
 
 function run(scenario, opts) {
   const els = {};
@@ -121,7 +122,7 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (!el(r,'picker').classList._on) results.push('A: picker not shown on an empty start');
   if (el(r,'controls').classList._on) results.push('A: controls panel visible before a graph was opened');
   const inp = el(r,'file-input');
-  inp.files = [{ name: 'graph.json', _text: JSON.stringify(data) }];
+  inp.files = [{ name: 'payments-target-state.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
   const gd = r.calls['__last_graphData'];
   const vis = r.probe.visible();
@@ -148,7 +149,7 @@ const el = (r, id) => r.els[id] || EMPTY;
 {
   const r = run('B', { cdnBlocked: false, badProjection: true }); await tick();
   const bi = el(r,'file-input');
-  bi.files = [{ name: 'graph.json', _text: JSON.stringify(data) }];
+  bi.files = [{ name: 'payments-target-state.json', _text: JSON.stringify(data) }];
   bi.onchange(); await tick();
   const nl = el(r,'labels').children.filter(c => /^nlabel/.test(c.className));
   const hidden = nl.filter(c => c.style.display === 'none').length;
@@ -176,7 +177,7 @@ const el = (r, id) => r.els[id] || EMPTY;
 
 // C2: static audit -- the shipped file must not reference a remote resource
 {
-  const src = fs.readFileSync('index.html', 'utf8');
+  const src = fs.readFileSync('knowledge-visualizer.html', 'utf8');
   const loaders = [...src.matchAll(/(?:src|href)\s*=\s*["']([^"']+)["']/g)].map(m => m[1]);
   const remoteLoaders = loaders.filter(u => /^(https?:)?\/\//.test(u));
   const assigned = [...src.matchAll(/\.src\s*=\s*([A-Za-z_$][\w$]*)/g)].map(m => m[1]);
@@ -205,9 +206,9 @@ const el = (r, id) => r.els[id] || EMPTY;
   input.onchange(); await tick();
   let notes = el(r,'notes-body').children.map(c => c._html).join(' ');
   const renderedWrong = !!r.calls['__last_graphData'];
-  console.log('D: wrong-shape file rejected =', /not a kg-viz graph file/.test(notes),
+  console.log('D: wrong-shape file rejected =', /not a Knowledge Visualizer graph file/.test(notes),
     '| rendered it anyway =', renderedWrong);
-  if (!/not a kg-viz graph file/.test(notes)) results.push('D: wrong-shape JSON not reported clearly');
+  if (!/not a Knowledge Visualizer graph file/.test(notes)) results.push('D: wrong-shape JSON not reported clearly');
   if (renderedWrong) results.push('D: rendered a file with no views array');
 
   // malformed JSON
@@ -217,22 +218,22 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (!/not valid JSON/.test(notes)) results.push('D: malformed JSON not reported');
 
   // now the real thing
-  input.files = [{ name: 'graph.json', _text: JSON.stringify(data) }];
+  input.files = [{ name: 'payments-target-state.json', _text: JSON.stringify(data) }];
   input.onchange(); await tick();
   const gd = r.calls['__last_graphData'];
-  console.log('D: after loading graph.json -> nodes =', gd && gd.nodes.length,
+  console.log('D: after loading payments-target-state.json -> nodes =', gd && gd.nodes.length,
     '| picker dismissed =', !el(r,'picker').classList._on);
-  if (!gd || gd.nodes.length !== 26) results.push('D: picking graph.json did not render 26 nodes');
+  if (!gd || gd.nodes.length !== 26) results.push('D: picking payments-target-state.json did not render 26 nodes');
   if (el(r,'picker').classList._on) results.push('D: picker still open after a successful load');
   const stats = el(r,'stats')._html;
-  if (!/graph\.json/.test(stats)) results.push('D: stats box does not name the file the data came from');
+  if (!/payments-target-state\.json/.test(stats)) results.push('D: stats box does not name the file the data came from');
 }
 
 // E: opening a second file must reuse the renderer and reset per-graph state
 {
   const r = run('E', { cdnBlocked: false }); await tick();
   const inp = el(r,'file-input');
-  inp.files = [{ name: 'graph.json', _text: JSON.stringify(data) }];
+  inp.files = [{ name: 'payments-target-state.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
   const afterFirst = r.fgCount();
 
@@ -256,7 +257,7 @@ const el = (r, id) => r.els[id] || EMPTY;
 {
   const r = run('F', { cdnBlocked: false }); await tick();
   const inp = el(r,'file-input');
-  inp.files = [{ name: 'graph.json', _text: JSON.stringify(data) }];
+  inp.files = [{ name: 'payments-target-state.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
 
   const flow = data.views.find(v => v.layout === 'layered');
@@ -311,7 +312,7 @@ const el = (r, id) => r.els[id] || EMPTY;
 {
   const r = run('G', { cdnBlocked: false }); await tick();
   const inp = el(r,'file-input');
-  inp.files = [{ name: 'graph.json', _text: JSON.stringify(data) }];
+  inp.files = [{ name: 'payments-target-state.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
 
   const cam = r.cam();
@@ -348,7 +349,7 @@ const el = (r, id) => r.els[id] || EMPTY;
 {
   const r = run('H', { cdnBlocked: false }); await tick();
   const inp = el(r,'file-input');
-  inp.files = [{ name: 'graph.json', _text: JSON.stringify(data) }];
+  inp.files = [{ name: 'payments-target-state.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
   r.probe.positionLabels();
 
@@ -397,7 +398,7 @@ const el = (r, id) => r.els[id] || EMPTY;
 {
   const r = run('I', { cdnBlocked: false }); await tick();
   const inp = el(r,'file-input');
-  inp.files = [{ name: 'graph.json', _text: JSON.stringify(data) }];
+  inp.files = [{ name: 'payments-target-state.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
 
   const flatSample = el(r,'labels').children.filter(c => /^elabel/.test(c.className))[0];
@@ -428,7 +429,7 @@ const el = (r, id) => r.els[id] || EMPTY;
 {
   const r = run('J', { cdnBlocked: false }); await tick();
   const inp = el(r,'file-input');
-  inp.files = [{ name: 'graph.json', _text: JSON.stringify(data) }];
+  inp.files = [{ name: 'payments-target-state.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
 
   const flow = data.views.find(v => v.layout === 'layered');
@@ -476,6 +477,28 @@ const el = (r, id) => r.els[id] || EMPTY;
   r.probe.switchView(authority.id); await tick();
   console.log('J: bands on the force view =', r.probe.bands().length);
   if (r.probe.bands().length) results.push('J: bands drawn on a view with no stages');
+}
+
+// K: knowledge-visualizer.html is generated from src/ by build.py and must
+// never be hand-edited -- a forgotten rebuild after touching a src/*.js file
+// would otherwise mean every scenario above is exercising stale code without
+// anyone noticing. Reconstructs build.py's own concatenation in plain node
+// rather than shelling out to python3, so this file's "requires only node"
+// claim stays true. MODULE_ORDER is kept in sync with build.py by hand; both
+// lists are short and rarely change.
+{
+  const MODULE_ORDER = [
+    'state.js', 'graph-model.js', 'controls-panel.js', 'labels.js',
+    'bands.js', 'camera.js', 'data-loading.js', 'renderer.js', 'bootstrap.js',
+  ];
+  const shell = fs.readFileSync('src/shell.html', 'utf8');
+  const body = MODULE_ORDER
+    .map(name => fs.readFileSync('src/' + name, 'utf8').replace(/\n+$/, ''))
+    .join('\n\n');
+  const expected = shell + body + '\n</script>\n</body>\n</html>\n';
+  const fresh = expected === html;
+  console.log('K: knowledge-visualizer.html matches build.py(src/) =', fresh);
+  if (!fresh) results.push('K: knowledge-visualizer.html is stale -- run `python3 build.py`');
 }
 
 console.log(results.length ? '\nFAILURES:\n' + results.join('\n') : '\nALL SCENARIOS PASSED');

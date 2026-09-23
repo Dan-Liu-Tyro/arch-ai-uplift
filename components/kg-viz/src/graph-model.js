@@ -1,0 +1,85 @@
+  function groupKeyOf(node) {
+    return view.id === "payments-target-state" ? node.stage : (node.category || "_uncategorized");
+  }
+
+  function groupsForView() {
+    if (view.id === "payments-target-state") {
+      return view.stages.map(function (s, i) {
+        return { key: s.id, label: s.ordinal + ". " + s.title, color: STAGE_COLORS[i % STAGE_COLORS.length] };
+      });
+    }
+    var cats = DATA.categories.map(function (c) {
+      return { key: c.id, label: c.title, color: CATEGORY_COLORS[c.id] || CATEGORY_COLORS._uncategorized };
+    });
+    cats.push({ key: "_uncategorized", label: "Uncategorized (e.g. principle)", color: CATEGORY_COLORS._uncategorized });
+    return cats;
+  }
+
+  function colorFor(node) {
+    if (view.id === "payments-target-state") {
+      if (node.kind !== "domain") return KIND_COLORS[node.kind] || KIND_COLORS.domain;
+      var i = view.stages.findIndex(function (s) { return s.id === node.stage; });
+      return STAGE_COLORS[(i < 0 ? 0 : i) % STAGE_COLORS.length];
+    }
+    if (node.type !== "domain") return KIND_COLORS[node.type] || CATEGORY_COLORS._uncategorized;
+    return CATEGORY_COLORS[node.category] || CATEGORY_COLORS._uncategorized;
+  }
+
+  function hiddenSet() {
+    if (!hiddenGroups[view.id]) hiddenGroups[view.id] = {};
+    return hiddenGroups[view.id];
+  }
+
+  function isHidden(node) { return !!hiddenSet()[groupKeyOf(node)]; }
+
+  // Scope never hides -- it dims. Asked for explicitly: a domain filtered out
+  // of an "acquirer" view is often exactly the boundary you are trying to see.
+  function isDimmedByScope(node) {
+    if (scopeMode === "all") return false;
+    if (!node.scope) return true;
+    return node.scope !== scopeMode;
+  }
+
+  function visibleData() {
+    var nodes = view.nodes.filter(function (n) { return !isHidden(n); });
+    var ids = {};
+    nodes.forEach(function (n) { ids[n.id] = true; });
+    var links = view.links.filter(function (l) {
+      return ids[srcId(l)] && ids[tgtId(l)];
+    });
+    return { nodes: nodes, links: links };
+  }
+
+  // After the force engine runs, link.source/target are node objects, not ids.
+  function srcId(l) { return typeof l.source === "object" ? l.source.id : l.source; }
+  function tgtId(l) { return typeof l.target === "object" ? l.target.id : l.target; }
+
+  function buildAdjacency() {
+    adjacency = {};
+    view.nodes.forEach(function (n) { adjacency[n.id] = { out: [], in: [] }; });
+    view.links.forEach(function (l) {
+      var s = srcId(l), t = tgtId(l);
+      if (adjacency[s]) adjacency[s].out.push(l);
+      if (adjacency[t]) adjacency[t].in.push(l);
+    });
+  }
+
+  function applyLayout() {
+    var fixed = view.layout === "layered";
+    view.nodes.forEach(function (n) {
+      if (fixed) {
+        n.fx = n.col * COL_SPACING;
+        n.fy = (n.lane - 1) * LANE_HEIGHT + n.row * ROW_SPACING - LANE_HEIGHT;
+        n.fz = 0;
+        // Seed x/y/z as well, not just the fx/fy/fz pins. zoomToFit() reads
+        // x/y/z to compute bounds, and a node whose x is still undefined
+        // yields NaN bounds and a camera that points nowhere -- which looks
+        // exactly like an empty canvas. The force engine would normally copy
+        // fx->x on init, but seeding directly removes the dependency on that
+        // having happened before the first fit.
+        n.x = n.fx; n.y = n.fy; n.z = 0;
+      } else {
+        delete n.fx; delete n.fy; delete n.fz;
+      }
+    });
+  }
