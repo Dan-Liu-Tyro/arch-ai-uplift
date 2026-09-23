@@ -138,21 +138,32 @@ through ingestion is the real fix. See "Known gaps".
 - **Click a node** — highlights it and everything linked to it, dims the
   rest, and opens a panel listing every inbound and outbound relationship
   with its predicate, payload, and whether it is a feedback arc.
-- **Edge labels on the lines** — the predicate, drawn at each edge midpoint,
-  with a backing so it stays readable where it crosses the line. On by default
-  for the flow view and **off for the authority view**, where 296 copies of
-  "not authoritative for" is noise rather than information. Toggleable.
+- **Edge labels on the lines** — the predicate at each edge midpoint, with a
+  backing so it stays readable where it crosses the line. **Opt-in, off by
+  default in both views**: 43 of them crowd the flow view and 296 make the
+  authority view unreadable. With a node selected, only that node's edges are
+  labelled.
+- **No label ever overlaps another label or a node.** Placement is greedy with
+  collision suppression — node markers are reserved first, then node labels,
+  then edge labels fill whatever room is left; anything that would collide is
+  hidden rather than drawn on top. Text that overlaps other text is worse than
+  absent text, and a suppressed label is still reachable by hover or by
+  selecting the node.
 - **Direction as motion** — a slow stream of particles runs source → target on
   every flow edge, so direction reads without tracing an arrowhead. Flow view
-  only; 296 animated edges would be visual noise and the authority
-  predicate is not directional in a way worth animating.
+  only; 296 animated edges would be visual noise and the authority predicate
+  is not directional in a way worth animating.
 - **Feedback arcs** drawn dashed/curved, in a contrasting colour for both the
   line and its particles, and counted in the stats box.
-- **Fills the viewport by default.** Fit padding is 12px, and the fit is
-  re-applied a few times over the first second — a single call can land while
-  the renderer still reports its construction-time size, which yields a
-  correct-looking but under-zoomed camera. An earlier 70px padding wasted a
-  large fraction of the window and meant zooming in by hand every time.
+- **Fills the viewport.** For the layered view the camera is computed directly
+  from the node bounding box, the camera's field of view and the container
+  size, including a keep-out for the control panel so the graph is centred in
+  the space actually visible. `zoomToFit()` was tried twice and abandoned: at
+  70px padding and then at 12px it still left the graph occupying roughly a
+  quarter of the window, which forced a manual zoom on every open. For a
+  pinned planar layout the fit is simple trigonometry, and the arithmetic is
+  asserted in the harness (currently 93% of the usable region). The force view
+  keeps moving, so it still uses `zoomToFit`.
 - **Fit to view** — re-frames the camera. Framing also happens automatically
   on `onEngineStop`, but a manual control matters because a camera pointed
   somewhere empty is indistinguishable from a graph that failed to draw.

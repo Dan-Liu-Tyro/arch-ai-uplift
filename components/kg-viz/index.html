@@ -166,8 +166,8 @@
       <span>Node labels</span>
     </div>
     <div class="row" id="edge-labels-row">
-      <input type="checkbox" id="edge-labels-cb" checked />
-      <span>Edge labels</span>
+      <input type="checkbox" id="edge-labels-cb" />
+      <span>Edge labels <span class="count">dense</span></span>
     </div>
     <div class="seg" style="margin-top: 8px;">
       <button id="fit-btn">Fit to view</button>
@@ -233,11 +233,11 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-23a — fills view, bolder edges, edge labels, flow particles";
+  var PAGE_REVISION = "2026-09-23b — computed fit, no label overlap, edge labels opt-in";
   var LOADED_FROM = "(nothing loaded)";
 
   var DATA = null, view = null, Graph = null;
-  var dims = 2, scopeMode = "all", showLabels = true, showEdgeLabels = true;
+  var dims = 2, scopeMode = "all", showLabels = true, showEdgeLabels = false;
   // Anything that prevents the graph drawing goes on screen. Errors thrown
   // inside the render loop never reach the fetch().catch() below, which is
   // why a broken node accessor previously produced a blank canvas next to a
@@ -594,10 +594,32 @@
     positionLabels();
   }
 
+  // Greedy collision suppression. Text that overlaps other text -- or sits on
+  // top of a node -- is worse than absent text, which is exactly what the
+  // unfitted view demonstrated: every label legible individually, the whole
+  // unreadable. Node labels are placed first and always win; edge labels fill
+  // whatever room is left. A suppressed label is still reachable by hovering
+  // the node or edge, and by selecting a node.
+  var placed = [];
+
+  function claim(el, x, y) {
+    var w = el.offsetWidth || el.textContent.length * 5.6;
+    var h = el.offsetHeight || 12;
+    var box = { l: x - w / 2 - 2, r: x + w / 2 + 2, t: y - 1, b: y + h + 1 };
+    for (var i = 0; i < placed.length; i++) {
+      var o = placed[i];
+      if (box.l < o.r && box.r > o.l && box.t < o.b && box.b > o.t) return false;
+    }
+    placed.push(box);
+    return true;
+  }
+
   function place(el, p, dy) {
     if (!p || !isFinite(p.x) || !isFinite(p.y)) { el.style.display = "none"; return false; }
+    // Measure while visible, then decide; offsetWidth is 0 on a hidden node.
     el.style.display = "block";
     el.style.transform = "translate(-50%, 0) translate(" + p.x + "px," + (p.y + dy) + "px)";
+    if (!claim(el, p.x, p.y + dy)) { el.style.display = "none"; return false; }
     return true;
   }
 
@@ -605,6 +627,17 @@
     if (!Graph) return;
     var vis = visibleData();
     var keep = selected ? neighbourIds(selected) : null;
+    placed = [];
+
+    // Reserve the node markers themselves, so no label ever covers a node.
+    for (var k = 0; k < vis.nodes.length; k++) {
+      var nn = vis.nodes[k];
+      if (!isFinite(nn.x) || !isFinite(nn.y)) continue;
+      var np = Graph.graph2ScreenCoords(nn.x, nn.y, isFinite(nn.z) ? nn.z : 0);
+      if (np && isFinite(np.x)) {
+        placed.push({ l: np.x - 7, r: np.x + 7, t: np.y - 7, b: np.y + 7 });
+      }
+    }
 
     if (showLabels) {
       for (var i = 0; i < vis.nodes.length; i++) {
@@ -612,10 +645,10 @@
         var el = labelEls[n.id];
         if (!el) continue;
         if (!isFinite(n.x) || !isFinite(n.y)) { el.style.display = "none"; continue; }
-        if (!place(el, Graph.graph2ScreenCoords(n.x, n.y, isFinite(n.z) ? n.z : 0), 11)) continue;
         var dim = keep ? !keep[n.id] : isDimmedByScope(n);
         el.className = "nlabel" + (dim ? " dim" : "") +
           (selected && selected.id === n.id ? " sel" : "");
+        place(el, Graph.graph2ScreenCoords(n.x, n.y, isFinite(n.z) ? n.z : 0), 11);
       }
     }
 
@@ -624,15 +657,17 @@
         var l = vis.links[j];
         var el2 = edgeEls[linkKey(l)];
         if (!el2) continue;
+        var on = !selected || srcId(l) === selected.id || tgtId(l) === selected.id;
+        // With a node selected, only its own edges are worth labelling.
+        if (selected && !on) { el2.style.display = "none"; continue; }
         var a = nodeById[srcId(l)], b = nodeById[tgtId(l)];
         if (!a || !b || !isFinite(a.x) || !isFinite(b.x)) { el2.style.display = "none"; continue; }
         var mid = Graph.graph2ScreenCoords(
           (a.x + b.x) / 2, (a.y + b.y) / 2,
           ((isFinite(a.z) ? a.z : 0) + (isFinite(b.z) ? b.z : 0)) / 2
         );
-        if (!place(el2, mid, -6)) continue;
-        var on = !selected || srcId(l) === selected.id || tgtId(l) === selected.id;
-        el2.className = "elabel" + (on ? "" : " dim") + (l.back_edge ? " back" : "");
+        el2.className = "elabel" + (l.back_edge ? " back" : "");
+        place(el2, mid, -6);
       }
     }
   }
@@ -645,9 +680,10 @@
   function switchView(id) {
     view = DATA.views.find(function (v) { return v.id === id; });
     selected = null;
-    // 296 copies of "not authoritative for" is noise, not information.
-    showEdgeLabels = view.layout === "layered";
-    document.getElementById("edge-labels-cb").checked = showEdgeLabels;
+    // Never auto-enable: edge labels are opt-in in every view. 43 of them
+    // crowd the flow view and 296 make the authority view unreadable.
+    showEdgeLabels = false;
+    document.getElementById("edge-labels-cb").checked = false;
     document.getElementById("detail").classList.remove("open");
     buildAdjacency();
     applyLayout();
@@ -660,11 +696,53 @@
 
   // Framing is done from a real measurement rather than a blind timeout,
   // because "camera pointed at NaN" and "nothing was drawn" look identical.
-  // Padding is in screen pixels. It was 70, which on a fixed layout wastes a
-  // large fraction of the viewport and left the graph small enough to need
-  // manual zooming every time. 12 is enough to keep the outermost node labels
-  // off the window edge.
-  var FIT_PADDING = 12;
+  // zoomToFit() proved unreliable for the pinned layered view -- it left the
+  // graph occupying roughly a quarter of the window regardless of the padding
+  // argument, which is what made every session start with a manual zoom. For
+  // a fixed planar layout the fit is simple trigonometry, so compute the
+  // camera distance directly and stop guessing.
+  var FIT_PADDING = 48;      // world-space breathing room for outermost labels
+  var LEFT_INSET = 372;      // control panel keep-out, so the graph is not drawn under it
+
+  function fitLayered() {
+    var pts = visibleData().nodes.filter(function (n) {
+      return isFinite(n.x) && isFinite(n.y);
+    });
+    if (!pts.length) return false;
+    var cam = Graph.camera && Graph.camera();
+    if (!cam || !cam.fov) return false;
+
+    var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    pts.forEach(function (n) {
+      if (n.x < minX) minX = n.x;
+      if (n.x > maxX) maxX = n.x;
+      if (n.y < minY) minY = n.y;
+      if (n.y > maxY) maxY = n.y;
+    });
+
+    var host = document.getElementById("graph");
+    var W = host.clientWidth || window.innerWidth || 1200;
+    var H = host.clientHeight || window.innerHeight || 800;
+
+    var w = (maxX - minX) || 1;
+    var h = (maxY - minY) || 1;
+    // Scale in screen px per world unit, honouring the panel keep-out so the
+    // graph is centred in the space actually visible rather than behind the
+    // controls.
+    var availW = Math.max(160, W - LEFT_INSET);
+    var availH = Math.max(160, H);
+    var scale = Math.min(availW / (w + 2 * FIT_PADDING), availH / (h + 2 * FIT_PADDING));
+
+    var fov = cam.fov * Math.PI / 180;
+    var dist = (H / scale) / (2 * Math.tan(fov / 2));
+
+    // Shift the look-at point left so the box lands centred inside the
+    // available region instead of the full window.
+    var cx = (minX + maxX) / 2 - (LEFT_INSET / 2) / scale;
+    var cy = (minY + maxY) / 2;
+    Graph.cameraPosition({ x: cx, y: cy, z: dist }, { x: cx, y: cy, z: 0 }, 400);
+    return true;
+  }
 
   function frameGraph() {
     var vis = visibleData();
@@ -682,14 +760,12 @@
       note("<b>" + (vis.nodes.length - finite.length) + " of " + vis.nodes.length +
         "</b> nodes have non-finite coordinates and will not be drawn.");
     }
-    // Fit repeatedly over the first moment. A single call can land while the
-    // renderer still reports its construction-time size, which produces a
-    // correct-looking but under-zoomed camera; positions are pinned in the
-    // layered view, so re-fitting is idempotent and cheap.
-    Graph.zoomToFit(0, FIT_PADDING);
-    [120, 400, 900].forEach(function (ms) {
-      setTimeout(function () { Graph.zoomToFit(200, FIT_PADDING); }, ms);
-    });
+    // The layered view is a pinned plane, so its fit is computed exactly.
+    // The force view keeps moving, so zoomToFit is the right tool there.
+    if (view.layout === "layered") {
+      if (fitLayered()) return;
+    }
+    Graph.zoomToFit(300, 30);
   }
 
   // ---- Getting the data in -------------------------------------------------
