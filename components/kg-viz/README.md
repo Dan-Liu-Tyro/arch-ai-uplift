@@ -48,7 +48,7 @@ blob that existed only to let the page auto-load, which it no longer does).
 cd components/kg-viz && node verify.js
 ```
 
-Nine scenarios, exit non-zero on failure. This is the only automated check
+Ten scenarios, exit non-zero on failure. This is the only automated check
 in the repo, and it exists because **nothing this component renders can be
 observed from a Claude Code session** — see `docs/decision-log.md`'s
 "Constraints identified". It is a floor, not a substitute for opening the
@@ -145,9 +145,24 @@ through ingestion is the real fix. See "Known gaps".
 - **2D / 3D** — 2D is the default. 3D is genuinely useful on the dense
   authority graph, where a third dimension reduces occlusion; it adds little
   to the flow view, which is a plane by construction.
+- **Stage bands** — each stage is drawn as its own translucent region with a
+  dashed boundary and a caption, so the three lanes read as lanes rather than
+  as an accident of where nodes happen to sit. Toggleable. Flow view only;
+  the authority view has no stages and draws none.
+
+  Each band is a **polygon of four projected corners, not a screen rectangle**,
+  because the camera can be orbited and a rect would shear. It is drawn as an
+  SVG overlay *on top of* the canvas at low opacity rather than behind it: the
+  WebGL canvas is opaque, so anything behind it is invisible, and making the
+  canvas transparent would depend on `rendererConfig` alpha — which, if it
+  silently failed, would make the bands vanish with no error. That is an
+  unacceptable failure mode in a component nobody in a session here can see,
+  so the guaranteed-visible option wins and the cost is a faint tint over the
+  nodes each band covers.
 - **Group show/hide** — checkboxes per stage (flow) or per domain category
   (authority), with live counts. Hiding a group drops its nodes *and* every
-  edge touching them, so no dangling edges are drawn.
+  edge touching them, so no dangling edges are drawn, and empties that
+  stage's band rather than leaving a boundary around nothing.
 - **Scope emphasis** — All / Acquirer / Tyro-wide. **Dims, never hides**, per
   decision 35: a domain filtered out of an acquiring view is often the
   boundary you are trying to see.

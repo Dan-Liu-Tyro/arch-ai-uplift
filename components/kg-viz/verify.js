@@ -34,6 +34,11 @@ function run(scenario, opts) {
     checked: true, type: '', src: '',
     classList: { _on: false, add(){ this._on = true; }, remove(){ this._on = false; } },
     appendChild(c){ this.children.push(c); return c; },
+    removeChild(c){ this.children = this.children.filter(x => x !== c); return c; },
+    get firstChild(){ return this.children[0] || null; },
+    attrs: {},
+    setAttribute(k, v){ this.attrs[k] = String(v); },
+    getAttribute(k){ return this.attrs[k]; },
     querySelectorAll(){ return []; },
     addEventListener(k, fn){ (this._ev = this._ev || {})[k] = fn; },
     click(){ this.onclick && this.onclick(); },
@@ -48,6 +53,7 @@ function run(scenario, opts) {
     body: bodyEl,
     getElementById(id){ return (els[id] = els[id] || mkEl()); },
     createElement(){ return mkEl(); },
+    createElementNS(ns, tag){ const e = mkEl(); e.ns = ns; e.tag = tag; return e; },
     head: { appendChild(s){
       attempted.push(s.src);
       // vendor/ files are absent on disk here; CDN availability is the knob.
@@ -97,7 +103,7 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), };', ctx);
 
   return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam };
 }
@@ -416,6 +422,60 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (upsideDown.length) results.push('I: angles outside +/-90deg would read upside down: ' + upsideDown);
   if (!rotated) results.push('I: along-line style rotated nothing');
   if (!along.every(c => /along/.test(c.className))) results.push('I: .along class not applied');
+}
+
+// J: stage bands -- one region per stage, four projected corners, captioned
+{
+  const r = run('J', { cdnBlocked: false }); await tick();
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'graph.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+
+  const flow = data.views.find(v => v.layout === 'layered');
+  const bands = r.probe.bands();
+  const boxes = bands.map(b => {
+    const pts = (b.poly.getAttribute('points') || '').trim();
+    if (!pts) return null;
+    const pairs = pts.split(' ').map(q => q.split(',').map(Number));
+    const xs = pairs.map(q => q[0]), ys = pairs.map(q => q[1]);
+    return { n: pairs.length, l: Math.min(...xs), r: Math.max(...xs),
+             t: Math.min(...ys), b: Math.max(...ys), cap: b.caption.textContent };
+  });
+  const drawn = boxes.filter(Boolean);
+  console.log('J: bands =', bands.length, 'of', flow.stages.length,
+    '| drawn =', drawn.length,
+    '| corners each =', [...new Set(drawn.map(b => b.n))],
+    '| captions =', drawn.map(b => b.cap));
+
+  if (bands.length !== flow.stages.length) results.push('J: expected one band per stage, got ' + bands.length);
+  if (drawn.length !== flow.stages.length) results.push('J: ' + (bands.length - drawn.length) + ' bands have no geometry');
+  if (drawn.some(b => b.n !== 4)) results.push('J: a band is not a four-corner polygon');
+  flow.stages.forEach(st => {
+    if (!drawn.some(b => b.cap.includes(st.title))) results.push('J: no band captioned for stage ' + st.title);
+  });
+
+  // The whole point is visual separation, so the regions must not overlap.
+  let clash = 0;
+  for (let i = 0; i < drawn.length; i++) for (let j = i+1; j < drawn.length; j++) {
+    const a = drawn[i], b = drawn[j];
+    if (a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t) clash++;
+  }
+  console.log('J: overlapping band pairs =', clash);
+  if (clash) results.push('J: ' + clash + ' stage bands overlap, defeating the separation');
+
+  // hiding a stage must empty its band, not leave one around nothing
+  r.probe.hidden()['design-a-product'] = true;
+  r.probe.positionBands();
+  const empties = r.probe.bands().filter(b => !(b.poly.getAttribute('points') || '').trim()).length;
+  console.log('J: after hiding stage 1 -> bands with no geometry =', empties);
+  if (empties !== 1) results.push('J: hiding a stage left ' + empties + ' empty bands, expected 1');
+  delete r.probe.hidden()['design-a-product'];
+
+  // the force view has no stages, so it must draw no bands at all
+  const authority = data.views.find(v => v.layout === 'force');
+  r.probe.switchView(authority.id); await tick();
+  console.log('J: bands on the force view =', r.probe.bands().length);
+  if (r.probe.bands().length) results.push('J: bands drawn on a view with no stages');
 }
 
 console.log(results.length ? '\nFAILURES:\n' + results.join('\n') : '\nALL SCENARIOS PASSED');
