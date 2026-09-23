@@ -80,3 +80,9 @@ policy this exists to serve.
 - One blocked line does not make a file untestable — scope "can't test that
   here" to the blocked call, name skipped checks in any verification list,
   and re-grep every reader when a shared return shape changes.
+- A stub that models only the success case cannot catch the failure it
+  guards — enumerate a dependency's failure states as scenarios, and suspect
+  the harness when a result looks impossible.
+- A required value you cannot verify is a blocker, not a blank to fill
+  fluently — leave it out, mark it unverified inline, or ask; never emit a
+  plausible-looking version/hash/id to complete a structure.

@@ -606,3 +606,62 @@ it; and "I can't test that here" is a conclusion with a shelf life — it
 expires the moment you change something the untestable code depends on. On
 any change to a shared return shape or signature, grep for every reader
 rather than relying on recall of which ones you edited.
+
+## A stub that models only the success case cannot catch the failure it guards
+
+**What happened.** Building a browser UI I had no way to see, I wrote a node
+harness that ran the page's own JavaScript against real data under a stubbed
+DOM. It passed, and the page was blank in the user's browser. The harness
+stubbed the `SpriteText` label library as *always present*, so it was
+structurally incapable of catching what actually broke: the library failing to
+initialise, and the label accessor then throwing once per node from inside the
+render loop, which killed the scene while leaving the control panel healthy.
+Later in the same component the same class of thing bit again — the fake
+element's `innerHTML` setter did not detach children the way a real one does,
+so a rebuild appeared to duplicate every label and reported eighteen
+non-existent overlaps.
+
+**Cost.** The blank canvas took two browser round trips through the user to
+diagnose, and the harness contributed nothing to either — it reported success
+throughout. The bogus overlap report nearly caused a "fix" to code that was
+correct; the duplicated label text in the failure output was the only clue
+that the test, not the page, was wrong.
+
+**Rule.** When you stub a dependency, enumerate its realistic failure states
+and make each one a scenario: absent, present-but-broken, present-but-a
+-different-version, slow, returning the wrong shape. A stub that only models
+the happy path tests your code against an environment that cannot occur. Two
+corollaries worth holding separately. First, a stub is itself code with bugs,
+and its bugs masquerade as findings about the system under test — when a
+failure looks impossible (identical duplicate items, counts that exceed the
+input), suspect the harness before editing the subject. Second, when a stub
+exists specifically because the real thing is unobservable, the failure modes
+are the whole reason the harness exists; modelling only success inverts its
+purpose.
+
+## A required value you do not know is a blocker, not a blank to fill fluently
+
+**What happened.** Writing a CDN fallback URL for a JavaScript library, the
+cdnjs form requires an explicit version in the path. I did not know the
+version and had no way to look it up — the sandbox denies that host. Instead
+of stopping, I wrote `1.73.3`, which is plausible-looking and was never
+anything but invented. It went into two committed files, sitting beside two
+URLs that were correct. The real version was `1.80.0`, learned only when the
+user ran the fetch script and it printed the actual number.
+
+**Cost.** Low by luck: the first source succeeded so the fabricated URL was
+never requested, and the script's validation would have rejected a 404 rather
+than installing the wrong thing. The real damage is to trust — a made-up URL
+in a fallback list is worse than an absent fallback, because it looks checked,
+and a later reader has no way to tell which entries were verified.
+
+**Rule.** When a structure demands a value you cannot verify — a version, a
+hash, a port, an account id, a date — the honest options are to leave it
+unfilled, to mark it inline as unverified, or to ask. Producing a
+well-formed-looking value to complete the pattern is the failure, and it is
+especially tempting when the surrounding values *are* correct, because the
+fabrication inherits their credibility. The tell is being unable to name where
+a specific value came from. Compare the licence question on the same
+dependency, handled correctly minutes later: the bundle carried no licence
+text, MIT was plausible, and it was recorded as an explicit open item with the
+command to settle it rather than asserted.

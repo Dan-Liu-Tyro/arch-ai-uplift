@@ -478,3 +478,45 @@ the rename) is what surfaced the `KeyError`.
 `serve.summarize()` specifically so it can be called without binding, and
 the rule is recorded in `meta/procedural-memory/universal.md` — not
 restated here.
+
+## 9. A library version number invented and written into code as if checked
+
+**The belief.** That `3d-force-graph` version `1.73.3` existed, and that
+`https://cdnjs.cloudflare.com/ajax/libs/3d-force-graph/1.73.3/3d-force-graph.min.js`
+was a valid URL. It was committed into `index.html`'s CDN fallback list and
+then into `vendor/fetch-renderer.sh`'s source list.
+
+**Why it was wrong.** There was never any basis for it. cdnjs URLs require an
+explicit version, unlike unpkg's bare-package form, so writing that URL
+*required* a version — and rather than treating "I do not know the version" as
+a blocker, a plausible-looking number was produced to complete the pattern.
+The actual current release turned out to be `1.80.0`, learned only when the
+user ran the fetch script successfully and it printed the real version. So the
+guess was wrong by seven minor versions, and nothing about the way it was
+written would have suggested it was a guess: it sat in a list beside two URLs
+that *were* correct, in code, with a comment explaining the fallback strategy.
+
+**Distinct from the other entries here.** Entries 1 and 7 are
+overgeneralizations from narrow real evidence; entry 8 is a true conclusion
+that went stale. This one had *no* evidence at any point. The failure mode is
+confabulation in service of completing a structure — a required field with an
+unknown value got a fluent-sounding value instead of a flag.
+
+**Cost.** Low, by luck rather than design. unpkg succeeded on the first
+attempt, so the cdnjs entry was never reached, and if it had been, the
+script's own validation would have rejected a 404 rather than installing
+something wrong. The realistic damage was to trust: a fabricated URL sitting
+in a fallback list is worse than no fallback, because it *looks* verified and
+a later reader would reasonably assume someone had checked it.
+
+**Caught by.** Self-caught, but only after committing — flagged to the user in
+the same message that reported the script working, then corrected to `1.80.0`
+once the real version was known. Not caught by any check, because no check
+can distinguish an unverified constant from a verified one.
+
+**Fix.** The URL now carries the real version. The generalizable guard is in
+`meta/procedural-memory/universal.md`: a value that cannot be verified must be
+marked as unverified where it is written, not silently completed — the same
+discipline `architecture-learning` applies in requiring cited evidence, and the
+same one applied correctly a few minutes later to the library's licence, which
+was recorded as an explicit open item rather than assumed to be MIT.

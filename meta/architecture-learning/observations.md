@@ -185,3 +185,33 @@ principle's `status` and must not be silently absorbed as if it agreed.
   actually true (the unresolved-reference count kept visible on screen) over
   ones that look finished. Related principle already recorded:
   `principles/generated-outputs-are-not-sources.md`.
+- 2026-09-23 · Repeatedly resolved a problem by *removing* machinery rather
+  than adding to it, across three separate decisions in one session: dropped
+  the local HTTP server entirely ("if we completely drop the idea of having
+  server at all... Any problem with that?"), dropped the auto-loaded data
+  blob in favour of an explicit file picker ("make the vis graph viewer start
+  with empty, allow to open and browse for any compatible graph"), and
+  required the last remote dependency be vendored locally ("I want this graph
+  viewer is offline completely") · this conversation · stated · unpromoted —
+  worth recording because in each case my own instinct had been to *add*: a
+  cache-busting URL scheme for the server, a generated JS wrapper so the page
+  could auto-load, a three-CDN fallback so one blocked host would not be
+  fatal. All three additions were superseded by a removal that made the
+  problem not exist. The pattern predicts a preference for deleting a
+  component over hardening it whenever the component's job can be done by
+  something already present (here: the filesystem, and a file dialog). Would
+  be contradicted by a case where they choose resilience machinery over
+  removing the thing that needs it.
+- 2026-09-23 · Chose pragmatic sequencing over architectural purity when
+  offered both, picking "vendor now, SVG renderer later" over dropping the
+  third-party renderer immediately · this conversation · stated · unpromoted
+  — I had recommended the dependency-free option and named a strong argument
+  for it (an SVG renderer emits inspectable text, so its output could be
+  verified without a human looking at a screen, which is the constraint that
+  had cost six browser round trips). The reply took the working-today path
+  and parked the better end state in the backlog. Read alongside the
+  removal-over-addition pattern above, the ordering seems to be: get it
+  working, keep the cleaner design as a named follow-up rather than a
+  blocker. Tension worth watching — the same person who removes machinery on
+  principle also declines to remove it when doing so would delay a working
+  artefact.

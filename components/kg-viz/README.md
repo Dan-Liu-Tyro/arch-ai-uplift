@@ -215,42 +215,40 @@ Current content, as reported by `generate.py` rather than asserted here:
 
 ## Known gaps
 
-- **Partly verified in a real browser, as of 2026-09-22.** The user ran it and
-  supplied a screenshot: both control panels populate correctly, the stats box
-  reports 26 of 26 nodes and 43 of 43 edges, and the graph draws. Two defects
-  that only a browser could surface were found and fixed — `three-spritetext`
-  throwing inside the render loop (blank canvas beside a working panel) and
-  nodes rendering as near-invisible specks against a 230-unit column spacing.
-  Still unconfirmed after those fixes: whether the swimlane layout reads
-  correctly, whether labels collide, and camera framing.
+- **Confirmed working in a real browser, 2026-09-23.** The user's verdict
+  after opening it with the vendored renderer in place: "all working". That
+  closes the loop on the four things mechanical checks could not judge —
+  whether the camera fills the viewport, whether the three swimlanes read
+  left-to-right, whether labels are legible without overlapping, and whether
+  the flow particles read as direction.
 
-  Nothing browser-facing can be checked from the sandbox this is built in.
-  It denies socket operations broadly — which is why the server could never
-  bind, why `curl http://127.0.0.1` fails with "Operation not permitted",
-  and why headless Chrome aborts at startup (it creates a Unix-domain socket
-  for its process singleton). Browser automation is also prohibited by
-  organisational policy. So the user's eyes are the only observer, and the
-  page is built to report its own state.
+  Getting there took six browser round trips, every one of them a rendering
+  defect rather than a data or layout error: a start command that always
+  failed, a blank canvas from a label library throwing inside the render
+  loop, nodes drawn as near-invisible specks, a stale cached page, a camera
+  filling a quarter of the window, and text covering the nodes. Recorded as a
+  count because it is the honest measure of what the constraint below costs.
 
-  What *is* verified mechanically: `generate.py`'s output and layout
-  invariants (every forward edge runs left-to-right within its lane, no two
-  nodes share a position, no node unranked); both data files against their
-  schemas and for referential integrity; and the page's own JavaScript run
-  against the real `graph.json` under a stubbed DOM in node — four scenarios
-  covering a healthy auto-load, a NaN projection, a blocked library, and the
-  file-picker path including malformed and wrong-shape JSON. What none of
-  that covers is anything three.js actually draws: label legibility,
-  arrowheads, camera framing, colour contrast. **Treat the visual design as
-  unreviewed.**
+  **Nothing browser-facing can be checked from a Claude Code session here,
+  and that has not changed.** The sandbox denies socket operations broadly —
+  which is why a local server could never bind, why `curl
+  http://127.0.0.1` fails with "Operation not permitted", and why headless
+  Chrome aborts at startup creating its process-singleton socket. Browser
+  automation is separately prohibited by organisational policy. The user's
+  eyes remain the only observer of anything rendered, which is why the page
+  reports its own state (a visible build revision, the source file, the data
+  timestamp, and errors painted into the DOM rather than the console) and why
+  `docs/backlog.md` carries the SVG renderer: SVG output is inspectable text,
+  and most of those six defects would have been caught mechanically by it.
 
-  An earlier version of this list omitted the now-deleted `serve.py`
-  entirely, on the reasoning that the socket restriction made it untestable
-  here. That was wrong in a way worth keeping written down even though the
-  file is gone: the restriction applied to one call, and a later change to
-  `generate.generate()`'s return shape broke `serve.py` several lines
-  *earlier*, shipping a start command that always failed. See
-  `meta/perception-failures/log.md` entry 8 and the matching rule in
-  `meta/procedural-memory/universal.md`.
+  What `verify.js` covers, and what it cannot: eight scenarios over the real
+  `graph.json` under a stubbed DOM — empty start, load-by-file with malformed
+  and wrong-shape rejection, reopening without stacking a renderer or
+  inheriting stale filters, the camera-fit arithmetic recomputed
+  independently, label non-overlap, and the two offline invariants. It cannot
+  judge legibility, colour, or whether a layout communicates anything. Those
+  still need a person.
+
 - **Per-edge prose is missing for authority edges** — see above.
 - **`scope` is a judgement, not a sourced fact.** 12/27 split, assigned here
   rather than taken from any Confluence page. Eight domains carry a

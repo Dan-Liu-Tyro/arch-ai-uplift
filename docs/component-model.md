@@ -23,7 +23,7 @@ not know about its consumers; this document is how the filesystem enforces it.
 | `query-service` | v2. Network-reachable query interface so cloud-hosted Rovo can reach the graph. Deployed via TAP/CTAP. | Deferred | Kotlin |
 | `claude-code-access` | Local access glue so Claude Code can read and traverse the graph from the filesystem. | Not started | Scripts |
 | `local-agent` | MVP. A local mirror of Arc's advisory role, with zero production access. No longer outside the dependency graph below — see decision 21 in `docs/decision-log.md`. | MVP | Markdown, no code |
-| `kg-viz` | Read-only visualization for human inspection — two purpose-built views (2D payments flow by default, dense authority graph second). Not a consumer that reasons about the graph. | Fifth pass; serverless and file-driven, partly browser-verified | One stdlib script + static HTML/JS |
+| `kg-viz` | Read-only visualization for human inspection — two purpose-built views (2D payments flow by default, dense authority graph second). Not a consumer that reasons about the graph. | Working; serverless, file-driven, offline-only, browser-confirmed 2026-09-23 | One stdlib script + static HTML/JS + one vendored library |
 
 ## Dependency rules
 
