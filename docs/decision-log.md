@@ -96,6 +96,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 37 | `kg-viz` starts empty and opens any compatible graph file; `graph-data.js` dropped | `kg-viz` |
 | 38 | `kg-viz` offline-only: renderer vendored and committed, no remote loads | `kg-viz`, `.gitignore`, backlog |
 | 39 | `kg-viz` UI renamed "Knowledge Visualizer"; `index.html`→`knowledge-visualizer.html`, `graph.json`→`payments-target-state.json`; source split under `src/`, compiled by `build.py` | `kg-viz`, `CLAUDE.md`, `README.md` |
+| 40 | `payments-target-state.json`→`payments.json` after the same-named source overlay caused a real mis-pick; `build.py` embeds it, adding a "Load default" button | `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -1800,6 +1801,66 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       `python3`, so the file's "requires only node" claim stays true) and
       fails if it does not match the committed `knowledge-visualizer.html`
       byte-for-byte.
+
+40. **`payments-target-state.json` renamed to `payments.json`, and a "Load
+    default" button added, after the same-named-file collision decision 39
+    flagged actually happened.** Not a hypothetical: within the same session
+    decision 39 shipped, the user picked a file through the OS dialog named
+    `payments-target-state.json` and got the *source* overlay at
+    `kg-content/entities/graphs/payments-target-state.json` instead of this
+    component's compiled output — same filename, different directory — at
+    `components/kg-viz/payments-target-state.json`. The viewer correctly
+    rejected it ("not a Knowledge Visualizer graph file", no top-level
+    `views` array), but it was a bad experience for picking the wrong file
+    with the right name. Confirmed by checking both files' actual top-level
+    keys before acting on the report.
+    - **The compiled output is now `payments.json`** — short, and
+      deliberately unlike either the source overlay's name or either view id
+      it contains, so it structurally cannot collide with anything else in
+      the repo again. Cost: the name no longer hints at what's inside (it
+      still carries both `payments-target-state` and `domain-authority`,
+      unchanged from decision 39's accepted tradeoff).
+    - **A "Load default" button, in both places a graph is opened** (the
+      initial empty-state prompt, and the left panel's "Graph file" group),
+      removes the OS file dialog from the common case entirely — the
+      collision can only recur through the browse path, which now exists
+      only for the uncommon case of opening a different file.
+    - **This needed reintroducing part of the mechanism decision 37 removed,
+      because `fetch()` is blocked on `file://`.** A zero-dialog load needs
+      some script-loadable copy of the data; `<script src>` is the only
+      thing that works from `file://`, which is exactly why the deleted
+      `graph-data.js` existed in the first place. Raised explicitly before
+      building anything, given decision 37 was a deliberate, reaffirmed
+      choice: asked whether to (a) have `build.py` embed `payments.json`
+      into `knowledge-visualizer.html` directly (one generated artifact, not
+      two) or (b) something else. The user chose (a).
+    - **Decision 37's substance survives; only its "no bundled blob at all"
+      half is now qualified.** The page still starts empty and draws nothing
+      without a click — what decision 37 actually objected to was silent
+      auto-load on open, not a button. `knowledge-visualizer.html` was
+      already a generated artifact (decision 39); embedding
+      `payments.json`'s content in it is an extension of that, not a new
+      category of thing to keep in sync.
+    - **New staleness risk, and how it's caught.** The embedded copy can lag
+      behind disk if `payments.json` is regenerated without rerunning
+      `build.py` — `generate.py` and `build.py` are separate commands. The
+      existing on-screen `generated_at` stamp (decision 37's "freshness is
+      shown" mechanism) catches this the same way it already caught every
+      other staleness case; no new UI was added for it.
+    - **`verify.js` split scenario K into K and L, and added M.** K now
+      checks `knowledge-visualizer.html`'s *structure* against `src/` only,
+      with the generated default-graph block stripped to a marker on both
+      sides first — reproducing Python's `json.dumps` formatting
+      byte-for-byte in node would be a fragile, pointless cross-language
+      match. L checks the embedded data separately, by comparing parsed
+      objects via `JSON.stringify` on both sides (both produced by the same
+      node process), never against Python's raw serialized bytes. M
+      exercises the Load default button itself, including that two
+      successive clicks don't accumulate mutation on the shared
+      `DEFAULT_GRAPH` object reference (`applyLayout()` writes coordinates
+      onto node objects in place) — `loadDefault()` clones via
+      `JSON.parse(JSON.stringify(...))` per click specifically to prevent
+      that.
 
 ## Constraints identified
 

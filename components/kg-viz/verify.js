@@ -13,7 +13,7 @@
 // round trip through them to find.
 //
 // So this file executes knowledge-visualizer.html's own JavaScript against
-// the real payments-target-state.json under a stubbed DOM, and asserts what
+// the real payments.json under a stubbed DOM, and asserts what
 // can be asserted without pixels. It is not a substitute for looking at the
 // page; it is the floor
 // below which things cannot silently break. Scenarios C and C2 in particular
@@ -26,7 +26,7 @@
 const fs = require('fs');
 const html = fs.readFileSync('knowledge-visualizer.html', 'utf8');
 const js = html.match(/<script>([\s\S]*?)<\/script>/)[1];
-const data = JSON.parse(fs.readFileSync('payments-target-state.json', 'utf8'));
+const data = JSON.parse(fs.readFileSync('payments.json', 'utf8'));
 
 function run(scenario, opts) {
   const els = {};
@@ -104,7 +104,7 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), };', ctx);
 
   return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam };
 }
@@ -122,7 +122,7 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (!el(r,'picker').classList._on) results.push('A: picker not shown on an empty start');
   if (el(r,'controls').classList._on) results.push('A: controls panel visible before a graph was opened');
   const inp = el(r,'file-input');
-  inp.files = [{ name: 'payments-target-state.json', _text: JSON.stringify(data) }];
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
   const gd = r.calls['__last_graphData'];
   const vis = r.probe.visible();
@@ -149,7 +149,7 @@ const el = (r, id) => r.els[id] || EMPTY;
 {
   const r = run('B', { cdnBlocked: false, badProjection: true }); await tick();
   const bi = el(r,'file-input');
-  bi.files = [{ name: 'payments-target-state.json', _text: JSON.stringify(data) }];
+  bi.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
   bi.onchange(); await tick();
   const nl = el(r,'labels').children.filter(c => /^nlabel/.test(c.className));
   const hidden = nl.filter(c => c.style.display === 'none').length;
@@ -218,22 +218,22 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (!/not valid JSON/.test(notes)) results.push('D: malformed JSON not reported');
 
   // now the real thing
-  input.files = [{ name: 'payments-target-state.json', _text: JSON.stringify(data) }];
+  input.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
   input.onchange(); await tick();
   const gd = r.calls['__last_graphData'];
-  console.log('D: after loading payments-target-state.json -> nodes =', gd && gd.nodes.length,
+  console.log('D: after loading payments.json -> nodes =', gd && gd.nodes.length,
     '| picker dismissed =', !el(r,'picker').classList._on);
-  if (!gd || gd.nodes.length !== 26) results.push('D: picking payments-target-state.json did not render 26 nodes');
+  if (!gd || gd.nodes.length !== 26) results.push('D: picking payments.json did not render 26 nodes');
   if (el(r,'picker').classList._on) results.push('D: picker still open after a successful load');
   const stats = el(r,'stats')._html;
-  if (!/payments-target-state\.json/.test(stats)) results.push('D: stats box does not name the file the data came from');
+  if (!/payments\.json/.test(stats)) results.push('D: stats box does not name the file the data came from');
 }
 
 // E: opening a second file must reuse the renderer and reset per-graph state
 {
   const r = run('E', { cdnBlocked: false }); await tick();
   const inp = el(r,'file-input');
-  inp.files = [{ name: 'payments-target-state.json', _text: JSON.stringify(data) }];
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
   const afterFirst = r.fgCount();
 
@@ -257,7 +257,7 @@ const el = (r, id) => r.els[id] || EMPTY;
 {
   const r = run('F', { cdnBlocked: false }); await tick();
   const inp = el(r,'file-input');
-  inp.files = [{ name: 'payments-target-state.json', _text: JSON.stringify(data) }];
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
 
   const flow = data.views.find(v => v.layout === 'layered');
@@ -312,7 +312,7 @@ const el = (r, id) => r.els[id] || EMPTY;
 {
   const r = run('G', { cdnBlocked: false }); await tick();
   const inp = el(r,'file-input');
-  inp.files = [{ name: 'payments-target-state.json', _text: JSON.stringify(data) }];
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
 
   const cam = r.cam();
@@ -349,7 +349,7 @@ const el = (r, id) => r.els[id] || EMPTY;
 {
   const r = run('H', { cdnBlocked: false }); await tick();
   const inp = el(r,'file-input');
-  inp.files = [{ name: 'payments-target-state.json', _text: JSON.stringify(data) }];
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
   r.probe.positionLabels();
 
@@ -398,7 +398,7 @@ const el = (r, id) => r.els[id] || EMPTY;
 {
   const r = run('I', { cdnBlocked: false }); await tick();
   const inp = el(r,'file-input');
-  inp.files = [{ name: 'payments-target-state.json', _text: JSON.stringify(data) }];
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
 
   const flatSample = el(r,'labels').children.filter(c => /^elabel/.test(c.className))[0];
@@ -429,7 +429,7 @@ const el = (r, id) => r.els[id] || EMPTY;
 {
   const r = run('J', { cdnBlocked: false }); await tick();
   const inp = el(r,'file-input');
-  inp.files = [{ name: 'payments-target-state.json', _text: JSON.stringify(data) }];
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
 
   const flow = data.views.find(v => v.layout === 'layered');
@@ -479,26 +479,85 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (r.probe.bands().length) results.push('J: bands drawn on a view with no stages');
 }
 
-// K: knowledge-visualizer.html is generated from src/ by build.py and must
-// never be hand-edited -- a forgotten rebuild after touching a src/*.js file
-// would otherwise mean every scenario above is exercising stale code without
-// anyone noticing. Reconstructs build.py's own concatenation in plain node
-// rather than shelling out to python3, so this file's "requires only node"
-// claim stays true. MODULE_ORDER is kept in sync with build.py by hand; both
-// lists are short and rarely change.
+// K: knowledge-visualizer.html's *structure* is generated from src/ by
+// build.py and must never be hand-edited -- a forgotten rebuild after
+// touching a src/*.js file would otherwise mean every scenario above is
+// exercising stale code without anyone noticing. Reconstructs build.py's own
+// concatenation in plain node rather than shelling out to python3, so this
+// file's "requires only node" claim stays true. MODULE_ORDER is kept in sync
+// with build.py by hand; both lists are short and rarely change.
+//
+// The generated default-graph block (decision 40) is stripped out on both
+// sides before comparing, down to a marker string: reproducing build.py's
+// Python json.dumps formatting byte-for-byte in node would be a fragile,
+// pointless cross-language match, and structure and data are two genuinely
+// separate freshness questions -- see scenario L for the data half.
 {
+  const BEGIN = '// BEGIN GENERATED DEFAULT GRAPH -- do not hand-edit, see build.py';
+  const END = '// END GENERATED DEFAULT GRAPH';
+  const stripBlock = (text) => {
+    const i = text.indexOf(BEGIN), j = text.indexOf(END);
+    if (i === -1 || j === -1) return null;
+    return text.slice(0, i) + '<GENERATED>' + text.slice(j + END.length);
+  };
+
   const MODULE_ORDER = [
     'state.js', 'graph-model.js', 'controls-panel.js', 'labels.js',
     'bands.js', 'camera.js', 'data-loading.js', 'renderer.js', 'bootstrap.js',
   ];
   const shell = fs.readFileSync('src/shell.html', 'utf8');
-  const body = MODULE_ORDER
-    .map(name => fs.readFileSync('src/' + name, 'utf8').replace(/\n+$/, ''))
-    .join('\n\n');
-  const expected = shell + body + '\n</script>\n</body>\n</html>\n';
-  const fresh = expected === html;
-  console.log('K: knowledge-visualizer.html matches build.py(src/) =', fresh);
-  if (!fresh) results.push('K: knowledge-visualizer.html is stale -- run `python3 build.py`');
+  const modules = MODULE_ORDER.map(name => fs.readFileSync('src/' + name, 'utf8').replace(/\n+$/, ''));
+  // Stand-in for build.py's generated block: content doesn't matter here,
+  // only that it sits between the same markers at the same position, so
+  // stripBlock collapses both sides to the identical placeholder below.
+  modules.splice(1, 0, `  ${BEGIN}\n  var DEFAULT_GRAPH = {};\n  ${END}`);
+  const reconstructed = shell + modules.join('\n\n') + '\n</script>\n</body>\n</html>\n';
+
+  const actual = stripBlock(html);
+  const expected = stripBlock(reconstructed);
+  const fresh = actual !== null && expected !== null && actual === expected;
+  console.log('K: knowledge-visualizer.html structure matches build.py(src/) =', fresh);
+  if (actual === null) results.push('K: could not find the generated default-graph markers -- run `python3 build.py`');
+  else if (!fresh) results.push('K: knowledge-visualizer.html is stale against src/ -- run `python3 build.py`');
+}
+
+// L: the embedded default graph (decision 40) must match payments.json's
+// current content -- a forgotten rebuild after regenerating payments.json is
+// a distinct staleness risk from K's, since generate.py and build.py are two
+// separate commands. Compared as parsed objects via JSON.stringify on both
+// sides (both produced by this same node process), never as raw bytes
+// against Python's own serialization, so no cross-language format concern.
+{
+  const r = run('L', {}); await tick();
+  const embedded = r.probe.defaultGraph();
+  const fresh = embedded !== null && JSON.stringify(embedded) === JSON.stringify(data);
+  console.log('L: embedded DEFAULT_GRAPH matches payments.json =', fresh);
+  if (embedded === null) results.push('L: DEFAULT_GRAPH not found in knowledge-visualizer.html -- run `python3 build.py`');
+  else if (!fresh) results.push('L: embedded DEFAULT_GRAPH is stale against payments.json -- run `python3 generate.py` then `python3 build.py`');
+}
+
+// M: the Load default button/flow, in both places it appears
+{
+  const r = run('M', {}); await tick();
+  if (!el(r,'picker').classList._on) results.push('M: picker not shown on an empty start');
+  r.probe.loadDefault(); await tick();
+  const gd = r.calls['__last_graphData'];
+  console.log('M: Load default -> nodes =', gd && gd.nodes.length,
+    '| picker dismissed =', !el(r,'picker').classList._on);
+  if (!gd || gd.nodes.length !== 26) results.push('M: Load default did not render 26 nodes');
+  if (el(r,'picker').classList._on) results.push('M: picker still open after Load default');
+  const stats = el(r,'stats')._html;
+  if (!/payments\.json/.test(stats)) results.push('M: stats box does not name payments.json after Load default');
+
+  // Two clicks must not accumulate mutation on the shared DEFAULT_GRAPH
+  // object -- applyLayout() writes fx/fy/fz/x/y/z onto node objects in
+  // place, so a second load reusing the same reference should reproduce
+  // identical coordinates, not drift.
+  const firstX = r.probe.visible().nodes[0].x;
+  r.probe.loadDefault(); await tick();
+  const secondX = r.probe.visible().nodes[0].x;
+  console.log('M: coordinate stable across two Load default clicks =', firstX === secondX);
+  if (firstX !== secondX) results.push('M: repeated Load default drifted a node coordinate: ' + firstX + ' -> ' + secondX);
 }
 
 console.log(results.length ? '\nFAILURES:\n' + results.join('\n') : '\nALL SCENARIOS PASSED');

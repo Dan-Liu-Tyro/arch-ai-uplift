@@ -132,6 +132,8 @@
       document.getElementById("file-input").click();
     };
 
+    document.getElementById("load-default-panel-btn").onclick = loadDefault;
+
     labelLoop();
 
     Graph.onEngineStop(function () { frameGraph(); });

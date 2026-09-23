@@ -8,7 +8,7 @@
   //
   // Note what was *never* happening, so the risk is not overstated: the page
   // has no fetch, XHR, sendBeacon, WebSocket, form, img or postMessage path at
-  // all, and payments-target-state.json is read from disk. No graph content
+  // all, and payments.json is read from disk. No graph content
   // has ever left the machine. The library download was the only outbound
   // request, and it is now gone.
   //

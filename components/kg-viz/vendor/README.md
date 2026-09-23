@@ -24,8 +24,9 @@ because the alternative fails the requirement.
 
 **What was never happening, so the risk is not overstated:** the page has no
 `fetch`, `XMLHttpRequest`, `sendBeacon`, `WebSocket`, `<form>`, `<img>` or
-`postMessage` path at all, and `payments-target-state.json` is read from
-disk. No graph content has ever left the machine. The library download was
+`postMessage` path at all, and `payments.json` is read from disk (or, via
+the **Load default** button, from an embedded copy that never leaves the
+page). No graph content has ever left the machine. The library download was
 the only outbound
 request. Both the loader and the absence of egress paths are asserted by the
 test harness (scenarios C and C2), so a regression fails a test rather than

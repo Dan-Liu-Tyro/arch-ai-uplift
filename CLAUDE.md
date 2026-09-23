@@ -39,7 +39,7 @@ components/kg-viz/        read-only viewer, two purpose-built views (2D
                                   flow default, 3D a toggle); no server --
                                   open knowledge-visualizer.html from disk,
                                   then open any compatible graph file
-                                  (default payments-target-state.json, a
+                                  (default payments.json, a
                                   regenerable artifact, never hand-edited);
                                   knowledge-visualizer.html is itself
                                   generated too, by build.py from src/*.js
