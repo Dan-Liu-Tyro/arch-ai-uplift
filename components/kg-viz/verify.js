@@ -97,7 +97,7 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), };', ctx);
 
   return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam };
 }
@@ -261,8 +261,8 @@ const el = (r, id) => r.els[id] || EMPTY;
   console.log('F: camera framed =', framed, '| via computed fit =', !!r.cam());
   if (!framed) results.push('F: the view was never framed');
 
-  // edge labels: opt-in, so enable them before asserting
-  r.probe.setEdgeLabels(true); await tick();
+  // edge labels are on by default -- assert that, do not enable them first
+  if (!r.probe.edgeLabelsOn()) results.push('F: edge labels are not on by default');
   const eEls = r.probe.edgeEls();
   const nEdge = Object.keys(eEls).length;
   const sample = el(r,'labels').children.filter(c => c.className === 'elabel')[0];
@@ -291,12 +291,13 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (!(alpha >= 0.8)) results.push('F: flow edge still faint, alpha ' + alpha);
   if (!(wid >= 1.5)) results.push('F: flow edge still thin, width ' + wid);
 
-  // switching to the dense view must turn edge labels off and particles off
+  // switching view must NOT silently override the user's edge-label choice,
+  // but must still drop particles on the 296-edge graph
   r.probe.switchView(authority.id); await tick();
   const authParts = r.calls['__last_linkDirectionalParticles'](authority.links[0]);
-  console.log('F: after switch to authority -> edge labels =', r.probe.edgeLabelsOn(),
+  console.log('F: after switch to authority -> edge labels still on =', r.probe.edgeLabelsOn(),
     '| particles =', authParts);
-  if (r.probe.edgeLabelsOn()) results.push('F: edge labels left on for the 296-edge view');
+  if (!r.probe.edgeLabelsOn()) results.push('F: view switch silently turned the edge-label toggle off');
   if (authParts) results.push('F: particles left on for the 296-edge view');
 }
 
@@ -337,13 +338,12 @@ const el = (r, id) => r.els[id] || EMPTY;
   }
 }
 
-// H: no visible label may overlap another label or a node marker
+// H: node labels suppressed on collision; edge labels NEVER suppressed
 {
   const r = run('H', { cdnBlocked: false }); await tick();
   const inp = el(r,'file-input');
   inp.files = [{ name: 'graph.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
-  r.probe.setEdgeLabels(true); await tick();
   r.probe.positionLabels();
 
   const boxOf = (c) => {
@@ -353,22 +353,69 @@ const el = (r, id) => r.els[id] || EMPTY;
     const w = c.textContent.length * 5.6, h = 12;
     return { l: x - w/2 - 2, r: x + w/2 + 2, t: y - 1, b: y + h + 1, txt: c.textContent };
   };
-  const vis = el(r,'labels').children.filter(c => c.style.display === 'block');
-  const boxes = vis.map(boxOf).filter(Boolean);
-  let clashes = 0, example = null;
-  for (let i = 0; i < boxes.length; i++) {
-    for (let j = i+1; j < boxes.length; j++) {
-      const a = boxes[i], b = boxes[j];
-      if (a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t) {
-        clashes++; if (!example) example = a.txt + ' / ' + b.txt;
-      }
+  const overlaps = (list) => {
+    let n = 0, ex = null;
+    for (let i = 0; i < list.length; i++) for (let j = i+1; j < list.length; j++) {
+      const a = list[i], b = list[j];
+      if (a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t) { n++; if (!ex) ex = a.txt + ' / ' + b.txt; }
     }
+    return { n, ex };
+  };
+
+  const kids = el(r,'labels').children;
+  const nodeLabels = kids.filter(c => /^nlabel/.test(c.className));
+  const edgeLabels = kids.filter(c => /^elabel/.test(c.className));
+  const edgeHidden = edgeLabels.filter(c => c.style.display === 'none');
+  const nodeClash = overlaps(nodeLabels.filter(c => c.style.display === 'block').map(boxOf).filter(Boolean));
+
+  const flow = data.views.find(v => v.layout === 'layered');
+  console.log('H: node labels', nodeLabels.length, '-> overlapping pairs', nodeClash.n,
+    nodeClash.ex ? '(' + nodeClash.ex + ')' : '',
+    '| edge labels', edgeLabels.length, 'of', flow.links.length, '-> suppressed', edgeHidden.length);
+
+  if (nodeClash.n) results.push('H: ' + nodeClash.n + ' overlapping node-label pairs, e.g. ' + nodeClash.ex);
+  if (edgeLabels.length !== flow.links.length) {
+    results.push('H: expected an element for all ' + flow.links.length + ' edges, got ' + edgeLabels.length);
   }
-  const hiddenCount = el(r,'labels').children.filter(c => c.style.display === 'none').length;
-  console.log('H: visible labels =', boxes.length, '| suppressed =', hiddenCount,
-    '| overlapping pairs =', clashes, example ? '(' + example + ')' : '');
-  if (clashes) results.push('H: ' + clashes + ' overlapping label pairs still drawn, e.g. ' + example);
-  if (!boxes.length) results.push('H: suppression hid everything');
+  // The point of this scenario: no edge label may ever be hidden. Suppression
+  // dropped the longest predicates first, which are the most informative.
+  if (edgeHidden.length) {
+    results.push('H: ' + edgeHidden.length + ' edge labels suppressed; edge labels must always show');
+  }
+  const longest = edgeLabels.reduce((a, c) => c.textContent.length > a.textContent.length ? c : a, edgeLabels[0]);
+  console.log('H: longest predicate =', JSON.stringify(longest.textContent), '-> display', longest.style.display);
+  if (longest.style.display !== 'block') results.push('H: the longest edge label is hidden');
+}
+
+// I: along-line style rotates each label to its edge, never upside down
+{
+  const r = run('I', { cdnBlocked: false }); await tick();
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'graph.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+
+  const flatSample = el(r,'labels').children.filter(c => /^elabel/.test(c.className))[0];
+  const flatHasRotate = /rotate\(/.test(flatSample.style.transform || '');
+
+  r.probe.setEdgeStyle('along'); await tick();
+  r.probe.positionLabels();
+  const along = el(r,'labels').children.filter(c => /^elabel/.test(c.className));
+  const angles = along.map(c => {
+    const m = /rotate\((-?[\d.]+)deg\)/.exec(c.style.transform || '');
+    return m ? parseFloat(m[1]) : null;
+  });
+  const missing = angles.filter(a => a === null).length;
+  const upsideDown = angles.filter(a => a !== null && (a > 90.001 || a < -90.001));
+  const rotated = angles.filter(a => a !== null && Math.abs(a) > 0.001).length;
+  console.log('I: flat style has rotate =', flatHasRotate,
+    '| along style: rotated', rotated, 'of', along.length,
+    '| missing angle', missing, '| outside +/-90deg', upsideDown.length,
+    '| classed .along =', along.every(c => /along/.test(c.className)));
+  if (flatHasRotate) results.push('I: flat style should not rotate labels');
+  if (missing) results.push('I: ' + missing + ' along-line labels have no rotation');
+  if (upsideDown.length) results.push('I: angles outside +/-90deg would read upside down: ' + upsideDown);
+  if (!rotated) results.push('I: along-line style rotated nothing');
+  if (!along.every(c => /along/.test(c.className))) results.push('I: .along class not applied');
 }
 
 console.log(results.length ? '\nFAILURES:\n' + results.join('\n') : '\nALL SCENARIOS PASSED');

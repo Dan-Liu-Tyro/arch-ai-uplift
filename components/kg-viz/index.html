@@ -104,6 +104,11 @@
     background: rgba(5, 7, 13, 0.8); padding: 0 3px; border-radius: 3px;
     will-change: transform; }
   .elabel.back { color: #ffb3bf; }
+  /* Rotated onto the line: no pill (it would rotate into the edge and look
+     like a smear), a text shadow instead, and a nudge clear of the stroke. */
+  .elabel.along { background: transparent; padding: 0;
+    text-shadow: 0 0 3px #05070d, 0 0 3px #05070d, 0 0 6px #05070d, 0 0 6px #05070d;
+    margin-top: -7px; }
   .elabel.dim { color: rgba(140, 155, 180, 0.28); background: transparent; }
   #hint { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
     font-size: 11px; color: #67718a; z-index: 4; }
@@ -166,9 +171,15 @@
       <span>Node labels</span>
     </div>
     <div class="row" id="edge-labels-row">
-      <input type="checkbox" id="edge-labels-cb" />
-      <span>Edge labels <span class="count">dense</span></span>
+      <input type="checkbox" id="edge-labels-cb" checked />
+      <span>Edge labels</span>
     </div>
+    <div class="group-label">Edge label style</div>
+    <div class="seg" id="elabel-seg">
+      <button data-style="flat" class="on">Flat</button>
+      <button data-style="along">Along line</button>
+    </div>
+
     <div class="seg" style="margin-top: 8px;">
       <button id="fit-btn">Fit to view</button>
     </div>
@@ -233,12 +244,12 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-23c — offline only: no remote loads, no data egress";
+  var PAGE_REVISION = "2026-09-23d — edge labels on by default, never suppressed, flat or along-line";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
   var DATA = null, view = null, Graph = null;
-  var dims = 2, scopeMode = "all", showLabels = true, showEdgeLabels = false;
+  var dims = 2, scopeMode = "all", showLabels = true, showEdgeLabels = true, edgeLabelStyle = "flat";
   // Anything that prevents the graph drawing goes on screen. Errors thrown
   // inside the render loop never reach the fetch().catch() below, which is
   // why a broken node accessor previously produced a blank canvas next to a
@@ -618,13 +629,34 @@
     return true;
   }
 
-  function place(el, p, dy) {
+  // `suppress` is opt-in per layer. Node labels are suppressed on collision,
+  // because a node's identity is recoverable by clicking it. Edge labels are
+  // never suppressed: the predicate is the only place an edge's meaning
+  // appears on the canvas, and suppression silently dropped the *longest*
+  // ones first -- a bigger box collides more often -- which is exactly
+  // backwards, since the longest predicates are the most informative.
+  function place(el, p, dy, opts) {
+    opts = opts || {};
     if (!p || !isFinite(p.x) || !isFinite(p.y)) { el.style.display = "none"; return false; }
-    // Measure while visible, then decide; offsetWidth is 0 on a hidden node.
     el.style.display = "block";
-    el.style.transform = "translate(-50%, 0) translate(" + p.x + "px," + (p.y + dy) + "px)";
-    if (!claim(el, p.x, p.y + dy)) { el.style.display = "none"; return false; }
+    var x = p.x, y = p.y + dy;
+    if (opts.rotate !== undefined) {
+      el.style.transform = "translate(-50%, -50%) translate(" + x + "px," + y + "px) " +
+        "rotate(" + opts.rotate + "deg)";
+    } else {
+      el.style.transform = "translate(-50%, 0) translate(" + x + "px," + y + "px)";
+    }
+    if (opts.suppress && !claim(el, x, y)) { el.style.display = "none"; return false; }
     return true;
+  }
+
+  // Angle of the edge in screen space, normalised so text never reads upside
+  // down: past vertical, flip by 180 degrees rather than mirroring it.
+  function edgeAngle(a, b) {
+    var deg = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+    if (deg > 90) deg -= 180;
+    if (deg < -90) deg += 180;
+    return deg;
   }
 
   function positionLabels() {
@@ -652,7 +684,8 @@
         var dim = keep ? !keep[n.id] : isDimmedByScope(n);
         el.className = "nlabel" + (dim ? " dim" : "") +
           (selected && selected.id === n.id ? " sel" : "");
-        place(el, Graph.graph2ScreenCoords(n.x, n.y, isFinite(n.z) ? n.z : 0), 11);
+        place(el, Graph.graph2ScreenCoords(n.x, n.y, isFinite(n.z) ? n.z : 0), 11,
+          { suppress: true });
       }
     }
 
@@ -666,12 +699,14 @@
         if (selected && !on) { el2.style.display = "none"; continue; }
         var a = nodeById[srcId(l)], b = nodeById[tgtId(l)];
         if (!a || !b || !isFinite(a.x) || !isFinite(b.x)) { el2.style.display = "none"; continue; }
-        var mid = Graph.graph2ScreenCoords(
-          (a.x + b.x) / 2, (a.y + b.y) / 2,
-          ((isFinite(a.z) ? a.z : 0) + (isFinite(b.z) ? b.z : 0)) / 2
-        );
-        el2.className = "elabel" + (l.back_edge ? " back" : "");
-        place(el2, mid, -6);
+        var pa = Graph.graph2ScreenCoords(a.x, a.y, isFinite(a.z) ? a.z : 0);
+        var pb = Graph.graph2ScreenCoords(b.x, b.y, isFinite(b.z) ? b.z : 0);
+        if (!pa || !pb || !isFinite(pa.x) || !isFinite(pb.x)) { el2.style.display = "none"; continue; }
+        var mid = { x: (pa.x + pb.x) / 2, y: (pa.y + pb.y) / 2 };
+        el2.className = "elabel" + (l.back_edge ? " back" : "") +
+          (edgeLabelStyle === "along" ? " along" : "");
+        place(el2, mid, edgeLabelStyle === "along" ? 0 : -6,
+          edgeLabelStyle === "along" ? { rotate: edgeAngle(pa, pb) } : {});
       }
     }
   }
@@ -684,10 +719,10 @@
   function switchView(id) {
     view = DATA.views.find(function (v) { return v.id === id; });
     selected = null;
-    // Never auto-enable: edge labels are opt-in in every view. 43 of them
-    // crowd the flow view and 296 make the authority view unreadable.
-    showEdgeLabels = false;
-    document.getElementById("edge-labels-cb").checked = false;
+    // Deliberately NOT reset here: the edge-label choice is the user's and
+    // survives a view switch. The authority view's 296 identical predicates
+    // are genuinely noisy, but silently overriding a toggle someone just set
+    // is worse than letting them turn it off.
     document.getElementById("detail").classList.remove("open");
     buildAdjacency();
     applyLayout();
@@ -978,6 +1013,16 @@
       showEdgeLabels = e.target.checked;
       rebuildLabels();
     };
+
+    document.getElementById("elabel-seg").querySelectorAll("button").forEach(function (b) {
+      b.onclick = function () {
+        edgeLabelStyle = b.dataset.style;
+        document.getElementById("elabel-seg").querySelectorAll("button").forEach(function (x) {
+          x.className = x === b ? "on" : "";
+        });
+        rebuildLabels();
+      };
+    });
 
     document.getElementById("fit-btn").onclick = function () { frameGraph(); };
 

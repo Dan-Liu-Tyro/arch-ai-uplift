@@ -48,7 +48,7 @@ blob that existed only to let the page auto-load, which it no longer does).
 cd components/kg-viz && node verify.js
 ```
 
-Eight scenarios, exit non-zero on failure. This is the only automated check
+Nine scenarios, exit non-zero on failure. This is the only automated check
 in the repo, and it exists because **nothing this component renders can be
 observed from a Claude Code session** — see `docs/decision-log.md`'s
 "Constraints identified". It is a floor, not a substitute for opening the
@@ -154,17 +154,22 @@ through ingestion is the real fix. See "Known gaps".
 - **Click a node** — highlights it and everything linked to it, dims the
   rest, and opens a panel listing every inbound and outbound relationship
   with its predicate, payload, and whether it is a feedback arc.
-- **Edge labels on the lines** — the predicate at each edge midpoint, with a
-  backing so it stays readable where it crosses the line. **Opt-in, off by
-  default in both views**: 43 of them crowd the flow view and 296 make the
-  authority view unreadable. With a node selected, only that node's edges are
-  labelled.
-- **No label ever overlaps another label or a node.** Placement is greedy with
-  collision suppression — node markers are reserved first, then node labels,
-  then edge labels fill whatever room is left; anything that would collide is
-  hidden rather than drawn on top. Text that overlaps other text is worse than
-  absent text, and a suppressed label is still reachable by hover or by
-  selecting the node.
+- **Edge labels on the lines, on by default, and never hidden.** The
+  predicate at each edge midpoint. Two styles, switchable: **Flat**
+  (horizontal, with a backing pill so it survives crossing the line) or
+  **Along line** (rotated to the edge's screen angle, flipped past vertical
+  so text never reads upside down). With a node selected, only that node's
+  edges are labelled. The toggle is the user's and a view switch does not
+  silently override it.
+- **Node labels are suppressed on collision; edge labels never are.** Greedy
+  placement reserves node markers first, then places node labels, hiding any
+  that would collide — a node's identity is recoverable by clicking it, so a
+  dropped node label costs little. Edge labels are exempt, because the
+  predicate is the only place an edge's meaning appears on the canvas.
+  Suppressing them was actively wrong: a longer label has a bigger box, so it
+  collides more often and was dropped first, meaning **the most informative
+  predicates were the ones that disappeared**. `verify.js` asserts that all 43
+  are placed and that the longest is among them.
 - **Direction as motion** — a slow stream of particles runs source → target on
   every flow edge, so direction reads without tracing an arrowhead. Flow view
   only; 296 animated edges would be visual noise and the authority predicate
