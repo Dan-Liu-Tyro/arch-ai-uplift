@@ -31,7 +31,7 @@ mirroring**: Arc's five-page split exists because Rovo loads pages
 dynamically and a rule can change without redeploying the agent, a
 constraint a Claude Code subagent file doesn't have. Identity, working
 protocol, and answer-format now live directly in
-[`.claude/agents/arc-lite.md`](../../.claude/agents/arc-lite.md) itself,
+[`.claude/agents/arc.md`](../../.claude/agents/arc.md) itself,
 and local grounding is `components/kg-content/` entities directly — no
 separate `constitution/02-canonical-sources.md` shadow schema. Only the two
 things that are genuinely data that grows by entry, not behaviour, remain
@@ -50,7 +50,7 @@ reason — see Boundary below.
   title, status, source link, note) — deliberately not `kg-core`'s full
   schema.
 - A local persona ("Arc Lite"), defined directly in
-  `.claude/agents/arc-lite.md`, grounded first on `components/kg-content/`
+  `.claude/agents/arc.md`, grounded first on `components/kg-content/`
   entities, and allowed to search and read live Confluence when local
   grounding doesn't cover a question.
 - An ignore list (`constitution/05-ignore-list.md`) of specific pages to
@@ -59,7 +59,7 @@ reason — see Boundary below.
   block per answer — `{"citations": [...], "refusal": bool}`, per decision
   21): every answer must end with one, which `ui/server.py` parses and
   validates rather than only trusting the model to have followed
-  `arc-lite.md`'s working protocol.
+  `arc.md`'s working protocol.
 - `gap-log.md`: every refusal and every citation below `canonical` status
   is logged there automatically, as the knowledge-lifecycle feedback loop
   — a knowledge owner reviews it and curates new `kg-content` entities
@@ -84,14 +84,14 @@ reason — see Boundary below.
 `ui/server.py` is a local-only HTML relay: a stdlib-only Python HTTP server
 (no dependencies to install) that serves `ui/index.html` — a plain chatbox,
 no framework — and relays `POST /ask` to a headless `claude -p --agent
-arc-lite --output-format json` call, the same subagent invocation a Claude
+arc --output-format json` call, the same subagent invocation a Claude
 Code session already makes, just automated instead of typed.
-`ui/arc-lite.sh {start|stop|restart|status}` runs it as a background
+`ui/arc.sh {start|stop|restart|status}` runs it as a background
 process (pid + log under `ui/.run/`, gitignored) so it doesn't tie up a
 terminal; open `http://127.0.0.1:8765` once it's started. Binds to
 localhost only; nothing is exposed beyond the machine it runs on.
 
-The one seam is `ask_arc_lite()` in `server.py` — swapping the local
+The one seam is `ask_arc()` in `server.py` — swapping the local
 subprocess call for a real deployed API call later is a change to that one
 function, not a redesign, mirroring decision 2's "transport change, not a
 redesign" principle. Whether this UI is ever worth deploying beyond that is
@@ -110,7 +110,7 @@ happen outside that sandbox, on the user's own machine.
 Nothing in this repo, deliberately — not even `kg-core`. The UI adds a
 runtime dependency on the `claude` CLI being on `PATH` and authenticated;
 Arc Lite's live-Confluence-read step (decision 11) depends on the
-Atlassian MCP connector being enabled for the `arc-lite` subagent's own
+Atlassian MCP connector being enabled for the `arc` subagent's own
 tool grant, separately from whether it's enabled for a Claude Code
 session generally. Still nothing on another component in this repo. This is a
 temporary decoupling: `kg-core`'s schema targets the full graph (program
@@ -128,16 +128,16 @@ Nothing yet.
 
 ## How to use it
 
-Invoke the `arc-lite` subagent (`.claude/agents/arc-lite.md`) in a Claude
+Invoke the `arc` subagent (`.claude/agents/arc.md`) in a Claude
 Code session in this repo, or ask a session to act as Arc Lite directly.
 As of decision 21, identity, working protocol, and answer-format live
-directly in `arc-lite.md` — there is no "read N constitution files first"
+directly in `arc.md` — there is no "read N constitution files first"
 indirection for content that small; only `components/kg-content/`
 (grounding, grows by entry) and the three remaining `constitution/`
 registries (`03-skills.md`, `04-procedure-memory.md`,
-`05-ignore-list.md`) are read on demand, per the protocol in `arc-lite.md`
+`05-ignore-list.md`) are read on demand, per the protocol in `arc.md`
 itself. The subagent's *tool grant* (which MCP tools it's allowed to
-call) also lives in `arc-lite.md`, and is left to the user's own hand
+call) also lives in `arc.md`, and is left to the user's own hand
 deliberately — not because Claude is blocked from writing the file (it
 isn't, for an existing tracked file's content — see
 `meta/procedural-memory/universal.md`'s sandbox-write-protection entry

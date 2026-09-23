@@ -2,8 +2,8 @@
 """Local-only HTML relay for Arc Lite. Stdlib only, no deps, no deployment.
 
 Serves index.html and relays POST /ask to a headless `claude -p --agent
-arc-lite` invocation, mirroring exactly how a Claude Code session already
-invokes the subagent (.claude/agents/arc-lite.md) -- this just automates
+arc` invocation, mirroring exactly how a Claude Code session already
+invokes the subagent (.claude/agents/arc.md) -- this just automates
 that same call instead of adding a second, parallel way to talk to it.
 """
 
@@ -32,13 +32,13 @@ FRONTMATTER_ID_RE = re.compile(r"^id:\s*(\S+)", re.MULTILINE)
 FRONTMATTER_STATUS_RE = re.compile(r"^status:\s*(\S+)", re.MULTILINE)
 
 
-def ask_arc_lite(question: str) -> str:
+def ask_arc(question: str) -> str:
     """The one seam to change if this ever moves off a local subprocess call
     onto a deployed API -- everything else in this file is transport."""
     result = subprocess.run(
         [
             "claude", "-p", question,
-            "--agent", "arc-lite",
+            "--agent", "arc",
             "--output-format", "json",
             "--permission-prompts", "none",
         ],
@@ -108,7 +108,7 @@ def _load_kg_content_statuses() -> dict:
 
 def _extract_citation_block(answer: str) -> tuple[Optional[dict], str]:
     """Pull the last fenced ```json block out of the answer per
-    .claude/agents/arc-lite.md's answer-format contract, parse it, and
+    .claude/agents/arc.md's answer-format contract, parse it, and
     return (payload_or_None, clean_answer_with_block_removed)."""
     last = None
     for m in JSON_BLOCK_RE.finditer(answer):
@@ -124,7 +124,7 @@ def _extract_citation_block(answer: str) -> tuple[Optional[dict], str]:
 
 def check_compliance(question: str, answer: str) -> tuple[str, bool]:
     """Validate the trailing citation block against .claude/agents/
-    arc-lite.md's answer-format contract, log every refusal and every
+    arc.md's answer-format contract, log every refusal and every
     non-active kg-content citation to gap-log.md, and report whether the
     answer honored the contract. Returns (clean_answer, compliant)."""
     payload, clean_answer = _extract_citation_block(answer)
@@ -225,7 +225,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self._send_json(400, {"error": "expected JSON body {\"question\": \"...\"}"})
             return
         try:
-            answer = ask_arc_lite(question)
+            answer = ask_arc(question)
         except (RuntimeError, subprocess.TimeoutExpired) as exc:
             self._send_json(502, {"error": str(exc)})
             return

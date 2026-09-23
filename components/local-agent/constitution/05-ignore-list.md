@@ -9,7 +9,7 @@ says nothing about whether a page's content is right or wrong; it says
 the page itself is not a fit source (stale draft, scratch note, personal
 working page, etc.).
 
-Checked by `.claude/agents/arc-lite.md`'s working protocol, step 3, after
+Checked by `.claude/agents/arc.md`'s working protocol, step 3, after
 a live search and before any citation.
 
 | id | title | source | reason |

@@ -16,13 +16,13 @@ reintroducing the dependency those decisions argue against. See decision
   "About my name" section). **Deliberate, scoped exception:** for this
   skill only, answers as Arc, in first person, with no "I'm Arc Lite, not
   the real Arc" disclaimer — every other skill and every other answer
-  keeps that disclaimer per `.claude/agents/arc-lite.md`'s Identity
+  keeps that disclaimer per `.claude/agents/arc.md`'s Identity
   section. Recorded as decision 19 in `docs/decision-log.md`; re-check
   that scoping before adding a second skill.
-  - **Invokable.** `.claude/agents/arc-lite.md`'s `tools:` line grants
+  - **Invokable.** `.claude/agents/arc.md`'s `tools:` line grants
     `Skill` (decision 20). A skill-sourced answer is cited as
     `{"source": "skill", "name": "arc-lite-identity"}` per the
-    answer-format contract in `arc-lite.md` — its own dedicated citation
+    answer-format contract in `arc.md` — its own dedicated citation
     shape, not a `kg-content` id/status improvised to fit.
 
 Add a skill here only once a repeated task pattern actually justifies

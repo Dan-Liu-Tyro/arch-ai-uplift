@@ -98,6 +98,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 39 | `kg-viz` UI renamed "Knowledge Visualizer"; `index.html`→`knowledge-visualizer.html`, `graph.json`→`payments-target-state.json`; source split under `src/`, compiled by `build.py` | `kg-viz`, `CLAUDE.md`, `README.md` |
 | 40 | `payments-target-state.json`→`payments.json` after the same-named source overlay caused a real mis-pick; `build.py` embeds it, adding a "Load default" button | `kg-viz` |
 | 41 | Stage bands invisible in Safari only: `#bands` `<svg>` needs explicit `width`/`height`, `inset:0` alone doesn't stretch a replaced element | `kg-viz` |
+| 42 | Agent's invocation handle renamed `arc-lite` → `arc` for easier `@`-mention; persona identity and disclaimer unchanged | `local-agent` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -1905,6 +1906,47 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       extends one level further than previously written: it is not just
       "needs a human's eyes," it is "needs a human's eyes, in the specific
       browser being asked about."
+42. **The subagent's invocation handle renamed `arc-lite` → `arc`, so it's
+    easier to `@`-mention in a Claude Code session; the persona identity
+    and non-affiliation disclaimer from decision 19 are unchanged.** The
+    user asked directly for the rename. Flagged one objection before
+    acting, per this repo's standing challenge-first norm: the agent's own
+    Identity section calls "never imply you are the real Arc" non-
+    negotiable, and an invocation string of exactly `arc` asserts that
+    identity before the agent says a word. The user's answer resolved it:
+    there is no agent actually named `arc` in the Claude Code namespace to
+    collide with, so the concern was about a real ambiguity that turns out
+    not to exist here, not one the rename creates. On that basis, only the
+    technical handle changed — the frontmatter `name:` field, the `claude
+    -p --agent` flag value, and every filename/path built on it. The
+    persona name "Arc Lite" in prose, the Identity-section disclaimer, and
+    `arc-lite-identity`'s own skill name (a separate artifact, not asked
+    about) are all untouched, so the agent still answers describing
+    itself as Arc Lite, not the real Arc, even though it's now invoked as
+    `@arc`.
+    - **Files changed:** `.claude/agents/arc-lite.md` → `arc.md`
+      (frontmatter `name:` only); `components/local-agent/ui/arc-lite.sh`
+      → `arc.sh` (and its internal `arc.pid`/`arc.log` names);
+      `components/local-agent/ui/server.py` (`--agent` value, the
+      `ask_arc_lite()` → `ask_arc()` function name, and path comments);
+      `components/local-agent/constitution/03-skills.md` and
+      `05-ignore-list.md`; `.claude/skills/arc-lite-identity/SKILL.md`
+      (path references only, not its own `name:`);
+      `components/local-agent/README.md`; `CLAUDE.md`'s Layout section;
+      `meta/idea-to-presentation/README.md`'s precedent reference.
+    - **Deliberately left alone:** every reference to the old
+      `arc-lite.md` path inside this file's own earlier entries (9, 17–20),
+      and inside `meta/procedural-memory/universal.md` and
+      `meta/perception-failures/log.md` — those are historical record (one
+      is a direct quote) of what was true at the time, not live pointers,
+      and rewriting them would misrepresent the history rather than
+      preserve it.
+    - **Sandbox note:** renaming `.claude/agents/arc-lite.md` itself is a
+      create+delete of a path under `.claude/agents/`, which the sandbox
+      blocks outright (see `meta/procedural-memory/universal.md`'s
+      create-vs-edit boundary) — Claude could edit the file's `name:`
+      field in place but could not perform the rename. That one `git mv`
+      needs the user's own hand.
 
 ## Constraints identified
 

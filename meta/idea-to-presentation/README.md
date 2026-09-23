@@ -49,7 +49,7 @@ the idea should say.
   connector, already used by `components/confluence-publish`'s intended
   design).
 - Whether it's invoked as a Claude Code Skill, an Agent (mirroring
-  `arc-lite`), or something else.
+  `arc`), or something else.
 - If any executable tooling is needed, its language — per org standards,
   Kotlin is preferred for complex applications; something simpler may be
   fine for a first pass, consistent with this project's

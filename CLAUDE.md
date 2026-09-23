@@ -56,7 +56,7 @@ meta/idea-to-presentation/       idea -> deck/page capability, general-purpose
 meta/CDCD/                       evidence log: conversation-driven co-design
 practice/                        Architecture-stream business work, not software
 practice/capability-maturity/    IN-563: initiative -> process-map mapping
-.claude/agents/arc-lite.md       local-agent's persona; lives here (not nested
+.claude/agents/arc.md            local-agent's persona; lives here (not nested
                                   under components/) because this is where
                                   Claude Code's harness scans for it
 .claude/skills/arc-lite-identity/  local-agent's one native Claude Code Skill,
