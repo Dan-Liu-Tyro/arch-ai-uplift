@@ -269,12 +269,19 @@ Current content, as reported by `generate.py` rather than asserted here:
   left-to-right, whether labels are legible without overlapping, and whether
   the flow particles read as direction.
 
-  Getting there took six browser round trips, every one of them a rendering
+  Getting there took seven browser round trips, every one of them a rendering
   defect rather than a data or layout error: a start command that always
   failed, a blank canvas from a label library throwing inside the render
   loop, nodes drawn as near-invisible specks, a stale cached page, a camera
-  filling a quarter of the window, and text covering the nodes. Recorded as a
-  count because it is the honest measure of what the constraint below costs.
+  filling a quarter of the window, text covering the nodes, and — after
+  decision 39's refactor, in Safari specifically — stage bands computing
+  valid geometry but never painting (decision 41: Safari's `<svg>` needs an
+  explicit size, `inset: 0` alone doesn't stretch a replaced element the way
+  it stretches a `<div>`). Recorded as a count because it is the honest
+  measure of what the constraint below costs. The seventh entry is also a
+  correction to the first sentence of this bullet: "confirmed working" was
+  true of whichever browser did the confirming, not of every browser — worth
+  stating explicitly now that it has mattered once.
 
   **Nothing browser-facing can be checked from a Claude Code session here,
   and that has not changed.** The sandbox denies socket operations broadly —

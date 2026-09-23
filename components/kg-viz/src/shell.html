@@ -99,7 +99,14 @@
      can see. On-top-at-low-alpha is guaranteed visible; the cost is a faint
      tint over the nodes it covers. z-index sits above #graph and below
      #labels so captions and node text stay crisp. */
-  #bands { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+  /* width/height:100% alongside inset:0 -- Safari has known quirks
+     stretching a bare <svg> (a replaced element, with its own intrinsic-size
+     rules unlike a <div>) to fill an absolutely positioned box from inset
+     alone. Without an explicit size, polygon points computed in full-
+     viewport pixel space can land outside the SVG's own tiny viewport and
+     get silently clipped -- valid geometry, invisible result, no error. */
+  #bands { position: absolute; inset: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 2; }
   #bands .band-caption { font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
     text-transform: uppercase; opacity: 0.85; }
   /* Labels live in screen space, not in the 3D scene, so they stay crisp and
@@ -156,7 +163,7 @@
 </head>
 <body>
   <div id="graph"></div>
-  <svg id="bands"></svg>
+  <svg id="bands" width="100%" height="100%"></svg>
   <div id="labels"></div>
 
   <div id="controls" class="panel-base">

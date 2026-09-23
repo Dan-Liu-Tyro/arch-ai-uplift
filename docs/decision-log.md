@@ -97,6 +97,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 38 | `kg-viz` offline-only: renderer vendored and committed, no remote loads | `kg-viz`, `.gitignore`, backlog |
 | 39 | `kg-viz` UI renamed "Knowledge Visualizer"; `index.html`→`knowledge-visualizer.html`, `graph.json`→`payments-target-state.json`; source split under `src/`, compiled by `build.py` | `kg-viz`, `CLAUDE.md`, `README.md` |
 | 40 | `payments-target-state.json`→`payments.json` after the same-named source overlay caused a real mis-pick; `build.py` embeds it, adding a "Load default" button | `kg-viz` |
+| 41 | Stage bands invisible in Safari only: `#bands` `<svg>` needs explicit `width`/`height`, `inset:0` alone doesn't stretch a replaced element | `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -1861,6 +1862,49 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       onto node objects in place) — `loadDefault()` clones via
       `JSON.parse(JSON.stringify(...))` per click specifically to prevent
       that.
+
+41. **Stage bands computed valid geometry but never painted, in Safari
+    specifically — the seventh browser round trip, and the first one this
+    component has hit that turned out to be browser-specific rather than a
+    plain code defect.** The user reported "I don't see the stages boundary
+    and colors at all" after decision 40 shipped. Investigated methodically
+    rather than guessed at: first ruled out a stale cache (bumped
+    `PAGE_REVISION`, confirmed the fresh string was showing), then a data or
+    logic regression (diffed the entire script body against the last
+    confirmed-working commit, byte-for-byte, finding only the intended
+    decision-39/40 changes; ran the real `loadDefault()` code path through
+    an instrumented copy of `verify.js`'s harness and got valid, non-empty
+    polygon points). Only then asked the user to check the DOM directly via
+    browser devtools — which confirmed the polygons existed with correct,
+    non-degenerate geometry, yet were invisible. The `[Log]` prefix on the
+    console output the user pasted back was the tell: that format is
+    specific to Safari's Web Inspector.
+    - **Root cause: `#bands` is a bare `<svg>` sized only by
+      `position: absolute; inset: 0`, with no explicit `width`/`height`.**
+      An `<svg>` is a replaced element with its own intrinsic-size rules,
+      unlike a `<div>` — Safari has known quirks not stretching one to fill
+      an absolutely positioned box from `inset` alone the way it does an
+      ordinary block element. `#graph` (a `<div>`) was never affected by
+      this, which is why nodes, edges, and the HTML label overlay all
+      rendered correctly while only the SVG band layer stayed invisible.
+      Polygon points were computed correctly in full-viewport pixel space,
+      then silently clipped by the SVG's own collapsed viewport — geometry
+      correct, paint absent, no error anywhere.
+    - **Fix: explicit `width: 100%; height: 100%` in CSS, and matching
+      `width="100%" height="100%"` attributes directly on the `<svg>` tag.**
+      Belt-and-suspenders because SVG viewport establishment doesn't defer
+      identically to CSS across every engine; the attribute-level fix is the
+      more universally reliable of the two, the CSS rule documents the
+      reasoning where a future reader will actually see it.
+    - **What this changes about "confirmed working."** That claim (Known
+      gaps, this file's `README.md`) was accurate for whichever browser did
+      the confirming, not for every browser — worth stating explicitly now
+      that the gap has mattered once, rather than let the phrase imply more
+      than it verified. The verification constraint this component operates
+      under (nothing browser-facing checkable from a Claude Code session)
+      extends one level further than previously written: it is not just
+      "needs a human's eyes," it is "needs a human's eyes, in the specific
+      browser being asked about."
 
 ## Constraints identified
 

@@ -22,7 +22,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-23g — payments.json rename, Load default button";
+  var PAGE_REVISION = "2026-09-23h — explicit #bands SVG size for Safari";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
