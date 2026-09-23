@@ -138,7 +138,21 @@ through ingestion is the real fix. See "Known gaps".
 - **Click a node** — highlights it and everything linked to it, dims the
   rest, and opens a panel listing every inbound and outbound relationship
   with its predicate, payload, and whether it is a feedback arc.
-- **Feedback arcs** drawn dashed/curved and counted in the stats box.
+- **Edge labels on the lines** — the predicate, drawn at each edge midpoint,
+  with a backing so it stays readable where it crosses the line. On by default
+  for the flow view and **off for the authority view**, where 296 copies of
+  "not authoritative for" is noise rather than information. Toggleable.
+- **Direction as motion** — a slow stream of particles runs source → target on
+  every flow edge, so direction reads without tracing an arrowhead. Flow view
+  only; 296 animated edges would be visual noise and the authority
+  predicate is not directional in a way worth animating.
+- **Feedback arcs** drawn dashed/curved, in a contrasting colour for both the
+  line and its particles, and counted in the stats box.
+- **Fills the viewport by default.** Fit padding is 12px, and the fit is
+  re-applied a few times over the first second — a single call can land while
+  the renderer still reports its construction-time size, which yields a
+  correct-looking but under-zoomed camera. An earlier 70px padding wasted a
+  large fraction of the window and meant zooming in by hand every time.
 - **Fit to view** — re-frames the camera. Framing also happens automatically
   on `onEngineStop`, but a manual control matters because a camera pointed
   somewhere empty is indistinguishable from a graph that failed to draw.
@@ -149,7 +163,8 @@ Fifth pass. No build system — plain stdlib Python plus a single CDN script
 tag (`3d-force-graph`), consistent with this repo's "zero new infra" stance
 (decision 1). Node labels are plain HTML positioned over the canvas with
 `graph2ScreenCoords()`; see `vendor/README.md` for why the `three-spritetext`
-dependency was removed rather than vendored. The viewer is file-driven: it
+dependency was removed rather than vendored. **Edge** labels use the same
+overlay, positioned at each edge's midpoint. The viewer is file-driven: it
 holds no data of its own and starts empty.
 
 Current content, as reported by `generate.py` rather than asserted here:

@@ -96,6 +96,15 @@
     0 0 4px #05070d, 0 0 7px #05070d; will-change: transform; }
   .nlabel.dim { color: rgba(150, 160, 180, 0.35); text-shadow: none; }
   .nlabel.sel { color: #fff; font-weight: 600; }
+  /* Edge labels sit on the line, so they need a solid backing to stay
+     readable where they cross it. Smaller and cooler than node labels so the
+     two layers remain distinguishable at a glance. */
+  .elabel { position: absolute; top: 0; left: 0; white-space: nowrap;
+    font-size: 9.5px; letter-spacing: 0.02em; color: #9ff0cd;
+    background: rgba(5, 7, 13, 0.8); padding: 0 3px; border-radius: 3px;
+    will-change: transform; }
+  .elabel.back { color: #ffb3bf; }
+  .elabel.dim { color: rgba(140, 155, 180, 0.28); background: transparent; }
   #hint { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
     font-size: 11px; color: #67718a; z-index: 4; }
   /* Deliberately loud and centred. A silent blank canvas cost a round trip
@@ -155,6 +164,10 @@
     <div class="row" id="labels-row">
       <input type="checkbox" id="labels-cb" checked />
       <span>Node labels</span>
+    </div>
+    <div class="row" id="edge-labels-row">
+      <input type="checkbox" id="edge-labels-cb" checked />
+      <span>Edge labels</span>
     </div>
     <div class="seg" style="margin-top: 8px;">
       <button id="fit-btn">Fit to view</button>
@@ -220,11 +233,11 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-22e — starts empty; open any compatible graph";
+  var PAGE_REVISION = "2026-09-23a — fills view, bolder edges, edge labels, flow particles";
   var LOADED_FROM = "(nothing loaded)";
 
   var DATA = null, view = null, Graph = null;
-  var dims = 2, scopeMode = "all", showLabels = true;
+  var dims = 2, scopeMode = "all", showLabels = true, showEdgeLabels = true;
   // Anything that prevents the graph drawing goes on screen. Errors thrown
   // inside the render loop never reach the fetch().catch() below, which is
   // why a broken node accessor previously produced a blank canvas next to a
@@ -531,37 +544,96 @@
     return String(n.title).replace(/ Domain$/, "");
   }
 
+  // Edge labels use the same overlay. The predicate is the single most
+  // informative thing about an edge in this graph -- a typed relationship is
+  // the reason the flow view exists at all -- so hover-only was hiding the
+  // content. Drawn at the edge midpoint. Off by default on the authority
+  // view, where 296 copies of the same predicate would be pure noise.
+  var labelEls = {};
+  var edgeEls = {};
+  var nodeById = {};
+
+  function shortTitle(n) {
+    return String(n.title).replace(/ Domain$/, "");
+  }
+
+  function edgeText(l) {
+    return String(l.label || l.predicate || "").replace(/_/g, " ");
+  }
+
+  function linkKey(l) { return srcId(l) + "->" + tgtId(l) + ":" + (l.predicate || ""); }
+
   function rebuildLabels() {
+    var vis = visibleData();
+    nodeById = {};
+    vis.nodes.forEach(function (n) { nodeById[n.id] = n; });
+
     var host = document.getElementById("labels");
     host.innerHTML = "";
     labelEls = {};
-    if (!showLabels) return;
-    visibleData().nodes.forEach(function (n) {
-      var el = document.createElement("div");
-      el.className = "nlabel";
-      el.textContent = shortTitle(n);
-      host.appendChild(el);
-      labelEls[n.id] = el;
-    });
+    edgeEls = {};
+
+    if (showLabels) {
+      vis.nodes.forEach(function (n) {
+        var el = document.createElement("div");
+        el.className = "nlabel";
+        el.textContent = shortTitle(n);
+        host.appendChild(el);
+        labelEls[n.id] = el;
+      });
+    }
+    if (showEdgeLabels) {
+      vis.links.forEach(function (l) {
+        var el = document.createElement("div");
+        el.className = "elabel";
+        el.textContent = edgeText(l);
+        host.appendChild(el);
+        edgeEls[linkKey(l)] = el;
+      });
+    }
     positionLabels();
   }
 
+  function place(el, p, dy) {
+    if (!p || !isFinite(p.x) || !isFinite(p.y)) { el.style.display = "none"; return false; }
+    el.style.display = "block";
+    el.style.transform = "translate(-50%, 0) translate(" + p.x + "px," + (p.y + dy) + "px)";
+    return true;
+  }
+
   function positionLabels() {
-    if (!Graph || !showLabels) return;
-    var nodes = visibleData().nodes;
+    if (!Graph) return;
+    var vis = visibleData();
     var keep = selected ? neighbourIds(selected) : null;
-    for (var i = 0; i < nodes.length; i++) {
-      var n = nodes[i];
-      var el = labelEls[n.id];
-      if (!el) continue;
-      if (!isFinite(n.x) || !isFinite(n.y)) { el.style.display = "none"; continue; }
-      var p = Graph.graph2ScreenCoords(n.x, n.y, isFinite(n.z) ? n.z : 0);
-      if (!p || !isFinite(p.x) || !isFinite(p.y)) { el.style.display = "none"; continue; }
-      el.style.display = "block";
-      el.style.transform = "translate(-50%, 0) translate(" + p.x + "px," + (p.y + 9) + "px)";
-      var dim = keep ? !keep[n.id] : isDimmedByScope(n);
-      el.className = "nlabel" + (dim ? " dim" : "") +
-        (selected && selected.id === n.id ? " sel" : "");
+
+    if (showLabels) {
+      for (var i = 0; i < vis.nodes.length; i++) {
+        var n = vis.nodes[i];
+        var el = labelEls[n.id];
+        if (!el) continue;
+        if (!isFinite(n.x) || !isFinite(n.y)) { el.style.display = "none"; continue; }
+        if (!place(el, Graph.graph2ScreenCoords(n.x, n.y, isFinite(n.z) ? n.z : 0), 11)) continue;
+        var dim = keep ? !keep[n.id] : isDimmedByScope(n);
+        el.className = "nlabel" + (dim ? " dim" : "") +
+          (selected && selected.id === n.id ? " sel" : "");
+      }
+    }
+
+    if (showEdgeLabels) {
+      for (var j = 0; j < vis.links.length; j++) {
+        var l = vis.links[j];
+        var el2 = edgeEls[linkKey(l)];
+        if (!el2) continue;
+        var a = nodeById[srcId(l)], b = nodeById[tgtId(l)];
+        if (!a || !b || !isFinite(a.x) || !isFinite(b.x)) { el2.style.display = "none"; continue; }
+        var mid = Graph.graph2ScreenCoords(
+          (a.x + b.x) / 2, (a.y + b.y) / 2,
+          ((isFinite(a.z) ? a.z : 0) + (isFinite(b.z) ? b.z : 0)) / 2
+        );
+        if (!place(el2, mid, -6)) continue;
+        var on = !selected || srcId(l) === selected.id || tgtId(l) === selected.id;
+        el2.className = "elabel" + (on ? "" : " dim") + (l.back_edge ? " back" : "");
+      }
     }
   }
 
@@ -573,6 +645,9 @@
   function switchView(id) {
     view = DATA.views.find(function (v) { return v.id === id; });
     selected = null;
+    // 296 copies of "not authoritative for" is noise, not information.
+    showEdgeLabels = view.layout === "layered";
+    document.getElementById("edge-labels-cb").checked = showEdgeLabels;
     document.getElementById("detail").classList.remove("open");
     buildAdjacency();
     applyLayout();
@@ -580,11 +655,17 @@
     buildControls();
     renderStats();
     repaint();
-    setTimeout(function () { Graph.zoomToFit(600, 70); }, 350);
+    setTimeout(frameGraph, 350);
   }
 
   // Framing is done from a real measurement rather than a blind timeout,
   // because "camera pointed at NaN" and "nothing was drawn" look identical.
+  // Padding is in screen pixels. It was 70, which on a fixed layout wastes a
+  // large fraction of the viewport and left the graph small enough to need
+  // manual zooming every time. 12 is enough to keep the outermost node labels
+  // off the window edge.
+  var FIT_PADDING = 12;
+
   function frameGraph() {
     var vis = visibleData();
     if (!vis.nodes.length) return;
@@ -601,7 +682,14 @@
       note("<b>" + (vis.nodes.length - finite.length) + " of " + vis.nodes.length +
         "</b> nodes have non-finite coordinates and will not be drawn.");
     }
-    Graph.zoomToFit(600, 70);
+    // Fit repeatedly over the first moment. A single call can land while the
+    // renderer still reports its construction-time size, which produces a
+    // correct-looking but under-zoomed camera; positions are pinned in the
+    // layered view, so re-fitting is idempotent and cheap.
+    Graph.zoomToFit(0, FIT_PADDING);
+    [120, 400, 900].forEach(function (ms) {
+      setTimeout(function () { Graph.zoomToFit(200, FIT_PADDING); }, ms);
+    });
   }
 
   // ---- Getting the data in -------------------------------------------------
@@ -730,26 +818,43 @@
       // over the canvas -- see rebuildLabels(). Keeping this accessor unset
       // means there is no application code running inside the render loop
       // that can take the scene down.
-      .linkDirectionalArrowLength(function (l) { return view.layout === "layered" ? 4 : 0; })
-      .linkDirectionalArrowRelPos(1)
+      .linkDirectionalArrowLength(function (l) { return view.layout === "layered" ? 7 : 0; })
+      .linkDirectionalArrowRelPos(0.98)
+      // Direction as motion, not just as an arrowhead: a slow stream of
+      // particles running source -> target. Only on the flow view -- 296
+      // animated edges on the authority graph would be noise, and that graph's
+      // single predicate is not directional in a way worth animating.
+      .linkDirectionalParticles(function (l) { return view.layout === "layered" ? 3 : 0; })
+      .linkDirectionalParticleSpeed(0.0035)
+      .linkDirectionalParticleWidth(function (l) {
+        if (!selected) return 2.6;
+        return (srcId(l) === selected.id || tgtId(l) === selected.id) ? 4 : 1.4;
+      })
+      .linkDirectionalParticleColor(function (l) {
+        return l.back_edge ? "#ff9fae" : "#7ff0c0";
+      })
       .linkCurvature(function (l) { return l.back_edge ? 0.45 : 0; })
       .linkLabel(function (l) {
         return "<b>" + (l.label || l.predicate) + "</b>" + (l.payload ? "<br/>" + l.payload : "");
       })
+      // Edges were too faint to read against the near-black background. The
+      // flow view has 43 of them and they are the content, so they are now
+      // nearly opaque; the authority view has 296 and stays restrained to
+      // remain legible at all.
       .linkColor(function (l) {
         var s = srcId(l), t = tgtId(l);
         if (selected) {
           var on = s === selected.id || t === selected.id;
-          if (!on) return "rgba(110,120,140,0.07)";
+          if (!on) return "rgba(110,120,140,0.09)";
           return l.back_edge ? "#ff7e8f" : "#6fe3a8";
         }
-        if (l.back_edge) return "rgba(255,126,143,0.55)";
-        return view.layout === "layered" ? "rgba(160,180,215,0.42)" : "rgba(130,150,190,0.16)";
+        if (l.back_edge) return "rgba(255,140,155,0.9)";
+        return view.layout === "layered" ? "rgba(196,212,240,0.85)" : "rgba(140,162,205,0.3)";
       })
       .linkWidth(function (l) {
-        if (!selected) return view.layout === "layered" ? 0.8 : 0.4;
+        if (!selected) return view.layout === "layered" ? 1.6 : 0.5;
         var s = srcId(l), t = tgtId(l);
-        return (s === selected.id || t === selected.id) ? 2.2 : 0.3;
+        return (s === selected.id || t === selected.id) ? 3 : 0.4;
       })
       .onNodeClick(function (n) {
         selected = (selected && selected.id === n.id) ? null : n;
@@ -766,7 +871,7 @@
           x.className = x === b ? "on" : "";
         });
         Graph.numDimensions(dims);
-        setTimeout(function () { Graph.zoomToFit(600, 70); }, 350);
+        setTimeout(frameGraph, 350);
       };
     });
 
@@ -782,8 +887,12 @@
 
     document.getElementById("labels-cb").onchange = function (e) {
       showLabels = e.target.checked;
-      if (!showLabels) document.getElementById("labels").innerHTML = "";
-      repaint();
+      rebuildLabels();
+    };
+
+    document.getElementById("edge-labels-cb").onchange = function (e) {
+      showEdgeLabels = e.target.checked;
+      rebuildLabels();
     };
 
     document.getElementById("fit-btn").onclick = function () { frameGraph(); };
