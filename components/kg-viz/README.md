@@ -32,12 +32,27 @@ sparse and reads in order.
 | `generate.py` | **The only executable.** Reads `kg-content`, resolves the overlay's `domain_ref`s against `domains.json`, computes the swimlane layout (feedback-arc detection, then longest-path depth within each stage), and writes `graph.json`. The single place any derivation happens. | a human, by hand |
 | `index.html` | **The entire viewer**, in one self-contained file: markup, CSS, and all loading/view/filter/label/selection behaviour. Derives nothing from `kg-content`; renders whatever graph file it is given. Opened directly from disk. | a human, by hand |
 | `graph.json` | **The generated graph.** Both views, their nodes, typed edges, computed layout coordinates, and per-view stats. This is the default file to open, and the only output of `generate.py`. **Never hand-edit; it is overwritten on every run.** | `generate.py` |
+| `verify.js` | **The checks behind this component's claims.** Runs `index.html`'s own JavaScript against the real `graph.json` under a stubbed DOM and asserts what can be asserted without pixels: empty start, load-by-file with validation, reopening, camera fit arithmetic, label non-overlap, and the offline invariants. Plain `node`, no dependencies. `node verify.js`. | a human, by hand |
+| `vendor/3d-force-graph.min.js` | The renderer, committed so a clone works with no network (decision 38). Third-party minified build; provenance recorded in `vendor/README.md`. | fetched once, then committed |
 | `README.md` | This file: the component's contract. | a human, by hand |
 | `vendor/README.md` | How and why to place a local copy of `3d-force-graph` here when the CDN is unreachable. The `.js` file it describes is gitignored. | a human, by hand |
 
 Deleted and not coming back: `serve.py` and `graph.sh` (decision 36 — this
 component has no server), and `graph-data.js` (decision 37 — a bundled data
 blob that existed only to let the page auto-load, which it no longer does).
+
+### Verifying a change
+
+```bash
+cd components/kg-viz && node verify.js
+```
+
+Eight scenarios, exit non-zero on failure. This is the only automated check
+in the repo, and it exists because **nothing this component renders can be
+observed from a Claude Code session** — see `docs/decision-log.md`'s
+"Constraints identified". It is a floor, not a substitute for opening the
+page: it cannot judge legibility, colour or layout quality, only that the
+things it asserts have not broken.
 
 ## Boundary
 
@@ -170,9 +185,14 @@ through ingestion is the real fix. See "Known gaps".
 
 ## Status
 
-Fifth pass. No build system — plain stdlib Python plus a single CDN script
-tag (`3d-force-graph`), consistent with this repo's "zero new infra" stance
-(decision 1). Node labels are plain HTML positioned over the canvas with
+Sixth pass. No build system — plain stdlib Python plus one **locally
+vendored** script (`3d-force-graph`), consistent with this repo's "zero new
+infra" stance (decision 1). **Offline-only by requirement (decision 38):**
+the page loads nothing remote and has no data-egress path of any kind; both
+properties are asserted by the harness rather than left to vigilance. The
+vendored renderer is committed, which is what makes a fresh clone work with
+no network — see `vendor/README.md`, and `docs/backlog.md` for the plan to
+drop the dependency entirely. Node labels are plain HTML positioned over the canvas with
 `graph2ScreenCoords()`; see `vendor/README.md` for why the `three-spritetext`
 dependency was removed rather than vendored. **Edge** labels use the same
 overlay, positioned at each edge's midpoint. The viewer is file-driven: it

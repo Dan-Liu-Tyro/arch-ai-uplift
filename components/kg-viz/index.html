@@ -233,8 +233,9 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-23b — computed fit, no label overlap, edge labels opt-in";
+  var PAGE_REVISION = "2026-09-23c — offline only: no remote loads, no data egress";
   var LOADED_FROM = "(nothing loaded)";
+  var LIB_LOADED_FROM = null;
 
   var DATA = null, view = null, Graph = null;
   var dims = 2, scopeMode = "all", showLabels = true, showEdgeLabels = false;
@@ -424,7 +425,10 @@
     // screen, or stale data is indistinguishable from current data.
     lines.push('<span style="color:#67718a">page ' + escapeHtml(PAGE_REVISION) +
       "<br/>data from " + escapeHtml(LOADED_FROM) +
-      ", generated " + escapeHtml(DATA.generated_at || "unknown") + "</span>");
+      ", generated " + escapeHtml(DATA.generated_at || "unknown") +
+      "<br/>library from " + escapeHtml(
+        LIB_LOADED_FROM ? LIB_LOADED_FROM.replace(/^https:\/\//, "") : "unknown"
+      ) + "</span>");
     el.innerHTML = lines.join("<br/><br/>");
   }
 
@@ -829,13 +833,17 @@
 
   function boot() {
     if (typeof ForceGraph3D !== "function") {
-      note("<b>3d-force-graph did not load.</b> The page is served from " +
-        "localhost but the library comes from <code>unpkg.com</code>, so this " +
-        "is usually a blocked network. Fix: save " +
-        "<code>https://unpkg.com/3d-force-graph</code> as " +
-        "<code>components/kg-viz/vendor/3d-force-graph.min.js</code> — the " +
-        "page prefers that copy over the CDN whenever it exists. See " +
-        "<code>vendor/README.md</code>.");
+      note("<b><code>" + escapeHtml(LIB_SOURCE) + "</code> is missing, so " +
+        "nothing can be drawn.</b> This viewer is deliberately offline-only " +
+        "and has no CDN fallback, so the renderer has to be present on disk.");
+      note("<b>To populate it</b> (one time, needs a connection once — see " +
+        "<code>vendor/README.md</code>):<br/>" +
+        "&nbsp;&nbsp;<code>cd components/kg-viz/vendor</code><br/>" +
+        "&nbsp;&nbsp;<code>curl -Lo 3d-force-graph.min.js " +
+        "https://unpkg.com/3d-force-graph</code><br/>" +
+        "Behind a network that blocks public CDNs, <code>npm pack " +
+        "3d-force-graph</code> usually works through an internal registry " +
+        "mirror. Once the file is committed, every clone works offline.");
       return;
     }
     showPicker();
@@ -991,24 +999,38 @@
     Graph.onEngineStop(function () { frameGraph(); });
   }
 
-  // Vendor copy first, CDN second. One library only -- labels are HTML now,
-  // so there is no second script to go wrong.
-  function loadFirstAvailable(urls, done) {
-    var i = 0;
-    (function attempt() {
-      if (i >= urls.length) { done(false); return; }
-      var s = document.createElement("script");
-      s.src = urls[i++];
-      s.onload = function () { done(true); };
-      s.onerror = attempt;
-      document.head.appendChild(s);
-    })();
+  // ---- Strictly offline -----------------------------------------------------
+  //
+  // One local source, and no remote fallback of any kind. This viewer displays
+  // internal architecture content, so the requirement is that it loads nothing
+  // online and sends nothing out: a CDN <script src> leaks the requesting IP
+  // and the fact that this library was loaded, which is a disclosure with no
+  // upside once a local copy exists.
+  //
+  // Note what was *never* happening, so the risk is not overstated: the page
+  // has no fetch, XHR, sendBeacon, WebSocket, form, img or postMessage path at
+  // all, and graph.json is read from disk. No graph content has ever left the
+  // machine. The library download was the only outbound request, and it is now
+  // gone.
+  //
+  // Auditable claim: this file should contain no "http" URL outside comments.
+  // See vendor/README.md for how to populate the one local file, and
+  // docs/backlog.md for the plan to drop this dependency entirely in favour of
+  // a hand-written SVG renderer.
+  var LIB_SOURCE = "vendor/3d-force-graph.min.js";
+
+  function loadLibrary(done) {
+    var el = document.createElement("script");
+    el.src = LIB_SOURCE;
+    el.onload = function () { done(true); };
+    el.onerror = function () { done(false); };
+    document.head.appendChild(el);
   }
 
-  loadFirstAvailable(
-    ["vendor/3d-force-graph.min.js", "https://unpkg.com/3d-force-graph"],
-    function () { boot(); }
-  );
+  loadLibrary(function (ok) {
+    LIB_LOADED_FROM = ok ? LIB_SOURCE : null;
+    boot();
+  });
 </script>
 </body>
 </html>

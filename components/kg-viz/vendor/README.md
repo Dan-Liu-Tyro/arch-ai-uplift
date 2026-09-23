@@ -1,49 +1,71 @@
-# vendor/ — optional local copy of the one browser library
+# vendor/ — the renderer, committed on purpose
 
-`index.html` loads its single dependency from here **first**, and falls back
-to `unpkg.com` only if this file is absent:
+`index.html` loads exactly one script, from here, with **no remote
+fallback**:
 
 | Expected filename | Upstream |
 | --- | --- |
 | `3d-force-graph.min.js` | `https://unpkg.com/3d-force-graph` |
 
-## Why this exists
+## Why this is committed rather than gitignored
 
-The CDN is the component's only external dependency and its only real single
-point of failure — on a network that blocks `unpkg.com`, nothing renders. The
-page says so on screen instead of showing a blank canvas, and this directory
-is the fix it points at.
+This viewer displays internal architecture content, and the requirement
+(decision 38) is that it loads nothing online and sends nothing out. A CDN
+`<script src>` discloses the requesting IP and the fact that this library was
+loaded — a disclosure with no upside once a local copy exists. It also made
+the viewer unusable with the connection down, which is how the requirement
+surfaced: `ERR_NAME_NOT_RESOLVED` on a home network that was simply offline.
+
+So the `.js` file is tracked. That is a deliberate reversal of the earlier
+decision to ignore it: an ignored file makes a fresh clone depend on the
+network, which is exactly what we are removing. The cost is a minified
+third-party bundle in git that no reviewer can meaningfully diff — accepted,
+because the alternative fails the requirement.
+
+**What was never happening, so the risk is not overstated:** the page has no
+`fetch`, `XMLHttpRequest`, `sendBeacon`, `WebSocket`, `<form>`, `<img>` or
+`postMessage` path at all, and `graph.json` is read from disk. No graph
+content has ever left the machine. The library download was the only outbound
+request. Both the loader and the absence of egress paths are asserted by the
+test harness (scenarios C and C2), so a regression fails a test rather than
+going unnoticed.
+
+## Populating it (one time, needs a connection once)
 
 ```bash
 cd components/kg-viz/vendor
 curl -Lo 3d-force-graph.min.js https://unpkg.com/3d-force-graph
 ```
 
-Then reload `index.html`. The page prefers this copy automatically; there
-is nothing to configure. The path is relative to the page, so it resolves
-under `file://` exactly as it did over http.
+Behind a network that blocks public CDNs, `npm pack 3d-force-graph` usually
+works through an internal registry mirror; unpack the tarball and copy
+`dist/3d-force-graph.min.js` here. Either way, commit the result — after that
+every clone works offline with no further setup.
 
-## There used to be a second library, and why there isn't now
+Record the version below when you update it, since a minified bundle carries
+no useful provenance in a diff:
+
+| Date | Version | Obtained via |
+| --- | --- | --- |
+| _(not yet populated)_ | | |
+
+## This dependency is scheduled for removal
+
+`docs/backlog.md` carries the follow-up: replace `3d-force-graph` with a
+hand-written SVG renderer for the flow view. That removes the last third-party
+code, removes WebGL, produces crisper text and real arrowheads, and — the
+decisive reason — makes the rendering *inspectable as text*, which is the one
+thing that would let the output be verified without a human looking at a
+screen. The library is kept for now because it also provides the
+force-directed layout the 296-edge authority view uses.
+
+## There used to be a second library
 
 Node labels were `SpriteText` objects from `three-spritetext`. In a real
-browser that library failed with an opaque cross-origin `"Script error."`
-while `3d-force-graph` loaded normally — it expects a global `THREE`, and
+browser it failed with an opaque cross-origin `"Script error."` while
+`3d-force-graph` loaded normally — it expects a global `THREE`, and
 `3d-force-graph` bundles its own copy without exposing it. Because the label
 accessor ran inside the render loop, *every* node threw, so the canvas stayed
-empty next to a fully working control panel.
-
-Vendoring it would not have helped: the script was reaching the browser and
-failing during execution, not failing to download. Labels are now plain HTML
-positioned with `graph2ScreenCoords()`, which removes the dependency
-altogether and is better anyway — text stays crisp at any zoom instead of
-being a scaled texture, it is styleable in CSS, and it cannot take the scene
-down. **Do not reintroduce a THREE-dependent text library here.**
-
-## Why the `.js` file is gitignored
-
-It is a third-party minified build. Tyro's code-search standard is not to
-pull copyrighted public source into our repositories, and a vendored bundle
-also has no review value in a diff — a reviewer cannot judge a change to
-minified output. Keeping it local preserves the offline escape hatch without
-committing someone else's distribution. Only this README is tracked, so the
-mechanism stays discoverable when the directory is empty.
+empty next to a fully working control panel. Labels are now plain HTML
+positioned with `graph2ScreenCoords()`. **Do not reintroduce a
+THREE-dependent text library.**

@@ -94,6 +94,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 35 | `kg-viz` split into two purpose-built views; first typed directed graph; `scope` tag on `domain` | `kg-viz`, `kg-content/entities/graphs/`, `kg-core/SCHEMA.md` |
 | 36 | `kg-viz` de-serverised: `serve.py`/`graph.sh` deleted, `index.html` opened from disk | `kg-viz`, `CLAUDE.md`, component-model |
 | 37 | `kg-viz` starts empty and opens any compatible graph file; `graph-data.js` dropped | `kg-viz` |
+| 38 | `kg-viz` offline-only: renderer vendored and committed, no remote loads | `kg-viz`, `.gitignore`, backlog |
 
 ## Decisions so far (tentative — open to change)
 
@@ -1686,6 +1687,45 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
     - **This partially reverses decision 36's loading mechanism, not its
       substance.** No server, still; only the route the data takes into the
       page has changed, from a generated blob to a user-chosen file.
+38. **`kg-viz` is offline-only: the renderer is vendored and committed, and
+    the page loads nothing remote.** The user's requirement, after the viewer
+    failed with the home connection down: *"I want this graph viewer is
+    offline completely, shouldn't load anything online or expose any data to
+    outside."*
+    - **What was actually wrong, and what was not.** The failure was
+      `ERR_NAME_NOT_RESOLVED` fetching `3d-force-graph` from `unpkg.com` —
+      DNS failing because the connection was down, not a blocked host and not
+      a bug. Worth separating the two halves of the requirement, because only
+      one was ever at risk: the page has **no** `fetch`, `XMLHttpRequest`,
+      `sendBeacon`, `WebSocket`, `<form>`, `<img>` or `postMessage` path, and
+      `graph.json` is read from disk, so **no graph content has ever left the
+      machine**. The library `<script src>` was the only outbound request; it
+      disclosed the requesting IP and the fact that the library was loaded,
+      never any Tyro architecture content.
+    - **Now: one local source, no fallback.** `index.html` loads
+      `vendor/3d-force-graph.min.js` and nothing else. A CDN fallback was
+      briefly added (three hosts, to survive one being blocked) and then
+      removed in the same session — it is the wrong direction once the
+      requirement is "loads nothing online", and a fallback that works only
+      sometimes is worse than a missing file that says so clearly.
+    - **The vendored `.js` is now tracked, reversing the earlier decision to
+      gitignore it.** An ignored file makes a fresh clone depend on the
+      network, which is what we are removing. The cost — a minified
+      third-party bundle in git that no reviewer can diff — is accepted
+      because the alternative fails the requirement. Version and provenance
+      are recorded in `vendor/README.md`, since a minified diff carries none.
+    - **Enforced by tests, not by vigilance.** Harness scenario C asserts the
+      loader attempts exactly one source and that it is relative; C2
+      statically scans the shipped file for remote `src`/`href` attributes and
+      for data-egress constructs outside comments. An offline regression now
+      fails a test rather than going unnoticed until someone is on a train.
+    - **Half of this is deferred, deliberately.** The user chose "vendor now,
+      SVG renderer later" over dropping the dependency immediately. See
+      `docs/backlog.md`: replacing the library with a hand-written SVG
+      renderer would remove the last third-party code and, more importantly,
+      make the rendering verifiable as text rather than only by a human
+      looking at a screen. It was not done now because the 296-edge authority
+      view still needs the library's force layout.
 
 ## Constraints identified
 

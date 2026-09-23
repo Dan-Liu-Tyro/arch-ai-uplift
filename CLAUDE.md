@@ -15,9 +15,12 @@ is `components/local-agent/ui/server.py`, `components/kg-viz/generate.py`,
 plus the stdlib scripts under `meta/`. `kg-viz` deliberately has **no**
 server any more (decision 36) -- `index.html` is opened directly from
 disk; do not reintroduce one.
-Do not invent or assume build/lint/test commands; there are none. If asked to
-add tooling, choose per the org language standards (Kotlin preferred for
-complex applications).
+There is no build system and no lint step. The **one** test command is
+`node components/kg-viz/verify.js` (plain node, no dependencies) -- it exists
+because nothing `kg-viz` renders can be observed from a session here. Do not
+invent or assume any other build/lint/test commands. If asked to add tooling,
+choose per the org language standards (Kotlin preferred for complex
+applications).
 
 ## Layout
 

@@ -106,3 +106,30 @@ being worked, or delete it here once it's superseded.
   needs to go. Not decided; revisit once there's actual substance in
   `kg-core` to judge the split against, or drop this if it turns out to be
   self-resolving.
+- **Replace `3d-force-graph` with a hand-written SVG renderer for the flow
+  view.** Agreed 2026-09-23 as the follow-up half of decision 38, which made
+  `kg-viz` offline-only by committing the vendored library. The library is the
+  last third-party code in the repo and the only reason `vendor/` exists. For
+  the `payments-target-state` view it is close to unnecessary: `generate.py`
+  already computes every node position, so nothing needs a force simulation —
+  the renderer only has to draw 26 circles, 43 arrows and some text at
+  coordinates it is handed. SVG would give crisper text, real arrowheads, and
+  direction-of-flow animation via `stroke-dashoffset` rather than WebGL
+  particles.
+
+  **The decisive argument is verification, not aesthetics.** Nothing rendered
+  can currently be checked without a human looking at a screen — see the
+  "Constraints identified" entry on the sandbox denying socket operations and
+  browser automation being prohibited. An SVG renderer emits *text*, so its
+  output can be parsed and asserted: lanes in the right place, no overlapping
+  labels, every edge joining the right pair, arrowheads pointing the right
+  way. Most of the defects in this component's history — blank canvas, a
+  quarter-screen camera, labels covering nodes — would have been caught
+  mechanically by that.
+
+  **Why it was deferred rather than done:** the 296-edge `domain-authority`
+  view genuinely uses the library's force layout, so dropping the dependency
+  means either implementing a small force simulation or replacing that view
+  with a different presentation (an ownership matrix would read better than a
+  hairball, but that is a content decision, not a rendering one). The user
+  chose to vendor first and revisit once the graph content has settled.
