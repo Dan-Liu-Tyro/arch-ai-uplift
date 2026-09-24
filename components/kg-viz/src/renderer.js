@@ -131,9 +131,19 @@
     document.getElementById("stats-toggle").onclick = function () {
       statsCollapsed = !statsCollapsed;
       var panel = document.getElementById("stats");
-      if (statsCollapsed) panel.classList.add("collapsed");
-      else panel.classList.remove("collapsed");
-      document.getElementById("stats-toggle").title = statsCollapsed ? "Expand" : "Collapse";
+      var toggle = document.getElementById("stats-toggle");
+      if (statsCollapsed) {
+        panel.classList.add("collapsed");
+        // Collapsed reads as "this is the info panel" -- an info glyph.
+        toggle.innerHTML = "&#9432;";
+        toggle.title = "Expand";
+      } else {
+        panel.classList.remove("collapsed");
+        // Expanded reads as "click to shrink me" -- a minimize glyph, not
+        // the same info icon repeated, which never signalled the action.
+        toggle.innerHTML = "&#8722;";
+        toggle.title = "Collapse";
+      }
     };
 
     // 3d-force-graph sizes its renderer from the container once, at

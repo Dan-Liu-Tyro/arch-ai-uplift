@@ -862,15 +862,25 @@ const el = (r, id) => r.els[id] || EMPTY;
   el(r,'stats-toggle').click();
   const afterFirstClick = r.probe.statsCollapsed();
   const titleAfterCollapse = el(r,'stats-toggle').title;
+  const iconAfterCollapse = el(r,'stats-toggle')._html;
   el(r,'stats-toggle').click();
   const afterSecondClick = r.probe.statsCollapsed();
   const titleAfterExpand = el(r,'stats-toggle').title;
+  const iconAfterExpand = el(r,'stats-toggle')._html;
   console.log('S: starts expanded =', !before, '| collapses on click =', afterFirstClick,
     '| expands on a second click =', !afterSecondClick,
-    '| title tracks state =', titleAfterCollapse === 'Expand' && titleAfterExpand === 'Collapse');
+    '| title tracks state =', titleAfterCollapse === 'Expand' && titleAfterExpand === 'Collapse',
+    '| icon tracks state =', iconAfterCollapse === '&#9432;' && iconAfterExpand === '&#8722;');
   if (before) results.push('S: stats panel starts collapsed, expected expanded by default');
   if (!afterFirstClick) results.push('S: clicking the toggle did not collapse the stats panel');
   if (afterSecondClick) results.push('S: clicking the toggle again did not expand the stats panel back');
+  // A minimize glyph while expanded ("click to shrink me"), an info glyph
+  // once collapsed ("this is the info panel") -- not the same icon twice,
+  // which never signalled which action a click would take.
+  if (iconAfterCollapse !== '&#9432;' || iconAfterExpand !== '&#8722;') {
+    results.push('S: toggle icon did not swap between expanded and collapsed: ' +
+      iconAfterCollapse + ' / ' + iconAfterExpand);
+  }
   if (titleAfterCollapse !== 'Expand' || titleAfterExpand !== 'Collapse') {
     results.push('S: toggle title did not track collapsed state: ' + titleAfterCollapse + ' / ' + titleAfterExpand);
   }
