@@ -102,3 +102,8 @@ policy this exists to serve.
   it — for formats where one local error invalidates the whole file, the
   failure is silent and whole-file. Two invisible traps: no `--` inside an
   XML/SVG comment, and no duplicate `id`s once SVGs are inlined together.
+- A capability limit borrowed from a similar mechanism needs its own check —
+  a constraint proven for one implementation trick doesn't transfer to
+  another that hits the same wall for a different reason; check what it
+  actually depends on, and check whether the codebase is already doing the
+  thing you're about to call impossible.

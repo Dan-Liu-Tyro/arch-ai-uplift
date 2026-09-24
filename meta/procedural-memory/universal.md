@@ -754,3 +754,42 @@ repeating them per file.
 
 Generalised: for any format where one local mistake invalidates the whole
 file, validation belongs in the write step, not in a review pass.
+
+---
+
+## A capability limit borrowed from a similar mechanism needs its own check
+
+**What happened.** Building an HTML icon overlay for graph nodes (reusing
+`graph2ScreenCoords()`, the exact call the existing text-label overlay
+already used successfully in both 2D and 3D), I wrote — as settled fact, in
+code comments, the README, and a test name — that the overlay "cannot track
+an orbiting camera" and could only work in 2D, keeping a 3D mesh silhouette
+as the fallback for that view. The belief was borrowed from a real, adjacent
+constraint I had verified two turns earlier: `applyControlMode()`'s drag-to
+-pan mapping only works in 2D because that is a *live-input* problem (which
+way should a drag move the camera). `graph2ScreenCoords()` is a *projection*
+— it recomputes the screen point from the current camera matrix every frame,
+regardless of orientation — so nothing about it depends on whether the
+camera can rotate. The label overlay, using the identical call, had been
+visibly working in 3D the whole time; that alone contradicted the belief
+before it was written down, and nothing checked it against that.
+
+**Cost.** A wrong architectural decision — an entire additional rendering
+mechanism (a cloned-mesh silhouette, its per-frame material-resync, and a
+degrade-on-clone-failure path) kept alive for 3D on the belief that nothing
+simpler could work there — shipped across several commits, each restating
+the "2D only, hidden in 3D" reasoning in a different file (`renderer.js`,
+`labels.js`, `shell.html`, the README) plus a test asserting the wrong
+behaviour. All of it had to be found and removed together once the user
+asked to see the same icon in 3D and the premise was actually tested.
+
+**Rule.** When two mechanisms share an implementation trick because both hit
+the same underlying wall (here: "no reachable THREE constructor, so do it in
+HTML instead"), a constraint proven for one does not transfer to the other
+just because they look alike. Name what the constraint actually depends on —
+here, "camera orientation" meant something different for a live-input
+mapping than for a pure projection — and check that specific dependency
+against the new mechanism, not the surface similarity to the old one. Before
+writing a capability limit down as fact, check whether anything already in
+the codebase is *already doing the thing you are about to claim is
+impossible* — it was, here, in the next file over.

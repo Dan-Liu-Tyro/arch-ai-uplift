@@ -80,7 +80,7 @@ than a plain slip. If it doesn't have that shape, it belongs in
 ## Status
 
 Seeded 2026-09-08 with the instance that prompted this component's
-creation. Ten entries as of 2026-09-24. Still deliberately no synthesis
+creation. Twelve entries as of 2026-09-24. Still deliberately no synthesis
 document: the entries are accumulating fast enough that a pattern may be
 findable, but naming one is the thing this component's own purpose
 section says to resist until the instances can be compared properly. The

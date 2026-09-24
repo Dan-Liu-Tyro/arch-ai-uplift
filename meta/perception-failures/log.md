@@ -631,3 +631,57 @@ missed entirely while auditing for an ask that was never wanted — is now item
 1. The generalizable rule is in `meta/procedural-memory/universal.md`: a
 deliverable's purpose is a fact to establish, not a prior to apply. Not
 restated here.
+
+---
+
+## 12. A 2D-only camera limitation assumed to apply to a different mechanism
+
+**Date.** 2026-09-24.
+
+**Belief asserted.** That `kg-viz`'s new HTML icon overlay for actor nodes
+"only works while the camera cannot rotate out from under it," and so had to
+be gated to 2D, with a cloned-mesh 3D silhouette kept as the fallback for
+3D. Stated as settled fact in code comments across three files
+(`renderer.js`, `labels.js`, `shell.html`), in the component README, and
+encoded into a test (`verify.js` scenario T asserted the icon must hide once
+`dims` is 3).
+
+**Actual evidence behind it.** None specific to this mechanism — it was
+carried over from a real, adjacent finding two turns earlier in the same
+session: `applyControlMode()`'s drag-to-pan mapping only works in 2D,
+because 3D's camera can orbit and a drag's direction is ambiguous once it
+can. The icon overlay uses `graph2ScreenCoords()`, a projection that
+recomputes the screen point from the *current* camera matrix every frame —
+it has no dependency on whether the camera rotates, only on being asked
+again after it does, which the existing per-frame loop already did. The
+text-label overlay, using the identical call, had been rendering correctly
+in 3D the entire session; nothing was ever wrong with it there.
+
+**How it formed.** Two mechanisms shared an implementation trick for the
+same underlying reason (no reachable `THREE.Sprite`/`Texture` constructor,
+so render in HTML instead) and that similarity was read as meaning they
+shared the same limitation too. "Camera orientation" was the word both
+constraints were described with, but they meant different things: a
+*live-input* mapping (which way should this drag move the camera) versus a
+*projection* (where does this world point land on screen right now). The
+gap opened at the point of writing the limitation down without asking what,
+specifically, `graph2ScreenCoords()` itself depended on.
+
+**How it propagated.** Into the icon's design from the first commit that
+added it, then repeated with elaboration (not just cited) in the README's
+rendering-mechanism writeup, in a CSS comment in `shell.html`, and in
+`verify.js`'s scenario T, which actively asserted the wrong behaviour rather
+than merely failing to catch it.
+
+**Caught by.** The user, after seeing the icon work well in 2D: "show the
+same even in 3d model, completely remove the silly 3d actor." Not caught by
+noticing the contradiction already sitting in the codebase — the label
+overlay was proof against the belief the entire time, using the same
+projection call, and nothing prompted checking it against that.
+
+**Fix.** Recorded in `meta/procedural-memory/universal.md`: "A capability
+limit borrowed from a similar mechanism needs its own check." Not restated
+here. The 3D silhouette mechanism (`personify()`, its clone/head bookkeeping,
+material-resync, and degrade-on-failure path) was removed entirely rather
+than merely relabelled, once the icon covered every view and there was no
+view left for it to be the fallback for.
