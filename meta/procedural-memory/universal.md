@@ -718,3 +718,39 @@ element in the content is evidence only about the content, never about whether
 it belonged there. And note the second-order cost, which is larger than the
 wrong finding: an invented purpose also sets what you look for, so it hides
 the gaps that the real purpose would have made obvious.
+
+---
+
+## Parse every hand-authored structured file the moment you write it
+
+**What happened.** While hand-authoring nine SVG diagrams, two of them failed
+to parse, both for the same reason: an XML comment cannot contain a double
+hyphen. The first was a prose dash in an explanatory comment (`family (06, 07,
+08) -- these three`), the second a row of hyphens used as a section divider
+(`<!-- ---------- outside ---------- -->`). Both are completely ordinary
+things to type, and neither looks wrong.
+
+**Cost.** Near zero, and that is the point of the entry. Each file was passed
+through `xml.etree.ElementTree.parse` in the same command that wrote it, so
+each failure surfaced within seconds, with a line and column, before anything
+was built on top of it. The counterfactual is what makes it worth recording: a
+malformed comment takes down the *entire* document, so had these been found
+after the deck was assembled, the symptom would have been a blank slide with
+no error anywhere — the whole file silently absent rather than one comment
+mis-rendered.
+
+**Rule.** When hand-authoring a file in a format that has a parser available —
+XML, SVG, JSON, YAML, TOML — run the parser over it in the same command that
+writes it, every time, not once at the end of the batch. The check costs one
+line and converts a silent, whole-file failure into an immediate error with a
+position. Two specific traps worth remembering because they are invisible on
+inspection: **no `--` anywhere inside an XML or SVG comment** (so use `=====`
+for dividers and an em dash or single hyphen in prose), and **no duplicate
+`id` attributes** once several SVG files are inlined into one HTML document —
+the browser silently resolves every `url(#name)` to whichever came first, so a
+diagram borrows another's definitions and looks merely *wrong* rather than
+broken. Prefer hoisting shared definitions into the containing document over
+repeating them per file.
+
+Generalised: for any format where one local mistake invalidates the whole
+file, validation belongs in the write step, not in a review pass.

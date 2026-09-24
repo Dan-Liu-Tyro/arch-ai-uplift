@@ -98,3 +98,7 @@ policy this exists to serve.
   before critiquing a deck or document, ask who requested it and in what
   words; an invented purpose also decides what you look for, so it hides the
   real gaps.
+- Parse every hand-authored structured file in the same command that writes
+  it — for formats where one local error invalidates the whole file, the
+  failure is silent and whole-file. Two invisible traps: no `--` inside an
+  XML/SVG comment, and no duplicate `id`s once SVGs are inlined together.
