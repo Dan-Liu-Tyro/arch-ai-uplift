@@ -25,6 +25,10 @@ policy this exists to serve.
 - Bump `kg-viz`'s `PAGE_REVISION` in the same edit as any change under
   `src/`, every time — it only catches a stale cached page if it actually
   changes.
+- "The boundary" names at least three geometries in `kg-viz` (camera fit,
+  stage band, label collision box) — on a visual report, check the
+  screenshot or ask before picking one, then encode the fix as a
+  `verify.js` assertion rather than declaring it fixed.
 
 ## Universal (`universal.md`)
 

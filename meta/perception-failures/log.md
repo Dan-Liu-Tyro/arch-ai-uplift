@@ -520,3 +520,58 @@ marked as unverified where it is written, not silently completed — the same
 discipline `architecture-learning` applies in requiring cited evidence, and the
 same one applied correctly a few minutes later to the library's licence, which
 was recorded as an explicit open item rather than assumed to be MIT.
+
+---
+
+## 10. A real bug in the wrong place taken as confirmation of the reported one
+
+**Date.** 2026-09-24.
+
+**Belief asserted.** That the user's report — the payments flow view needed
+"the boundary" expanded to enclose node name labels — referred to `kg-viz`'s
+camera fit. Stated to the user as a diagnosis, not a hypothesis: "The root
+cause was a units mismatch, not a missing padding value," followed by an
+explanation of why `FIT_PADDING` was the culprit and the claim "that's the
+actual bug fix."
+
+**Actual evidence behind it.** That `fitLayered()` in `src/camera.js` really
+does reserve world-space padding for labels whose footprint is fixed screen
+pixels, so the margin shrinks as the graph grows. That is a genuine defect and
+the analysis of it was correct. It is evidence about `camera.js` only. It is
+not evidence about which geometry the user was looking at — and the request
+had named that: "it finally display stage nicely" pointed at the stage bands,
+whose own boxing (`BAND_PAD` in `src/bands.js`) also ignored labels, and which
+the screenshot showed slicing through "Terminal Fleet & Device Management".
+
+**How it formed.** The word "boundary" matches at least three geometries in
+this component (camera fit, stage band, label collision box). Having grepped
+into one of them and found a real, well-formed bug there, the find itself
+served as confirmation that the right place had been located — a bug that
+reproduces the *described symptom class* feels like proof, which is precisely
+what stops the search. Finding nothing would have prompted a second look;
+finding something genuine did not. The specific mechanism is a plausible
+diagnosis crowding out an available observation: a screenshot existed, was not
+consulted, and would have settled the question in seconds.
+
+**How it propagated.** Into a full delivery before any check: the fix, a
+matching edit to `verify.js`'s scenario G expectation (rewriting the test's
+golden-model formula to agree with the new code), a `PAGE_REVISION` bump, a
+passing test run reported as validation, and an explanatory insight block
+stating the root cause as settled. The passing suite was offered as evidence
+the right thing had been fixed, when it only showed the changed thing was
+self-consistent — no assertion in the suite covered the property the user
+actually asked for.
+
+**Caught by.** The user, in seven words: "I didn't see the change, check the
+screenshot." Not caught by the test suite, which passed throughout, nor by
+re-reading the request. Notably, the belief was falsifiable from material
+already in the conversation — the request's own reference to stages — so the
+catch required no new information, only looking.
+
+**Fix.** The band fit now encloses its stage's labels, and `verify.js`
+scenario J asserts that property (it failed on first run and exposed a
+`rebuildBands()`-before-`rebuildLabels()` ordering bug, which is also fixed).
+The generalizable guard is in `meta/procedural-memory/lessons.md` — on a
+visual report with an ambiguous noun, get the render or ask before choosing a
+target, and encode the fixed property as an assertion rather than declaring
+it fixed. Not restated here.

@@ -80,6 +80,9 @@ than a plain slip. If it doesn't have that shape, it belongs in
 ## Status
 
 Seeded 2026-09-08 with the instance that prompted this component's
-creation. One entry. Too early to say anything about the shape of the
-pattern beyond the one case — recorded as such in `log.md` rather than
-overstated here.
+creation. Ten entries as of 2026-09-24. Still deliberately no synthesis
+document: the entries are accumulating fast enough that a pattern may be
+findable, but naming one is the thing this component's own purpose
+section says to resist until the instances can be compared properly. The
+count is worth watching rather than the individual entries — if it keeps
+climbing at this rate, that is itself the finding.
