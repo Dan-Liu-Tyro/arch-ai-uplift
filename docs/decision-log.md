@@ -2010,6 +2010,48 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       agent from its frontmatter before any git operation on the file
       completes — worth re-checking whether that holds for a genuinely
       new file, not just a renamed one).
+44. **Layout geometry stays derived, not curated — the graph data holds no
+    pixels and no stored positions.** Raised by the user asking whether node
+    positions are stored in the graph JSON, and whether visual data belongs
+    inside core data or beside it as its own thing. Checked against the code
+    rather than answered from memory: positions are not stored anywhere, and
+    the separation being asked for already exists, in three tiers.
+    - **The three tiers.** `components/kg-content/` holds curated truth —
+      entities, typed relationships, stage membership — and carries no
+      `col`/`row`/`lane` field at all. `components/kg-viz/generate.py`
+      derives those ordinals from the graph's own topology and writes them
+      into `payments.json`, a regenerable view artifact. Only `kg-viz`'s
+      `applyLayout()` turns an ordinal into a pixel, by multiplying it by
+      `COL_SPACING`/`LANE_HEIGHT`/`ROW_SPACING`. The graph JSON is therefore
+      resolution-independent: changing one spacing constant rescales the
+      whole picture without touching data.
+    - **Affirmed as the right split, and not to be collapsed.** Moving
+      positions into `kg-content` would put presentation into the curated
+      source and make PR review of *meaning* harder, which is the one job
+      that tier's quality gate exists to do.
+    - **Known weakness, accepted: `col` and `row` are not the same kind of
+      thing, but are stored as though they were.** `col` is longest-path
+      depth within a stage — a fact about flow topology, and the reason the
+      payment path reads left-to-right. `row` is assigned by
+      `sorted(members, key=(depth, order_of))` in `generate.py`, where
+      `order_of` is a node's index in the input list — so it derives from
+      entity enumeration order, not from meaning. Adding or reordering an
+      entity in `kg-content` can reshuffle rows and move nodes nobody
+      intended to move. This is exactly the failure mode
+      `meta/procedural-memory/universal.md` already names: an algorithm's
+      arbitrary tie-break becoming a semantic claim in its output.
+    - **Decided: leave it for now.** The user's call was "good enough for
+      now, and we can add manual adjustment later." So the tie-break is
+      deliberately *not* being re-derived from the data model yet, with the
+      cost named: doing it later will reshuffle rows once, on a layout that
+      will by then carry more expectations than it does today. Recorded as
+      an accepted cost rather than an open question, because the trade was
+      made explicitly and not deferred for lack of information.
+    - **Parked, not built:** a manual position-override mechanism — a
+      separate layout file under `kg-viz` pinning chosen nodes, leaving
+      `kg-content` pure. This is the "manual adjustment later" above, and
+      belongs in `docs/backlog.md`, which decision 43 hands to the
+      `backlog` agent rather than to direct editing.
 
 ## Constraints identified
 
