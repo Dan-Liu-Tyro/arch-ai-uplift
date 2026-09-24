@@ -332,6 +332,15 @@ Current content, as reported by `generate.py` rather than asserted here:
   renders it correctly and repeatably. It cannot judge legibility, colour,
   or whether a layout communicates anything. Those still need a person.
 
+  One structural gap worth naming, since it is a silent-drift risk rather
+  than a matter of taste: the stub does not parse `shell.html` (its
+  `querySelectorAll` returns `[]`), so nothing checks that a control's
+  `class="on"` marks the same option as the corresponding default in
+  `state.js`. Those two live in different files, and if they disagree the
+  panel highlights one choice while the canvas renders another. The default
+  *state* is asserted (scenario I pins the edge-label style to `along`);
+  only the markup half is unverifiable here. Change both together.
+
 - **Per-edge prose is missing for authority edges** — see above.
 - **`scope` is a judgement, not a sourced fact.** 12/27 split, assigned here
   rather than taken from any Confluence page. Eight domains carry a

@@ -104,7 +104,7 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), };', ctx);
 
   return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam };
 }
@@ -272,7 +272,9 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (!r.probe.edgeLabelsOn()) results.push('F: edge labels are not on by default');
   const eEls = r.probe.edgeEls();
   const nEdge = Object.keys(eEls).length;
-  const sample = el(r,'labels').children.filter(c => c.className === 'elabel')[0];
+  // Prefix match, not an exact class: the active style appends its own class
+  // ("elabel along"), and whether an edge label has text is independent of it.
+  const sample = el(r,'labels').children.filter(c => /^elabel/.test(c.className))[0];
   console.log('F: edge label elements =', nEdge, 'of', flow.links.length,
     '| sample text =', JSON.stringify(sample && sample.textContent));
   if (nEdge !== flow.links.length) results.push('F: expected ' + flow.links.length + ' edge labels, got ' + nEdge);
@@ -407,6 +409,11 @@ const el = (r, id) => r.els[id] || EMPTY;
   inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
 
+  // Along-line is the default, so the default state is what gets checked for
+  // rotation; flat has to be selected explicitly to sample it.
+  const defaultStyle = r.probe.edgeStyle();
+  r.probe.setEdgeStyle('flat'); await tick();
+  r.probe.positionLabels();
   const flatSample = el(r,'labels').children.filter(c => /^elabel/.test(c.className))[0];
   const flatHasRotate = /rotate\(/.test(flatSample.style.transform || '');
 
@@ -420,10 +427,16 @@ const el = (r, id) => r.els[id] || EMPTY;
   const missing = angles.filter(a => a === null).length;
   const upsideDown = angles.filter(a => a !== null && (a > 90.001 || a < -90.001));
   const rotated = angles.filter(a => a !== null && Math.abs(a) > 0.001).length;
-  console.log('I: flat style has rotate =', flatHasRotate,
+  console.log('I: default style =', defaultStyle,
+    '| flat style has rotate =', flatHasRotate,
     '| along style: rotated', rotated, 'of', along.length,
     '| missing angle', missing, '| outside +/-90deg', upsideDown.length,
     '| classed .along =', along.every(c => /along/.test(c.className)));
+  // Not asserted here: that shell.html's `class="on"` marks the same button
+  // as this default. The two live in different files and can drift, but the
+  // stub does not parse markup (querySelectorAll returns []), so it cannot
+  // be checked from a session. Noted as a gap in README instead.
+  if (defaultStyle !== 'along') results.push('I: default edge-label style is ' + defaultStyle + ', expected along');
   if (flatHasRotate) results.push('I: flat style should not rotate labels');
   if (missing) results.push('I: ' + missing + ' along-line labels have no rotation');
   if (upsideDown.length) results.push('I: angles outside +/-90deg would read upside down: ' + upsideDown);

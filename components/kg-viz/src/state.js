@@ -22,12 +22,12 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-24c — stage bands share a common left edge";
+  var PAGE_REVISION = "2026-09-24d — edge labels default to along-line";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
   var DATA = null, view = null, Graph = null;
-  var dims = 2, scopeMode = "all", showLabels = true, showEdgeLabels = true, edgeLabelStyle = "flat";
+  var dims = 2, scopeMode = "all", showLabels = true, showEdgeLabels = true, edgeLabelStyle = "along";
   var showBands = true;
   // Anything that prevents the graph drawing goes on screen. Errors thrown
   // inside the render loop never reach the fetch().catch() below, which is
