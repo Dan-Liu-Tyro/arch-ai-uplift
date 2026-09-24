@@ -319,12 +319,33 @@ through ingestion is the real fix. See "Known gaps".
   exactly one such node — the unconnected `principle` noted elsewhere in this
   file — and once it drifted far enough, `zoomToFit` had to zoom out to keep
   it in frame, shrinking the entire connected cluster into an unreadably
-  dense, overlapping clump alongside it. `renderer.js` now sets the charge
+  dense, overlapping clump alongside it. `renderer.js` sets the charge
   force's `distanceMax` (bounds how far the repulsion still reaches, so a
   disconnected node's drift is capped) and a longer link `distance` (gives
   connected nodes breathing room), both via `Graph.d3Force(...)` right after
-  construction. Harmless for the layered view, whose nodes are pinned via
-  `fx`/`fy`/`fz` and so ignore every force, this one included.
+  construction.
+
+  Neither is a *guarantee* against two nodes overlapping, though: repulsion
+  decays with distance, and in a dense, high-degree graph several link
+  forces can still pull a node closer to a neighbour than is comfortable,
+  overpowering that decayed repulsion at close range. There is no
+  `forceCollide` in this build to reach for either — checked the vendored
+  bundle directly, only charge/link/center are in it. `makeCollideForce()`
+  in `renderer.js` is a small hand-written substitute, plugged in through
+  `Graph.d3Force()`'s own extension point (it registers *any* function
+  following d3-force's convention, not just the library's four built-ins):
+  every pair of nodes closer than roughly twice the sum of their own
+  rendered radii gets pushed apart, using the exact radius formula
+  (`Math.cbrt(nodeVal) * nodeRelSize`) read out of the vendored bundle's
+  mesh-construction code, so the enforced gap matches what is actually
+  drawn. It adjusts velocity, not position directly, so the engine's own
+  per-tick integration is what actually moves the node — and is
+  deliberately not scaled by the tick's alpha the way charge/link are, since
+  it is meant to hold as a near-constant constraint rather than fade out as
+  the simulation cools.
+
+  All three are harmless for the layered view, whose nodes are pinned via
+  `fx`/`fy`/`fz` and so ignore every force, these included.
 - **Fit to view** — re-frames the camera. Framing also happens automatically
   on `onEngineStop`, but a manual control matters because a camera pointed
   somewhere empty is indistinguishable from a graph that failed to draw.

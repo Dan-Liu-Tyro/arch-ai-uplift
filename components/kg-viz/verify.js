@@ -112,7 +112,7 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), select: n => { selected = n; positionIcons(); }, };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), select: n => { selected = n; positionIcons(); }, nodeRadius: n => nodeRadius(n), makeCollideForce: () => makeCollideForce(), };', ctx);
 
   return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam, controls: () => fakeControls, camera: () => fakeCamera };
 }
@@ -913,15 +913,66 @@ const el = (r, id) => r.els[id] || EMPTY;
   // in the Ref Domains view. distanceMax bounds that drift; this only
   // checks the configuration was actually applied, not the physics outcome,
   // which needs a real browser to see.
-  console.log('U: d3Force configured =', r.calls['d3Force'] >= 2,
+  console.log('U: d3Force configured =', r.calls['d3Force'] >= 3,
     '| charge strength set =', !!r.calls['strength'], '| charge distanceMax set =', !!r.calls['distanceMax'],
     '| link distance set =', !!r.calls['distance']);
-  if (!(r.calls['d3Force'] >= 2)) results.push('U: charge and link forces were not both configured');
+  if (!(r.calls['d3Force'] >= 3)) results.push('U: charge, link, and collide were not all configured');
   if (!r.calls['strength']) results.push('U: charge force strength was never set');
   if (!r.calls['distanceMax']) {
     results.push('U: charge force distanceMax was never set -- an unconnected node can drift arbitrarily far');
   }
   if (!r.calls['distance']) results.push('U: link force distance was never set');
+}
+
+// V: a custom collision force keeps nodes at least ~2x their radius apart
+{
+  const r = run('V', { cdnBlocked: false }); await tick();
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+
+  // Matches the library's own rendered radius (Math.cbrt(nodeVal) *
+  // nodeRelSize), read out of the vendored bundle's mesh construction --
+  // a domain (nodeVal 5) must render, and so collide, larger than any
+  // other kind (nodeVal 3).
+  const rDomain = r.probe.nodeRadius({ kind: 'domain' });
+  const rOther = r.probe.nodeRadius({ kind: 'actor' });
+  console.log('V: domain radius =', rDomain.toFixed(2), '| other radius =', rOther.toFixed(2));
+  if (!(rDomain > rOther)) results.push('V: a domain node\'s collision radius is not larger than a smaller node\'s');
+
+  // Two overlapping, unpinned nodes: one tick should push them apart.
+  const a = { x: 0, y: 0, z: 0, kind: 'domain' };
+  const b = { x: 1, y: 0, z: 0, kind: 'domain' };
+  const force = r.probe.makeCollideForce();
+  force.initialize([a, b]);
+  force();
+  console.log('V: overlapping nodes pushed apart -> a.vx =', a.vx, '| b.vx =', b.vx);
+  if (!(a.vx < 0 && b.vx > 0)) {
+    results.push('V: collision force did not separate two overlapping nodes: a.vx=' + a.vx + ' b.vx=' + b.vx);
+  }
+
+  // A pinned node (layered view) must be left alone -- every force is a
+  // no-op for it regardless, once the engine integrates positions, and this
+  // one should not even try.
+  const c = { x: 0, y: 0, z: 0, kind: 'domain', fx: 0 };
+  const d = { x: 1, y: 0, z: 0, kind: 'domain' };
+  const force2 = r.probe.makeCollideForce();
+  force2.initialize([c, d]);
+  force2();
+  console.log('V: pinned node left alone -> c.vx =', c.vx);
+  if (c.vx !== undefined) results.push('V: collision force nudged a pinned node: c.vx=' + c.vx);
+
+  // A floor, not an attractor: two nodes already comfortably apart must be
+  // left alone rather than pulled together or pushed further.
+  const e = { x: 0, y: 0, z: 0, kind: 'domain' };
+  const f = { x: 1000, y: 0, z: 0, kind: 'domain' };
+  const force3 = r.probe.makeCollideForce();
+  force3.initialize([e, f]);
+  force3();
+  console.log('V: distant nodes left alone -> e.vx =', e.vx, '| f.vx =', f.vx);
+  if (e.vx !== undefined || f.vx !== undefined) {
+    results.push('V: collision force touched two nodes that are already far apart');
+  }
 }
 
 console.log(results.length ? '\nFAILURES:\n' + results.join('\n') : '\nALL SCENARIOS PASSED');

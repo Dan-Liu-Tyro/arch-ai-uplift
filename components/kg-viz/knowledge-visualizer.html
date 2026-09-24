@@ -363,7 +363,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-24j — Ref Domains view: renamed, force layout spacing tuned";
+  var PAGE_REVISION = "2026-09-24k — Ref Domains view: custom collision force keeps nodes apart";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
@@ -1397,6 +1397,73 @@
     setTimeout(frameGraph, 400);
   }
 
+  // Sized against the layout's own coordinate space: columns are 230 apart,
+  // so a radius in single digits renders as an almost invisible speck once
+  // the whole graph is framed.
+  var NODE_REL_SIZE = 9;
+
+  function nodeVal(n) { return (n.kind === "domain" || n.type === "domain") ? 5 : 3; }
+
+  // The library's own rendered sphere radius, world units -- found by
+  // reading the vendored bundle's mesh-construction code (`Math.cbrt(val) *
+  // nodeRelSize`), since nowhere in its public API documents the formula.
+  // The collision force below needs this to be exact: using the wrong
+  // radius would make it enforce a gap that does not match what is drawn,
+  // leaving spheres either still overlapping or needlessly far apart.
+  function nodeRadius(n) { return Math.cbrt(nodeVal(n)) * NODE_REL_SIZE; }
+
+  // A minimum-separation constraint the charge force alone cannot
+  // guarantee: repulsion decays with distance and is easily overwhelmed at
+  // close range by several competing link forces pulling one node toward
+  // multiple neighbours at once -- exactly what a dense, high-degree graph
+  // like the Ref Domains view does. This build has no forceCollide (checked
+  // the vendored bundle; only charge/link/center are in it), so this is a
+  // small custom force plugged in through d3Force()'s own extension point --
+  // `Graph.d3Force(name, forceFn)` registers *any* function following
+  // d3-force's convention (an `initialize(nodes)` hook plus a per-tick call
+  // that adjusts velocity, not position, so the engine's own integration
+  // step is what actually moves the node), not just the library's four
+  // built-ins. Deliberately not scaled by the tick's alpha, unlike
+  // charge/link: this is meant to hold as a near-constant constraint the
+  // same way d3-force's own forceCollide does, not fade out as the
+  // simulation cools.
+  function makeCollideForce() {
+    var nodes = [];
+    // Gap between two nodes' surfaces is roughly one more radius' worth on
+    // top of just touching -- "some distance apart compared to its own
+    // size", not merely non-overlapping.
+    var PADDING = 2.0;
+    function force() {
+      for (var i = 0; i < nodes.length; i++) {
+        var a = nodes[i];
+        if (a.fx != null) continue; // pinned (layered view) -- ignores every force regardless
+        var ra = nodeRadius(a);
+        for (var j = 0; j < nodes.length; j++) {
+          if (i === j) continue;
+          var b = nodes[j];
+          var dx = (a.x || 0) - (b.x || 0);
+          var dy = (a.y || 0) - (b.y || 0);
+          var dz = (a.z || 0) - (b.z || 0);
+          var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+          var minDist = (ra + nodeRadius(b)) * PADDING;
+          if (dist >= minDist) continue;
+          if (dist < 1e-6) {
+            // Exactly coincident: nudge along a stable axis rather than
+            // dividing by zero and leaving both nodes stacked forever.
+            a.vx = (a.vx || 0) + minDist * 0.05;
+            continue;
+          }
+          var push = (minDist - dist) / dist * 0.5;
+          a.vx = (a.vx || 0) + dx * push;
+          a.vy = (a.vy || 0) + dy * push;
+          a.vz = (a.vz || 0) + dz * push;
+        }
+      }
+    }
+    force.initialize = function (ns) { nodes = ns; };
+    return force;
+  }
+
   function ensureGraph() {
     if (Graph) return;
     Graph = ForceGraph3D()(document.getElementById("graph"))
@@ -1407,8 +1474,8 @@
       // Sized against the layout's own coordinate space: columns are 230
       // apart, so a radius in single digits renders as an almost invisible
       // speck once the whole graph is framed.
-      .nodeRelSize(9)
-      .nodeVal(function (n) { return n.kind === "domain" || n.type === "domain" ? 5 : 3; })
+      .nodeRelSize(NODE_REL_SIZE)
+      .nodeVal(nodeVal)
       .nodeColor(function (n) { return nodeDisplayColor(n); })
       // Still no nodeThreeObject, deliberately. Actors' meshes do get
       // touched (made transparent, in decorateShapes() below), but that
@@ -1467,18 +1534,22 @@
     // everything else -- the README documents exactly one such node, an
     // unconnected `principle`. zoomToFit() then has to zoom out to include
     // wherever that node drifted to, shrinking the entire connected cluster
-    // to fit alongside it, which is what made every other node look like an
-    // unreadable clump. distanceMax caps how far the repulsive force still
-    // has effect, which bounds the drift; a longer link distance gives
-    // connected nodes breathing room so individual spheres and labels stop
-    // overlapping. Harmless for the layered view -- its nodes are pinned via
-    // fx/fy/fz, so no force (this one included) has any visible effect
-    // there regardless.
+    // to fit alongside it. distanceMax caps how far the repulsive force
+    // still has effect, which bounds that drift; a longer link distance
+    // gives connected nodes breathing room. Neither is a *guarantee* against
+    // overlap, though -- repulsion decays with distance and several
+    // competing links can still pull a node closer than is comfortable, so
+    // makeCollideForce() above is the actual minimum-separation constraint;
+    // these two are about the graph's overall spread and its worst outlier,
+    // not about any one pair of nodes. Harmless for the layered view -- its
+    // nodes are pinned via fx/fy/fz, so no force (any of the three) has any
+    // visible effect there regardless.
     if (Graph.d3Force) {
       var charge = Graph.d3Force("charge");
       if (charge && charge.strength) charge.strength(-120).distanceMax(260);
       var link = Graph.d3Force("link");
       if (link && link.distance) link.distance(90);
+      Graph.d3Force("collide", makeCollideForce());
     }
 
     applyControlMode();

@@ -58,7 +58,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-24j — Ref Domains view: renamed, force layout spacing tuned";
+  var PAGE_REVISION = "2026-09-24k — Ref Domains view: custom collision force keeps nodes apart";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
