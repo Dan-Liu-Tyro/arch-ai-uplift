@@ -145,6 +145,19 @@ hasn't been prioritized yet — that is not the same as `[P3]`.
   with a different presentation (an ownership matrix would read better than a
   hairball, but that is a content decision, not a rendering one). The user
   chose to vendor first and revisit once the graph content has settled.
+
+  **Update 2026-09-24: this blocker is gone.** Decision 48 in
+  `docs/decision-log.md` removed the `domain-authority` view entirely — not
+  re-plumbed, deleted, including the force-layout code (charge/link tuning,
+  a custom collision force) that existed only to render it. That settles the
+  either/or this entry posed above, but by the view going away rather than
+  by either option (a small force simulation, or a different presentation
+  for it) being chosen. The one remaining view, `payments-target-state`,
+  already has this entry's own decisive case for SVG applying cleanly: every
+  node position is fully pre-computed by `generate.py` (pinned via
+  fx/fy/fz), so no force simulation is involved anywhere in what's left to
+  render. Whether this changes the entry's standing is for the user or a
+  future session to decide.
 - **Manual position overrides for the layered flow view, in a `kg-viz`-owned
   layout file.** [P3] Raised 2026-09-24, as the parked follow-up to decision
   44 in `docs/decision-log.md` — see that entry for the full three-tier

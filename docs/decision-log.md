@@ -101,6 +101,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 42 | Agent's invocation handle renamed `arc-lite` → `arc` for easier `@`-mention; persona identity and disclaimer unchanged | `local-agent` |
 | 43 | New pattern: dedicated agents own one artifact's source of truth and lifecycle; `backlog` agent is the pilot, owning `docs/backlog.md` | `docs/backlog.md`, `CLAUDE.md`, new `.claude/agents/backlog.md` |
 | 45 | `arc`'s missing live-Confluence access (open since decision 17) made an explicit decision: stay local-only for now, for testing | `.claude/agents/arc-lite.md` |
+| 48 | `not_authoritative_for` reversed to node-level text only; `kg-viz`'s `domain-authority`/"Ref Domains" view removed entirely | `kg-core/SCHEMA.md`, `kg-core/schemas/domain.schema.json`, `kg-content/entities/domains.json`, `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -1463,6 +1464,14 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
     relationships directly, dropping the string-similarity matching decision
     31 introduced. The reward-initiative evaluation task — this experiment's
     actual test — still hasn't run.
+
+    **The relationship-type half of this is reversed by decision 48** — the
+    file-consolidation half (one JSON-Schema-backed file for `domain`)
+    stands unaffected. `not_authoritative_for` never had a consumer beyond
+    its own visualization in `kg-viz`, which is removed; explicit
+    non-authority is text-only on the node again, as it already was in
+    `authority.not_authoritative_for` before this decision made it also a
+    structured edge.
 33. **Rename executed: `arch-knowledge-graph` → `arch-ai-uplift`** (decision
     29's "agreed in principle" acted on). GitHub repo renamed via `gh repo
     rename` (GitHub redirects the old URL). The four content references to
@@ -1551,6 +1560,14 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       `graph.json`'s shape changed from `{nodes, links, stats}` to
       `{categories, default_view, views[]}` — it remains a disposable build
       artifact, so this is not a migration.
+
+      **`domain-authority` is removed by decision 48** — the tension this
+      bullet already named (a single-predicate graph that "renders as a
+      hairball") was never resolved for that view, only worked around, and
+      it never gained a consumer beyond its own rendering. One view now;
+      `payments.json`'s shape has one fewer level of nesting in practice
+      (`views[]` still exists structurally, just holds one entry) than
+      described here.
     - **First typed, directed relationships in the graph.** Until now every
       edge in `kg-content` was a single predicate (`not_authoritative_for`),
       which meant the graph could not do the contradiction detection or
@@ -2205,6 +2222,69 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       explicit per-section slide directive inside the markdown, naming the
       diagram and the few points to surface, with the section's prose
       becoming presenter notes. To be settled by implementing it.
+48. **`not_authoritative_for` is reversed from a `domain → domain`
+    relationship type back to node-level text only, and `kg-viz`'s
+    `domain-authority` view (shown as "Ref Domains" in the UI) is removed
+    entirely, not just re-plumbed.** Raised by the user, looking at the
+    domain model itself rather than its rendering: the relationship type
+    "only creates confusion", and explicit non-authority should be
+    "information on node only". Both `authority.owns` and
+    `authority.not_authoritative_for` already existed as plain text on every
+    domain (`domains.json`); the reversal is which of the two forms — that
+    text, or the structured `relationships[]` array decision 32 added — is
+    the source of truth. Text wins; `relationships[]` is deleted, from the
+    schema (`kg-core/schemas/domain.schema.json`) and from all 39 domain
+    entities.
+    - **This confirms a tension decision 35 already named and did not
+      resolve.** Quoting it directly: "the graph could not do the
+      contradiction detection or dependency tracing that `CLAUDE.md` names
+      as the reason to be a graph at all" with only this one predicate.
+      Decision 35's fix was to add a second, richer view rather than touch
+      this one; this decision instead removes it, once it was clear nothing
+      had come to depend on the edges in the time since. Not used by Arc
+      Lite's grounding, not cited in any decision or document — its only
+      consumer was `kg-viz`'s own rendering of it, and that rendering was
+      exactly what had been fighting the visualizer for the three prior
+      sessions of layout work (charge/link tuning, then a hand-written
+      collision force): a dense, single-predicate, only-38%-mutual graph
+      that read as noise regardless of how the physics were tuned. Real
+      data behind "confusing": 296 resolved edges across 39 domains, average
+      out-degree 8.67, only 112 of them (38%) mutual pairs — genuinely
+      directional, easy to misread as symmetric once drawn as an
+      undirected-looking hairball.
+    - **The honest cost, named rather than dropped silently: two
+      machine-checkable capabilities, both speculative rather than used
+      today.** Traversing "what would be affected if this domain's
+      authority changed" without re-parsing prose, and the data-quality gate
+      that forced every non-authority claim to resolve to a real domain id
+      (42 of 338 references never did, and now never will). Judged against
+      this project's own "start lean, expand on a real gap" reasoning
+      (`meta/procedural-memory`) rather than kept on the chance either
+      becomes useful.
+    - **Removing the view has a second-order consequence beyond the
+      relationship type: `kg-viz` drops back to one view.** `domain-authority`
+      was also the only place any file-per-entity node
+      (principle/pattern/guardrail/reference-architecture/system/decision)
+      ever appeared in the visualizer — today that is exactly one entity (a
+      single `principle`), so the practical loss is small, but the
+      structural gap is real if that count grows before a replacement view
+      exists. The frontmatter-parsing code that fed those nodes to the view
+      (`generate.py`) is removed along with it, on the same "no consumer,
+      no code" basis; the pattern is still there to reach for, not gone.
+    - **Deliberately not bundled into this decision: the 2D/3D toggle.**
+      3D's stated justification (`kg-viz/README.md`) was reducing occlusion
+      on the dense force-directed authority graph specifically; with that
+      view gone, 3D's practical value on the one remaining (planar-by
+      -construction) view is limited. Flagged, not removed — that is a
+      separate call the user has not made, and folding it into this change
+      would have been scope creep past what was actually decided.
+    - **What replaced the edge, completing the user's own proposed
+      alternative:** the flow view's domain nodes now carry
+      `not_authoritative_for` text too (`generate.py`), surfaced in that
+      node's own detail panel (`controls-panel.js`) — so the information
+      that used to require switching to the authority view is still
+      reachable, just as text on the node rather than a jump to another
+      node.
 
 ## Constraints identified
 
