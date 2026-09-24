@@ -166,19 +166,28 @@ Two ways out, not exclusive:
 - **Label it as a hypothesis.** If it is not measured, say the shape is
   expected rather than observed, and say what would change the reading.
 
-## 5. Section 8 switches the unit of decomposition without defining it
+## 5. ~~Section 8 switches the unit of decomposition~~ — APPLIED
 
-Sections 3, 6 and 7 are organized around **eight streams**. Section 8 says "AI
-agents, one per **domain**, each owning its own domain knowledge" — then gives
-stream examples (Architecture's agent, Engineering's agent).
+**Resolved 2026-09-24.** The author chose *stream*, and section 8 now reads
+"AI agents, one per stream", "its own stream's knowledge", and "queryable
+across streams". Domains and streams were the same thing; only the wording
+moved.
 
-Either domains *are* the streams, in which case say stream and stay
-consistent, or a second decomposition axis has appeared on the final slide
-undefined. The second reading is the dangerous one: a payments organization
-has obvious business domains (acquiring, settlement, disputes, terminals) that
-are not streams at all, and a listener may hear "one agent per business
-domain" — a materially different and much larger architecture. This one is
-cheap to fix and expensive to leave.
+The original note, kept for the reasoning: sections 3, 6 and 7 are organized
+around **eight streams**, while section 8 said "AI agents, one per
+**domain**, each owning its own domain knowledge" — then gave stream examples
+(Architecture's agent, Engineering's agent). Either domains *were* the
+streams, in which case say stream and stay consistent, or a second
+decomposition axis had appeared on the final slide undefined. The second
+reading was the dangerous one: a payments organization has obvious business
+domains (acquiring, settlement, disputes, terminals) that are not streams at
+all, and a listener may have heard "one agent per business domain" — a
+materially different and much larger architecture.
+
+Note that "domain" survives elsewhere in the document deliberately and
+correctly: *industry and domain standards* in section 1's world-knowledge
+taxonomy, and *the reference domain model* as a named Architecture-owned
+artefact in section 3. Those are not the same usage and were left alone.
 
 ## 6. "AI-DLC" is never defined
 

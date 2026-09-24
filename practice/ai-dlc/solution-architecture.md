@@ -271,9 +271,9 @@ Steering the overall direction and evolution of the AI-DLC, and handling
 exceptions — stepping in for the edge cases and judgment calls that fall
 outside what agent-to-agent communication can resolve on its own.
 
-### Middle layer — AI agents, one per domain
+### Middle layer — AI agents, one per stream
 
-Each owns its own domain knowledge. The key shift: **agent-to-agent
+Each owns its own stream's knowledge. The key shift: **agent-to-agent
 communication becomes the primary driver of the DLC** — Architecture's agent
 talking directly to Engineering's agent, Engineering's to Quality
 Engineering's, and so on across the streams, rather than every handoff routing
@@ -285,7 +285,7 @@ The knowledge graph, schemas, the asset registry.
 
 **Each piece of knowledge is owned by exactly one agent** — the single source
 of truth responsible for keeping it accurate and current. Knowledge is shared
-and queryable across domains, but other agents access it *through its owner*
+and queryable across streams, but other agents access it *through its owner*
 rather than maintaining their own duplicate copy. That is what keeps
 agent-to-agent communication trustworthy instead of creating conflicting
 sources of truth.
