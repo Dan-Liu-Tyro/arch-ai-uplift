@@ -47,11 +47,15 @@ the Confluence page earlier than decision 46 assumed.
 ### Rebuilding the deck
 
 ```
-python3 ../../meta/idea-to-presentation/build_deck.py solution-architecture.md \
-  --subtitle "For the CTO and the TLT huddle · 29 September 2026"
+python3 ../../meta/idea-to-presentation/build_deck.py solution-architecture.md
 python3 ../../meta/idea-to-presentation/verify_deck.py \
   deck.html solution-architecture.md
 ```
+
+**No `--subtitle`.** The title slide is deliberately the title alone: the
+audience and date are in this README and in the calendar invitation, so
+putting them on the opening slide tells the room something it already knows
+and costs the deck its cleanest moment.
 
 Open `deck.html` from disk — no server. Arrow keys move, `n` toggles
 presenter notes, `p` opens the browser print dialog for the PDF handover.

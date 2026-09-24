@@ -270,11 +270,20 @@ def build_slides(text, diagrams_dir, problems):
 
 
 def title_slide(title, subtitle):
+    """The title slide is the title, and a subtitle only if one is given.
+
+    An empty <p> is not harmless here: the canvas is a flex column with a
+    gap, so a blank element still pushes the title off centre.
+    """
+    caption = (
+        f'\n    <p class="subtitle">{html.escape(subtitle)}</p>' if subtitle.strip()
+        else ""
+    )
     return (
         '<section class="slide slide-title" data-slide="0">\n'
         '  <div class="canvas">\n'
-        f"    <h1>{html.escape(title)}</h1>\n"
-        f'    <p class="subtitle">{html.escape(subtitle)}</p>\n'
+        f"    <h1>{html.escape(title)}</h1>"
+        f"{caption}\n"
         "  </div>\n"
         "</section>"
     )

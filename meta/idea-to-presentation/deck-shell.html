@@ -199,19 +199,19 @@
     letter-spacing: -.02em;
     max-width: 80%;
   }
+  /* Optional: build_deck.py omits the element entirely when no subtitle is
+     passed, rather than leaving an empty one to affect the layout gap. */
   .slide-title .subtitle {
     margin: 0;
     font-size: calc(1.9 * var(--u));
     color: var(--ink-muted);
   }
-  .slide-title .canvas::before {
-    content: "";
-    display: block;
-    width: calc(9 * var(--u));
-    height: calc(.4 * var(--u));
-    background: var(--accent);
-    margin-bottom: calc(1.4 * var(--u));
-  }
+  /* No accent bar above the title. It was decoration with no
+     informational job, which is the test a visual element has to pass
+     here -- the title is already the largest thing on the page and needs
+     nothing pointing at it. The rule UNDER each content-slide heading is
+     kept deliberately: that one separates title from body on a slide that
+     has both. */
 
   /* ---- presenter notes ---- */
   .notes {
