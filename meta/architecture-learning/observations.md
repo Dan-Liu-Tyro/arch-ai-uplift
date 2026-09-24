@@ -243,3 +243,19 @@ principle's `status` and must not be silently absorbed as if it agreed.
   blocker). Worth watching for the case that would contradict it: a
   correctness or data-integrity risk, rather than a structural-cleanliness
   one, where deferring may not be acceptable.
+- 2026-09-24 · Source-of-truth-first: chose a durable document as the artefact
+  and treated every presentable format as a generated view of it · this
+  conversation · stated · unpromoted — asked for a CTO presentation on AI-DLC,
+  and when offered a choice of output format answered "we can work on markdown
+  as the source of truth for this solution architecture, later it can output as
+  confluence page, in the meantime, the pressing need to base on this md to
+  generate a presentation slide by slide." Notable for two reasons. First, the
+  same instinct as decision 5 (curate in git, generate Confluence outward) and
+  as `kg-viz`'s regenerable `payments.json` / `knowledge-visualizer.html`,
+  now applied to a non-software deliverable — so the pattern looks like a
+  general preference rather than a KG-specific one. Second, they declined
+  rendering effort until the narrative stops moving, which is the same
+  defer-the-polish shape as the two ship-now entries above but inverted in
+  effect: here deferring *protects* the artefact rather than accepting debt in
+  it. Would be contradicted by a case where they author directly in a
+  presentation tool and treat the deck as the thing to keep.
