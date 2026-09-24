@@ -419,67 +419,26 @@ the full staged set matches what the commit message is about to claim. A
 path-scoped check only tells you that path's state — it actively hides
 other already-staged content sitting in the index from earlier work.
 
-**Recurred 2026-09-24, and the rule above was not sufficient.** Same repo,
-same mechanism, but this time the unscoped `git status` *was* run, and the
-pre-staged content — another concurrently-running session's in-flight work
-on `CLAUDE.md`, `docs/backlog.md` and a `docs/decision-log.md` entry — was
-seen, named in conversation, and reasoned about as a hazard to avoid. Then a
-plain `git add <my-one-file> && git commit` swept all of it into a commit
-whose message described only my file. Looking is not the mitigation; the
-looking happened and changed nothing. **The mitigation is to make the commit
-itself narrow**: `git commit -- <explicit paths>` (which commits only those
-paths regardless of what else is staged), or move the foreign staged content
-out of the way first, and then verify with `git show --stat HEAD` that the
-commit contains exactly the intended files — after committing, not only
-before. Treat a dirty index belonging to someone else as a stop-and-ask
-condition, not a thing to step around carefully: another session may commit
-or reset underneath you mid-operation, so the sequencing is the user's call.
-Note the trap in the recovery too — `git reset --soft HEAD~1` would restore
-their staged state, but running it while another session is active races
-with whatever that session does next.
+**Amended 2026-09-24: several sessions run on this repo at once by design,
+and that is not a conflict.** Two sessions each swept the other's
+uncommitted change into their own commit. Nothing was lost, and the round
+trip spent surfacing it was not worth it — the user's standing instruction:
+"it's OK to keep working on same branch currently and we shouldn't bother
+too much about the commit conflict, just do atom work at your best always
+and commit each time, don't ask me for anything unless it's critical and
+have real conflict." So the useful content is small:
 
-**The entanglement runs both ways, which is the part worth internalising.**
-Minutes later the other session committed its own work and swept up *my*
-uncommitted `docs/decision-log.md` entry (decision 44) in exactly the same
-way, under a message about adding the backlog agent. Two sessions sharing
-one worktree do not have separable commits: an uncommitted change is
-visible to, and committable by, whichever session commits next, regardless
-of who wrote it. So the hazard is not "don't contaminate their commit" —
-it is that concurrent sessions in one checkout cannot keep authorship
-straight at all. No content was lost in either direction here, and both
-entries ended up committed; what was lost was the correspondence between
-each commit message and its diff.
-
-**Corrected same day: concurrency is the normal operating condition, not an
-incident.** The first version of this entry concluded that a foreign dirty
-index is a "stop-and-ask" and that concurrent work should be agreed up
-front or moved into separate worktrees. The user then set the standing
-expectation directly: "I'd like to work on multiple claude code instance
-most of the time to be efficient, it's not a bug, but the way of working,
-deal with it going forward." That makes stop-and-ask actively wrong — it
-would mean stopping on nearly every commit, and it misreads deliberate
-parallel work as a fault. The rule is therefore **not** to detect and
-escalate concurrency, but to be safe under it by default:
-
-- **Scope every commit explicitly**: `git commit -m "..." -- path/a path/b`.
-  Never a bare `git add <file> && git commit`, never `git add -A` or
-  `git add .`. Assume the index contains someone else's work at all times,
-  and do not bother checking whether it happens to be empty this time.
-- **Verify after, not only before**: `git show --stat HEAD` must list
-  exactly the intended files.
-- **Commit promptly** when a unit of work is done — uncommitted work is not
-  private, and the longer it sits the likelier another session sweeps it up.
-- **Never `git stash`**, and never rewrite history (`rebase`, `--amend`,
-  `reset --hard`): stashing pockets another session's uncommitted work, and
-  rewriting moves SHAs underneath a session working on the same branch.
-- **Re-read immediately before editing**, keeping edits additive and
-  anchored on your own content — a file may have been rewritten since you
-  last read it. (This is the same discipline as the shared-file rule
-  elsewhere in this file, now applying to every file, not just busy ones.)
-
-Separate worktrees remain the right tool when work would genuinely conflict
-on the same files, but they are an opt-in the user chooses, not something to
-propose every time two sessions are noticed running.
+- **Do one atomic unit of work and commit it**, rather than batching.
+  Uncommitted work is not private to a session.
+- **Scope the commit**: `git commit -m "..." -- path/a path/b`. Never
+  `git add -A` or `git add .`, and don't assume the index is yours.
+- **Don't stash and don't rewrite history** (`rebase`, `--amend`,
+  `reset --hard`) — each reaches into work that may belong to someone else.
+- **Re-read a file immediately before editing it.**
+- **Don't escalate concurrency.** A dirty index, a file that moved under
+  you, a commit that picked up a neighbour's hunk: absorb it and carry on.
+  Only a genuine blocking conflict earns the user's attention, and separate
+  worktrees are theirs to request rather than yours to propose.
 
 ## A staleness warning is not a mitigation
 

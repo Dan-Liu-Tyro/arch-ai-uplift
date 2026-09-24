@@ -65,12 +65,10 @@ policy this exists to serve.
   rest of the session once invoked once — a mid-session edit doesn't
   reliably propagate; verify via a direct file read or a fresh session,
   not a same-session re-invocation.
-- Several Claude sessions run on this repo at once by design — assume the
-  index holds someone else's work always, scope every commit with
-  `git commit -m ... -- <paths>`, verify with `git show --stat HEAD` after,
-  commit promptly, and never `git stash` or rewrite history. Looking at a
-  dirty index is not a mitigation for it, and concurrency is not an
-  incident to escalate.
+- Several Claude sessions run on this repo at once by design — do atomic
+  work and commit each unit, scope commits with `git commit -m ... --
+  <paths>`, never `git stash` or rewrite history, and don't escalate
+  concurrency: only a genuine blocking conflict earns the user's attention.
 - A staleness warning is not a mitigation — refresh a known-stale input or
   say the conclusion is unavailable; don't derive on top of it. And if a
   stale source contradicts the user's own recollection, doubt the source
