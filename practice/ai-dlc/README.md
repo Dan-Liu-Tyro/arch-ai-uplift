@@ -39,8 +39,25 @@ the Confluence page earlier than decision 46 assumed.
 
 | File | Role |
 |---|---|
-| [`solution-architecture.md`](solution-architecture.md) | **The artefact.** The solution architecture as a document, section per intended slide. Every output is generated from this file. |
+| [`solution-architecture.md`](solution-architecture.md) | **Source.** The solution architecture as a document, section per slide. Carries a `<!-- slide -->` directive per section naming its diagram and its few surfaced points. |
+| `diagrams/*.svg` | **Source too.** Hand-authored SVG, referencing the deck's palette by CSS custom property rather than carrying hex. Diagrams are content, not decoration, so they are reviewed like content. |
+| `deck.html` | **GENERATED — never hand-edit.** Rebuild with `build_deck.py`; an edit made here is lost on the next build. |
 | [`review-notes.md`](review-notes.md) | Reviewer commentary on the draft. Not part of the architecture; items are open until the author accepts or rejects them. |
+
+### Rebuilding the deck
+
+```
+python3 ../../meta/idea-to-presentation/build_deck.py solution-architecture.md \
+  --subtitle "For the CTO and the TLT huddle · 29 September 2026"
+python3 ../../meta/idea-to-presentation/verify_deck.py \
+  deck.html solution-architecture.md
+```
+
+Open `deck.html` from disk — no server. Arrow keys move, `n` toggles
+presenter notes, `p` opens the browser print dialog for the PDF handover.
+**Run the verifier after every build:** the deck cannot be seen from a Claude
+session, so a missing diagram or an undeclared colour fails silently as an
+invisible shape rather than as an error.
 
 ## Why the document and not the deck
 

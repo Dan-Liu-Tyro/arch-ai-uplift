@@ -15,17 +15,31 @@ is `components/local-agent/ui/server.py`, `components/kg-viz/generate.py`,
 plus the stdlib scripts under `meta/`. `kg-viz` deliberately has **no**
 server any more (decision 36) -- `knowledge-visualizer.html` is opened
 directly from disk; do not reintroduce one.
-There is no build system and no lint step, with one narrow exception:
-`kg-viz`'s own `build.py` (decision 39) concatenates its `src/*.js` files
-into `knowledge-visualizer.html`, because the source is now split by concern
-while the shipped page must stay one self-contained file. It is stdlib
-Python, no bundler, and does not extend to the rest of the repo. The **one**
-test command is `node components/kg-viz/verify.js` (plain node, no
-dependencies) -- it exists because nothing `kg-viz` renders can be observed
-from a session here, and it now also checks that `knowledge-visualizer.html`
-is not stale against `src/`. Do not invent or assume any other build/lint/test
-commands. If asked to add tooling, choose per the org language standards
-(Kotlin preferred for complex applications).
+There is no build system and no lint step. There are **two** narrow
+exceptions, and they are the same pattern twice: a generated single-file page
+whose source is split, so a script has to assemble it.
+
+1. `kg-viz`'s own `build.py` (decision 39) concatenates its `src/*.js` files
+   into `knowledge-visualizer.html`.
+2. `meta/idea-to-presentation/build_deck.py` (decision 47) projects a
+   markdown document plus committed SVG diagrams into a self-contained HTML
+   slide deck. It takes the source path as an argument and knows nothing
+   about any particular deck -- deliberately, because it lives in `meta/`
+   and the content it runs on lives in `practice/`, which `meta/` must never
+   depend on.
+
+Both are stdlib Python, no bundler, and neither extends to the rest of the
+repo. Each has a matching verifier, for the same reason in both cases:
+nothing either one renders can be observed from a session here, so "it built
+without error" is a weaker claim than it looks.
+
+- `node components/kg-viz/verify.js` (plain node, no dependencies)
+- `python3 meta/idea-to-presentation/verify_deck.py <deck.html> <source.md>`
+
+Both also check that the generated file is not stale against its sources.
+Do not invent or assume any other build/lint/test commands. If asked to add
+tooling, choose per the org language standards (Kotlin preferred for complex
+applications).
 
 ## Layout
 
@@ -53,10 +67,16 @@ meta/procedural-memory/          operational lessons — read lessons.md early
 meta/architecture-learning/      evidence-based record of demonstrated style
 meta/perception-failures/        catalogue of Claude's own incorrect-belief incidents
 meta/token-tracking/             token usage data + summarize.py
-meta/idea-to-presentation/       idea -> deck/page capability, general-purpose
+meta/idea-to-presentation/       idea -> deck/page capability, general-purpose;
+                                  holds build_deck.py, deck-shell.html and
+                                  verify_deck.py (decision 47) -- all take
+                                  paths as arguments, never naming content
 meta/CDCD/                       evidence log: conversation-driven co-design
 practice/                        Architecture-stream business work, not software
 practice/capability-maturity/    IN-563: initiative -> process-map mapping
+practice/ai-dlc/                 the CTO deck: solution-architecture.md and
+                                  diagrams/*.svg are both source; deck.html
+                                  is GENERATED -- never hand-edit it
 .claude/agents/arc.md            local-agent's persona; lives here (not nested
                                   under components/) because this is where
                                   Claude Code's harness scans for it
@@ -96,8 +116,13 @@ delivery. **`components/` must never depend on `meta/`** — that would tie an
 extractable component to something outside the KG pipeline's own trajectory. The
 repo's only executables outside `components/` live here —
 `token-tracking/summarize.py`, `token-tracking/budget.py`,
-`architecture-learning/reindex.py`, and
-`architecture-learning/extract_transcript.py`, all stdlib only.
+`architecture-learning/reindex.py`,
+`architecture-learning/extract_transcript.py`,
+`idea-to-presentation/build_deck.py`, and
+`idea-to-presentation/verify_deck.py`, all stdlib only. The last two take
+their input path as an argument rather than naming it: they are used on
+content under `practice/`, and a hardcoded path would be exactly the
+dependency the rule above forbids.
 
 `practice/` (decision 26) is the third tier: the Architecture practice's own
 business work — Jira initiatives, practice roadmaps, capability and maturity

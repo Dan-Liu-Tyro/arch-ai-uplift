@@ -81,6 +81,41 @@ build follows `kg-viz`'s proven pattern (decisions 36, 39): one stdlib script
 producing a single self-contained file that opens from `file://`, no server,
 no CDN, slide mechanics hand-rolled rather than vendored.
 
+## What is here
+
+| File | Role |
+|---|---|
+| `build_deck.py` | Projects a markdown document plus its SVG diagrams into one self-contained HTML deck. Stdlib only. |
+| `deck-shell.html` | The template: palette, 16:9 geometry, keyboard navigation, print rules. The only place colours are defined. |
+| `verify_deck.py` | Checks a built deck. Exists because nothing it renders can be seen from a session here. |
+
+```
+python3 build_deck.py <source.md> [--diagrams DIR] [--out FILE] [--subtitle S]
+python3 verify_deck.py <deck.html> <source.md> [--diagrams DIR]
+```
+
+**These take paths; they never name content.** That is not politeness, it is
+the layering rule: this component lives under `meta/` and is used on content
+under `practice/`, which `meta/` must never depend on. A hardcoded path would
+be precisely that dependency. The useful side effect is that the mechanism is
+reusable for the next deck by construction rather than by intention.
+
+**The palette is validated, not chosen by eye.** Three categorical hues for
+the layer diagrams and a four-step single-hue ordinal ramp for the knowledge
+tiers, both run through the dataviz skill's checker against the deck's own
+light surface. One hue sits below 3:1 on that surface, so the relief rule
+applies and every band it colours carries a visible text label — which is
+also what keeps identity from being carried by colour alone. Substituting hex
+by hand invalidates all of that.
+
+**Diagrams reference the palette rather than carrying it.** An SVG uses
+`var(--tier-3)`, not a hex value, so colours live in one place and cannot
+drift between diagrams. This is why `build_deck.py` *inlines* the SVG instead
+of linking it: a linked `<img>` would not inherit the custom properties.
+Shared `<marker>` definitions live in the shell for the same reason, plus one
+of its own — nine inlined documents each defining `id="arrow"` would collide
+silently, with every diagram borrowing the first one.
+
 **Still open:**
 - **The text projection rule.** Sections are dense prose that cannot be
   dumped onto slides, but re-authoring slide text in a second file would
@@ -98,10 +133,10 @@ The Confluence path is the least open of the three: `createConfluencePage`
 via the Atlassian MCP connector already exists and needs no new
 infrastructure — the same channel `components/confluence-publish` intends to
 use, arrived at independently.
-- If any executable tooling is needed, its language — per org standards,
-  Kotlin is preferred for complex applications; something simpler may be
-  fine for a first pass, consistent with this project's
-  least-infrastructure-first pattern.
+Tooling language is settled by the same least-infrastructure-first pattern:
+stdlib Python, no dependencies, matching every other script in this repo. The
+org standard prefers Kotlin for *complex applications*, and a 300-line text
+projector is not one. Revisit if the projector grows a real domain model.
 
 ## Depends on
 
@@ -117,10 +152,13 @@ it turns out to be.
 
 ## Status
 
-**In first real use.** Purpose and boundary were set at scaffolding; the
-source-of-truth mechanism is now decided (see Mechanism above) because a
-real need arrived: a solution-architecture presentation to the CTO on
-AI-DLC. That content lives under `practice/`, not here — this component
+**Built and exercised once, end to end.** Purpose and boundary were set at
+scaffolding; the source-of-truth mechanism and the rendering step are both
+decided (see Mechanism above) and now implemented, because a real need
+arrived: a solution-architecture presentation to the CTO on AI-DLC. That run
+produced a nine-slide deck and is what settled the open questions — the
+mechanism was found by use, not designed up front. That content lives under
+`practice/`, not here — this component
 holds the capability, not any one deck's material. Slide rendering is decided
 (decision 47); the text projection rule and invocation shape remain
 undecided.
@@ -130,5 +168,7 @@ undecided.
 Explicitly the kind of thing decision 22 anticipates could outgrow this
 repo — it has no tie to architecture-knowledge curation, so if it becomes
 genuinely useful beyond this project there's no KG-specific content to
-untangle it from. Not a candidate to assess for promotion until the
-mechanism exists and has been used for real.
+untangle it from. The mechanism now exists and has been used for
+real once, which was the stated precondition for assessing promotion — so
+this is newly worth looking at, on the evidence of a second unrelated deck
+rather than the first.

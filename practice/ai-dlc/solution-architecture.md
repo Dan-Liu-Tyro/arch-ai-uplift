@@ -27,6 +27,16 @@ Section headings are the slide titles.
 
 ## 1. Organizational Knowledge versus World Knowledge
 
+<!-- slide
+diagram: 01-knowledge-boundary.svg
+layout: split
+point: World knowledge is everything **outside** the organization; organizational knowledge is everything inside
+point: Organizational knowledge is **our focus and our moat**
+point: World knowledge **cannot be consumed directly** — it has to cross a bridge
+point: Once translated, it *becomes* organizational knowledge
+-->
+
+
 At the highest level, all knowledge that can power our AI agents splits into
 two categories, separated by the organizational boundary.
 
@@ -64,6 +74,16 @@ so it can be kept fresh.
 
 ## 2. Inside Organizational Knowledge — First-Party versus Third-Party
 
+<!-- slide
+diagram: 02-lineage-test.svg
+layout: split
+point: **First party** is ours: we decide it and we change it
+point: **Third party** is interpreted: the source moves and we must follow
+point: One test decides it — **is there a tight, traceable lineage to an external source?**
+point: It returns an answer, not a debate
+-->
+
+
 ### First-party knowledge
 
 *Knowledge you author yourself — born inside the organization and owned end to
@@ -99,6 +119,15 @@ in sync?**
 
 ## 3. First-Party Knowledge by Stream
 
+<!-- slide
+diagram: 03-eight-streams.svg
+layout: full
+point: **Eight streams**, in delivery order, each owning a distinct slice
+point: This is the unit of decomposition for the whole deck
+point: **Architecture** is the one taken all the way down, at the end
+-->
+
+
 Eight streams, in delivery order.
 
 | Stream | Owns | Examples |
@@ -115,6 +144,15 @@ Eight streams, in delivery order.
 ---
 
 ## 4. The Form of Knowledge
+
+<!-- slide
+diagram: 04-knowledge-form.svg
+layout: split
+point: **Tacit knowledge cannot be consumed by an agent at all** — making it explicit is the first step, and the one most often skipped
+point: Once explicit, four tiers from noisy to structured
+point: The tiers differ in **how machine-readable** they are, not in how valuable
+-->
+
 
 ### The foundational axis: tacit versus explicit
 
@@ -141,6 +179,15 @@ a whole layer of our most valuable knowledge is invisible to agents.
 ---
 
 ## 5. The Economics of Knowledge Form
+
+<!-- slide
+diagram: 05-economics.svg
+layout: full
+point: Accuracy improves **gradually** across all four tiers
+point: Token cost is a **step change, not a slope** — it only pays off at the structured tier
+point: That asymmetry is what says *where to spend*
+-->
+
 
 *As knowledge becomes more structured, agents get more accurate — though the
 cost benefit only really kicks in at the structured tier.*
@@ -178,6 +225,15 @@ knowledge crosses into the structured tier.**
 
 ## 6. Current State Architecture
 
+<!-- slide
+diagram: 06-current-state.svg
+layout: split
+point: AI tooling used **ad hoc**, by individual choice, with no shared grounding
+point: Humans are the **mandatory intermediary** — every handoff routes through a person
+point: The knowledge layer is overwhelmingly unstructured
+-->
+
+
 ### Top layer — AI tooling, used ad hoc
 
 Claude and Atlassian's Rovo agent, picked up occasionally by individuals for
@@ -213,6 +269,15 @@ and every cross-stream handoff still runs entirely through humans.
 ---
 
 ## 7. Tactical Solution — Stream-Level Agents
+
+<!-- slide
+diagram: 07-tactical.svg
+layout: split
+point: One agent **per stream**, working in parallel instead of through a courier
+point: Humans move from carrying the work to **holding a review gate** on it
+point: **The honest trade:** organizational consistency for speed
+-->
+
 
 ### Top layer — humans
 
@@ -263,6 +328,15 @@ heavily on unstructured input.
 
 ## 8. Target State Architecture
 
+<!-- slide
+diagram: 08-target.svg
+layout: split
+point: **Agent-to-agent communication becomes the primary driver** — the flow turns horizontal
+point: Humans handle **direction and exceptions**, not every handoff
+point: Every piece of knowledge has **exactly one owner**
+-->
+
+
 ### Top layer — humans
 
 Steering the overall direction and evolution of the AI-DLC, and handling
@@ -299,6 +373,15 @@ to drive the AI-DLC.
 ---
 
 ## 9. Architecture Knowledge, Set Up for Use Across Tyro
+
+<!-- slide
+diagram: 09-architecture-knowledge.svg
+layout: split
+point: Curate in git — **Confluence becomes an output, not the source of truth**
+point: The **local path works today**; org-wide reach through Rovo is deferred, not unknown
+point: A proof of concept with a working local path, explicitly **not a populated knowledge base**
+-->
+
 
 *The second half of the ask, answered as one stream taken all the way down.
 Architecture is used as the worked example because it is the only stream with
