@@ -215,3 +215,16 @@ principle's `status` and must not be silently absorbed as if it agreed.
   blocker. Tension worth watching — the same person who removes machinery on
   principle also declines to remove it when doing so would delay a working
   artefact.
+- 2026-09-24 · Separated "the data layout is right" from "the framing around
+  it is wrong," and constrained the fix to the framing · this conversation ·
+  stated · unpromoted — asked for stage band boundaries to be left-aligned,
+  and pre-empted the obvious alternative in the same breath: "I still like
+  the entire nodes distribution, so may just need to expand other boundaries
+  to align with longest on left." Moving nodes would also have squared the
+  edges up, and would have been the easier change; it was ruled out because
+  the node positions carry meaning the chrome does not. Fits the
+  earn-its-form pattern — the diagnosis was that ragged edges make three
+  lanes of one process read as three unrelated stacked regions, i.e. a
+  correctness claim about what the picture says, not a taste preference.
+  Would be contradicted by a case where they accept relayouting the data to
+  satisfy a purely presentational constraint.
