@@ -160,8 +160,9 @@
     Graph.nodeColor(Graph.nodeColor())
       .linkColor(Graph.linkColor())
       .linkWidth(Graph.linkWidth());
-    rebuildBands();
+    // Labels before bands -- bands are sized from the label elements.
     rebuildLabels();
+    rebuildBands();
   }
 
   function refresh() {

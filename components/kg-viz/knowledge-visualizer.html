@@ -278,7 +278,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-23h — explicit #bands SVG size for Safari";
+  var PAGE_REVISION = "2026-09-24b — stage bands and fit enclose node labels";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
@@ -573,8 +573,9 @@
     Graph.nodeColor(Graph.nodeColor())
       .linkColor(Graph.linkColor())
       .linkWidth(Graph.linkWidth());
-    rebuildBands();
+    // Labels before bands -- bands are sized from the label elements.
     rebuildLabels();
+    rebuildBands();
   }
 
   function refresh() {
@@ -602,8 +603,26 @@
   var edgeEls = {};
   var nodeById = {};
 
+  var LABEL_DY = 11;        // node label sits this far below the node marker
+  var LABEL_LINE_H = 14;    // 11px font, one line, plus leading -- fallback only
+
   function shortTitle(n) {
     return String(n.title).replace(/ Domain$/, "");
+  }
+
+  // A node label's footprint in screen pixels, or zeroes when labels are off.
+  // Both the band fit and the camera fit have to leave room for text they do
+  // not own, and neither can assume a world-space size for it: these are
+  // fixed-size HTML elements, so the footprint is pixels at any zoom.
+  // offsetWidth is authoritative in a browser; the character estimate is the
+  // fallback under a stubbed DOM (verify.js), and matches claim() below.
+  function labelBoxPx(n) {
+    var el = showLabels ? labelEls[n.id] : null;
+    if (!el) return { w: 0, h: 0 };
+    return {
+      w: el.offsetWidth || String(el.textContent).length * 5.6,
+      h: el.offsetHeight || LABEL_LINE_H
+    };
   }
 
   // Edge labels use the same overlay. The predicate is the single most
@@ -723,7 +742,7 @@
         var dim = keep ? !keep[n.id] : isDimmedByScope(n);
         el.className = "nlabel" + (dim ? " dim" : "") +
           (selected && selected.id === n.id ? " sel" : "");
-        place(el, Graph.graph2ScreenCoords(n.x, n.y, isFinite(n.z) ? n.z : 0), 11,
+        place(el, Graph.graph2ScreenCoords(n.x, n.y, isFinite(n.z) ? n.z : 0), LABEL_DY,
           { suppress: true });
       }
     }
@@ -758,8 +777,19 @@
   // corners stay correct under rotation, where a screen-space rect would not.
   // Bands are a layered-view feature -- the force view has no stages.
   var SVG_NS = "http://www.w3.org/2000/svg";
-  var BAND_PAD = 46;        // world units of margin around a stage's nodes
+  var BAND_PAD = 46;        // world units of margin around a stage's contents
   var bandEls = [];
+
+  // Screen pixels per world unit, measured off the live projection instead of
+  // assumed, so the label allowance below stays correct at every zoom level.
+  // The layered view is a flat plane viewed down z, so one sample taken near
+  // the band describes the whole band.
+  function worldScale(x, y) {
+    var a = Graph.graph2ScreenCoords(x, y, 0);
+    var b = Graph.graph2ScreenCoords(x + 100, y, 0);
+    if (!a || !b || !isFinite(a.x) || !isFinite(b.x)) return 0;
+    return Math.abs(b.x - a.x) / 100;
+  }
 
   function rebuildBands() {
     var svg = document.getElementById("bands");
@@ -801,13 +831,31 @@
         band.caption.textContent = "";
         return;
       }
+      // A band has to contain the stage's *labels*, not only its nodes: a
+      // dashed edge slicing through "Terminal Fleet & Device Management"
+      // reads as the band being drawn wrong rather than as a label
+      // overflowing it. Labels are fixed-size HTML (labels.js), so their
+      // footprint is screen pixels and has to be divided back into world
+      // units at the current zoom -- which also means the band tracks its
+      // labels as you zoom, instead of being right at one magnification.
+      // Room is reserved whether or not a label is currently
+      // collision-suppressed, so the band does not twitch as labels drop in
+      // and out. Vertical room goes on both edges because labels hang below
+      // a node on screen and nothing here establishes which world-y
+      // direction that is; the cost is a little headroom on the top edge.
+      var scale = worldScale(members[0].x, members[0].y);
       var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      var drop = 0;
       members.forEach(function (n) {
-        if (n.x < minX) minX = n.x;
-        if (n.x > maxX) maxX = n.x;
+        var box = scale > 0 ? labelBoxPx(n) : { w: 0, h: 0 };
+        var halfW = (box.w / 2) / (scale || 1);
+        if (n.x - halfW < minX) minX = n.x - halfW;
+        if (n.x + halfW > maxX) maxX = n.x + halfW;
         if (n.y < minY) minY = n.y;
         if (n.y > maxY) maxY = n.y;
+        if (box.h) drop = Math.max(drop, (LABEL_DY + box.h) / (scale || 1));
       });
+      minY -= drop; maxY += drop;
       minX -= BAND_PAD; maxX += BAND_PAD; minY -= BAND_PAD; maxY += BAND_PAD;
 
       var corners = [[minX, minY], [maxX, minY], [maxX, maxY], [minX, maxY]];
@@ -864,8 +912,26 @@
   // argument, which is what made every session start with a manual zoom. For
   // a fixed planar layout the fit is simple trigonometry, so compute the
   // camera distance directly and stop guessing.
-  var FIT_PADDING = 48;      // world-space breathing room for outermost labels
+  var FIT_PADDING = 48;      // world-space breathing room around outermost nodes
   var LEFT_INSET = 372;      // control panel keep-out, so the graph is not drawn under it
+  // Node labels are a fixed-size HTML overlay (see labels.js), not a 3D
+  // sprite that scales with zoom -- so their footprint is a constant number
+  // of screen pixels no matter what scale fitLayered() lands on. FIT_PADDING
+  // is world-space, so on a large graph (small scale) it shrinks to a handful
+  // of screen pixels and stops covering the label at all, which is what
+  // clips the outermost names. So reserve this margin in pixels instead.
+  // Top and bottom get the same value, for the same reason positionBands()
+  // does it: labels hang below a node on screen, and nothing here
+  // establishes which world-y direction that is.
+  function labelPixelMargins() {
+    var halfW = 0, tallest = 0;
+    visibleData().nodes.forEach(function (n) {
+      var box = labelBoxPx(n);
+      if (box.w / 2 > halfW) halfW = box.w / 2;
+      if (box.h > tallest) tallest = box.h;
+    });
+    return { x: halfW + 4, y: tallest ? (LABEL_DY + tallest + 4) : 10 };
+  }
 
   function fitLayered() {
     var pts = visibleData().nodes.filter(function (n) {
@@ -889,11 +955,13 @@
 
     var w = (maxX - minX) || 1;
     var h = (maxY - minY) || 1;
-    // Scale in screen px per world unit, honouring the panel keep-out so the
-    // graph is centred in the space actually visible rather than behind the
-    // controls.
-    var availW = Math.max(160, W - LEFT_INSET);
-    var availH = Math.max(160, H);
+    // Scale in screen px per world unit, honouring the panel keep-out and
+    // reserving real screen-pixel room for labels so the graph *and its
+    // names* are centred in the space actually visible rather than behind
+    // the controls or run off the edge.
+    var margin = labelPixelMargins();
+    var availW = Math.max(160, W - LEFT_INSET - 2 * margin.x);
+    var availH = Math.max(160, H - 2 * margin.y);
     var scale = Math.min(availW / (w + 2 * FIT_PADDING), availH / (h + 2 * FIT_PADDING));
 
     var fov = cam.fov * Math.PI / 180;
@@ -1055,8 +1123,12 @@
     document.getElementById("stats").classList.add("ready");
     buildControls();
     renderStats();
-    rebuildBands();
+    // Labels first: a band is sized to enclose its stage's labels, so it has
+    // to measure elements that already exist. The rAF loop would correct the
+    // order within a frame, but a first paint with under-sized bands is a
+    // visible flash, and it hid the bug from verify.js's single-frame stub.
     rebuildLabels();
+    rebuildBands();
     setTimeout(frameGraph, 400);
   }
 

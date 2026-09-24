@@ -324,7 +324,13 @@ const el = (r, id) => r.els[id] || EMPTY;
     const minY = Math.min(...ys), maxY = Math.max(...ys);
     const w = maxX - minX, h = maxY - minY;
     const W = 3270, H = 1730, PAD = 48, LEFT = 372;
-    const availW = W - LEFT, availH = H;
+    // Mirrors labelPixelMargins() in camera.js: label overlays are a fixed
+    // number of screen pixels regardless of the zoom the fit picks, so the
+    // expected fit here must reserve the same pixel margin, not just PAD.
+    const halfW = Math.max(...flow.map(n =>
+      String(n.title).replace(/ Domain$/, '').length * 5.6)) / 2;
+    const marginX = halfW + 4, marginY = 11 + 14 + 4;
+    const availW = W - LEFT - 2*marginX, availH = H - 2*marginY;
     const scale = Math.min(availW / (w + 2*PAD), availH / (h + 2*PAD));
     const fov = 75 * Math.PI / 180;
     const expectDist = (H / scale) / (2 * Math.tan(fov/2));
@@ -463,6 +469,34 @@ const el = (r, id) => r.els[id] || EMPTY;
   }
   console.log('J: overlapping band pairs =', clash);
   if (clash) results.push('J: ' + clash + ' stage bands overlap, defeating the separation');
+
+  // A band must enclose its stage's *labels*, not just its nodes. Boxing the
+  // node coordinates alone left dashed edges cutting through the wider names
+  // ("Terminal Fleet & Device Management", "Product Bundling & Eligibility"),
+  // which reads as the band being wrong rather than the label overflowing.
+  // Checked per stage, since each label belongs to exactly one band.
+  r.probe.positionLabels();
+  const lbl = r.probe.labelEls();
+  const bandFor = {};
+  bands.forEach((b, i) => { if (boxes[i]) bandFor[b.stage] = boxes[i]; });
+  const escaped = [];
+  let worst = 0;
+  r.probe.visible().nodes.forEach(n => {
+    const box = bandFor[n.stage], c = lbl[n.id];
+    if (!box || !c) return;
+    const m = /translate\((-?[\d.]+)px,(-?[\d.]+)px\)/.exec(c.style.transform || '');
+    if (!m) return;
+    const x = parseFloat(m[1]), y = parseFloat(m[2]);
+    const w = c.textContent.length * 5.6, h = 14;
+    const over = Math.max(box.l - (x - w/2), (x + w/2) - box.r, box.t - y, (y + h) - box.b);
+    if (over > 0) { escaped.push(c.textContent); worst = Math.max(worst, over); }
+  });
+  console.log('J: node labels escaping their stage band =', escaped.length,
+    escaped.length ? '| worst = ' + worst.toFixed(0) + 'px | e.g. ' + escaped.slice(0,3).join(' / ') : '');
+  if (escaped.length) {
+    results.push('J: ' + escaped.length + ' node labels fall outside their stage band, e.g. ' +
+      escaped.slice(0,3).join(' / ') + ' (worst ' + worst.toFixed(0) + 'px)');
+  }
 
   // hiding a stage must empty its band, not leave one around nothing
   r.probe.hidden()['design-a-product'] = true;

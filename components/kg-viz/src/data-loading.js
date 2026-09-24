@@ -122,7 +122,11 @@
     document.getElementById("stats").classList.add("ready");
     buildControls();
     renderStats();
-    rebuildBands();
+    // Labels first: a band is sized to enclose its stage's labels, so it has
+    // to measure elements that already exist. The rAF loop would correct the
+    // order within a frame, but a first paint with under-sized bands is a
+    // visible flash, and it hid the bug from verify.js's single-frame stub.
     rebuildLabels();
+    rebuildBands();
     setTimeout(frameGraph, 400);
   }

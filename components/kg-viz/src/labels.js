@@ -16,8 +16,26 @@
   var edgeEls = {};
   var nodeById = {};
 
+  var LABEL_DY = 11;        // node label sits this far below the node marker
+  var LABEL_LINE_H = 14;    // 11px font, one line, plus leading -- fallback only
+
   function shortTitle(n) {
     return String(n.title).replace(/ Domain$/, "");
+  }
+
+  // A node label's footprint in screen pixels, or zeroes when labels are off.
+  // Both the band fit and the camera fit have to leave room for text they do
+  // not own, and neither can assume a world-space size for it: these are
+  // fixed-size HTML elements, so the footprint is pixels at any zoom.
+  // offsetWidth is authoritative in a browser; the character estimate is the
+  // fallback under a stubbed DOM (verify.js), and matches claim() below.
+  function labelBoxPx(n) {
+    var el = showLabels ? labelEls[n.id] : null;
+    if (!el) return { w: 0, h: 0 };
+    return {
+      w: el.offsetWidth || String(el.textContent).length * 5.6,
+      h: el.offsetHeight || LABEL_LINE_H
+    };
   }
 
   // Edge labels use the same overlay. The predicate is the single most
@@ -137,7 +155,7 @@
         var dim = keep ? !keep[n.id] : isDimmedByScope(n);
         el.className = "nlabel" + (dim ? " dim" : "") +
           (selected && selected.id === n.id ? " sel" : "");
-        place(el, Graph.graph2ScreenCoords(n.x, n.y, isFinite(n.z) ? n.z : 0), 11,
+        place(el, Graph.graph2ScreenCoords(n.x, n.y, isFinite(n.z) ? n.z : 0), LABEL_DY,
           { suppress: true });
       }
     }

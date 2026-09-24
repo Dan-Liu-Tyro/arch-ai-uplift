@@ -28,8 +28,26 @@
   // argument, which is what made every session start with a manual zoom. For
   // a fixed planar layout the fit is simple trigonometry, so compute the
   // camera distance directly and stop guessing.
-  var FIT_PADDING = 48;      // world-space breathing room for outermost labels
+  var FIT_PADDING = 48;      // world-space breathing room around outermost nodes
   var LEFT_INSET = 372;      // control panel keep-out, so the graph is not drawn under it
+  // Node labels are a fixed-size HTML overlay (see labels.js), not a 3D
+  // sprite that scales with zoom -- so their footprint is a constant number
+  // of screen pixels no matter what scale fitLayered() lands on. FIT_PADDING
+  // is world-space, so on a large graph (small scale) it shrinks to a handful
+  // of screen pixels and stops covering the label at all, which is what
+  // clips the outermost names. So reserve this margin in pixels instead.
+  // Top and bottom get the same value, for the same reason positionBands()
+  // does it: labels hang below a node on screen, and nothing here
+  // establishes which world-y direction that is.
+  function labelPixelMargins() {
+    var halfW = 0, tallest = 0;
+    visibleData().nodes.forEach(function (n) {
+      var box = labelBoxPx(n);
+      if (box.w / 2 > halfW) halfW = box.w / 2;
+      if (box.h > tallest) tallest = box.h;
+    });
+    return { x: halfW + 4, y: tallest ? (LABEL_DY + tallest + 4) : 10 };
+  }
 
   function fitLayered() {
     var pts = visibleData().nodes.filter(function (n) {
@@ -53,11 +71,13 @@
 
     var w = (maxX - minX) || 1;
     var h = (maxY - minY) || 1;
-    // Scale in screen px per world unit, honouring the panel keep-out so the
-    // graph is centred in the space actually visible rather than behind the
-    // controls.
-    var availW = Math.max(160, W - LEFT_INSET);
-    var availH = Math.max(160, H);
+    // Scale in screen px per world unit, honouring the panel keep-out and
+    // reserving real screen-pixel room for labels so the graph *and its
+    // names* are centred in the space actually visible rather than behind
+    // the controls or run off the edge.
+    var margin = labelPixelMargins();
+    var availW = Math.max(160, W - LEFT_INSET - 2 * margin.x);
+    var availH = Math.max(160, H - 2 * margin.y);
     var scale = Math.min(availW / (w + 2 * FIT_PADDING), availH / (h + 2 * FIT_PADDING));
 
     var fov = cam.fov * Math.PI / 180;

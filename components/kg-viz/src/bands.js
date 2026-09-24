@@ -6,8 +6,19 @@
   // corners stay correct under rotation, where a screen-space rect would not.
   // Bands are a layered-view feature -- the force view has no stages.
   var SVG_NS = "http://www.w3.org/2000/svg";
-  var BAND_PAD = 46;        // world units of margin around a stage's nodes
+  var BAND_PAD = 46;        // world units of margin around a stage's contents
   var bandEls = [];
+
+  // Screen pixels per world unit, measured off the live projection instead of
+  // assumed, so the label allowance below stays correct at every zoom level.
+  // The layered view is a flat plane viewed down z, so one sample taken near
+  // the band describes the whole band.
+  function worldScale(x, y) {
+    var a = Graph.graph2ScreenCoords(x, y, 0);
+    var b = Graph.graph2ScreenCoords(x + 100, y, 0);
+    if (!a || !b || !isFinite(a.x) || !isFinite(b.x)) return 0;
+    return Math.abs(b.x - a.x) / 100;
+  }
 
   function rebuildBands() {
     var svg = document.getElementById("bands");
@@ -49,13 +60,31 @@
         band.caption.textContent = "";
         return;
       }
+      // A band has to contain the stage's *labels*, not only its nodes: a
+      // dashed edge slicing through "Terminal Fleet & Device Management"
+      // reads as the band being drawn wrong rather than as a label
+      // overflowing it. Labels are fixed-size HTML (labels.js), so their
+      // footprint is screen pixels and has to be divided back into world
+      // units at the current zoom -- which also means the band tracks its
+      // labels as you zoom, instead of being right at one magnification.
+      // Room is reserved whether or not a label is currently
+      // collision-suppressed, so the band does not twitch as labels drop in
+      // and out. Vertical room goes on both edges because labels hang below
+      // a node on screen and nothing here establishes which world-y
+      // direction that is; the cost is a little headroom on the top edge.
+      var scale = worldScale(members[0].x, members[0].y);
       var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      var drop = 0;
       members.forEach(function (n) {
-        if (n.x < minX) minX = n.x;
-        if (n.x > maxX) maxX = n.x;
+        var box = scale > 0 ? labelBoxPx(n) : { w: 0, h: 0 };
+        var halfW = (box.w / 2) / (scale || 1);
+        if (n.x - halfW < minX) minX = n.x - halfW;
+        if (n.x + halfW > maxX) maxX = n.x + halfW;
         if (n.y < minY) minY = n.y;
         if (n.y > maxY) maxY = n.y;
+        if (box.h) drop = Math.max(drop, (LABEL_DY + box.h) / (scale || 1));
       });
+      minY -= drop; maxY += drop;
       minX -= BAND_PAD; maxX += BAND_PAD; minY -= BAND_PAD; maxY += BAND_PAD;
 
       var corners = [[minX, minY], [maxX, minY], [maxX, maxY], [minX, maxY]];

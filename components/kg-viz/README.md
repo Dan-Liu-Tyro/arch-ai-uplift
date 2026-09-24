@@ -178,6 +178,18 @@ through ingestion is the real fix. See "Known gaps".
   unacceptable failure mode in a component nobody in a session here can see,
   so the guaranteed-visible option wins and the cost is a faint tint over the
   nodes each band covers.
+
+  A band is sized to enclose its stage's **labels**, not just its nodes — a
+  dashed edge cutting through "Terminal Fleet & Device Management" reads as
+  the band being drawn wrong rather than as a label overflowing it. Labels
+  are fixed-size HTML, so their footprint is screen pixels and is divided
+  back into world units at the current zoom, which also means the band
+  tracks its labels as you zoom instead of being correct at one
+  magnification. **This makes band geometry depend on the label elements
+  existing**, so `rebuildLabels()` must run before `rebuildBands()` — the
+  per-frame loop would correct the order within a frame, but the first paint
+  would flash under-sized bands. `verify.js` scenario J asserts no label
+  escapes its own band, which is what catches a regression here.
 - **Group show/hide** — checkboxes per stage (flow) or per domain category
   (authority), with live counts. Hiding a group drops its nodes *and* every
   edge touching them, so no dangling edges are drawn, and empties that
@@ -213,7 +225,10 @@ through ingestion is the real fix. See "Known gaps".
 - **Fills the viewport.** For the layered view the camera is computed directly
   from the node bounding box, the camera's field of view and the container
   size, including a keep-out for the control panel so the graph is centred in
-  the space actually visible. `zoomToFit()` was tried twice and abandoned: at
+  the space actually visible, plus a screen-pixel margin for the outermost
+  labels — reserved in pixels for the same reason the bands do it, since a
+  world-space margin shrinks away as the graph grows and clips the names.
+  `zoomToFit()` was tried twice and abandoned: at
   70px padding and then at 12px it still left the graph occupying roughly a
   quarter of the window, which forced a manual zoom on every open. For a
   pinned planar layout the fit is simple trigonometry, and the arithmetic is
