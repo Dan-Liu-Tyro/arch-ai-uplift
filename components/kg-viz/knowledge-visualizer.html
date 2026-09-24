@@ -157,20 +157,25 @@
      (personify() in renderer.js). Neither a THREE.Sprite/Texture nor a real
      PNG is reachable here -- same "no THREE constructor" wall documented on
      personify() -- but 2D never rotates the camera (see applyControlMode()),
-     so a plain HTML badge tracks the node perfectly there, the same trick
+     so a plain HTML glyph tracks the node perfectly there, the same trick
      #labels already relies on. It sits over the node's own 3D mesh rather
      than replacing it: pointer-events:none lets clicks fall through to the
-     mesh underneath for onNodeClick's hit-testing, and the badge's solid
-     background hides the sphere it is centred on. Hidden outright in 3D,
-     where it cannot track an orbiting camera -- see positionIcons(). */
+     mesh underneath for onNodeClick's hit-testing, and the mesh itself is
+     made fully transparent in 2D (applyActorMeshOpacity() in renderer.js) --
+     not just covered -- since the glyph has no opaque background and the
+     3D head sits offset above the body in world space regardless, so no
+     badge size could reliably mask both. Hidden outright in 3D, where it
+     cannot track an orbiting camera -- see positionIcons(). */
   #actor-icons { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
-  .actor-icon { position: absolute; top: 0; left: 0; width: 26px; height: 26px;
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    border: 1px solid rgba(255,255,255,0.4);
-    box-shadow: 0 0 7px currentColor, inset 0 1px 3px rgba(255,255,255,0.35);
+  .actor-icon { position: absolute; top: 0; left: 0; width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
     will-change: transform; }
-  .actor-icon svg { width: 15px; height: 15px; }
-  .actor-icon.sel { border-color: #fff; box-shadow: 0 0 10px #fff, inset 0 1px 3px rgba(255,255,255,0.6); }
+  .actor-icon svg { width: 34px; height: 34px;
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.7)); }
+  /* Glow is selection-only, not an ambient effect -- a plain flat-coloured
+     glyph the rest of the time, matching the mesh's own "white plus glow"
+     treatment for whichever node is actually selected. */
+  .actor-icon.sel svg { filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 9px currentColor); }
   #hint { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
     font-size: 11px; color: #67718a; z-index: 4; }
   /* Deliberately loud and centred. A silent blank canvas cost a round trip
@@ -362,7 +367,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-24g — actor icon badge in 2D, silhouette in 3D";
+  var PAGE_REVISION = "2026-09-24h — actor icon glyph (glows on select) in 2D, silhouette in 3D";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
@@ -756,16 +761,15 @@
   // orbits (3D), so positionIcons() hides these outright once dims is 3 and
   // the sphere-and-head silhouette is what's on screen instead.
   //
-  // A dark silhouette on a colour-filled circle, not a coloured glyph on a
-  // dark circle: the fill on the shapes below is a fixed near-black ink, and
-  // only the badge's own background/glow (set per node in positionIcons(),
-  // from the same nodeDisplayColor() the 3D mesh uses) carries the actor's
-  // role colour -- the classic flat-avatar look, and it means selection/scope
-  // highlighting stays visually consistent with every other node kind.
+  // The glyph itself carries the actor's role colour (fill="currentColor",
+  // set per node in positionIcons() from the same nodeDisplayColor() the 3D
+  // mesh uses) rather than sitting on a coloured circle -- no badge, so
+  // selection/scope highlighting stays visually consistent with every other
+  // node kind without a separate background to keep in sync.
   var iconEls = {};
   var PERSON_ICON_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true">' +
-    '<circle cx="12" cy="8.3" r="4.1" fill="#0b0d14"/>' +
-    '<path d="M4 21c0-4.7 3.8-8.3 8-8.3s8 3.6 8 8.3" fill="#0b0d14"/>' +
+    '<circle cx="12" cy="7.4" r="4.4" fill="currentColor"/>' +
+    '<path d="M12 13c-4.6 0-8.4 3.6-8.4 8.4V22h16.8v-0.6C20.4 16.6 16.6 13 12 13z" fill="currentColor"/>' +
     '</svg>';
 
   function rebuildIcons() {
@@ -803,9 +807,9 @@
       if (!p || !isFinite(p.x)) { el.style.display = "none"; continue; }
       el.style.display = "flex";
       el.style.transform = "translate(-50%, -50%) translate(" + p.x + "px," + p.y + "px)";
-      var col = nodeDisplayColor(n);
-      el.style.background = col;
-      el.style.color = col;
+      // currentColor drives both the glyph's fill and, via .sel below, the
+      // glow's tint -- one property, so they can't fall out of step.
+      el.style.color = nodeDisplayColor(n);
       el.className = "actor-icon" + (selected && selected.id === n.id ? " sel" : "");
     }
   }
@@ -1469,6 +1473,12 @@
         });
         Graph.numDimensions(dims);
         applyControlMode();
+        // Reasserting nodeColor() forces the library to recompute every
+        // node's material from scratch, which is what undoes 2D's opacity
+        // -0 override on leaving it (see applyActorMeshOpacity()) -- nothing
+        // else ever would, since a material is only replaced when its
+        // colour or opacity no longer match what gets freshly computed.
+        repaint();
         setTimeout(frameGraph, 350);
       };
     });
@@ -1627,6 +1637,28 @@
     obj.__head = head;
   }
 
+  // The 2D actor icon overlay (labels.js) is meant to be the only visible
+  // representation of an actor there -- the badge no longer has an opaque
+  // background to hide the mesh behind (see labels.js), and the head sits
+  // offset above the body in world space regardless, so no badge size could
+  // reliably cover both anyway. Hidden via opacity, not `.visible`: the
+  // raycaster behind onNodeClick's hit-testing skips invisible objects but
+  // not transparent ones, and the mesh still has to be clickable under the
+  // overlay. Only forces opacity in 2D -- 3D's opacity already encodes
+  // selection/scope dimming via the colour string's alpha channel (a dimmed
+  // node's rgba(...,0.18)), and overwriting that here would fight it.
+  // Re-asserted every frame, because a recolour can swap in a *different*
+  // cached material at any time (see the head-material-sync comment below)
+  // -- a one-time set would not survive that. Leaving 2D restores it by
+  // re-asserting nodeColor() once in the dim-seg handler, which forces a
+  // fresh material lookup since the opacity forced here no longer matches
+  // what the library would compute.
+  function applyActorMeshOpacity(obj) {
+    if (!obj.material || dims !== 2) return;
+    obj.material.transparent = true;
+    obj.material.opacity = 0;
+  }
+
   // Idempotent and self-healing: a view switch or a filter change makes the
   // library build fresh meshes, which arrive without the marker and get
   // decorated on the next frame.
@@ -1638,6 +1670,7 @@
       if (presentationFor(n).shape !== "person") continue;
       var obj = n.__threeObj;
       if (!obj) continue;
+      applyActorMeshOpacity(obj);
       if (obj.__personified) {
         // The recolour this keeps up with runs every frame too (selection,
         // scope dimming), so the sync has to be per-frame, not one-shot.

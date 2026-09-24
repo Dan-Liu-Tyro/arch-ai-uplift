@@ -29,16 +29,15 @@
   // orbits (3D), so positionIcons() hides these outright once dims is 3 and
   // the sphere-and-head silhouette is what's on screen instead.
   //
-  // A dark silhouette on a colour-filled circle, not a coloured glyph on a
-  // dark circle: the fill on the shapes below is a fixed near-black ink, and
-  // only the badge's own background/glow (set per node in positionIcons(),
-  // from the same nodeDisplayColor() the 3D mesh uses) carries the actor's
-  // role colour -- the classic flat-avatar look, and it means selection/scope
-  // highlighting stays visually consistent with every other node kind.
+  // The glyph itself carries the actor's role colour (fill="currentColor",
+  // set per node in positionIcons() from the same nodeDisplayColor() the 3D
+  // mesh uses) rather than sitting on a coloured circle -- no badge, so
+  // selection/scope highlighting stays visually consistent with every other
+  // node kind without a separate background to keep in sync.
   var iconEls = {};
   var PERSON_ICON_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true">' +
-    '<circle cx="12" cy="8.3" r="4.1" fill="#0b0d14"/>' +
-    '<path d="M4 21c0-4.7 3.8-8.3 8-8.3s8 3.6 8 8.3" fill="#0b0d14"/>' +
+    '<circle cx="12" cy="7.4" r="4.4" fill="currentColor"/>' +
+    '<path d="M12 13c-4.6 0-8.4 3.6-8.4 8.4V22h16.8v-0.6C20.4 16.6 16.6 13 12 13z" fill="currentColor"/>' +
     '</svg>';
 
   function rebuildIcons() {
@@ -76,9 +75,9 @@
       if (!p || !isFinite(p.x)) { el.style.display = "none"; continue; }
       el.style.display = "flex";
       el.style.transform = "translate(-50%, -50%) translate(" + p.x + "px," + p.y + "px)";
-      var col = nodeDisplayColor(n);
-      el.style.background = col;
-      el.style.color = col;
+      // currentColor drives both the glyph's fill and, via .sel below, the
+      // glow's tint -- one property, so they can't fall out of step.
+      el.style.color = nodeDisplayColor(n);
       el.className = "actor-icon" + (selected && selected.id === n.id ? " sel" : "");
     }
   }

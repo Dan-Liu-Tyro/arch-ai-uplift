@@ -112,7 +112,7 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), select: n => { selected = n; positionIcons(); }, };', ctx);
 
   return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam, controls: () => fakeControls, camera: () => fakeCamera };
 }
@@ -744,6 +744,31 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (!sameMaterialAtClone) results.push('O: head did not start out sharing the body\'s material');
   if (!syncedAfterRecolour) results.push('O: head material was not re-synced after the body was recoloured');
 
+  // 2D (the default here) hides the mesh via opacity, not `.visible`, so the
+  // 2D icon overlay (labels.js) can be the only visible representation of
+  // the actor while the mesh itself stays raycastable for onNodeClick.
+  console.log('O: 2D hides the actor mesh via opacity =',
+    newMaterial.opacity === 0 && newMaterial.transparent === true);
+  if (newMaterial.opacity !== 0 || !newMaterial.transparent) {
+    results.push('O: actor mesh was not made transparent in 2D: opacity=' + newMaterial.opacity +
+      ' transparent=' + newMaterial.transparent);
+  }
+
+  // 3D never touches opacity -- it already carries selection/scope dimming
+  // via the colour string's alpha channel (a dimmed node's rgba(...,0.18)),
+  // and forcing it here would fight that.
+  newMaterial.opacity = 0.42;
+  newMaterial.transparent = false;
+  r.probe.setDims(3);
+  r.probe.decorateShapes();
+  const leftAlone = newMaterial.opacity === 0.42 && newMaterial.transparent === false;
+  console.log('O: 3D leaves an existing opacity alone =', leftAlone);
+  if (!leftAlone) {
+    results.push('O: 3D mode touched the actor mesh opacity it should leave alone: opacity=' +
+      newMaterial.opacity + ' transparent=' + newMaterial.transparent);
+  }
+  r.probe.setDims(2);
+
   // Self-healing: a view switch rebuilds meshes, which arrive unmarked.
   actors.forEach(n => { n.__threeObj = mkObj(false); });
   r.probe.decorateShapes();
@@ -906,10 +931,10 @@ const el = (r, id) => r.els[id] || EMPTY;
   const sample = actors[0];
   const el0 = iconEls[sample.id];
   console.log('T: 2D -> display =', el0.style.display, '| transform set =', !!el0.style.transform,
-    '| background =', el0.style.background);
+    '| colour =', el0.style.color);
   if (el0.style.display === 'none') results.push('T: actor icon hidden in 2D, the default');
   if (!el0.style.transform) results.push('T: actor icon has no screen position in 2D');
-  if (!el0.style.background) results.push('T: actor icon has no colour in 2D');
+  if (!el0.style.color) results.push('T: actor icon has no colour in 2D');
 
   // 3D: a flat overlay cannot track an orbiting camera, so it must step
   // aside for the existing sphere-and-head silhouette instead.
@@ -922,6 +947,19 @@ const el = (r, id) => r.els[id] || EMPTY;
   r.probe.positionIcons();
   console.log('T: back to 2D -> display =', el0.style.display);
   if (el0.style.display === 'none') results.push('T: actor icon did not reappear when returning to 2D');
+
+  // Glow is selection-only: unselected is a plain className, selecting this
+  // actor adds "sel" (which carries the glow in CSS), deselecting removes it.
+  const classUnselected = el0.className;
+  r.probe.select(sample);
+  const classSelected = el0.className;
+  r.probe.select(null);
+  const classDeselected = el0.className;
+  console.log('T: glow class -> unselected =', JSON.stringify(classUnselected),
+    '| selected =', JSON.stringify(classSelected), '| deselected =', JSON.stringify(classDeselected));
+  if (/\bsel\b/.test(classUnselected)) results.push('T: actor icon glows before anything is selected');
+  if (!/\bsel\b/.test(classSelected)) results.push('T: actor icon did not glow when selected');
+  if (/\bsel\b/.test(classDeselected)) results.push('T: actor icon kept glowing after deselecting');
 }
 
 console.log(results.length ? '\nFAILURES:\n' + results.join('\n') : '\nALL SCENARIOS PASSED');

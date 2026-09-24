@@ -72,6 +72,12 @@
         });
         Graph.numDimensions(dims);
         applyControlMode();
+        // Reasserting nodeColor() forces the library to recompute every
+        // node's material from scratch, which is what undoes 2D's opacity
+        // -0 override on leaving it (see applyActorMeshOpacity()) -- nothing
+        // else ever would, since a material is only replaced when its
+        // colour or opacity no longer match what gets freshly computed.
+        repaint();
         setTimeout(frameGraph, 350);
       };
     });
@@ -230,6 +236,28 @@
     obj.__head = head;
   }
 
+  // The 2D actor icon overlay (labels.js) is meant to be the only visible
+  // representation of an actor there -- the badge no longer has an opaque
+  // background to hide the mesh behind (see labels.js), and the head sits
+  // offset above the body in world space regardless, so no badge size could
+  // reliably cover both anyway. Hidden via opacity, not `.visible`: the
+  // raycaster behind onNodeClick's hit-testing skips invisible objects but
+  // not transparent ones, and the mesh still has to be clickable under the
+  // overlay. Only forces opacity in 2D -- 3D's opacity already encodes
+  // selection/scope dimming via the colour string's alpha channel (a dimmed
+  // node's rgba(...,0.18)), and overwriting that here would fight it.
+  // Re-asserted every frame, because a recolour can swap in a *different*
+  // cached material at any time (see the head-material-sync comment below)
+  // -- a one-time set would not survive that. Leaving 2D restores it by
+  // re-asserting nodeColor() once in the dim-seg handler, which forces a
+  // fresh material lookup since the opacity forced here no longer matches
+  // what the library would compute.
+  function applyActorMeshOpacity(obj) {
+    if (!obj.material || dims !== 2) return;
+    obj.material.transparent = true;
+    obj.material.opacity = 0;
+  }
+
   // Idempotent and self-healing: a view switch or a filter change makes the
   // library build fresh meshes, which arrive without the marker and get
   // decorated on the next frame.
@@ -241,6 +269,7 @@
       if (presentationFor(n).shape !== "person") continue;
       var obj = n.__threeObj;
       if (!obj) continue;
+      applyActorMeshOpacity(obj);
       if (obj.__personified) {
         // The recolour this keeps up with runs every frame too (selection,
         // scope dimming), so the sync has to be per-frame, not one-shot.

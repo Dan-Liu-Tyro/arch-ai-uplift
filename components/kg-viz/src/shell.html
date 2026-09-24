@@ -157,20 +157,25 @@
      (personify() in renderer.js). Neither a THREE.Sprite/Texture nor a real
      PNG is reachable here -- same "no THREE constructor" wall documented on
      personify() -- but 2D never rotates the camera (see applyControlMode()),
-     so a plain HTML badge tracks the node perfectly there, the same trick
+     so a plain HTML glyph tracks the node perfectly there, the same trick
      #labels already relies on. It sits over the node's own 3D mesh rather
      than replacing it: pointer-events:none lets clicks fall through to the
-     mesh underneath for onNodeClick's hit-testing, and the badge's solid
-     background hides the sphere it is centred on. Hidden outright in 3D,
-     where it cannot track an orbiting camera -- see positionIcons(). */
+     mesh underneath for onNodeClick's hit-testing, and the mesh itself is
+     made fully transparent in 2D (applyActorMeshOpacity() in renderer.js) --
+     not just covered -- since the glyph has no opaque background and the
+     3D head sits offset above the body in world space regardless, so no
+     badge size could reliably mask both. Hidden outright in 3D, where it
+     cannot track an orbiting camera -- see positionIcons(). */
   #actor-icons { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
-  .actor-icon { position: absolute; top: 0; left: 0; width: 26px; height: 26px;
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    border: 1px solid rgba(255,255,255,0.4);
-    box-shadow: 0 0 7px currentColor, inset 0 1px 3px rgba(255,255,255,0.35);
+  .actor-icon { position: absolute; top: 0; left: 0; width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
     will-change: transform; }
-  .actor-icon svg { width: 15px; height: 15px; }
-  .actor-icon.sel { border-color: #fff; box-shadow: 0 0 10px #fff, inset 0 1px 3px rgba(255,255,255,0.6); }
+  .actor-icon svg { width: 34px; height: 34px;
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.7)); }
+  /* Glow is selection-only, not an ambient effect -- a plain flat-coloured
+     glyph the rest of the time, matching the mesh's own "white plus glow"
+     treatment for whichever node is actually selected. */
+  .actor-icon.sel svg { filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 9px currentColor); }
   #hint { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
     font-size: 11px; color: #67718a; z-index: 4; }
   /* Deliberately loud and centred. A silent blank canvas cost a round trip

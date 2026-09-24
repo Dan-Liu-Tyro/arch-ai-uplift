@@ -248,21 +248,31 @@ through ingestion is the real fix. See "Known gaps".
   would be pixel mud, and the question being answered is "which steps involve
   people".
 
-  **In 2D only, actors instead show a coloured icon badge** — a flat HTML
-  overlay, not a mesh — sitting on top of (and fully covering) the same
-  sphere. The reachability wall above rules out a real `THREE.Sprite`/
-  `Texture` here too, so this is the other route already proven for text:
-  `#labels`' `graph2ScreenCoords()` overlay trick, applied to a `<div>` badge
-  instead of a text node. That trick only works while the camera cannot
-  rotate out from under it, which is exactly 2D (`applyControlMode()` maps
-  drag to pan there, never orbit) and exactly why 3D keeps the silhouette
-  instead: nothing here can make a flat overlay track an orbiting camera.
-  `positionIcons()` in `src/labels.js` hides the badges outright once
-  `numDimensions` is 3. The badge's fill and glow come from
-  `nodeDisplayColor()` — the same selection/scope-dimming logic the mesh's
-  `nodeColor()` accessor uses, factored out so the two can never disagree —
-  and the glyph inside is a fixed dark silhouette, not tinted, so it reads
-  against any role colour.
+  **In 2D only, actors instead show a coloured person-shaped icon** — a flat
+  HTML overlay, not a mesh — sitting on top of the same sphere-and-head mesh,
+  which is made fully transparent there (`applyActorMeshOpacity()` in
+  `src/renderer.js`) rather than covered: the icon has no opaque background
+  to hide anything behind, and the 3D head sits offset above the body in
+  world space regardless, so no overlay size could reliably mask both. The
+  mesh stays raycastable (opacity, not `.visible`, is what changes), so
+  `onNodeClick`'s hit-testing is untouched.
+
+  The reachability wall above rules out a real `THREE.Sprite`/`Texture`
+  here too, so this is the other route already proven for text: `#labels`'
+  `graph2ScreenCoords()` overlay trick, applied to an SVG glyph instead of a
+  text node. That trick only works while the camera cannot rotate out from
+  under it, which is exactly 2D (`applyControlMode()` maps drag to pan there,
+  never orbit) and exactly why 3D keeps the silhouette instead: nothing here
+  can make a flat overlay track an orbiting camera. `positionIcons()` in
+  `src/labels.js` hides the icons outright once `numDimensions` is 3.
+
+  The glyph's own fill carries the actor's role colour (`currentColor`, set
+  from `nodeDisplayColor()` — the same selection/scope-dimming logic the
+  mesh's `nodeColor()` accessor uses, factored out so the two can never
+  disagree). It glows only when that actor is the one currently selected
+  (a `.sel`-gated CSS `drop-shadow`, not an ambient effect) — matching the
+  mesh's own "white plus glow" treatment for a selected node, since
+  `nodeDisplayColor()` already returns white for it.
 - **Colour legend** — lists only the kinds actually present in the current
   view, built from the same table `colorFor` reads, so it cannot drift from
   the rendering. Hidden on the authority view, which colours domains by
