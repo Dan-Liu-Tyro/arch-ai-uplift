@@ -65,12 +65,12 @@ policy this exists to serve.
   rest of the session once invoked once — a mid-session edit doesn't
   reliably propagate; verify via a direct file read or a fresh session,
   not a same-session re-invocation.
-- `git commit` commits everything already staged, not just what this turn
-  `git add`ed — run a full, unscoped `git status` immediately before
-  committing, and make the commit itself narrow (`git commit -- <paths>`),
-  because looking at a dirty index is not a mitigation for it. A dirty
-  index belonging to another session is a stop-and-ask, not a thing to
-  step around.
+- Several Claude sessions run on this repo at once by design — assume the
+  index holds someone else's work always, scope every commit with
+  `git commit -m ... -- <paths>`, verify with `git show --stat HEAD` after,
+  commit promptly, and never `git stash` or rewrite history. Looking at a
+  dirty index is not a mitigation for it, and concurrency is not an
+  incident to escalate.
 - A staleness warning is not a mitigation — refresh a known-stale input or
   say the conclusion is unavailable; don't derive on top of it. And if a
   stale source contradicts the user's own recollection, doubt the source

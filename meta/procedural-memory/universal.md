@@ -448,9 +448,38 @@ of who wrote it. So the hazard is not "don't contaminate their commit" —
 it is that concurrent sessions in one checkout cannot keep authorship
 straight at all. No content was lost in either direction here, and both
 entries ended up committed; what was lost was the correspondence between
-each commit message and its diff. If concurrent sessions are expected, the
-sequencing has to be agreed with the user up front, or the work has to go
-in separate worktrees (`EnterWorktree`), not coordinated commit-by-commit.
+each commit message and its diff.
+
+**Corrected same day: concurrency is the normal operating condition, not an
+incident.** The first version of this entry concluded that a foreign dirty
+index is a "stop-and-ask" and that concurrent work should be agreed up
+front or moved into separate worktrees. The user then set the standing
+expectation directly: "I'd like to work on multiple claude code instance
+most of the time to be efficient, it's not a bug, but the way of working,
+deal with it going forward." That makes stop-and-ask actively wrong — it
+would mean stopping on nearly every commit, and it misreads deliberate
+parallel work as a fault. The rule is therefore **not** to detect and
+escalate concurrency, but to be safe under it by default:
+
+- **Scope every commit explicitly**: `git commit -m "..." -- path/a path/b`.
+  Never a bare `git add <file> && git commit`, never `git add -A` or
+  `git add .`. Assume the index contains someone else's work at all times,
+  and do not bother checking whether it happens to be empty this time.
+- **Verify after, not only before**: `git show --stat HEAD` must list
+  exactly the intended files.
+- **Commit promptly** when a unit of work is done — uncommitted work is not
+  private, and the longer it sits the likelier another session sweeps it up.
+- **Never `git stash`**, and never rewrite history (`rebase`, `--amend`,
+  `reset --hard`): stashing pockets another session's uncommitted work, and
+  rewriting moves SHAs underneath a session working on the same branch.
+- **Re-read immediately before editing**, keeping edits additive and
+  anchored on your own content — a file may have been rewritten since you
+  last read it. (This is the same discipline as the shared-file rule
+  elsewhere in this file, now applying to every file, not just busy ones.)
+
+Separate worktrees remain the right tool when work would genuinely conflict
+on the same files, but they are an opt-in the user chooses, not something to
+propose every time two sessions are noticed running.
 
 ## A staleness warning is not a mitigation
 
