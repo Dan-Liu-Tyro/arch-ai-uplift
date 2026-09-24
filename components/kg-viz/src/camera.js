@@ -16,6 +16,7 @@
     buildAdjacency();
     applyLayout();
     Graph.numDimensions(dims).graphData(visibleData());
+    applyControlMode();
     buildControls();
     renderStats();
     repaint();

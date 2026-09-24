@@ -999,6 +999,7 @@
     buildAdjacency();
     applyLayout();
     Graph.numDimensions(dims).graphData(visibleData());
+    applyControlMode();
     buildControls();
     renderStats();
     repaint();
@@ -1218,6 +1219,7 @@
     applyLayout();
     ensureGraph();
     Graph.numDimensions(dims).graphData(visibleData());
+    applyControlMode();
 
     document.getElementById("controls").classList.add("ready");
     document.getElementById("stats").classList.add("ready");
@@ -1306,6 +1308,8 @@
       })
       .onBackgroundClick(closeDetail);
 
+    applyControlMode();
+
     document.getElementById("dim-seg").querySelectorAll("button").forEach(function (b) {
       b.onclick = function () {
         dims = parseInt(b.dataset.dim, 10);
@@ -1313,6 +1317,7 @@
           x.className = x === b ? "on" : "";
         });
         Graph.numDimensions(dims);
+        applyControlMode();
         setTimeout(frameGraph, 350);
       };
     });
@@ -1374,6 +1379,39 @@
     Graph.onEngineStop(function () { frameGraph(); });
   }
 
+  // ---- Controls: pan the plane in 2D, orbit freely in 3D -------------------
+  //
+  // numDimensions() only clamps node z to 0 inside the force layout (checked
+  // against the vendored bundle's own source) -- it never touches the camera
+  // or its controls. So the "2D" toggle left the camera exactly as free to
+  // orbit as "3D", and a single left-drag could tip a flattened graph out of
+  // the plane it was just flattened into.
+  //
+  // There is no controlType switch for this: the fix is remapping the mouse
+  // button on the trackball controls the library already built, the same
+  // "work with the live object, not a constructor" approach personify() uses
+  // above and for the same reason -- there is still no reachable THREE.MOUSE
+  // enum to build a value from. What *is* reachable is the controls
+  // instance's own default button assignments, so the PAN sentinel it
+  // already put on RIGHT gets copied onto LEFT for 2D, and LEFT's original
+  // (rotate) value is restored for 3D.
+  var trackballDefaults = null;
+
+  function applyControlMode() {
+    var controls = Graph && Graph.controls && Graph.controls();
+    if (!controls || !controls.mouseButtons || !("noRotate" in controls)) return;
+    if (!trackballDefaults) {
+      trackballDefaults = { LEFT: controls.mouseButtons.LEFT, RIGHT: controls.mouseButtons.RIGHT };
+    }
+    if (dims === 2) {
+      controls.noRotate = true;
+      controls.mouseButtons.LEFT = trackballDefaults.RIGHT;
+    } else {
+      controls.noRotate = false;
+      controls.mouseButtons.LEFT = trackballDefaults.LEFT;
+    }
+  }
+
   // ---- Shapes: a person silhouette for actors ------------------------------
   //
   // Why this is done by mutating the library's own meshes rather than by a
@@ -1404,6 +1442,15 @@
     // the parent would multiply this offset and the two would drift apart.
     head.position.set(0, r * 1.3, 0);
     obj.add(head);
+    // clone() copies the material *reference*, not the material itself
+    // (three.js's Mesh.copy does `this.material = source.material`) -- so
+    // head and body start out sharing one object. That snapshot goes stale
+    // the moment selection or scope dimming changes: the library reacts to
+    // a new nodeColor() result by looking up a *different* cached material
+    // and reassigning it onto the body's mesh, never onto the head, which
+    // is a separate object nobody told about the swap. Keep a direct
+    // reference so decorateShapes() can re-sync it every frame instead.
+    obj.__head = head;
   }
 
   // Idempotent and self-healing: a view switch or a filter change makes the
@@ -1416,7 +1463,16 @@
       var n = nodes[i];
       if (presentationFor(n).shape !== "person") continue;
       var obj = n.__threeObj;
-      if (!obj || obj.__personified || !obj.clone || !obj.add) continue;
+      if (!obj) continue;
+      if (obj.__personified) {
+        // The recolour this keeps up with runs every frame too (selection,
+        // scope dimming), so the sync has to be per-frame, not one-shot.
+        if (obj.__head && obj.__head.material !== obj.material) {
+          obj.__head.material = obj.material;
+        }
+        continue;
+      }
+      if (!obj.clone || !obj.add) continue;
       try {
         personify(obj);
         obj.__personified = true;

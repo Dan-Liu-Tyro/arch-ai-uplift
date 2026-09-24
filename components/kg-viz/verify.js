@@ -66,12 +66,17 @@ function run(scenario, opts) {
 
   const listeners = {};
   const calls = {};
+  // A fake trackball controls instance -- real button-assignment values are
+  // opaque library-internal sentinels (see renderer.js's applyControlMode
+  // comment), so any two distinct markers exercise the same swap logic.
+  const fakeControls = { mouseButtons: { LEFT: 'ROTATE', MIDDLE: 'ZOOM', RIGHT: 'PAN' }, noRotate: false };
   const G = new Proxy({}, { get: (_t, prop) => {
     if (prop === 'camera') return () => ({ fov: 75 });
     if (prop === 'cameraPosition') return (pos, look, ms) => { calls.__cam = { pos, look, ms }; return G; };
     if (prop === 'graph2ScreenCoords') {
       return (x, y, z) => (opts.badProjection ? { x: NaN, y: NaN } : { x: x / 2 + 500, y: y / 2 + 400 });
     }
+    if (prop === 'controls') return () => fakeControls;
     return (...args) => {
       calls[prop] = (calls[prop] || 0) + 1;
       if (args.length === 0) return calls['__last_' + prop];
@@ -104,9 +109,9 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, };', ctx);
 
-  return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam };
+  return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam, controls: () => fakeControls };
 }
 
 const results = [];
@@ -680,12 +685,16 @@ const el = (r, id) => r.els[id] || EMPTY;
 
   // The stub has no three.js, so stand in for the mesh the library binds to
   // each node. Only the instance methods personify() actually uses.
-  const mkObj = (throws) => {
+  const mkObj = (throws, material) => {
     const o = {
       children: [], scale: { x:1,y:1,z:1, set(x,y,z){ o.scale.x=x; o.scale.y=y; o.scale.z=z; } },
       position: { x:0,y:0,z:0, set(x,y,z){ o.position.x=x; o.position.y=y; o.position.z=z; } },
       geometry: { parameters: { radius: 13 } },
-      clone(){ if (throws) throw new Error('no THREE here'); return mkObj(false); },
+      material: material || { color: 'initial' },
+      // Mirrors real three.js Mesh.copy(), which shares the material
+      // *reference* rather than cloning it -- the behaviour that makes the
+      // head go stale when the library later reassigns the body's material.
+      clone(){ if (throws) throw new Error('no THREE here'); return mkObj(false, o.material); },
       add(c){ o.children.push(c); }
     };
     return o;
@@ -718,6 +727,20 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (!(head.scale.y > 0 && head.scale.y < 1)) results.push('O: head is not smaller than the body: ' + head.scale.y);
   if (!(head.position.y > 13)) results.push('O: head does not sit clear of the body: y=' + head.position.y);
 
+  // Selection/scope-dim recolouring works by the library reassigning the
+  // body's .material to a different cached object, never touching the
+  // head -- decorateShapes() must re-sync it every frame.
+  const body0 = actors[0].__threeObj;
+  const sameMaterialAtClone = body0.children[0].material === body0.material;
+  const newMaterial = { color: 'selected' };
+  body0.material = newMaterial;
+  r.probe.decorateShapes();
+  const syncedAfterRecolour = body0.children[0].material === newMaterial;
+  console.log('O: head shares material at clone =', sameMaterialAtClone,
+    '| re-synced after body recoloured =', syncedAfterRecolour);
+  if (!sameMaterialAtClone) results.push('O: head did not start out sharing the body\'s material');
+  if (!syncedAfterRecolour) results.push('O: head material was not re-synced after the body was recoloured');
+
   // Self-healing: a view switch rebuilds meshes, which arrive unmarked.
   actors.forEach(n => { n.__threeObj = mkObj(false); });
   r.probe.decorateShapes();
@@ -741,6 +764,33 @@ const el = (r, id) => r.els[id] || EMPTY;
   console.log('O: unclonable mesh threw =', threw, '| announced on screen =', noted);
   if (threw) results.push('O: decorateShapes threw instead of degrading: ' + threw);
   if (!noted) results.push('O: shape failure was silent -- no on-screen note');
+}
+
+// P: dragging pans the plane in 2D, orbits freely in 3D
+{
+  const r = run('P', { cdnBlocked: false }); await tick();
+  // Captured before any file loads, and thus before ensureGraph() ever calls
+  // applyControlMode() -- dims defaults to 2, so grabbing these afterwards
+  // would read back already-swapped values instead of the true defaults.
+  const controls = r.controls();
+  const rotateDefault = controls.mouseButtons.LEFT;
+  const panDefault = controls.mouseButtons.RIGHT;
+
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+
+  r.probe.setDims(2);
+  const twoD = { noRotate: controls.noRotate, leftIsPan: controls.mouseButtons.LEFT === panDefault };
+  console.log('P: 2D -> noRotate =', twoD.noRotate, '| left-drag mapped to pan =', twoD.leftIsPan);
+  if (!twoD.noRotate) results.push('P: 2D mode still allows the camera to orbit off the plane');
+  if (!twoD.leftIsPan) results.push('P: 2D mode left-drag is not mapped to pan');
+
+  r.probe.setDims(3);
+  const threeD = { noRotate: controls.noRotate, leftIsRotate: controls.mouseButtons.LEFT === rotateDefault };
+  console.log('P: 3D -> noRotate =', threeD.noRotate, '| left-drag restored to rotate =', threeD.leftIsRotate);
+  if (threeD.noRotate) results.push('P: 3D mode lost its orbit rotation');
+  if (!threeD.leftIsRotate) results.push('P: 3D mode left-drag was not restored to rotate');
 }
 
 console.log(results.length ? '\nFAILURES:\n' + results.join('\n') : '\nALL SCENARIOS PASSED');

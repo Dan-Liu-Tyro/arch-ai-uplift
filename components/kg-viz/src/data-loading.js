@@ -117,6 +117,7 @@
     applyLayout();
     ensureGraph();
     Graph.numDimensions(dims).graphData(visibleData());
+    applyControlMode();
 
     document.getElementById("controls").classList.add("ready");
     document.getElementById("stats").classList.add("ready");
