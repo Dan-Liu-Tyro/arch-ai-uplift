@@ -229,7 +229,7 @@ instinct behind it ("is every term defined?") is audience-independent by
 construction, which is exactly why it misfires on a deliverable whose audience
 set the vocabulary.
 
-### 6a. The term is never tied to the deck's own model — one clause, still open
+### 6a. ~~The term is never tied to the deck's own model~~ — superseded by 6b
 
 What survives is smaller and is not a definition. "AI-DLC" appears five times
 in the document and **all four body mentions are in sections 6–8**; sections
@@ -246,15 +246,82 @@ supplied.
 Also: section 8 says "the primary driver of the **DLC**" where every other
 mention says "AI-DLC". Trivial, worth aligning.
 
-### 6b. AWS's AI-DLC is a question for the regroup, not deck content
+### 6b. Industry AI-DLC — verified, and it strengthens the deck
 
-AWS publishes a methodology by this name, with its own phases and ceremonies.
-If Tyro's term arrived from there, part of the audience may be importing AWS's
-meaning — a materially different thing from this deck's three-stage model. That
-is worth the author *knowing* before the huddle and worth one question at the
-Monday regroup; it is not something the deck should explain. **Flagged from the
-reviewer's recall, which has not been verified against AWS's published
-material** — check it rather than repeat it.
+**Checked against published sources, 2026-09-24**, having first been flagged as
+unverified reviewer recall. It is real and the recall was accurate.
+
+**Origin and reach.** Coined by AWS (Raja SP, 2025, in a whitepaper). Now broad
+enough that IBM and Wiz publish explainers, `awslabs/aidlc-workflows` exists as
+a repo, and there is a community site at `ai-dlc.dev`. IBM credits AWS
+explicitly and notes the methodology can run on platforms including Claude
+Code.
+
+**What it is.** An augmentation of the SDLC in which an LLM, or a group of
+them, is an active collaborator at every step: AI is the primary executor,
+humans are validators and decision makers. Three phases — **Inception**
+(business intent into requirements, via the **Mob Elaboration** ceremony),
+**Construction** (architecture, code and tests, via **Mob Construction**), and
+**Operations** (deployment, infrastructure, monitoring). It renames the
+cadence too: **Bolts** replace sprints (hours or days), **Units of Work**
+replace Epics.
+
+**How it handles knowledge — the load-bearing detail.** Via **steering
+files**: markdown documents defining rules, constraints, architectural
+standards and workflows that agents must follow. That is its persistent
+governance and context mechanism across all three phases.
+
+#### Why this matters more than a definition would
+
+**The two AI-DLCs are different kinds of thing.** The industry's is a
+*methodology* — phases, ceremonies, iteration cadence — answering *how a team
+works*. This deck's is an *architecture* — three layers, eight streams, a
+current/tactical/target progression — answering *what gets built and where
+knowledge lives*. Complementary, not substitutes. The real risk item 6 was
+groping at is therefore not an undefined acronym: it is that a listener
+expecting Inception/Construction/Operations and bolts will not recognise nine
+sections that mention none of them.
+
+**But the deck's position is strong, not weak.** AWS's own financial-services
+guidance states that **"context quality determines output quality"** — which is
+this deck's thesis almost verbatim. Their answer to it is steering files, i.e.
+markdown documents, which in section 4's taxonomy is **tier 3,
+semi-structured**. Section 5 argues the step change in token economics only
+arrives at **tier 4, structured**.
+
+So the deck is neither a restatement of AI-DLC nor a rival model. It is an
+argument about **the one layer the industry methodology depends on but
+under-specifies** — it says context is everything, then hands you markdown
+files. Positioning it that way is a stronger and more defensible frame than
+presenting a parallel model, and it is now evidence-backed rather than
+asserted. **This supersedes 6a**: the useful addition is not a link from the
+term to section 3's eight streams, but one or two lines locating this deck
+*relative to the industry methodology*. Still the author's call.
+
+#### Two other items this changes
+
+- **Item 7's governance gates are answered by AWS, better than item 7 guessed.**
+  Governance is **risk-based, not uniform**: *"only material changes require
+  human sign-off; routine changes flow through automated validation"*, with
+  end-to-end traceability from requirements to code to tests for audit, and
+  steering files carrying regulatory constraints such as the EU AI Act. AWS
+  frames the whole thing as *regulatorily defensible*, with human-in-the-loop
+  governance at the heart of the design — written for financial services
+  specifically. Borrowable directly, with a citation.
+- **Item 2's ladder reading shifts.** Mob Elaboration and Mob Construction are
+  literally human-in-the-loop, which reads as **L3**. But the risk-based
+  gating above is **L4**-shaped for routine work. So section 8's target state
+  is roughly *aligned* with the published industry position rather than more
+  aggressive than it — and "our target matches where AWS's methodology already
+  is" is a far easier thing to defend than a novel target.
+
+**Still open:** whether Tyro's use of the term actually came from AWS. A
+Monday question, though it matters less now — any technically engaged audience
+in 2026 is likely to have exposure either way.
+
+**Sources.** AWS DevOps blog (`ai-driven-development-life-cycle`), AWS for
+Industries (`ai-driven-development-lifecycle-for-financial-services`),
+IBM Think (`topics/ai-dlc`), `github.com/awslabs/aidlc-workflows`.
 
 ## 7. Lower priority at this depth
 
