@@ -1,12 +1,3 @@
-  var CATEGORY_COLORS = {
-    "support-and-experience-channels": "#3fd0ff",
-    "core-customer-and-product-domains": "#ff5f7e",
-    "business-operations-domains": "#ffb454",
-    "partner-integrations-and-value-add-services-domains": "#8b7bff",
-    "data-and-intelligence-domains": "#4dff9e",
-    "cross-domain-orchestrators": "#ff8ad8",
-    "_uncategorized": "#8a93ab"
-  };
   // ---- Presentation, keyed off the model's strict types -------------------
   //
   // The model says what a thing *is* -- `kind`, plus `actor_type` for an
@@ -58,7 +49,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-24k — Ref Domains view: custom collision force keeps nodes apart";
+  var PAGE_REVISION = "2026-09-24l — Ref Domains view removed; one view now";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 

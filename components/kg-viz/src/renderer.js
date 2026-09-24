@@ -5,66 +5,6 @@
 
   function nodeVal(n) { return (n.kind === "domain" || n.type === "domain") ? 5 : 3; }
 
-  // The library's own rendered sphere radius, world units -- found by
-  // reading the vendored bundle's mesh-construction code (`Math.cbrt(val) *
-  // nodeRelSize`), since nowhere in its public API documents the formula.
-  // The collision force below needs this to be exact: using the wrong
-  // radius would make it enforce a gap that does not match what is drawn,
-  // leaving spheres either still overlapping or needlessly far apart.
-  function nodeRadius(n) { return Math.cbrt(nodeVal(n)) * NODE_REL_SIZE; }
-
-  // A minimum-separation constraint the charge force alone cannot
-  // guarantee: repulsion decays with distance and is easily overwhelmed at
-  // close range by several competing link forces pulling one node toward
-  // multiple neighbours at once -- exactly what a dense, high-degree graph
-  // like the Ref Domains view does. This build has no forceCollide (checked
-  // the vendored bundle; only charge/link/center are in it), so this is a
-  // small custom force plugged in through d3Force()'s own extension point --
-  // `Graph.d3Force(name, forceFn)` registers *any* function following
-  // d3-force's convention (an `initialize(nodes)` hook plus a per-tick call
-  // that adjusts velocity, not position, so the engine's own integration
-  // step is what actually moves the node), not just the library's four
-  // built-ins. Deliberately not scaled by the tick's alpha, unlike
-  // charge/link: this is meant to hold as a near-constant constraint the
-  // same way d3-force's own forceCollide does, not fade out as the
-  // simulation cools.
-  function makeCollideForce() {
-    var nodes = [];
-    // Gap between two nodes' surfaces is roughly one more radius' worth on
-    // top of just touching -- "some distance apart compared to its own
-    // size", not merely non-overlapping.
-    var PADDING = 2.0;
-    function force() {
-      for (var i = 0; i < nodes.length; i++) {
-        var a = nodes[i];
-        if (a.fx != null) continue; // pinned (layered view) -- ignores every force regardless
-        var ra = nodeRadius(a);
-        for (var j = 0; j < nodes.length; j++) {
-          if (i === j) continue;
-          var b = nodes[j];
-          var dx = (a.x || 0) - (b.x || 0);
-          var dy = (a.y || 0) - (b.y || 0);
-          var dz = (a.z || 0) - (b.z || 0);
-          var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-          var minDist = (ra + nodeRadius(b)) * PADDING;
-          if (dist >= minDist) continue;
-          if (dist < 1e-6) {
-            // Exactly coincident: nudge along a stable axis rather than
-            // dividing by zero and leaving both nodes stacked forever.
-            a.vx = (a.vx || 0) + minDist * 0.05;
-            continue;
-          }
-          var push = (minDist - dist) / dist * 0.5;
-          a.vx = (a.vx || 0) + dx * push;
-          a.vy = (a.vy || 0) + dy * push;
-          a.vz = (a.vz || 0) + dz * push;
-        }
-      }
-    }
-    force.initialize = function (ns) { nodes = ns; };
-    return force;
-  }
-
   function ensureGraph() {
     if (Graph) return;
     Graph = ForceGraph3D()(document.getElementById("graph"))
@@ -83,13 +23,11 @@
       // happens *after* the library has built its own mesh, from the
       // per-frame loop, not by an accessor running inside node construction
       // -- see that function for why that distinction matters here.
-      .linkDirectionalArrowLength(function (l) { return view.layout === "layered" ? 7 : 0; })
+      .linkDirectionalArrowLength(function (l) { return 7; })
       .linkDirectionalArrowRelPos(0.98)
       // Direction as motion, not just as an arrowhead: a slow stream of
-      // particles running source -> target. Only on the flow view -- 296
-      // animated edges on the authority graph would be noise, and that graph's
-      // single predicate is not directional in a way worth animating.
-      .linkDirectionalParticles(function (l) { return view.layout === "layered" ? 3 : 0; })
+      // particles running source -> target.
+      .linkDirectionalParticles(function (l) { return 3; })
       .linkDirectionalParticleSpeed(0.0035)
       .linkDirectionalParticleWidth(function (l) {
         if (!selected) return 2.6;
@@ -102,10 +40,8 @@
       .linkLabel(function (l) {
         return "<b>" + (l.label || l.predicate) + "</b>" + (l.payload ? "<br/>" + l.payload : "");
       })
-      // Edges were too faint to read against the near-black background. The
-      // flow view has 43 of them and they are the content, so they are now
-      // nearly opaque; the authority view has 296 and stays restrained to
-      // remain legible at all.
+      // Edges were too faint to read against the near-black background --
+      // 43 of them are the content, so they are nearly opaque.
       .linkColor(function (l) {
         var s = srcId(l), t = tgtId(l);
         if (selected) {
@@ -114,10 +50,10 @@
           return l.back_edge ? "#ff7e8f" : "#6fe3a8";
         }
         if (l.back_edge) return "rgba(255,140,155,0.9)";
-        return view.layout === "layered" ? "rgba(196,212,240,0.85)" : "rgba(140,162,205,0.3)";
+        return "rgba(196,212,240,0.85)";
       })
       .linkWidth(function (l) {
-        if (!selected) return view.layout === "layered" ? 1.6 : 0.5;
+        if (!selected) return 1.6;
         var s = srcId(l), t = tgtId(l);
         return (s === selected.id || t === selected.id) ? 3 : 0.4;
       })
@@ -129,30 +65,12 @@
       })
       .onBackgroundClick(closeDetail);
 
-    // The force view (Ref Domains) has an unforgiving failure mode with no
-    // tuning at all: a node with few or no links has nothing pulling it
-    // back, so pure charge repulsion pushes it arbitrarily far from
-    // everything else -- the README documents exactly one such node, an
-    // unconnected `principle`. zoomToFit() then has to zoom out to include
-    // wherever that node drifted to, shrinking the entire connected cluster
-    // to fit alongside it. distanceMax caps how far the repulsive force
-    // still has effect, which bounds that drift; a longer link distance
-    // gives connected nodes breathing room. Neither is a *guarantee* against
-    // overlap, though -- repulsion decays with distance and several
-    // competing links can still pull a node closer than is comfortable, so
-    // makeCollideForce() above is the actual minimum-separation constraint;
-    // these two are about the graph's overall spread and its worst outlier,
-    // not about any one pair of nodes. Harmless for the layered view -- its
-    // nodes are pinned via fx/fy/fz, so no force (any of the three) has any
-    // visible effect there regardless.
-    if (Graph.d3Force) {
-      var charge = Graph.d3Force("charge");
-      if (charge && charge.strength) charge.strength(-120).distanceMax(260);
-      var link = Graph.d3Force("link");
-      if (link && link.distance) link.distance(90);
-      Graph.d3Force("collide", makeCollideForce());
-    }
-
+    // Every node is pinned via fx/fy/fz (see applyLayout()), so d3-force's
+    // charge/link/center forces have nothing left to act on -- no tuning
+    // needed or applied. This mattered when a second, force-directed view
+    // existed (removed; see kg-core/SCHEMA.md's Open items and
+    // docs/decision-log.md), which is also why there is no forceCollide-
+    // style minimum-separation force here any more.
     applyControlMode();
 
     document.getElementById("dim-seg").querySelectorAll("button").forEach(function (b) {

@@ -24,7 +24,7 @@
     var svg = document.getElementById("bands");
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     bandEls = [];
-    if (!showBands || !view.stages || view.layout !== "layered") return;
+    if (!showBands || !view.stages) return;
 
     view.stages.forEach(function (stage, i) {
       var colour = STAGE_COLORS[i % STAGE_COLORS.length];

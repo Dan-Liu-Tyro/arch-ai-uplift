@@ -25,27 +25,10 @@
       row.appendChild(txt);
       host.appendChild(row);
     });
-    // The authority view colours domains by category, not by kind, so the
-    // kind legend would be actively wrong there.
-    var show = view.id === "payments-target-state";
-    document.getElementById("legend-label").style.display = show ? "" : "none";
-    host.style.display = show ? "" : "none";
   }
 
   function buildControls() {
-    var seg = document.getElementById("view-seg");
-    seg.innerHTML = "";
-    DATA.views.forEach(function (v) {
-      var b = document.createElement("button");
-      b.textContent = v.id === "payments-target-state" ? "Payments flow" : "Ref Domains";
-      b.className = v.id === view.id ? "on" : "";
-      b.onclick = function () { switchView(v.id); };
-      seg.appendChild(b);
-    });
-
     document.getElementById("view-desc").textContent = view.description;
-    document.getElementById("groups-label").textContent =
-      view.id === "payments-target-state" ? "Stages (show / hide)" : "Domain groups (show / hide)";
 
     var counts = {};
     view.nodes.forEach(function (n) {
@@ -167,9 +150,16 @@
     html += '<div class="section-label">Inbound (' + adj.in.length + ")</div>" +
       (adj.in.length ? adj.in.map(function (l) { return relHtml(l, "in"); }).join("")
                      : '<div class="payload">none</div>');
-    if (node.authority && view.id === "domain-authority") {
-      html += '<div class="section-label">Authority</div><div class="payload">' +
-        escapeHtml(node.authority) + "</div>";
+    // Explicit non-authority lives on the node itself as plain text, not as
+    // a graph edge -- `not_authoritative_for` briefly existed as a
+    // relationship type and was reversed (kg-core/SCHEMA.md's Open items):
+    // it never had a consumer beyond its own visualization, and the source
+    // domain model is itself the citation, not another node to jump to.
+    if (node.not_authoritative_for && node.not_authoritative_for.length) {
+      html += '<div class="section-label">Not authoritative for</div><div>' +
+        node.not_authoritative_for.map(function (t) {
+          return '<span class="pill">' + escapeHtml(t) + "</span>";
+        }).join("") + "</div>";
     }
     document.getElementById("detail-body").innerHTML = html;
     document.getElementById("detail").classList.add("open");

@@ -15,13 +15,18 @@
   optional for the flow view -- a hover-only tooltip makes you probe 26 nodes
   one at a time to see what you are looking at.
 
-  Two views, deliberately not merged onto one canvas:
-    - payments-target-state: sparse, directed, typed. Fixed swimlane layout
-      (lane = stage, column = flow depth within the stage) so the payment path
-      reads in order. This is the default view.
-    - domain-authority: 39 domains x 296 not_authoritative_for edges, average
-      degree ~15. Force layout. Only legible once you switch groups off, which
-      is why the group toggles exist.
+  One view: payments-target-state, sparse, directed, typed. Fixed swimlane
+  layout (lane = stage, column = flow depth within the stage) so the payment
+  path reads in order.
+
+  There used to be a second view, domain-authority: 39 domains linked by
+  their own not_authoritative_for edges. Removed along with that
+  relationship type -- see kg-core/SCHEMA.md's Open items and
+  docs/decision-log.md. It never had a consumer beyond this page, and this
+  page rendered it as a dense, mostly-non-mutual, single-predicate hairball
+  that read as noise rather than structure. Explicit non-authority is
+  domain-level text now, shown in a domain node's own detail panel, not a
+  graph edge.
 -->
 <!--
   One external dependency: 3d-force-graph, loaded by the loader at the bottom
@@ -210,9 +215,6 @@
     <h1>Knowledge Visualizer</h1>
     <p class="sub" id="view-desc"></p>
 
-    <div class="group-label">View</div>
-    <div class="seg" id="view-seg"></div>
-
     <div class="group-label">Dimensions</div>
     <div class="seg" id="dim-seg">
       <button data-dim="2" class="on">2D plane</button>
@@ -226,7 +228,7 @@
       <button data-scope="tyro-wide">Tyro-wide</button>
     </div>
 
-    <div class="group-label" id="groups-label">Groups</div>
+    <div class="group-label" id="groups-label">Stages (show / hide)</div>
     <div id="group-rows"></div>
 
     <!-- Node colour encodes what a node *is*. Without this the encoding is

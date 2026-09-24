@@ -1,28 +1,30 @@
 #!/usr/bin/env python3
 """Generate payments.json from kg-content, for kg-viz's browser UI to render.
 
-Stdlib only, no deps. Emits *two views* over the same content, because they
-answer different questions and drawing them on one canvas is unreadable:
+Stdlib only, no deps. Emits one view: `payments-target-state`, the overlay
+graph in kg-content/entities/graphs/payments-target-state.json. Sparse,
+directed and typed, with a real predicate and payload on every edge. Nodes
+that are domains are declared as a `domain_ref` and have their
+title/category/scope resolved from domains.json here, so domain facts are
+never duplicated.
 
-- `domain-authority` -- all 39 domains plus any file-per-entity entities,
-  linked by `not_authoritative_for`. A dense negative-assertion graph
-  (average degree ~15), so it is only legible with the category toggles the
-  UI provides.
-- `payments-target-state` -- the overlay graph in
-  kg-content/entities/graphs/payments-target-state.json. Sparse, directed and
-  typed, with a real predicate and payload on every edge. Nodes that are
-  domains are declared as a `domain_ref` and have their title/category/scope
-  resolved from domains.json here, so domain facts are never duplicated.
+There used to be a second view, `domain-authority` -- all 39 domains linked
+by `not_authoritative_for` edges. Removed: that relationship type never had
+a consumer beyond this view, and the view itself was a dense,
+mostly-non-mutual, single-predicate graph that read as noise rather than
+structure. Non-authority is domain-level text only now
+(`authority.not_authoritative_for` in domains.json); see
+`kg-core/SCHEMA.md`'s Open items and `docs/decision-log.md` for the record.
+One side effect worth naming: the removed view was also the only place any
+file-per-entity node (principle/pattern/guardrail/reference-architecture/
+system/decision) appeared in kg-viz at all. Today that is exactly one
+entity (a single `principle`) -- not a meaningful loss in practice, but a
+real gap if that count grows before a replacement view exists.
 
 `domain` entities live in one consolidated file (kg-content/entities/
 domains.json, a scoped exception to kg-core's usual one-file-per-entity
-convention -- see SCHEMA.md's `domain` section) with real, structured
-`not_authoritative_for` relationships already resolved at ingestion time.
-This script no longer infers edges from prose -- that fuzzy-matching pass was
-retired once relationships became first-class data; see
-docs/domain-model-experiment.md for why. Every other entity type is still one
-file per entity, parsed by regex the same way
-components/local-agent/ui/server.py already does, to avoid a YAML dependency.
+convention -- see SCHEMA.md's `domain` section). Every other entity type is
+still one file per entity; nothing here reads them any more (see above).
 
 Run directly to regenerate payments.json from whatever is currently in
 kg-content: `python3 components/kg-viz/generate.py`
@@ -32,7 +34,6 @@ from __future__ import annotations
 
 import datetime
 import json
-import re
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -51,115 +52,9 @@ GRAPHS_DIR = KG_CONTENT_ENTITIES / "graphs"
 # Visualizer graph file" error the same session it shipped (decision 40).
 OUTPUT = Path(__file__).resolve().parent / "payments.json"
 
-FRONTMATTER_KV_RE = re.compile(r"^([a-z_]+):\s*(.+?)\s*$", re.MULTILINE)
-
-# `not_authoritative_for` is a negative, directional assertion, and the source
-# prose that produced each edge was not carried through ingestion (only the
-# resolved target id was). So the per-edge description is derived from the
-# predicate rather than quoted -- see README's "Known gaps".
-AUTHORITY_PREDICATE = "not_authoritative_for"
-AUTHORITY_DESCRIPTION = (
-    "{source} is explicitly NOT authoritative for a concern that {target} owns. "
-    "Directional: it does not imply {target} defers to {source}."
-)
-
-
-def _parse_frontmatter(text: str) -> dict:
-    if not text.startswith("---"):
-        return {}
-    end = text.find("\n---", 3)
-    block = text[3:end] if end != -1 else text[3:]
-    return {m.group(1): m.group(2) for m in FRONTMATTER_KV_RE.finditer(block)}
-
-
-def _extract_section(body: str, name: str) -> str:
-    m = re.search(rf"##\s*{re.escape(name)}\s*\n+(.*?)(?=\n##\s|\Z)", body, re.DOTALL)
-    return m.group(1).strip() if m else ""
-
-
-def _load_file_per_entity_nodes() -> list[dict]:
-    """Every entity type except `domain` -- still one markdown file each."""
-    nodes = []
-    for path in sorted(KG_CONTENT_ENTITIES.glob("*/*.md")):
-        text = path.read_text(encoding="utf-8")
-        fm = _parse_frontmatter(text)
-        if "id" not in fm or "type" not in fm:
-            continue
-        body = text[text.find("\n---", 3) + 4 :] if text.startswith("---") else text
-        purpose = _extract_section(body, "Purpose") or _extract_section(body, "Statement")
-        nodes.append(
-            {
-                "id": fm["id"],
-                "title": fm.get("title", fm["id"]),
-                "type": fm["type"],
-                "kind": fm["type"],
-                "category": fm.get("category"),
-                "scope": fm.get("scope"),
-                "status": fm.get("status", "unknown"),
-                "purpose": purpose,
-                "authority": "",
-            }
-        )
-    return nodes
-
 
 def _load_domains() -> dict:
     return json.loads(DOMAINS_JSON.read_text(encoding="utf-8"))
-
-
-def _domain_authority_view(domains_data: dict) -> dict:
-    nodes = []
-    links = []
-    unresolved = []
-    titles = {d["id"]: d["title"] for d in domains_data["domains"]}
-
-    for d in domains_data["domains"]:
-        owns = "; ".join(d["authority"]["owns"])
-        not_auth = "; ".join(d["authority"]["not_authoritative_for"])
-        nodes.append(
-            {
-                "id": d["id"],
-                "title": d["title"],
-                "type": "domain",
-                "kind": "domain",
-                "category": d["category"],
-                "scope": d["scope"],
-                "scope_note": d.get("scope_note"),
-                "status": d["status"],
-                "purpose": d["purpose"],
-                "authority": f"Owns: {owns}. Not authoritative for: {not_auth}.",
-            }
-        )
-        for rel in d["relationships"]:
-            if "target" in rel:
-                links.append(
-                    {
-                        "source": d["id"],
-                        "target": rel["target"],
-                        "predicate": rel["type"],
-                        "label": "not authoritative for",
-                        "description": AUTHORITY_DESCRIPTION.format(
-                            source=d["title"],
-                            target=titles.get(rel["target"], rel["target"]),
-                        ),
-                    }
-                )
-            else:
-                unresolved.append({"source": d["id"], "phrase": rel["target_unresolved"]})
-
-    nodes.extend(_load_file_per_entity_nodes())
-    return {
-        "id": "domain-authority",
-        "title": "Domain Authority Boundaries",
-        "description": (
-            "Every domain, linked by its own `not_authoritative_for` assertions. "
-            "Dense by nature -- use the category toggles to read it."
-        ),
-        "layout": "force",
-        "nodes": nodes,
-        "links": links,
-        "stats": {"unresolved_references": unresolved},
-    }
 
 
 def _find_back_edges(
@@ -325,6 +220,9 @@ def _payments_target_state_view(domains_data: dict) -> dict | None:
                 "purpose": domain["purpose"] if domain else "",
                 "authority": n.get("responsibility", ""),
                 "responsibility": n.get("responsibility", ""),
+                # Explicit non-authority, node-level text only -- see the
+                # module docstring for why this is no longer a graph edge.
+                "not_authoritative_for": domain["authority"]["not_authoritative_for"] if domain else [],
                 "touchpoints": n.get("touchpoints", []),
                 "stage": n["stage"],
                 "stage_ordinal": stage_ordinal[n["stage"]],
@@ -379,18 +277,22 @@ def _payments_target_state_view(domains_data: dict) -> dict | None:
 
 def generate() -> dict:
     domains_data = _load_domains()
-    views = [_domain_authority_view(domains_data)]
     payments = _payments_target_state_view(domains_data)
-    if payments:
-        views.append(payments)
+    if not payments:
+        # There is exactly one view now (see module docstring for why the
+        # other one was removed) -- with nothing to fall back to, a missing
+        # overlay graph is a hard failure, not a silently empty output.
+        raise RuntimeError(
+            f"{GRAPHS_DIR / 'payments-target-state.json'} not found -- "
+            "there is no other view left to fall back to."
+        )
     graph = {
         "generated_from": "components/kg-content",
         # Surfaced in the UI so "am I looking at current data?" is answerable
         # by reading the screen rather than by trusting a reload.
         "generated_at": datetime.datetime.now().replace(microsecond=0).isoformat(),
-        "categories": domains_data["categories"],
-        "default_view": "payments-target-state" if payments else "domain-authority",
-        "views": views,
+        "default_view": "payments-target-state",
+        "views": [payments],
     }
     OUTPUT.write_text(json.dumps(graph, indent=2), encoding="utf-8")
     return graph

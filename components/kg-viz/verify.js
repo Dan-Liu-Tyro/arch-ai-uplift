@@ -112,7 +112,7 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), select: n => { selected = n; positionIcons(); }, nodeRadius: n => nodeRadius(n), makeCollideForce: () => makeCollideForce(), };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), select: n => { selected = n; positionIcons(); }, renderDetail: n => renderDetail(n), };', ctx);
 
   return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam, controls: () => fakeControls, camera: () => fakeCamera };
 }
@@ -269,7 +269,6 @@ const el = (r, id) => r.els[id] || EMPTY;
   inp.onchange(); await tick();
 
   const flow = data.views.find(v => v.layout === 'layered');
-  const authority = data.views.find(v => v.layout === 'force');
 
   // fill: padding must be small, and a fit must have happened
   const framed = !!r.cam() || !!r.calls['zoomToFit'];
@@ -289,7 +288,7 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (!sample || !sample.textContent) results.push('F: edge label has no text');
   if (sample && /_/.test(sample.textContent)) results.push('F: edge label still shows raw SCREAMING_SNAKE: ' + sample.textContent);
 
-  // particles: on for the flow view, off for the dense authority view
+  // particles: direction as motion on every edge
   const parts = r.calls['__last_linkDirectionalParticles'];
   const flowParts = parts(flow.links[0]);
   const width = r.calls['__last_linkDirectionalParticleWidth'](flow.links[0]);
@@ -307,15 +306,6 @@ const el = (r, id) => r.els[id] || EMPTY;
   console.log('F: flow edge colour =', col, '| alpha =', alpha, '| width =', wid);
   if (!(alpha >= 0.8)) results.push('F: flow edge still faint, alpha ' + alpha);
   if (!(wid >= 1.5)) results.push('F: flow edge still thin, width ' + wid);
-
-  // switching view must NOT silently override the user's edge-label choice,
-  // but must still drop particles on the 296-edge graph
-  r.probe.switchView(authority.id); await tick();
-  const authParts = r.calls['__last_linkDirectionalParticles'](authority.links[0]);
-  console.log('F: after switch to authority -> edge labels still on =', r.probe.edgeLabelsOn(),
-    '| particles =', authParts);
-  if (!r.probe.edgeLabelsOn()) results.push('F: view switch silently turned the edge-label toggle off');
-  if (authParts) results.push('F: particles left on for the 296-edge view');
 }
 
 // G: the computed camera fit actually fills the available region
@@ -540,11 +530,17 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (empties !== 1) results.push('J: hiding a stage left ' + empties + ' empty bands, expected 1');
   delete r.probe.hidden()['design-a-product'];
 
-  // the force view has no stages, so it must draw no bands at all
-  const authority = data.views.find(v => v.layout === 'force');
-  r.probe.switchView(authority.id); await tick();
-  console.log('J: bands on the force view =', r.probe.bands().length);
+  // a view with no stages must draw no bands at all -- there is only one
+  // view now (it has stages), so exercise the guard directly rather than
+  // switching to a removed second view that used to lack them.
+  const v = r.probe.view();
+  const savedStages = v.stages;
+  delete v.stages;
+  r.probe.setBands(true);
+  console.log('J: bands with no stages data =', r.probe.bands().length);
   if (r.probe.bands().length) results.push('J: bands drawn on a view with no stages');
+  v.stages = savedStages;
+  r.probe.setBands(true);
 }
 
 // K: knowledge-visualizer.html's *structure* is generated from src/ by
@@ -671,12 +667,6 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (legendRows !== keys.length) {
     results.push('N: legend shows ' + legendRows + ' rows but ' + keys.length + ' kinds are present');
   }
-
-  // ...and must be hidden on the authority view, which colours by category.
-  r.probe.switchView('domain-authority'); await tick();
-  const hidden = el(r,'kind-legend').style.display === 'none';
-  console.log('N: legend hidden on the authority view =', hidden);
-  if (!hidden) results.push('N: kind legend still shown on the authority view, which colours by category');
 }
 
 // O: actors' 3D mesh is made fully transparent, in every view, never rebuilt
@@ -757,37 +747,25 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (!threeD.leftIsRotate) results.push('P: 3D mode left-drag was not restored to rotate');
 }
 
-// Q: "Reset positions" undoes a dragged node, in both view types
+// Q: "Reset positions" undoes a dragged node
 {
   const r = run('Q', { cdnBlocked: false }); await tick();
   const inp = el(r,'file-input');
   inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
 
-  // Layered view: 3d-force-graph's own drag controls overwrite fx/fy/x/y
-  // directly, and nothing else ever recomputes them -- resetLayout() must
-  // reproduce the same values applyLayout() set on first load, derived
-  // fresh from the node's untouched col/lane/row.
+  // 3d-force-graph's own drag controls overwrite fx/fy/x/y directly, and
+  // nothing else ever recomputes them -- resetLayout() must reproduce the
+  // same values applyLayout() set on first load, derived fresh from the
+  // node's untouched col/lane/row.
   const target = r.probe.visible().nodes[0];
   const original = { fx: target.fx, fy: target.fy, x: target.x, y: target.y };
   target.fx = 9999; target.fy = 9999; target.x = 9999; target.y = 9999;
   r.probe.resetLayout(); await tick();
   const restored = { fx: target.fx, fy: target.fy, x: target.x, y: target.y };
   const layeredOk = JSON.stringify(restored) === JSON.stringify(original);
-  console.log('Q: layered view dragged node restored =', layeredOk);
-  if (!layeredOk) results.push('Q: reset did not restore the layered view\'s computed position: ' + JSON.stringify(restored));
-
-  // Force view: there is no fixed position to snap back to, so a drag's pin
-  // must be released and the simulation reheated, not left wherever dropped.
-  r.probe.switchView('domain-authority'); await tick();
-  const fnodes = r.probe.visible().nodes;
-  fnodes.forEach(n => { n.fx = 42; n.fy = 42; });
-  r.probe.resetLayout(); await tick();
-  const stillPinned = fnodes.some(n => n.fx !== undefined || n.fy !== undefined);
-  const reheated = !!r.calls['d3ReheatSimulation'];
-  console.log('Q: force view drag-pins released =', !stillPinned, '| simulation reheated =', reheated);
-  if (stillPinned) results.push('Q: reset left the force view\'s dragged nodes pinned');
-  if (!reheated) results.push('Q: reset did not reheat the force view\'s simulation');
+  console.log('Q: dragged node restored =', layeredOk);
+  if (!layeredOk) results.push('Q: reset did not restore the computed position: ' + JSON.stringify(restored));
 }
 
 // R: Fit to view and Reset positions level a camera drifted by 3D orbiting
@@ -900,78 +878,33 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (/\bsel\b/.test(classDeselected)) results.push('T: actor icon kept glowing after deselecting');
 }
 
-// U: the force view's charge/link forces are tuned to bound outlier drift
+// W: a domain's explicit non-authority renders as node-level text, not edges
 {
-  const r = run('U', { cdnBlocked: false }); await tick();
+  const r = run('W', { cdnBlocked: false }); await tick();
   const inp = el(r,'file-input');
   inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
 
-  // A node with few or no links has nothing pulling it back toward the
-  // cluster, so unbounded charge repulsion can push it arbitrarily far --
-  // the README documents exactly one such node (an unconnected `principle`)
-  // in the Ref Domains view. distanceMax bounds that drift; this only
-  // checks the configuration was actually applied, not the physics outcome,
-  // which needs a real browser to see.
-  console.log('U: d3Force configured =', r.calls['d3Force'] >= 3,
-    '| charge strength set =', !!r.calls['strength'], '| charge distanceMax set =', !!r.calls['distanceMax'],
-    '| link distance set =', !!r.calls['distance']);
-  if (!(r.calls['d3Force'] >= 3)) results.push('U: charge, link, and collide were not all configured');
-  if (!r.calls['strength']) results.push('U: charge force strength was never set');
-  if (!r.calls['distanceMax']) {
-    results.push('U: charge force distanceMax was never set -- an unconnected node can drift arbitrarily far');
-  }
-  if (!r.calls['distance']) results.push('U: link force distance was never set');
-}
-
-// V: a custom collision force keeps nodes at least ~2x their radius apart
-{
-  const r = run('V', { cdnBlocked: false }); await tick();
-  const inp = el(r,'file-input');
-  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
-  inp.onchange(); await tick();
-
-  // Matches the library's own rendered radius (Math.cbrt(nodeVal) *
-  // nodeRelSize), read out of the vendored bundle's mesh construction --
-  // a domain (nodeVal 5) must render, and so collide, larger than any
-  // other kind (nodeVal 3).
-  const rDomain = r.probe.nodeRadius({ kind: 'domain' });
-  const rOther = r.probe.nodeRadius({ kind: 'actor' });
-  console.log('V: domain radius =', rDomain.toFixed(2), '| other radius =', rOther.toFixed(2));
-  if (!(rDomain > rOther)) results.push('V: a domain node\'s collision radius is not larger than a smaller node\'s');
-
-  // Two overlapping, unpinned nodes: one tick should push them apart.
-  const a = { x: 0, y: 0, z: 0, kind: 'domain' };
-  const b = { x: 1, y: 0, z: 0, kind: 'domain' };
-  const force = r.probe.makeCollideForce();
-  force.initialize([a, b]);
-  force();
-  console.log('V: overlapping nodes pushed apart -> a.vx =', a.vx, '| b.vx =', b.vx);
-  if (!(a.vx < 0 && b.vx > 0)) {
-    results.push('V: collision force did not separate two overlapping nodes: a.vx=' + a.vx + ' b.vx=' + b.vx);
-  }
-
-  // A pinned node (layered view) must be left alone -- every force is a
-  // no-op for it regardless, once the engine integrates positions, and this
-  // one should not even try.
-  const c = { x: 0, y: 0, z: 0, kind: 'domain', fx: 0 };
-  const d = { x: 1, y: 0, z: 0, kind: 'domain' };
-  const force2 = r.probe.makeCollideForce();
-  force2.initialize([c, d]);
-  force2();
-  console.log('V: pinned node left alone -> c.vx =', c.vx);
-  if (c.vx !== undefined) results.push('V: collision force nudged a pinned node: c.vx=' + c.vx);
-
-  // A floor, not an attractor: two nodes already comfortably apart must be
-  // left alone rather than pulled together or pushed further.
-  const e = { x: 0, y: 0, z: 0, kind: 'domain' };
-  const f = { x: 1000, y: 0, z: 0, kind: 'domain' };
-  const force3 = r.probe.makeCollideForce();
-  force3.initialize([e, f]);
-  force3();
-  console.log('V: distant nodes left alone -> e.vx =', e.vx, '| f.vx =', f.vx);
-  if (e.vx !== undefined || f.vx !== undefined) {
-    results.push('V: collision force touched two nodes that are already far apart');
+  // not_authoritative_for briefly existed as a `domain -> domain` relationship
+  // type and was reversed (kg-core/SCHEMA.md's Open items): the source of
+  // truth is domain-level text only now, surfaced in that domain's own
+  // detail panel rather than as a graph edge to jump to.
+  const domainNode = r.probe.visible().nodes.find(
+    n => n.kind === 'domain' && n.not_authoritative_for && n.not_authoritative_for.length);
+  if (!domainNode) {
+    results.push('W: no domain node in the flow view carries not_authoritative_for text to test against');
+  } else {
+    r.probe.renderDetail(domainNode);
+    const html = el(r,'detail-body')._html;
+    const hasSection = /Not authoritative for/.test(html);
+    const hasFirstTarget = html.includes(domainNode.not_authoritative_for[0]);
+    console.log('W: detail panel shows a "Not authoritative for" section =', hasSection,
+      '| includes its first target =', hasFirstTarget);
+    if (!hasSection) results.push('W: domain detail panel has no "Not authoritative for" section');
+    if (!hasFirstTarget) {
+      results.push('W: "Not authoritative for" section is missing an actual target: ' +
+        domainNode.not_authoritative_for[0]);
+    }
   }
 }
 

@@ -6,24 +6,6 @@
     requestAnimationFrame(labelLoop);
   }
 
-  function switchView(id) {
-    view = DATA.views.find(function (v) { return v.id === id; });
-    selected = null;
-    // Deliberately NOT reset here: the edge-label choice is the user's and
-    // survives a view switch. The authority view's 296 identical predicates
-    // are genuinely noisy, but silently overriding a toggle someone just set
-    // is worse than letting them turn it off.
-    document.getElementById("detail").classList.remove("open");
-    buildAdjacency();
-    applyLayout();
-    Graph.numDimensions(dims).graphData(visibleData());
-    applyControlMode();
-    buildControls();
-    renderStats();
-    repaint();
-    setTimeout(frameGraph, 350);
-  }
-
   // Framing is done from a real measurement rather than a blind timeout,
   // because "camera pointed at NaN" and "nothing was drawn" look identical.
   // zoomToFit() proved unreliable for the pinned layered view -- it left the
@@ -123,29 +105,21 @@
     var cam = Graph.camera && Graph.camera();
     if (cam && cam.up && cam.up.set) cam.up.set(0, 1, 0);
 
-    // The layered view is a pinned plane, so its fit is computed exactly.
-    // The force view keeps moving, so zoomToFit is the right tool there.
-    if (view.layout === "layered") {
-      if (fitLayered()) return;
-    }
+    // The view is a pinned plane, so its fit is computed exactly rather
+    // than via zoomToFit() -- kept below only as a defensive fallback for
+    // whenever fitLayered() has nothing finite to fit (see its own guard).
+    if (fitLayered()) return;
     Graph.zoomToFit(300, 30);
   }
 
   // "Reset positions" undoes node drags. enableNodeDrag defaults to true in
   // the vendored library and nothing here turns it off, so a dragged node's
-  // fx/fy/x/y stay wherever it was dropped -- permanently, for the layered
-  // view, since nothing else ever recomputes them. applyLayout() is already
-  // the one place that derives a layered node's fx/fy/x/y from its
-  // col/lane/row, so re-running it snaps that view back exactly. The force
-  // view has no fixed "original" position to snap to -- a drag there just
-  // pins the node in place -- so clearing that pin and reheating the
-  // simulation is the closest equivalent: let it settle again rather than
-  // stay wherever it was dropped.
+  // fx/fy/x/y stay wherever it was dropped -- permanently, since nothing
+  // else ever recomputes them. applyLayout() is already the one place that
+  // derives a node's fx/fy/x/y from its col/lane/row, so re-running it snaps
+  // it back exactly.
   function resetLayout() {
     applyLayout();
     Graph.graphData(visibleData());
-    if (view.layout !== "layered" && Graph.d3ReheatSimulation) {
-      Graph.d3ReheatSimulation();
-    }
     setTimeout(frameGraph, 350);
   }

@@ -1,31 +1,27 @@
+  // There used to be a second view (`domain-authority`) that grouped and
+  // coloured by category instead of stage, since it had no stages of its
+  // own -- removed along with `not_authoritative_for` as a relationship
+  // type (see kg-core/SCHEMA.md's Open items). Only one view left, so these
+  // no longer branch on which one it is.
   function groupKeyOf(node) {
-    return view.id === "payments-target-state" ? node.stage : (node.category || "_uncategorized");
+    return node.stage;
   }
 
   function groupsForView() {
-    if (view.id === "payments-target-state") {
-      return view.stages.map(function (s, i) {
-        return { key: s.id, label: s.ordinal + ". " + s.title, color: STAGE_COLORS[i % STAGE_COLORS.length] };
-      });
-    }
-    var cats = DATA.categories.map(function (c) {
-      return { key: c.id, label: c.title, color: CATEGORY_COLORS[c.id] || CATEGORY_COLORS._uncategorized };
+    return view.stages.map(function (s, i) {
+      return { key: s.id, label: s.ordinal + ". " + s.title, color: STAGE_COLORS[i % STAGE_COLORS.length] };
     });
-    cats.push({ key: "_uncategorized", label: "Uncategorized (e.g. principle)", color: CATEGORY_COLORS._uncategorized });
-    return cats;
   }
 
-  // In the flow view node colour means *what a node is*, and nothing else.
-  // It used to mean two things at once: a domain took its stage's colour
-  // while a non-domain took its kind's, so green meant "stage-3 domain" and
-  // gold meant "an actor, any stage" -- a reader could not tell whether a
-  // colour was telling them what something is or where it sits. Stage is
-  // already carried twice over by the bands (tint plus caption), so it gives
-  // that channel up here and colour becomes a single, honest encoding.
+  // Node colour means *what a node is*, and nothing else. It used to mean
+  // two things at once: a domain took its stage's colour while a non-domain
+  // took its kind's, so green meant "stage-3 domain" and gold meant "an
+  // actor, any stage" -- a reader could not tell whether a colour was
+  // telling them what something is or where it sits. Stage is already
+  // carried twice over by the bands (tint plus caption), so colour is a
+  // single, honest encoding of kind instead.
   function colorFor(node) {
-    if (view.id === "payments-target-state") return presentationFor(node).color;
-    if (node.type !== "domain") return presentationFor(node).color;
-    return CATEGORY_COLORS[node.category] || CATEGORY_COLORS._uncategorized;
+    return presentationFor(node).color;
   }
 
   function hiddenSet() {
@@ -84,21 +80,16 @@
   }
 
   function applyLayout() {
-    var fixed = view.layout === "layered";
     view.nodes.forEach(function (n) {
-      if (fixed) {
-        n.fx = n.col * COL_SPACING;
-        n.fy = (n.lane - 1) * LANE_HEIGHT + n.row * ROW_SPACING - LANE_HEIGHT;
-        n.fz = 0;
-        // Seed x/y/z as well, not just the fx/fy/fz pins. zoomToFit() reads
-        // x/y/z to compute bounds, and a node whose x is still undefined
-        // yields NaN bounds and a camera that points nowhere -- which looks
-        // exactly like an empty canvas. The force engine would normally copy
-        // fx->x on init, but seeding directly removes the dependency on that
-        // having happened before the first fit.
-        n.x = n.fx; n.y = n.fy; n.z = 0;
-      } else {
-        delete n.fx; delete n.fy; delete n.fz;
-      }
+      n.fx = n.col * COL_SPACING;
+      n.fy = (n.lane - 1) * LANE_HEIGHT + n.row * ROW_SPACING - LANE_HEIGHT;
+      n.fz = 0;
+      // Seed x/y/z as well, not just the fx/fy/fz pins. zoomToFit() reads
+      // x/y/z to compute bounds, and a node whose x is still undefined
+      // yields NaN bounds and a camera that points nowhere -- which looks
+      // exactly like an empty canvas. The force engine would normally copy
+      // fx->x on init, but seeding directly removes the dependency on that
+      // having happened before the first fit.
+      n.x = n.fx; n.y = n.fy; n.z = 0;
     });
   }
