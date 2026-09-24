@@ -272,3 +272,19 @@ principle's `status` and must not be silently absorbed as if it agreed.
   instead of systems. Would be contradicted by splitting a deliverable into
   parallel artefacts because the request naming two things was itself treated as
   the reason to produce two.
+- 2026-09-24 · Rejected adding content that served an imagined reader rather
+  than the actual audience, then asked what the industry position actually was ·
+  this conversation · stated · unpromoted — shown a review item asking the deck
+  to define "AI-DLC", replied "What do you mean by item 6, why do I need to
+  define that?" The term had come from the CTO in the original ask, so the deck
+  would have been defining a term back to the person who commissioned the work.
+  Two things worth noting. First, the challenge was to the *reviewer's frame*
+  rather than the wording — a checklist question like "is every term defined?"
+  is audience-independent by construction, which is why it misfires when the
+  audience supplied the vocabulary. Second, the follow-up was "what's AI-DLC on
+  the industry" — so the objection was not to knowing the external position but
+  to *stating it in the artefact* unnecessarily; the research then produced a
+  stronger framing than the original item asked for. Same shape as
+  `verify-state-claims` but pointed outward at industry context rather than at
+  system state. Would be contradicted by asking for defensive definitions of
+  shared vocabulary added for a hypothetical unfamiliar reader.
