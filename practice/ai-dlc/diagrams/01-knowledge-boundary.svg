@@ -52,7 +52,7 @@
 
   <!-- ===== inside the boundary ===== -->
   <text class="d-label" x="360" y="48">Organizational knowledge</text>
-  <text class="d-sub"   x="360" y="67">Everything inside. Our focus, and our moat.</text>
+  <text class="d-sub"   x="360" y="67">Everything inside. Our focus, our moat.</text>
 
   <rect x="360" y="86" width="260" height="196" rx="7"
         fill="var(--layer-knowledge)" fill-opacity="0.12"

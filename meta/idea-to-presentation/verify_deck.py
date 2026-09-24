@@ -24,6 +24,75 @@ def check(results, name, ok, detail=""):
     results.append((ok, name, detail))
 
 
+# Average glyph advance as a fraction of font size, for mixed-case English in
+# a sans-serif face. Bold runs marginally wider.
+GLYPH_ADVANCE = 0.52
+BOLD_EXTRA = 0.03
+CLASS_SIZES = {"d-label": 15, "d-sub": 12.5, "d-small": 11.5, "d-onfill": 15}
+SVG_NS = "{http://www.w3.org/2000/svg}"
+
+
+def _inherited(element, parents, attribute):
+    """Resolve an inherited SVG presentation attribute up the tree."""
+    node = element
+    while node is not None:
+        value = node.get(attribute)
+        if value:
+            return value
+        node = parents.get(id(node))
+    return None
+
+
+def text_overflow(diagrams):
+    """Estimate whether any <text> spills outside its diagram's viewBox.
+
+    Returns (clear_overflows, at_edge) as lists of human-readable strings.
+    """
+    import xml.etree.ElementTree as ET
+
+    clear, edge = [], []
+    for path in sorted(diagrams.glob("*.svg")):
+        root = ET.parse(path).getroot()
+        view_box = root.get("viewBox")
+        if not view_box:
+            clear.append(f"{path.name}: no viewBox")
+            continue
+        width = float(view_box.split()[2])
+        parents = {id(child): parent for parent in root.iter() for child in parent}
+
+        for element in root.iter(SVG_NS + "text"):
+            text = "".join(element.itertext()).strip()
+            if not text:
+                continue
+            classes = _inherited(element, parents, "class") or ""
+            size = 11.5
+            for name in classes.split():
+                size = CLASS_SIZES.get(name, size)
+            style = element.get("style") or ""
+            explicit = re.search(r"font-size:\s*([\d.]+)", style)
+            if explicit:
+                size = float(explicit.group(1))
+            bold = "font-weight:6" in style or "d-label" in classes
+            estimate = len(text) * size * (GLYPH_ADVANCE + (BOLD_EXTRA if bold else 0))
+
+            x = float(element.get("x", 0))
+            anchor = _inherited(element, parents, "text-anchor") or "start"
+            if anchor == "middle":
+                left = x - estimate / 2
+            elif anchor == "end":
+                left = x - estimate
+            else:
+                left = x
+            right = left + estimate
+
+            where = f"{path.name}: {text[:40]!r}"
+            if right > width or left < 0:
+                clear.append(where)
+            elif right > width - 6:
+                edge.append(where)
+    return clear, edge
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("deck", type=Path)
@@ -117,6 +186,24 @@ def main(argv=None):
     check(results, "no '--' inside an SVG comment", not offenders,
           str(sorted(set(offenders))))
 
+    # 9. Estimated text overflow. The only class of *visual* fault that is
+    #    mechanically detectable: a label wider than its viewBox is clipped
+    #    or spills, and neither shows up as an error.
+    #
+    #    This is an ESTIMATE, not a measurement -- there is no font metric
+    #    available here, so it assumes an average glyph advance. It
+    #    therefore only fails on clear overflow past the viewBox and merely
+    #    notes anything landing within a hair of the edge. Treat a note as
+    #    "go look at that one", not as a defect.
+    #
+    #    text-anchor, class and fill are INHERITED, so an ancestor <g>'s
+    #    value applies. Reading only the element's own attribute produced
+    #    four false positives the first time this was written, which is why
+    #    the walk up the tree exists.
+    overflow, at_edge = text_overflow(diagrams)
+    check(results, "no estimated text overflow in any diagram", not overflow,
+          "; ".join(overflow))
+
     failed = 0
     for ok, name, detail in results:
         if ok:
@@ -124,6 +211,12 @@ def main(argv=None):
         else:
             failed += 1
             print(f"  FAIL  {name}" + (f" -- {detail}" if detail else ""))
+
+    if at_edge:
+        print("\n  note  text landing within a hair of the viewBox edge,")
+        print("        worth an eyeball but not a failure:")
+        for item in at_edge:
+            print(f"          {item}")
 
     print(f"\n{len(results) - failed}/{len(results)} checks passed")
     return 1 if failed else 0
