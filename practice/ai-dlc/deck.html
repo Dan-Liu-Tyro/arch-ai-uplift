@@ -338,90 +338,106 @@
     <header><span class="eyebrow">1</span><h2>Organizational Knowledge versus World Knowledge</h2></header>
     <div class="content">
       <figure class="diagram"><!--
-  Organizational versus world knowledge. The organizational boundary is the
-  one structural line on the slide, so it is drawn as an actual boundary
-  rather than implied by two boxes sitting apart. The bridge crossing it is
-  the claim: world knowledge cannot be consumed directly, and once it has
-  crossed it IS organizational knowledge, which is why the arrow ends inside
-  the right hand region rather than beside it.
+  Organizational versus world knowledge.
 
-  The left stack narrows downward to carry "broad to specific" without a
-  second axis or any labels about breadth.
+  ORGANIZATIONAL KNOWLEDGE IS ON THE LEFT, deliberately: it is the subject of
+  the deck, and the left position is the primary one. The consequence is that
+  the bridge reads right to left, which is unusual but correct here, because
+  the arrow's direction is itself the claim.
+
+  THE WORLD BOXES ARE ALL THE SAME SIZE. An earlier version narrowed them to
+  encode "broad to specific" in their width, which put two encodings on one
+  axis for no gain. The ordering top to bottom plus the subheading carry it.
+
+  ARROW TERMINI ARE EXACT. The single bridge arrow starts on the left edge of
+  the bottom world box (x=376) and ends on the right edge of the
+  organizational container (x=256). It is drawn BEFORE the gate so the gate
+  occludes its middle, which is why there is one arrow rather than two short
+  ones: one terminus at each end, nothing landing inside a shape.
+
+  Geometry:
+    boundary          x = 318
+    organizational    x = 14..256   (container 242 wide, inner boxes 28..242)
+    world             x = 376..620  (four identical boxes, 244 x 40)
+    bridge            y = 250, from x 376 to x 256
 -->
 <svg viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg" role="img"
-     aria-label="World knowledge on the left, narrowing from general to
-                 industry and domain standards. The organizational boundary
-                 runs down the middle. A translation bridge crosses it into
-                 organizational knowledge on the right, which is labelled as
-                 the focus and the moat.">
+     aria-label="Organizational knowledge on the left, inside the boundary:
+                 how our services are designed, our API contracts and data
+                 models, our principles and decision records, our interpreted
+                 compliance rulings. World knowledge on the right, outside it,
+                 from the entire internet down to industry and domain
+                 standards. A single arrow crosses the boundary right to left
+                 through a gate marked translate, ending inside the
+                 organizational side.">
 
-  <!-- the boundary itself -->
-  <path d="M 322 26 L 322 394" stroke="var(--ink-muted)" stroke-width="2"
+  <!-- ===== the boundary, drawn first so the gate can sit on it ===== -->
+  <path d="M 318 26 L 318 376" stroke="var(--ink-muted)" stroke-width="2"
         stroke-dasharray="7 5" fill="none"/>
-  <text class="d-small" x="322" y="18" text-anchor="middle">the organizational boundary</text>
+  <text class="d-small" x="318" y="18" text-anchor="middle">the organizational boundary</text>
 
-  <!-- ===== outside the boundary ===== -->
-  <text class="d-label" x="20" y="48">World knowledge</text>
-  <text class="d-sub"   x="20" y="67">Everything outside. Broad to specific.</text>
+  <!-- ===== inside: organizational knowledge, on the left ===== -->
+  <text class="d-label" x="14" y="48">Organizational knowledge</text>
+  <text class="d-sub"   x="14" y="67">Everything inside. Our focus, our moat.</text>
 
-  <g stroke="var(--ink-muted)" stroke-width="1.5">
-    <rect x="20"  y="86"  width="276" height="40" rx="5" fill="var(--surface-sunk)"/>
-    <rect x="38"  y="134" width="240" height="40" rx="5" fill="var(--surface-sunk)"/>
-    <rect x="56"  y="182" width="204" height="40" rx="5" fill="var(--surface-sunk)"/>
-    <rect x="74"  y="230" width="168" height="40" rx="5"
-          fill="var(--layer-knowledge)" fill-opacity="0.16"/>
-  </g>
-  <g class="d-small" fill="var(--ink)">
-    <text x="158" y="111" text-anchor="middle">general knowledge</text>
-    <text x="158" y="159" text-anchor="middle">technology knowledge</text>
-    <text x="158" y="207" text-anchor="middle">engineering practice</text>
-    <text x="158" y="248" text-anchor="middle">industry and domain</text>
-    <text x="158" y="262" text-anchor="middle">standards</text>
-  </g>
-  <text class="d-small" x="20" y="300" fill="var(--ink-secondary)">card scheme rules,</text>
-  <text class="d-small" x="20" y="316" fill="var(--ink-secondary)">regulation, domain models</text>
-
-  <!-- ===== the bridge ===== -->
-  <path class="d-flow" d="M 246 250 L 300 250 L 300 342 L 380 342"
-        marker-end="url(#arrow-accent)" stroke-width="2.5"/>
-  <rect x="272" y="288" width="56" height="26" rx="13" fill="var(--surface)"
-        stroke="var(--accent)" stroke-width="2"/>
-  <text x="300" y="305" text-anchor="middle" class="d-small"
-        fill="var(--accent)" style="font-weight:600">translate</text>
-
-  <!-- ===== inside the boundary ===== -->
-  <text class="d-label" x="360" y="48">Organizational knowledge</text>
-  <text class="d-sub"   x="360" y="67">Everything inside. Our focus, our moat.</text>
-
-  <rect x="360" y="86" width="260" height="196" rx="7"
+  <rect x="14" y="86" width="242" height="196" rx="7"
         fill="var(--layer-knowledge)" fill-opacity="0.12"
         stroke="var(--layer-knowledge)" stroke-width="2"/>
   <g fill="var(--surface)" stroke="var(--layer-knowledge)" stroke-width="1.5">
-    <rect x="378" y="108" width="224" height="34" rx="5"/>
-    <rect x="378" y="150" width="224" height="34" rx="5"/>
-    <rect x="378" y="192" width="224" height="34" rx="5"/>
-    <rect x="378" y="234" width="224" height="34" rx="5"/>
+    <rect x="28" y="108" width="214" height="34" rx="5"/>
+    <rect x="28" y="150" width="214" height="34" rx="5"/>
+    <rect x="28" y="192" width="214" height="34" rx="5"/>
+    <rect x="28" y="234" width="214" height="34" rx="5"/>
   </g>
   <g class="d-small" fill="var(--ink)" text-anchor="middle">
-    <text x="490" y="129">how we build, run and decide</text>
-    <text x="490" y="171">our systems, as they actually are</text>
-    <text x="490" y="213">our rules, and why they exist</text>
-    <text x="490" y="255">our interpretation of the outside</text>
+    <text x="135" y="129">how our services are designed</text>
+    <text x="135" y="171">our API contracts and data models</text>
+    <text x="135" y="213">our principles and decision records</text>
+    <text x="135" y="255">our interpreted compliance rulings</text>
   </g>
 
-  <rect x="360" y="324" width="260" height="36" rx="5"
+  <rect x="14" y="300" width="242" height="36" rx="5"
         fill="var(--accent)" fill-opacity="0.10"
         stroke="var(--accent)" stroke-width="1.5"/>
-  <text x="490" y="347" text-anchor="middle" class="d-small"
+  <text x="135" y="323" text-anchor="middle" class="d-small"
         fill="var(--accent)" style="font-weight:600">once translated, it is ours</text>
 
-  <text class="d-small" x="20" y="394" fill="var(--ink-secondary)">
-    Nothing on the left can be consumed by an agent until it has crossed.
+  <!-- ===== outside: world knowledge, on the right, identical boxes ===== -->
+  <text class="d-label" x="376" y="48">World knowledge</text>
+  <text class="d-sub"   x="376" y="67">Everything outside. Broad to specific.</text>
+
+  <g stroke="var(--ink-muted)" stroke-width="1.5" fill="var(--surface-sunk)">
+    <rect x="376" y="86"  width="244" height="40" rx="5"/>
+    <rect x="376" y="134" width="244" height="40" rx="5"/>
+    <rect x="376" y="182" width="244" height="40" rx="5"/>
+  </g>
+  <rect x="376" y="230" width="244" height="40" rx="5"
+        fill="var(--layer-knowledge)" fill-opacity="0.16"
+        stroke="var(--layer-knowledge)" stroke-width="1.5"/>
+  <g class="d-small" fill="var(--ink)" text-anchor="middle">
+    <text x="498" y="111">the entire internet</text>
+    <text x="498" y="159">the model's baked-in wisdom</text>
+    <text x="498" y="207">software engineering knowledge</text>
+    <text x="498" y="255">industry and domain standards</text>
+  </g>
+  <text class="d-small" x="376" y="290" fill="var(--ink-secondary)">card scheme rules, regulation,</text>
+  <text class="d-small" x="376" y="305" fill="var(--ink-secondary)">reference domain models</text>
+
+  <!-- ===== the bridge: one arrow, both termini exactly on an edge ===== -->
+  <path d="M 376 250 L 256 250" class="d-flow" stroke-width="2.5"
+        marker-end="url(#arrow-accent)"/>
+  <rect x="286" y="237" width="64" height="26" rx="13" fill="var(--surface)"
+        stroke="var(--accent)" stroke-width="2"/>
+  <text x="318" y="254" text-anchor="middle" class="d-small"
+        fill="var(--accent)" style="font-weight:600">translate</text>
+
+  <text class="d-small" x="14" y="396" fill="var(--ink-secondary)">
+    Nothing on the right can be consumed by an agent until it has crossed.
   </text>
 </svg>
 </figure>
       <ul class="points">
-<li>World knowledge is everything <strong>outside</strong> the organization; organizational knowledge is everything inside</li>
+<li><strong>Organizational knowledge</strong> is everything inside the boundary; world knowledge is everything outside it</li>
 <li>Organizational knowledge is <strong>our focus and our moat</strong></li>
 <li>World knowledge <strong>cannot be consumed directly</strong> — it has to cross a bridge</li>
 <li>Once translated, it *becomes* organizational knowledge</li>

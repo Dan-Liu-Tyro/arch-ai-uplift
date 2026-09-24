@@ -30,7 +30,7 @@ Section headings are the slide titles.
 <!-- slide
 diagram: 01-knowledge-boundary.svg
 layout: split
-point: World knowledge is everything **outside** the organization; organizational knowledge is everything inside
+point: **Organizational knowledge** is everything inside the boundary; world knowledge is everything outside it
 point: Organizational knowledge is **our focus and our moat**
 point: World knowledge **cannot be consumed directly** — it has to cross a bridge
 point: Once translated, it *becomes* organizational knowledge
