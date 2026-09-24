@@ -1,0 +1,88 @@
+<!--
+  Tactical state. SECOND OF THE THREE BAND FAMILY (06, 07, 08). Geometry is
+  identical to 06 by design; see that file's header. What changed from 06:
+
+    * humans move from the middle to the TOP band
+    * the middle band becomes one agent per stream, in parallel
+    * paths run straight up in parallel instead of converging on one point,
+      each through its own review gate
+    * the knowledge layer emphasises unstructured and semi structured
+
+  Only five agent chips are drawn, not eight. Section 3 already carries the
+  full stream list, and eight chips at this width would be unreadable.
+-->
+<svg viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Tactical state: humans on top holding review gates, a row of
+                 per-stream AI agents in the middle working in parallel, and a
+                 knowledge layer beneath weighted to unstructured and semi
+                 structured material.">
+
+  <!-- band 1: humans, now on top -->
+  <rect x="30" y="18" width="580" height="88" rx="7"
+        fill="var(--layer-human)" fill-opacity="0.12"
+        stroke="var(--layer-human)" stroke-width="2"/>
+  <text class="d-label" x="46" y="44">Humans</text>
+  <text class="d-sub"   x="46" y="64">A check or review gate on every output</text>
+  <text class="d-small" x="46" y="86">Still in the loop, no longer the courier</text>
+
+  <!-- band 2: agents, one per stream -->
+  <rect x="30" y="126" width="580" height="98" rx="7"
+        fill="var(--layer-agent)" fill-opacity="0.10"
+        stroke="var(--layer-agent)" stroke-width="2"/>
+  <text class="d-label" x="46" y="150">AI agents, one per stream</text>
+  <g fill="var(--surface)" stroke="var(--layer-agent)" stroke-width="1.5">
+    <rect x="46"  y="172" width="100" height="34" rx="5"/>
+    <rect x="156" y="172" width="100" height="34" rx="5"/>
+    <rect x="266" y="172" width="100" height="34" rx="5"/>
+    <rect x="376" y="172" width="100" height="34" rx="5"/>
+    <rect x="486" y="172" width="100" height="34" rx="5"/>
+  </g>
+  <g class="d-small" text-anchor="middle" fill="var(--ink)">
+    <text x="96"  y="193">Product</text>
+    <text x="206" y="193">Architecture</text>
+    <text x="316" y="193">Engineering</text>
+    <text x="426" y="193">Quality</text>
+    <text x="536" y="193">and the rest</text>
+  </g>
+
+  <!-- band 3: knowledge, weighted low on the tier ramp -->
+  <rect x="30" y="242" width="580" height="120" rx="7"
+        fill="var(--layer-knowledge)" fill-opacity="0.12"
+        stroke="var(--layer-knowledge)" stroke-width="2"/>
+  <text class="d-label" x="46" y="268">Knowledge layer</text>
+  <text class="d-sub"   x="46" y="288">Mostly unstructured and semi structured</text>
+  <rect x="46"  y="306" width="170" height="38" rx="5" fill="var(--tier-1)"
+        stroke="var(--tier-3)" stroke-width="1.5"/>
+  <rect x="226" y="306" width="170" height="38" rx="5" fill="var(--tier-2)"
+        stroke="var(--tier-3)" stroke-width="1.5"/>
+  <rect x="406" y="306" width="188" height="38" rx="5" fill="var(--tier-4)"
+        fill-opacity="0.18" stroke="var(--tier-4)" stroke-width="1.5"
+        stroke-dasharray="4 3"/>
+  <g class="d-small" text-anchor="middle" fill="var(--ink)">
+    <text x="131" y="330">unstructured</text>
+    <text x="311" y="330">semi structured</text>
+    <text x="500" y="330">structured, thin so far</text>
+  </g>
+
+  <!-- THE CHANGE FROM 06: parallel paths, each with its own gate. -->
+  <g class="d-flow" stroke-linecap="round">
+    <path d="M 96  306 L 96  212" marker-end="url(#arrow)"/>
+    <path d="M 206 306 L 206 212" marker-end="url(#arrow)"/>
+    <path d="M 316 306 L 316 212" marker-end="url(#arrow)"/>
+    <path d="M 426 306 L 426 212" marker-end="url(#arrow)"/>
+    <path d="M 536 306 L 536 212" marker-end="url(#arrow)"/>
+    <path d="M 96  166 L 96  112" marker-end="url(#arrow-accent)"/>
+    <path d="M 206 166 L 206 112" marker-end="url(#arrow-accent)"/>
+    <path d="M 316 166 L 316 112" marker-end="url(#arrow-accent)"/>
+    <path d="M 426 166 L 426 112" marker-end="url(#arrow-accent)"/>
+    <path d="M 536 166 L 536 112" marker-end="url(#arrow-accent)"/>
+  </g>
+  <g fill="var(--surface)" stroke="var(--layer-human)" stroke-width="1.5">
+    <rect x="89"  y="132" width="14" height="14" rx="2"/>
+    <rect x="199" y="132" width="14" height="14" rx="2"/>
+    <rect x="309" y="132" width="14" height="14" rx="2"/>
+    <rect x="419" y="132" width="14" height="14" rx="2"/>
+    <rect x="529" y="132" width="14" height="14" rx="2"/>
+  </g>
+  <text class="d-small" x="558" y="144" fill="var(--layer-human)">gates</text>
+</svg>

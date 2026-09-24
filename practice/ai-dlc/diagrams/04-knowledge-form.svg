@@ -1,0 +1,76 @@
+<!--
+  The form of knowledge: the tacit to explicit gate, then the four explicit
+  tiers as a rising staircase.
+
+  Two separate claims share one picture on purpose. The tacit gate is a
+  BINARY (an agent can reach it or it cannot), so it is drawn as a gate.
+  The four tiers are an ORDINAL scale, so they are drawn as monotonically
+  rising bars using the four step single hue ramp. Using one visual idiom
+  for both would flatten the difference between a threshold and a slope.
+
+  Bar colours are the tier ramp and must match diagram 05's markers, so a
+  tier keeps one colour wherever it appears in the deck.
+-->
+<svg viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Tacit knowledge sits behind a gate marked make explicit;
+                 until it passes, an agent cannot reach it. Past the gate,
+                 four rising bars show the explicit tiers from noisy
+                 unstructured through deliberate unstructured and semi
+                 structured to structured.">
+
+  <!-- ===== the tacit gate ===== -->
+  <rect x="24" y="26" width="196" height="72" rx="7" fill="var(--surface)"
+        stroke="var(--ink-muted)" stroke-width="2" stroke-dasharray="6 4"/>
+  <text class="d-label" x="122" y="54" text-anchor="middle">Tacit</text>
+  <text class="d-small" x="122" y="74" text-anchor="middle">in people's heads</text>
+  <text class="d-small" x="122" y="89" text-anchor="middle">unreachable by an agent</text>
+
+  <path class="d-flow" d="M 220 62 L 286 62" marker-end="url(#arrow-accent)"
+        stroke-width="2.5"/>
+  <rect x="290" y="34" width="118" height="56" rx="7" fill="var(--accent)"
+        fill-opacity="0.12" stroke="var(--accent)" stroke-width="2"/>
+  <text class="d-small" x="349" y="58" text-anchor="middle" fill="var(--accent)"
+        style="font-weight:600;font-size:13px">make explicit</text>
+  <text class="d-small" x="349" y="76" text-anchor="middle" fill="var(--accent)">the step most skipped</text>
+
+  <path class="d-flow" d="M 408 62 L 474 62" marker-end="url(#arrow)"
+        stroke-width="2.5"/>
+  <text class="d-label" x="482" y="58">Explicit</text>
+  <text class="d-small" x="482" y="78">an artifact exists</text>
+
+  <!-- ===== the four explicit tiers ===== -->
+  <path class="d-axis" d="M 60 356 L 600 356"/>
+
+  <rect x="80"  y="301" width="110" height="55"  rx="4" fill="var(--tier-1)"
+        stroke="var(--tier-3)" stroke-width="1.5"/>
+  <rect x="210" y="256" width="110" height="100" rx="4" fill="var(--tier-2)"
+        stroke="var(--tier-3)" stroke-width="1.5"/>
+  <rect x="340" y="211" width="110" height="145" rx="4" fill="var(--tier-3)"
+        stroke="var(--tier-4)" stroke-width="1.5"/>
+  <rect x="470" y="161" width="110" height="195" rx="4" fill="var(--tier-4)"
+        stroke="var(--tier-4)" stroke-width="1.5"/>
+
+  <g text-anchor="middle" class="d-small" fill="var(--ink)" style="font-weight:600">
+    <text x="135" y="278">noisy</text>
+    <text x="135" y="292">unstructured</text>
+    <text x="265" y="233">deliberate</text>
+    <text x="265" y="247">unstructured</text>
+    <text x="395" y="188">semi</text>
+    <text x="395" y="202">structured</text>
+    <text x="525" y="138">structured</text>
+  </g>
+
+  <g text-anchor="middle" class="d-small">
+    <text x="135" y="374">Slack, tickets,</text>
+    <text x="135" y="388">meeting notes</text>
+    <text x="265" y="374">Confluence,</text>
+    <text x="265" y="388">design docs</text>
+    <text x="395" y="374">markdown,</text>
+    <text x="395" y="388">tags, labels</text>
+    <text x="525" y="374">knowledge graph,</text>
+    <text x="525" y="388">schemas, registry</text>
+  </g>
+
+  <text class="d-small" x="600" y="152" text-anchor="end" fill="var(--tier-4)"
+        style="font-weight:600">most machine readable</text>
+</svg>

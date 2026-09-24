@@ -1,0 +1,96 @@
+<!--
+  The economics of knowledge form. THE ONLY REAL CHART IN THE DECK.
+
+  Two panels, not one. Accuracy and token cost are different measures on
+  different scales, and putting them on one plot with two y axes is the
+  single worst thing you can do to a chart: the crossing point becomes an
+  artefact of where you happened to put the axes, and the audience reads a
+  relationship that is not in the data. Two panels sharing the same four
+  categories says the same thing honestly.
+
+  The y axes are deliberately UNNUMBERED, low to high. The underlying claims
+  are not measured yet (review-notes.md item 4), so numbers would be false
+  precision. Unnumbered axes plus the caption make the slide say "this is
+  the shape we expect" rather than "this is what we found", which is what is
+  actually true and is much harder to attack.
+
+  The point of the pairing is the contrast in shape: accuracy is a SLOPE,
+  cost is a CLIFF. Marker colours are the four tier ramp steps, the same
+  encoding diagram 04 uses, so a tier keeps one colour across the deck.
+-->
+<svg viewBox="0 0 900 340" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Two panels over the four knowledge tiers. Left: agent
+                 accuracy rises steadily from noisy unstructured to
+                 structured. Right: token cost stays high across the first
+                 three tiers then collapses at the structured tier. Accuracy
+                 improves as a slope; cost improves as a step change.">
+
+  <!-- ================= panel A: accuracy ================= -->
+  <text class="d-label" x="60" y="34">Agent accuracy</text>
+  <text class="d-small" x="60" y="52">rises steadily, tier by tier</text>
+
+  <path class="d-axis" d="M 60 250 L 400 250"/>
+  <path class="d-axis" d="M 60 60 L 60 250"/>
+  <text class="d-small" x="52" y="66"  text-anchor="end">high</text>
+  <text class="d-small" x="52" y="252" text-anchor="end">low</text>
+
+  <path d="M 95 216 L 190 165 L 285 121 L 380 70"
+        fill="none" stroke="var(--ink-muted)" stroke-width="2"
+        stroke-linecap="round"/>
+  <g stroke="var(--surface)" stroke-width="2">
+    <circle cx="95"  cy="216" r="5.5" fill="var(--tier-1)"/>
+    <circle cx="190" cy="165" r="5.5" fill="var(--tier-2)"/>
+    <circle cx="285" cy="121" r="5.5" fill="var(--tier-3)"/>
+    <circle cx="380" cy="70"  r="5.5" fill="var(--tier-4)"/>
+  </g>
+  <text class="d-small" x="380" y="54" text-anchor="middle"
+        fill="var(--tier-4)">near deterministic</text>
+
+  <!-- ================= panel B: token cost ================= -->
+  <text class="d-label" x="500" y="34">Token cost per answer</text>
+  <text class="d-small" x="500" y="52">barely moves, then collapses</text>
+
+  <path class="d-axis" d="M 500 250 L 840 250"/>
+  <path class="d-axis" d="M 500 60 L 500 250"/>
+  <text class="d-small" x="492" y="66"  text-anchor="end">high</text>
+  <text class="d-small" x="492" y="252" text-anchor="end">low</text>
+
+  <path d="M 535 70 L 630 132 L 725 140 L 820 235"
+        fill="none" stroke="var(--ink-muted)" stroke-width="2"
+        stroke-linecap="round"/>
+  <g stroke="var(--surface)" stroke-width="2">
+    <circle cx="535" cy="70"  r="5.5" fill="var(--tier-1)"/>
+    <circle cx="630" cy="132" r="5.5" fill="var(--tier-2)"/>
+    <circle cx="725" cy="140" r="5.5" fill="var(--tier-3)"/>
+    <circle cx="820" cy="235" r="5.5" fill="var(--tier-4)"/>
+  </g>
+
+  <!-- the cliff, called out because it is the argument -->
+  <path d="M 760 150 L 760 228" stroke="var(--layer-agent)" stroke-width="2"
+        stroke-dasharray="4 3" fill="none"/>
+  <text class="d-label" x="772" y="182" fill="var(--layer-agent)"
+        style="font-size:13px">the step change</text>
+  <text class="d-small" x="772" y="199" fill="var(--layer-agent)">only here</text>
+
+  <!-- ================= shared category labels ================= -->
+  <g class="d-small" text-anchor="middle">
+    <text x="95"  y="272">noisy</text>
+    <text x="95"  y="286">unstructured</text>
+    <text x="190" y="272">deliberate</text>
+    <text x="190" y="286">unstructured</text>
+    <text x="285" y="272">semi</text>
+    <text x="285" y="286">structured</text>
+    <text x="380" y="272">structured</text>
+    <text x="535" y="272">noisy</text>
+    <text x="535" y="286">unstructured</text>
+    <text x="630" y="272">deliberate</text>
+    <text x="630" y="286">unstructured</text>
+    <text x="725" y="272">semi</text>
+    <text x="725" y="286">structured</text>
+    <text x="820" y="272">structured</text>
+  </g>
+
+  <text class="d-small" x="60" y="322" fill="var(--ink-secondary)">
+    Axes are unnumbered on purpose: this is the expected shape, not a measurement.
+  </text>
+</svg>

@@ -1,0 +1,72 @@
+<!--
+  The eight streams, in delivery order. A `full` layout diagram, so the
+  viewBox is wide (900 x 300) rather than the 640 x 420 used by the split
+  layout slides.
+
+  Geometry: box width 92, step 107, first box at x = 30, last ends at 871.
+  Eight columns at this width is the reason each label is two short lines
+  and the "owns" hint is three words at most. If a stream is renamed to
+  something longer, widen the viewBox rather than shrinking the type.
+
+  Architecture carries the accent fill because section 9 takes that one
+  stream all the way down. The highlight is what makes the later slide feel
+  like a promise kept rather than a change of subject.
+-->
+<svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Eight streams in delivery order: Product, Design,
+                 Architecture, Engineering, Quality Engineering, Security,
+                 Operations, Platform. Architecture is highlighted as the
+                 stream taken all the way down later in the deck.">
+
+  <g stroke-width="1.5">
+    <rect x="30"  y="40" width="92" height="118" rx="6" fill="var(--surface-sunk)" stroke="var(--rule)"/>
+    <rect x="137" y="40" width="92" height="118" rx="6" fill="var(--surface-sunk)" stroke="var(--rule)"/>
+    <rect x="244" y="40" width="92" height="118" rx="6"
+          fill="var(--accent)" fill-opacity="0.14" stroke="var(--accent)" stroke-width="2.5"/>
+    <rect x="351" y="40" width="92" height="118" rx="6" fill="var(--surface-sunk)" stroke="var(--rule)"/>
+    <rect x="458" y="40" width="92" height="118" rx="6" fill="var(--surface-sunk)" stroke="var(--rule)"/>
+    <rect x="565" y="40" width="92" height="118" rx="6" fill="var(--surface-sunk)" stroke="var(--rule)"/>
+    <rect x="672" y="40" width="92" height="118" rx="6" fill="var(--surface-sunk)" stroke="var(--rule)"/>
+    <rect x="779" y="40" width="92" height="118" rx="6" fill="var(--surface-sunk)" stroke="var(--rule)"/>
+  </g>
+
+  <g text-anchor="middle" class="d-small" fill="var(--ink)" style="font-weight:600;font-size:13px">
+    <text x="76"  y="76">Product</text>
+    <text x="183" y="76">Design</text>
+    <text x="290" y="76">Architecture</text>
+    <text x="397" y="76">Engineering</text>
+    <text x="504" y="70">Quality</text>
+    <text x="504" y="86">Engineering</text>
+    <text x="611" y="76">Security</text>
+    <text x="718" y="76">Operations</text>
+    <text x="825" y="76">Platform</text>
+  </g>
+
+  <g text-anchor="middle" class="d-small">
+    <text x="76"  y="112">the what</text>
+    <text x="76"  y="127">and why</text>
+    <text x="183" y="112">the</text>
+    <text x="183" y="127">experience</text>
+    <text x="290" y="112">structure,</text>
+    <text x="290" y="127">and its change</text>
+    <text x="397" y="112">how it is</text>
+    <text x="397" y="127">built</text>
+    <text x="504" y="112">how we prove</text>
+    <text x="504" y="127">it works</text>
+    <text x="611" y="112">how we keep</text>
+    <text x="611" y="127">it safe</text>
+    <text x="718" y="112">how we</text>
+    <text x="718" y="127">run it</text>
+    <text x="825" y="112">what it</text>
+    <text x="825" y="127">runs on</text>
+  </g>
+
+  <!-- delivery order, stated once along the bottom -->
+  <path class="d-flow" d="M 30 196 L 866 196" marker-end="url(#arrow)"/>
+  <text class="d-small" x="30" y="222" fill="var(--ink-secondary)">delivery order</text>
+
+  <text class="d-small" x="290" y="256" text-anchor="middle" fill="var(--accent)"
+        style="font-weight:600">taken all the way down later</text>
+  <path d="M 290 236 L 290 208" stroke="var(--accent)" stroke-width="1.5"
+        fill="none" marker-end="url(#arrow-accent)"/>
+</svg>

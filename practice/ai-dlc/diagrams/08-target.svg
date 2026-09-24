@@ -1,0 +1,81 @@
+<!--
+  Target state. THIRD OF THE THREE BAND FAMILY (06, 07, 08). Geometry is
+  identical to 06 and 07 by design; see 06's header. What changed from 07:
+
+    * the arrows between agents turn HORIZONTAL. This is the whole point of
+      the slide: agent to agent communication becomes the primary driver,
+      so the picture stops being a column of vertical handoffs.
+    * only one path still runs up to the humans, and it is dashed and
+      labelled as the exception route
+    * the knowledge layer's weight moves to the structured end of the tier
+      ramp, and each block gains a single named owner
+
+  The vertical-to-horizontal flip is what makes the three slide progression
+  legible without narration. Do not restyle it into something prettier that
+  loses the contrast with 07.
+-->
+<svg viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Target state: humans on top handling direction and
+                 exceptions only, per-stream agents in the middle passing
+                 work horizontally to each other, and a structured knowledge
+                 layer beneath with one owner per piece.">
+
+  <!-- band 1: humans, reduced to direction and exceptions -->
+  <rect x="30" y="18" width="580" height="88" rx="7"
+        fill="var(--layer-human)" fill-opacity="0.12"
+        stroke="var(--layer-human)" stroke-width="2"/>
+  <text class="d-label" x="46" y="44">Humans</text>
+  <text class="d-sub"   x="46" y="64">Direction, and the exceptions only</text>
+  <text class="d-small" x="46" y="86">On the loop, not in it</text>
+
+  <!-- band 2: agents, now talking to each other -->
+  <rect x="30" y="126" width="580" height="98" rx="7"
+        fill="var(--layer-agent)" fill-opacity="0.10"
+        stroke="var(--layer-agent)" stroke-width="2"/>
+  <text class="d-label" x="46" y="150">AI agents, one per stream</text>
+  <g fill="var(--surface)" stroke="var(--layer-agent)" stroke-width="1.5">
+    <rect x="46"  y="172" width="100" height="34" rx="5"/>
+    <rect x="156" y="172" width="100" height="34" rx="5"/>
+    <rect x="266" y="172" width="100" height="34" rx="5"/>
+    <rect x="376" y="172" width="100" height="34" rx="5"/>
+    <rect x="486" y="172" width="100" height="34" rx="5"/>
+  </g>
+  <g class="d-small" text-anchor="middle" fill="var(--ink)">
+    <text x="96"  y="193">Product</text>
+    <text x="206" y="193">Architecture</text>
+    <text x="316" y="193">Engineering</text>
+    <text x="426" y="193">Quality</text>
+    <text x="536" y="193">and the rest</text>
+  </g>
+
+  <!-- THE CHANGE FROM 07: the flow is horizontal now. -->
+  <g stroke="var(--layer-agent)" stroke-width="2.5" fill="none"
+     stroke-linecap="round">
+    <path d="M 148 189 L 152 189" marker-end="url(#arrow-warn)"/>
+    <path d="M 258 189 L 262 189" marker-end="url(#arrow-warn)"/>
+    <path d="M 368 189 L 372 189" marker-end="url(#arrow-warn)"/>
+    <path d="M 478 189 L 482 189" marker-end="url(#arrow-warn)"/>
+  </g>
+
+  <!-- the one remaining upward path, deliberately dashed and singular -->
+  <path class="d-flow" d="M 316 166 L 316 112" stroke-dasharray="5 4"
+        marker-end="url(#arrow-accent)"/>
+  <text class="d-small" x="330" y="140" fill="var(--layer-human)">exceptions</text>
+
+  <!-- band 3: knowledge, weight moved to structured, with owners -->
+  <rect x="30" y="242" width="580" height="120" rx="7"
+        fill="var(--layer-knowledge)" fill-opacity="0.12"
+        stroke="var(--layer-knowledge)" stroke-width="2"/>
+  <text class="d-label" x="46" y="268">Knowledge layer, pushed to structured</text>
+  <text class="d-sub"   x="46" y="288">Each piece owned by exactly one agent</text>
+  <rect x="46"  y="306" width="170" height="38" rx="5" fill="var(--tier-1)"
+        fill-opacity="0.35" stroke="var(--tier-3)" stroke-width="1.5"
+        stroke-dasharray="4 3"/>
+  <rect x="226" y="306" width="170" height="38" rx="5" fill="var(--tier-3)"
+        stroke="var(--tier-4)" stroke-width="1.5"/>
+  <rect x="406" y="306" width="188" height="38" rx="5" fill="var(--tier-4)"
+        stroke="var(--tier-4)" stroke-width="1.5"/>
+  <text class="d-small" x="131" y="330" text-anchor="middle" fill="var(--ink)">still some prose</text>
+  <text class="d-onfill" x="311" y="331" text-anchor="middle" style="font-size:12px">schemas, registry</text>
+  <text class="d-onfill" x="500" y="331" text-anchor="middle" style="font-size:12px">the knowledge graph</text>
+</svg>

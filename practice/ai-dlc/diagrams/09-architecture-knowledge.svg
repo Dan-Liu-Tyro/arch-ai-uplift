@@ -1,0 +1,107 @@
+<!--
+  Architecture knowledge set up for use across Tyro: the second deliverable.
+
+  The one thing this diagram must do is keep the honest line visible. SOLID
+  is the path that works today; DASHED is the path that is understood and
+  deliberately deferred because Rovo is cloud and the graph is local. A
+  single-styled pipeline would quietly claim the whole chain is built, to an
+  audience that can ask to see it. The legend states the convention rather
+  than leaving it to be inferred.
+
+  git is drawn as the hub with a heavier stroke because it is the source of
+  truth and both paths leave from it. Confluence sits ON the deferred path
+  as an output, which is the inversion of today's arrangement and the single
+  most important thing on the slide to agree.
+-->
+<svg viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Architects curate typed entities in git, where pull request
+                 review is the quality gate. Solid arrows show the path that
+                 works today: git feeds a local agent the architects query.
+                 Dashed arrows show the deferred path: generated pages into a
+                 clean Confluence space, indexed by Rovo, reaching the rest
+                 of Tyro.">
+
+  <!-- ===== the working path, solid ===== -->
+  <rect x="20" y="86" width="120" height="70" rx="7"
+        fill="var(--layer-human)" fill-opacity="0.12"
+        stroke="var(--layer-human)" stroke-width="2"/>
+  <text class="d-small" x="80" y="114" text-anchor="middle" fill="var(--ink)"
+        style="font-weight:600;font-size:13px">Architects</text>
+  <text class="d-small" x="80" y="132" text-anchor="middle">author and</text>
+  <text class="d-small" x="80" y="146" text-anchor="middle">review</text>
+
+  <path class="d-flow" d="M 140 121 L 170 121" marker-end="url(#arrow)"
+        stroke-width="2.5"/>
+
+  <rect x="175" y="80" width="160" height="82" rx="7"
+        fill="var(--layer-knowledge)" fill-opacity="0.16"
+        stroke="var(--layer-knowledge)" stroke-width="3"/>
+  <text class="d-small" x="255" y="104" text-anchor="middle" fill="var(--ink)"
+        style="font-weight:600;font-size:13px">git: the typed graph</text>
+  <text class="d-small" x="255" y="124" text-anchor="middle">7 entity types,</text>
+  <text class="d-small" x="255" y="138" text-anchor="middle">typed relationships</text>
+  <text class="d-small" x="255" y="155" text-anchor="middle" fill="var(--layer-knowledge)"
+        style="font-weight:600">source of truth</text>
+
+  <path class="d-flow" d="M 335 121 L 375 121" marker-end="url(#arrow)"
+        stroke-width="2.5"/>
+
+  <rect x="380" y="86" width="150" height="70" rx="7"
+        fill="var(--layer-agent)" fill-opacity="0.12"
+        stroke="var(--layer-agent)" stroke-width="2"/>
+  <text class="d-small" x="455" y="114" text-anchor="middle" fill="var(--ink)"
+        style="font-weight:600;font-size:13px">A local agent</text>
+  <text class="d-small" x="455" y="132" text-anchor="middle">grounded only on</text>
+  <text class="d-small" x="455" y="146" text-anchor="middle">this content</text>
+
+  <text class="d-small" x="545" y="118" fill="var(--layer-knowledge)"
+        style="font-weight:600">works</text>
+  <text class="d-small" x="545" y="133" fill="var(--layer-knowledge)"
+        style="font-weight:600">today</text>
+
+  <text class="d-small" x="20" y="64" fill="var(--ink-secondary)">
+    Pull request review is the quality gate. Architects never edit Confluence.
+  </text>
+
+  <!-- ===== the deferred path, dashed ===== -->
+  <path class="d-flow" d="M 255 162 C 255 200 150 200 130 246"
+        stroke-dasharray="5 4" marker-end="url(#arrow)" stroke-width="2.5"/>
+
+  <g fill="var(--surface)" stroke="var(--ink-muted)" stroke-width="1.5"
+     stroke-dasharray="5 4">
+    <rect x="30"  y="250" width="150" height="62" rx="6"/>
+    <rect x="200" y="250" width="150" height="62" rx="6"/>
+    <rect x="370" y="250" width="150" height="62" rx="6"/>
+  </g>
+  <g text-anchor="middle" class="d-small" fill="var(--ink)">
+    <text x="105" y="276" style="font-weight:600">one page per entity</text>
+    <text x="105" y="295">generated, never typed</text>
+    <text x="275" y="276" style="font-weight:600">clean Confluence space</text>
+    <text x="275" y="295">an output, not the source</text>
+    <text x="445" y="276" style="font-weight:600">Rovo indexes it</text>
+    <text x="445" y="295">the rest of Tyro asks</text>
+  </g>
+
+  <g class="d-flow" stroke-dasharray="5 4">
+    <path d="M 180 281 L 196 281" marker-end="url(#arrow)"/>
+    <path d="M 350 281 L 366 281" marker-end="url(#arrow)"/>
+  </g>
+
+  <rect x="20" y="330" width="500" height="34" rx="5"
+        fill="var(--layer-agent)" fill-opacity="0.10"
+        stroke="var(--layer-agent)" stroke-width="1.5"/>
+  <text class="d-small" x="34" y="352" fill="var(--ink)">
+    Deferred, not unknown: Rovo is cloud, the graph is local, so this needs the org deployment path.
+  </text>
+
+  <!-- ===== legend, because the line style carries the meaning ===== -->
+  <g class="d-flow">
+    <path d="M 26 392 L 60 392"/>
+  </g>
+  <text class="d-small" x="68" y="396">working today</text>
+  <path class="d-flow" d="M 178 392 L 212 392" stroke-dasharray="5 4"/>
+  <text class="d-small" x="220" y="396">deferred</text>
+  <text class="d-small" x="330" y="396" fill="var(--ink-secondary)">
+    One owner per entity, as in the target state.
+  </text>
+</svg>

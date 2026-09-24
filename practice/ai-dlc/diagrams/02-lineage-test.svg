@@ -1,0 +1,71 @@
+<!--
+  The first party versus third party split, drawn as the decision it is.
+
+  The reason this is a decision diagram and not two side by side boxes: the
+  strength of section 2 is that the test is DECIDABLE, so the question is
+  the subject of the slide and the two categories are only its outcomes.
+  Two boxes would show a taxonomy and lose the argument.
+-->
+<svg viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="A single test at the top asks whether there is a tight,
+                 traceable lineage back to an external source that must be
+                 kept in sync. Answering no gives first-party knowledge,
+                 which is ours to decide. Answering yes gives third-party
+                 knowledge, which must track a source that moves.">
+
+  <!-- ===== the test ===== -->
+  <rect x="60" y="24" width="520" height="86" rx="7" fill="var(--surface)"
+        stroke="var(--accent)" stroke-width="2.5"/>
+  <text class="d-small" x="320" y="48" text-anchor="middle"
+        fill="var(--accent)" style="letter-spacing:.14em">THE TEST</text>
+  <text class="d-label" x="320" y="72" text-anchor="middle">Is there a tight, traceable lineage back to</text>
+  <text class="d-label" x="320" y="94" text-anchor="middle">an external source we must keep in sync?</text>
+
+  <!-- ===== branches ===== -->
+  <path class="d-flow" d="M 240 110 L 240 140 L 168 140 L 168 176"
+        marker-end="url(#arrow)"/>
+  <path class="d-flow" d="M 400 110 L 400 140 L 472 140 L 472 176"
+        marker-end="url(#arrow)"/>
+  <text class="d-label" x="150" y="136" text-anchor="end"
+        fill="var(--ink-secondary)">no</text>
+  <text class="d-label" x="490" y="136" fill="var(--ink-secondary)">yes</text>
+
+  <!-- ===== first party ===== -->
+  <rect x="30" y="180" width="276" height="196" rx="7"
+        fill="var(--layer-knowledge)" fill-opacity="0.12"
+        stroke="var(--layer-knowledge)" stroke-width="2"/>
+  <text class="d-label" x="48" y="208">First party</text>
+  <text class="d-sub"   x="48" y="228">Ours. We decide it, we change it.</text>
+  <g fill="var(--surface)" stroke="var(--layer-knowledge)" stroke-width="1.5">
+    <rect x="48" y="244" width="240" height="30" rx="5"/>
+    <rect x="48" y="282" width="240" height="30" rx="5"/>
+    <rect x="48" y="320" width="240" height="30" rx="5"/>
+  </g>
+  <g class="d-small" fill="var(--ink)">
+    <text x="60" y="263">our principles and patterns</text>
+    <text x="60" y="301">our systems and decisions</text>
+    <text x="60" y="339">our standards and runbooks</text>
+  </g>
+
+  <!-- ===== third party ===== -->
+  <rect x="334" y="180" width="276" height="196" rx="7"
+        fill="var(--layer-agent)" fill-opacity="0.10"
+        stroke="var(--layer-agent)" stroke-width="2"/>
+  <text class="d-label" x="352" y="208">Third party</text>
+  <text class="d-sub"   x="352" y="228">Interpreted. The source moves; we follow.</text>
+  <g fill="var(--surface)" stroke="var(--layer-agent)" stroke-width="1.5">
+    <rect x="352" y="244" width="240" height="30" rx="5"/>
+    <rect x="352" y="282" width="240" height="30" rx="5"/>
+    <rect x="352" y="320" width="240" height="30" rx="5"/>
+  </g>
+  <g class="d-small" fill="var(--ink)">
+    <text x="364" y="263">card scheme rules</text>
+    <text x="364" y="301">regulation and compliance</text>
+    <text x="364" y="339">vendor and platform docs</text>
+  </g>
+
+  <text class="d-small" x="320" y="404" text-anchor="middle"
+        fill="var(--ink-secondary)">
+    The test returns an answer, not a debate. Most such splits do not.
+  </text>
+</svg>

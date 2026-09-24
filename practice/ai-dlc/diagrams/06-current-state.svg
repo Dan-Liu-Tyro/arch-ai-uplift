@@ -1,0 +1,74 @@
+<!--
+  Current state. FIRST OF THE THREE BAND FAMILY (06, 07, 08). These three
+  share one literal skeleton: identical band x/y/width/height and identical
+  label positions. Only the contents and the arrows change, so the audience
+  sees the same architecture move across three slides rather than three
+  separate pictures. If you change geometry here, change it in all three.
+
+  Band geometry, fixed across the family:
+    x = 30, width = 580
+    band 1 (top)    y = 18,  h = 88
+    band 2 (middle) y = 126, h = 98
+    band 3 (bottom) y = 242, h = 120
+-->
+<svg viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Current state: AI tooling on top, humans as the mandatory
+                 intermediary in the middle, an unstructured knowledge layer
+                 beneath. Every path from knowledge to tooling converges
+                 through the human layer.">
+
+  <!-- band 1: AI tooling -->
+  <rect x="30" y="18" width="580" height="88" rx="7"
+        fill="var(--layer-agent)" fill-opacity="0.10"
+        stroke="var(--layer-agent)" stroke-width="2"/>
+  <text class="d-label" x="46" y="44">AI tooling, used ad hoc</text>
+  <text class="d-sub"   x="46" y="64">Individual choice, no shared grounding</text>
+  <g fill="var(--surface)" stroke="var(--layer-agent)" stroke-width="1.5">
+    <rect x="352" y="72" width="76" height="22" rx="11"/>
+    <rect x="438" y="72" width="76" height="22" rx="11"/>
+    <rect x="524" y="72" width="70" height="22" rx="11"/>
+  </g>
+  <g class="d-small" text-anchor="middle">
+    <text x="390" y="87">chat</text>
+    <text x="476" y="87">copilot</text>
+    <text x="559" y="87">agents</text>
+  </g>
+
+  <!-- band 2: humans -->
+  <rect x="30" y="126" width="580" height="98" rx="7"
+        fill="var(--layer-human)" fill-opacity="0.12"
+        stroke="var(--layer-human)" stroke-width="2"/>
+  <text class="d-label" x="46" y="152">Humans</text>
+  <text class="d-sub"   x="46" y="172">The mandatory intermediary</text>
+  <text class="d-small" x="46" y="206">Read, interpret, carry, retype</text>
+
+  <!-- band 3: knowledge -->
+  <rect x="30" y="242" width="580" height="120" rx="7"
+        fill="var(--layer-knowledge)" fill-opacity="0.12"
+        stroke="var(--layer-knowledge)" stroke-width="2"/>
+  <text class="d-label" x="46" y="268">Knowledge layer</text>
+  <text class="d-sub"   x="46" y="288">Overwhelmingly unstructured</text>
+  <g fill="var(--tier-1)" stroke="var(--tier-3)" stroke-width="1.5">
+    <rect x="46"  y="306" width="122" height="38" rx="5"/>
+    <rect x="180" y="306" width="122" height="38" rx="5"/>
+    <rect x="314" y="306" width="122" height="38" rx="5"/>
+    <rect x="448" y="306" width="146" height="38" rx="5"/>
+  </g>
+  <g class="d-small" text-anchor="middle" fill="var(--ink)">
+    <text x="107" y="330">Slack, tickets</text>
+    <text x="241" y="330">Confluence</text>
+    <text x="375" y="330">repos, readmes</text>
+    <text x="521" y="330">scattered, unlinked</text>
+  </g>
+
+  <!-- THE POINT: three paths converge into one human, then one path up. -->
+  <g class="d-flow" stroke-linecap="round">
+    <path d="M 150 306 C 150 260 300 230 316 196" marker-end="url(#arrow)"/>
+    <path d="M 320 306 C 320 260 320 230 320 196" marker-end="url(#arrow)"/>
+    <path d="M 490 306 C 490 260 340 230 324 196" marker-end="url(#arrow)"/>
+    <path d="M 320 140 L 320 112" marker-end="url(#arrow)"/>
+  </g>
+  <circle cx="320" cy="188" r="5" fill="var(--layer-human)"/>
+  <text class="d-small" x="334" y="192" fill="var(--layer-human)">every handoff</text>
+
+</svg>

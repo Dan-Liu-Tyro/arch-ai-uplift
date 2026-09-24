@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<!--
+  GENERATED FILE when filled -- see meta/idea-to-presentation/build_deck.py.
+  This is the template. The deck built from it must never be hand-edited:
+  edit the source document, the SVG diagrams, or this shell, then rebuild.
+
+  Self-contained by design (decision 47): no CDN, no webfont, no fetch, no
+  server. It opens from file:// and works offline, which internal material
+  requires.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+  /* ---------------------------------------------------------------
+     Palette. Validated with the dataviz skill's checker against the
+     light surface below -- do not substitute hex by eye.
+
+       layers   3 categorical hues, all-pairs clean
+                (worst CVD dE 9.2, worst normal-vision dE 24.0)
+       tiers    4-step single-hue ordinal ramp, monotone lightness,
+                light end clears the surface at 2.06:1
+
+     --layer-knowledge sits at 2.74:1 on this surface, which the checker
+     flags: the relief rule applies, so every layer band carries a visible
+     text label. That is not decoration, it is what keeps identity from
+     being colour-alone.
+     --------------------------------------------------------------- */
+  :root {
+    --surface:        #fcfcfb;
+    --surface-sunk:   #f0efec;
+    --ink:            #0b0b0b;
+    --ink-secondary:  #52514e;
+    --ink-muted:      #78766f;
+    --rule:           #d8d7d2;
+
+    --layer-human:     #2a78d6;
+    --layer-agent:     #eb6834;
+    --layer-knowledge: #1baf7a;
+
+    --tier-1: #86b6ef;
+    --tier-2: #3987e5;
+    --tier-3: #256abf;
+    --tier-4: #0d366b;
+
+    --accent:  #2a78d6;
+    --warn:    #eb6834;
+
+    /* One scaling unit so every size is proportional to the 16:9 canvas
+       rather than to the window. 1 --u is 1% of canvas width. */
+    --u: min(1vw, 1.7778vh);
+  }
+
+  * { box-sizing: border-box; }
+
+  /* The shared-defs SVG must occupy no space but stay renderable --
+     display:none would stop the markers resolving in some engines. */
+  .svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--surface-sunk);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .deck {
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+
+  .slide {
+    height: 100vh;
+    width: 100vw;
+    scroll-snap-align: start;
+    display: grid;
+    place-items: center;
+    position: relative;
+  }
+
+  .canvas {
+    width: min(100vw, 177.78vh);
+    height: min(56.25vw, 100vh);
+    background: var(--surface);
+    padding: calc(4.5 * var(--u)) calc(5 * var(--u));
+    display: flex;
+    flex-direction: column;
+    gap: calc(2.4 * var(--u));
+    overflow: hidden;
+  }
+
+  /* ---- header ---- */
+  .canvas > header { flex: 0 0 auto; }
+  .eyebrow {
+    display: block;
+    font-size: calc(1.35 * var(--u));
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: calc(.7 * var(--u));
+  }
+  .canvas h2 {
+    margin: 0;
+    font-size: calc(3.5 * var(--u));
+    line-height: 1.12;
+    font-weight: 620;
+    letter-spacing: -.012em;
+  }
+  .canvas > header::after {
+    content: "";
+    display: block;
+    width: calc(7 * var(--u));
+    height: calc(.32 * var(--u));
+    background: var(--accent);
+    margin-top: calc(1.5 * var(--u));
+  }
+
+  /* ---- body ---- */
+  .content {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    gap: calc(3.4 * var(--u));
+    align-items: center;
+  }
+  .layout-split .content { grid-template-columns: 1fr minmax(0, .62fr); }
+  .layout-full  .content { grid-template-rows: 1fr auto; }
+
+  .diagram {
+    margin: 0;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    display: grid;
+    place-items: center;
+  }
+  .diagram svg {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    display: block;
+  }
+  .diagram-missing {
+    color: var(--warn);
+    font-size: calc(1.6 * var(--u));
+    border: 1px dashed var(--warn);
+    padding: calc(2 * var(--u));
+  }
+
+  .points {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: calc(1.5 * var(--u));
+  }
+  .points li {
+    font-size: calc(1.72 * var(--u));
+    line-height: 1.42;
+    color: var(--ink-secondary);
+    padding-left: calc(2.1 * var(--u));
+    position: relative;
+  }
+  .points li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: calc(.62 * var(--u));
+    width: calc(.72 * var(--u));
+    height: calc(.72 * var(--u));
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .points strong { color: var(--ink); font-weight: 640; }
+  .layout-full .points {
+    flex-direction: row;
+    gap: calc(3 * var(--u));
+  }
+  .layout-full .points li { flex: 1 1 0; }
+
+  /* ---- title slide ---- */
+  .slide-title .canvas {
+    justify-content: center;
+    gap: calc(2 * var(--u));
+  }
+  .slide-title h1 {
+    margin: 0;
+    font-size: calc(5.4 * var(--u));
+    line-height: 1.08;
+    font-weight: 660;
+    letter-spacing: -.02em;
+    max-width: 80%;
+  }
+  .slide-title .subtitle {
+    margin: 0;
+    font-size: calc(1.9 * var(--u));
+    color: var(--ink-muted);
+  }
+  .slide-title .canvas::before {
+    content: "";
+    display: block;
+    width: calc(9 * var(--u));
+    height: calc(.4 * var(--u));
+    background: var(--accent);
+    margin-bottom: calc(1.4 * var(--u));
+  }
+
+  /* ---- presenter notes ---- */
+  .notes {
+    display: none;
+    flex: 0 0 34%;
+    overflow-y: auto;
+    border-top: 1px solid var(--rule);
+    padding-top: calc(1.4 * var(--u));
+    font-size: calc(1.28 * var(--u));
+    line-height: 1.5;
+    color: var(--ink-secondary);
+  }
+  body.show-notes .notes { display: block; }
+  body.show-notes .content { font-size: .9em; }
+  .notes h4 {
+    margin: calc(1.1 * var(--u)) 0 calc(.4 * var(--u));
+    font-size: calc(1.3 * var(--u));
+    color: var(--ink);
+  }
+  .notes p, .notes ul { margin: 0 0 calc(.7 * var(--u)); }
+  .notes ul { padding-left: calc(2 * var(--u)); }
+  .notes code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .92em;
+    background: var(--surface-sunk);
+    padding: 0 .25em;
+  }
+
+  /* ---- chrome ---- */
+  .counter {
+    position: fixed;
+    right: calc(2 * var(--u));
+    bottom: calc(1.6 * var(--u));
+    font-size: calc(1.25 * var(--u));
+    color: var(--ink-muted);
+    font-variant-numeric: tabular-nums;
+    z-index: 5;
+  }
+  .help {
+    position: fixed;
+    left: calc(2 * var(--u));
+    bottom: calc(1.6 * var(--u));
+    font-size: calc(1.15 * var(--u));
+    color: var(--ink-muted);
+    z-index: 5;
+  }
+  kbd {
+    font-family: inherit;
+    border: 1px solid var(--rule);
+    border-bottom-width: 2px;
+    border-radius: 3px;
+    padding: 0 .35em;
+    background: var(--surface);
+  }
+
+  /* ---- SVG diagram conventions, shared by every diagram ---- */
+  .diagram text {
+    font-family: inherit;
+    fill: var(--ink);
+  }
+  .d-label   { font-size: 15px; font-weight: 600; }
+  .d-sub     { font-size: 12.5px; fill: var(--ink-secondary); font-weight: 400; }
+  .d-small   { font-size: 11.5px; fill: var(--ink-muted); }
+  .d-onfill  { fill: #ffffff; font-size: 15px; font-weight: 600; }
+  .d-axis    { stroke: var(--rule); stroke-width: 1.5; fill: none; }
+  .d-flow    { stroke: var(--ink-muted); stroke-width: 2; fill: none; }
+
+  /* ---- print: one slide per landscape page, for PDF handover ---- */
+  @media print {
+    @page { size: 297mm 167mm; margin: 0; }
+    html, body { background: #fff; }
+    .deck { height: auto; overflow: visible; scroll-snap-type: none; }
+    .counter, .help { display: none; }
+    .notes { display: none !important; }
+    .slide {
+      height: 167mm;
+      width: 297mm;
+      break-after: page;
+      page-break-after: always;
+      display: block;
+    }
+    .slide:last-child { break-after: auto; page-break-after: auto; }
+    .canvas {
+      width: 297mm;
+      height: 167mm;
+      /* 1 --u is 1% of page width, matching the screen definition. */
+      --u: 2.97mm;
+    }
+  }
+</style>
+</head>
+<body>
+<!--
+  Shared SVG defs. Every diagram is INLINED into this one document, so a
+  <marker> defined inside each diagram would mean nine elements sharing one
+  id and only the first taking effect. They live here once instead, and the
+  diagrams reference them by id. Fills are explicit rather than
+  context-stroke so the result is predictable in print as well as on screen.
+-->
+<svg class="svg-defs" aria-hidden="true" focusable="false">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#78766f"/>
+    </marker>
+    <marker id="arrow-accent" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2a78d6"/>
+    </marker>
+    <marker id="arrow-warn" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#eb6834"/>
+    </marker>
+  </defs>
+</svg>
+<main class="deck" id="deck">
+{{SLIDES}}
+</main>
+<div class="counter" id="counter"></div>
+<p class="help"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> move &middot;
+   <kbd>n</kbd> notes &middot; <kbd>p</kbd> print to PDF</p>
+<script>
+// Keyboard navigation. Hand-rolled rather than vendoring a slide framework,
+// per least-infrastructure-first: scroll-snap already does the hard part,
+// so this only has to move the scroll position and keep the counter honest.
+(function () {
+  var deck = document.getElementById('deck');
+  var counter = document.getElementById('counter');
+  var slides = Array.prototype.slice.call(deck.querySelectorAll('.slide'));
+  var current = 0;
+
+  function show(index) {
+    current = Math.max(0, Math.min(slides.length - 1, index));
+    slides[current].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    render();
+  }
+
+  function render() {
+    counter.textContent = (current + 1) + ' / ' + slides.length;
+  }
+
+  // Scrolling by trackpad or scrollbar must update the counter too,
+  // otherwise it silently lies as soon as the deck is not driven by keys.
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        current = slides.indexOf(entry.target);
+        render();
+      }
+    });
+  }, { threshold: 0.6 });
+  slides.forEach(function (slide) { observer.observe(slide); });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    switch (event.key) {
+      case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ':
+        event.preventDefault(); show(current + 1); break;
+      case 'ArrowLeft': case 'ArrowUp': case 'PageUp':
+        event.preventDefault(); show(current - 1); break;
+      case 'Home': event.preventDefault(); show(0); break;
+      case 'End': event.preventDefault(); show(slides.length - 1); break;
+      case 'n': case 'N':
+        document.body.classList.toggle('show-notes'); break;
+      case 'p': case 'P':
+        window.print(); break;
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

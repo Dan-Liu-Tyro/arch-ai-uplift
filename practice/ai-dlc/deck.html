@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<!--
+  GENERATED FILE when filled -- see meta/idea-to-presentation/build_deck.py.
+  This is the template. The deck built from it must never be hand-edited:
+  edit the source document, the SVG diagrams, or this shell, then rebuild.
+
+  Self-contained by design (decision 47): no CDN, no webfont, no fetch, no
+  server. It opens from file:// and works offline, which internal material
+  requires.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI-DLC Solution Architecture</title>
+<style>
+  /* ---------------------------------------------------------------
+     Palette. Validated with the dataviz skill's checker against the
+     light surface below -- do not substitute hex by eye.
+
+       layers   3 categorical hues, all-pairs clean
+                (worst CVD dE 9.2, worst normal-vision dE 24.0)
+       tiers    4-step single-hue ordinal ramp, monotone lightness,
+                light end clears the surface at 2.06:1
+
+     --layer-knowledge sits at 2.74:1 on this surface, which the checker
+     flags: the relief rule applies, so every layer band carries a visible
+     text label. That is not decoration, it is what keeps identity from
+     being colour-alone.
+     --------------------------------------------------------------- */
+  :root {
+    --surface:        #fcfcfb;
+    --surface-sunk:   #f0efec;
+    --ink:            #0b0b0b;
+    --ink-secondary:  #52514e;
+    --ink-muted:      #78766f;
+    --rule:           #d8d7d2;
+
+    --layer-human:     #2a78d6;
+    --layer-agent:     #eb6834;
+    --layer-knowledge: #1baf7a;
+
+    --tier-1: #86b6ef;
+    --tier-2: #3987e5;
+    --tier-3: #256abf;
+    --tier-4: #0d366b;
+
+    --accent:  #2a78d6;
+    --warn:    #eb6834;
+
+    /* One scaling unit so every size is proportional to the 16:9 canvas
+       rather than to the window. 1 --u is 1% of canvas width. */
+    --u: min(1vw, 1.7778vh);
+  }
+
+  * { box-sizing: border-box; }
+
+  /* The shared-defs SVG must occupy no space but stay renderable --
+     display:none would stop the markers resolving in some engines. */
+  .svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--surface-sunk);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .deck {
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+
+  .slide {
+    height: 100vh;
+    width: 100vw;
+    scroll-snap-align: start;
+    display: grid;
+    place-items: center;
+    position: relative;
+  }
+
+  .canvas {
+    width: min(100vw, 177.78vh);
+    height: min(56.25vw, 100vh);
+    background: var(--surface);
+    padding: calc(4.5 * var(--u)) calc(5 * var(--u));
+    display: flex;
+    flex-direction: column;
+    gap: calc(2.4 * var(--u));
+    overflow: hidden;
+  }
+
+  /* ---- header ---- */
+  .canvas > header { flex: 0 0 auto; }
+  .eyebrow {
+    display: block;
+    font-size: calc(1.35 * var(--u));
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: calc(.7 * var(--u));
+  }
+  .canvas h2 {
+    margin: 0;
+    font-size: calc(3.5 * var(--u));
+    line-height: 1.12;
+    font-weight: 620;
+    letter-spacing: -.012em;
+  }
+  .canvas > header::after {
+    content: "";
+    display: block;
+    width: calc(7 * var(--u));
+    height: calc(.32 * var(--u));
+    background: var(--accent);
+    margin-top: calc(1.5 * var(--u));
+  }
+
+  /* ---- body ---- */
+  .content {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    gap: calc(3.4 * var(--u));
+    align-items: center;
+  }
+  .layout-split .content { grid-template-columns: 1fr minmax(0, .62fr); }
+  .layout-full  .content { grid-template-rows: 1fr auto; }
+
+  .diagram {
+    margin: 0;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    display: grid;
+    place-items: center;
+  }
+  .diagram svg {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    display: block;
+  }
+  .diagram-missing {
+    color: var(--warn);
+    font-size: calc(1.6 * var(--u));
+    border: 1px dashed var(--warn);
+    padding: calc(2 * var(--u));
+  }
+
+  .points {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: calc(1.5 * var(--u));
+  }
+  .points li {
+    font-size: calc(1.72 * var(--u));
+    line-height: 1.42;
+    color: var(--ink-secondary);
+    padding-left: calc(2.1 * var(--u));
+    position: relative;
+  }
+  .points li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: calc(.62 * var(--u));
+    width: calc(.72 * var(--u));
+    height: calc(.72 * var(--u));
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .points strong { color: var(--ink); font-weight: 640; }
+  .layout-full .points {
+    flex-direction: row;
+    gap: calc(3 * var(--u));
+  }
+  .layout-full .points li { flex: 1 1 0; }
+
+  /* ---- title slide ---- */
+  .slide-title .canvas {
+    justify-content: center;
+    gap: calc(2 * var(--u));
+  }
+  .slide-title h1 {
+    margin: 0;
+    font-size: calc(5.4 * var(--u));
+    line-height: 1.08;
+    font-weight: 660;
+    letter-spacing: -.02em;
+    max-width: 80%;
+  }
+  .slide-title .subtitle {
+    margin: 0;
+    font-size: calc(1.9 * var(--u));
+    color: var(--ink-muted);
+  }
+  .slide-title .canvas::before {
+    content: "";
+    display: block;
+    width: calc(9 * var(--u));
+    height: calc(.4 * var(--u));
+    background: var(--accent);
+    margin-bottom: calc(1.4 * var(--u));
+  }
+
+  /* ---- presenter notes ---- */
+  .notes {
+    display: none;
+    flex: 0 0 34%;
+    overflow-y: auto;
+    border-top: 1px solid var(--rule);
+    padding-top: calc(1.4 * var(--u));
+    font-size: calc(1.28 * var(--u));
+    line-height: 1.5;
+    color: var(--ink-secondary);
+  }
+  body.show-notes .notes { display: block; }
+  body.show-notes .content { font-size: .9em; }
+  .notes h4 {
+    margin: calc(1.1 * var(--u)) 0 calc(.4 * var(--u));
+    font-size: calc(1.3 * var(--u));
+    color: var(--ink);
+  }
+  .notes p, .notes ul { margin: 0 0 calc(.7 * var(--u)); }
+  .notes ul { padding-left: calc(2 * var(--u)); }
+  .notes code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .92em;
+    background: var(--surface-sunk);
+    padding: 0 .25em;
+  }
+
+  /* ---- chrome ---- */
+  .counter {
+    position: fixed;
+    right: calc(2 * var(--u));
+    bottom: calc(1.6 * var(--u));
+    font-size: calc(1.25 * var(--u));
+    color: var(--ink-muted);
+    font-variant-numeric: tabular-nums;
+    z-index: 5;
+  }
+  .help {
+    position: fixed;
+    left: calc(2 * var(--u));
+    bottom: calc(1.6 * var(--u));
+    font-size: calc(1.15 * var(--u));
+    color: var(--ink-muted);
+    z-index: 5;
+  }
+  kbd {
+    font-family: inherit;
+    border: 1px solid var(--rule);
+    border-bottom-width: 2px;
+    border-radius: 3px;
+    padding: 0 .35em;
+    background: var(--surface);
+  }
+
+  /* ---- SVG diagram conventions, shared by every diagram ---- */
+  .diagram text {
+    font-family: inherit;
+    fill: var(--ink);
+  }
+  .d-label   { font-size: 15px; font-weight: 600; }
+  .d-sub     { font-size: 12.5px; fill: var(--ink-secondary); font-weight: 400; }
+  .d-small   { font-size: 11.5px; fill: var(--ink-muted); }
+  .d-onfill  { fill: #ffffff; font-size: 15px; font-weight: 600; }
+  .d-axis    { stroke: var(--rule); stroke-width: 1.5; fill: none; }
+  .d-flow    { stroke: var(--ink-muted); stroke-width: 2; fill: none; }
+
+  /* ---- print: one slide per landscape page, for PDF handover ---- */
+  @media print {
+    @page { size: 297mm 167mm; margin: 0; }
+    html, body { background: #fff; }
+    .deck { height: auto; overflow: visible; scroll-snap-type: none; }
+    .counter, .help { display: none; }
+    .notes { display: none !important; }
+    .slide {
+      height: 167mm;
+      width: 297mm;
+      break-after: page;
+      page-break-after: always;
+      display: block;
+    }
+    .slide:last-child { break-after: auto; page-break-after: auto; }
+    .canvas {
+      width: 297mm;
+      height: 167mm;
+      /* 1 --u is 1% of page width, matching the screen definition. */
+      --u: 2.97mm;
+    }
+  }
+</style>
+</head>
+<body>
+<!--
+  Shared SVG defs. Every diagram is INLINED into this one document, so a
+  <marker> defined inside each diagram would mean nine elements sharing one
+  id and only the first taking effect. They live here once instead, and the
+  diagrams reference them by id. Fills are explicit rather than
+  context-stroke so the result is predictable in print as well as on screen.
+-->
+<svg class="svg-defs" aria-hidden="true" focusable="false">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#78766f"/>
+    </marker>
+    <marker id="arrow-accent" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2a78d6"/>
+    </marker>
+    <marker id="arrow-warn" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#eb6834"/>
+    </marker>
+  </defs>
+</svg>
+<main class="deck" id="deck">
+<section class="slide slide-title" data-slide="0">
+  <div class="canvas">
+    <h1>AI-DLC Solution Architecture</h1>
+    <p class="subtitle">For the CTO and the TLT huddle · 29 September 2026</p>
+  </div>
+</section>
+<section class="slide layout-split" data-slide="1">
+  <div class="canvas">
+    <header><span class="eyebrow">1</span><h2>Organizational Knowledge versus World Knowledge</h2></header>
+    <div class="content">
+      <figure class="diagram"><!--
+  Organizational versus world knowledge. The organizational boundary is the
+  one structural line on the slide, so it is drawn as an actual boundary
+  rather than implied by two boxes sitting apart. The bridge crossing it is
+  the claim: world knowledge cannot be consumed directly, and once it has
+  crossed it IS organizational knowledge, which is why the arrow ends inside
+  the right hand region rather than beside it.
+
+  The left stack narrows downward to carry "broad to specific" without a
+  second axis or any labels about breadth.
+-->
+<svg viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="World knowledge on the left, narrowing from general to
+                 industry and domain standards. The organizational boundary
+                 runs down the middle. A translation bridge crosses it into
+                 organizational knowledge on the right, which is labelled as
+                 the focus and the moat.">
+
+  <!-- the boundary itself -->
+  <path d="M 322 26 L 322 394" stroke="var(--ink-muted)" stroke-width="2"
+        stroke-dasharray="7 5" fill="none"/>
+  <text class="d-small" x="322" y="18" text-anchor="middle">the organizational boundary</text>
+
+  <!-- ===== outside the boundary ===== -->
+  <text class="d-label" x="20" y="48">World knowledge</text>
+  <text class="d-sub"   x="20" y="67">Everything outside. Broad to specific.</text>
+
+  <g stroke="var(--ink-muted)" stroke-width="1.5">
+    <rect x="20"  y="86"  width="276" height="40" rx="5" fill="var(--surface-sunk)"/>
+    <rect x="38"  y="134" width="240" height="40" rx="5" fill="var(--surface-sunk)"/>
+    <rect x="56"  y="182" width="204" height="40" rx="5" fill="var(--surface-sunk)"/>
+    <rect x="74"  y="230" width="168" height="40" rx="5"
+          fill="var(--layer-knowledge)" fill-opacity="0.16"/>
+  </g>
+  <g class="d-small" fill="var(--ink)">
+    <text x="158" y="111" text-anchor="middle">general knowledge</text>
+    <text x="158" y="159" text-anchor="middle">technology knowledge</text>
+    <text x="158" y="207" text-anchor="middle">engineering practice</text>
+    <text x="158" y="248" text-anchor="middle">industry and domain</text>
+    <text x="158" y="262" text-anchor="middle">standards</text>
+  </g>
+  <text class="d-small" x="20" y="300" fill="var(--ink-secondary)">card scheme rules,</text>
+  <text class="d-small" x="20" y="316" fill="var(--ink-secondary)">regulation, domain models</text>
+
+  <!-- ===== the bridge ===== -->
+  <path class="d-flow" d="M 246 250 L 300 250 L 300 342 L 380 342"
+        marker-end="url(#arrow-accent)" stroke-width="2.5"/>
+  <rect x="272" y="288" width="56" height="26" rx="13" fill="var(--surface)"
+        stroke="var(--accent)" stroke-width="2"/>
+  <text x="300" y="305" text-anchor="middle" class="d-small"
+        fill="var(--accent)" style="font-weight:600">translate</text>
+
+  <!-- ===== inside the boundary ===== -->
+  <text class="d-label" x="360" y="48">Organizational knowledge</text>
+  <text class="d-sub"   x="360" y="67">Everything inside. Our focus, and our moat.</text>
+
+  <rect x="360" y="86" width="260" height="196" rx="7"
+        fill="var(--layer-knowledge)" fill-opacity="0.12"
+        stroke="var(--layer-knowledge)" stroke-width="2"/>
+  <g fill="var(--surface)" stroke="var(--layer-knowledge)" stroke-width="1.5">
+    <rect x="378" y="108" width="224" height="34" rx="5"/>
+    <rect x="378" y="150" width="224" height="34" rx="5"/>
+    <rect x="378" y="192" width="224" height="34" rx="5"/>
+    <rect x="378" y="234" width="224" height="34" rx="5"/>
+  </g>
+  <g class="d-small" fill="var(--ink)" text-anchor="middle">
+    <text x="490" y="129">how we build, run and decide</text>
+    <text x="490" y="171">our systems, as they actually are</text>
+    <text x="490" y="213">our rules, and why they exist</text>
+    <text x="490" y="255">our interpretation of the outside</text>
+  </g>
+
+  <rect x="360" y="324" width="260" height="36" rx="5"
+        fill="var(--accent)" fill-opacity="0.10"
+        stroke="var(--accent)" stroke-width="1.5"/>
+  <text x="490" y="347" text-anchor="middle" class="d-small"
+        fill="var(--accent)" style="font-weight:600">once translated, it is ours</text>
+
+  <text class="d-small" x="20" y="394" fill="var(--ink-secondary)">
+    Nothing on the left can be consumed by an agent until it has crossed.
+  </text>
+</svg>
+</figure>
+      <ul class="points">
+<li>World knowledge is everything <strong>outside</strong> the organization; organizational knowledge is everything inside</li>
+<li>Organizational knowledge is <strong>our focus and our moat</strong></li>
+<li>World knowledge <strong>cannot be consumed directly</strong> — it has to cross a bridge</li>
+<li>Once translated, it *becomes* organizational knowledge</li>
+</ul>
+    </div>
+    <aside class="notes"><p>At the highest level, all knowledge that can power our AI agents splits into two categories, separated by the organizational boundary.</p>
+<p><strong>World knowledge</strong> is everything outside the organization. <strong>Organizational knowledge</strong> is everything inside it — and it is both our focus and our moat.</p>
+<p>The key principle: <strong>world knowledge cannot be consumed directly.</strong> It has to cross a bridge — a translation step — before an agent can rely on it. Once translated, it <em>becomes</em> organizational knowledge.</p>
+<h4>World knowledge, from broad to specific</h4>
+<ul>
+<li><strong>The entire internet</strong> — the broadest and least curated.</li>
+<li><strong>The large language model&#x27;s baked-in wisdom</strong> — the general reasoning</li>
+<p>carried in the model&#x27;s weights.</p>
+<li><strong>Software engineering knowledge in general</strong> — patterns and frameworks.</li>
+<li><strong>Industry and domain standards</strong> — payment card scheme rules, regulatory</li>
+<p>frameworks, reference domain models.</p>
+</ul>
+<h4>Organizational knowledge, anchored in the architectural perspective</h4>
+<ul>
+<li>How our own payment services are designed and how they interact.</li>
+<li>Our internal API contracts and data models.</li>
+<li>Our architecture principles and decision records.</li>
+<li>Our interpreted compliance rulings.</li>
+</ul>
+<h4>The bridge</h4>
+<p>World knowledge flows in, gets interpreted and contextualized, and becomes trusted organizational knowledge. <strong>That is where both the value and the risk concentrate.</strong> Translated knowledge always carries lineage back to its source, so it can be kept fresh.</p></aside>
+  </div>
+</section>
+<section class="slide layout-split" data-slide="2">
+  <div class="canvas">
+    <header><span class="eyebrow">2</span><h2>Inside Organizational Knowledge — First-Party versus Third-Party</h2></header>
+    <div class="content">
+      <figure class="diagram"><!--
+  The first party versus third party split, drawn as the decision it is.
+
+  The reason this is a decision diagram and not two side by side boxes: the
+  strength of section 2 is that the test is DECIDABLE, so the question is
+  the subject of the slide and the two categories are only its outcomes.
+  Two boxes would show a taxonomy and lose the argument.
+-->
+<svg viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="A single test at the top asks whether there is a tight,
+                 traceable lineage back to an external source that must be
+                 kept in sync. Answering no gives first-party knowledge,
+                 which is ours to decide. Answering yes gives third-party
+                 knowledge, which must track a source that moves.">
+
+  <!-- ===== the test ===== -->
+  <rect x="60" y="24" width="520" height="86" rx="7" fill="var(--surface)"
+        stroke="var(--accent)" stroke-width="2.5"/>
+  <text class="d-small" x="320" y="48" text-anchor="middle"
+        fill="var(--accent)" style="letter-spacing:.14em">THE TEST</text>
+  <text class="d-label" x="320" y="72" text-anchor="middle">Is there a tight, traceable lineage back to</text>
+  <text class="d-label" x="320" y="94" text-anchor="middle">an external source we must keep in sync?</text>
+
+  <!-- ===== branches ===== -->
+  <path class="d-flow" d="M 240 110 L 240 140 L 168 140 L 168 176"
+        marker-end="url(#arrow)"/>
+  <path class="d-flow" d="M 400 110 L 400 140 L 472 140 L 472 176"
+        marker-end="url(#arrow)"/>
+  <text class="d-label" x="150" y="136" text-anchor="end"
+        fill="var(--ink-secondary)">no</text>
+  <text class="d-label" x="490" y="136" fill="var(--ink-secondary)">yes</text>
+
+  <!-- ===== first party ===== -->
+  <rect x="30" y="180" width="276" height="196" rx="7"
+        fill="var(--layer-knowledge)" fill-opacity="0.12"
+        stroke="var(--layer-knowledge)" stroke-width="2"/>
+  <text class="d-label" x="48" y="208">First party</text>
+  <text class="d-sub"   x="48" y="228">Ours. We decide it, we change it.</text>
+  <g fill="var(--surface)" stroke="var(--layer-knowledge)" stroke-width="1.5">
+    <rect x="48" y="244" width="240" height="30" rx="5"/>
+    <rect x="48" y="282" width="240" height="30" rx="5"/>
+    <rect x="48" y="320" width="240" height="30" rx="5"/>
+  </g>
+  <g class="d-small" fill="var(--ink)">
+    <text x="60" y="263">our principles and patterns</text>
+    <text x="60" y="301">our systems and decisions</text>
+    <text x="60" y="339">our standards and runbooks</text>
+  </g>
+
+  <!-- ===== third party ===== -->
+  <rect x="334" y="180" width="276" height="196" rx="7"
+        fill="var(--layer-agent)" fill-opacity="0.10"
+        stroke="var(--layer-agent)" stroke-width="2"/>
+  <text class="d-label" x="352" y="208">Third party</text>
+  <text class="d-sub"   x="352" y="228">Interpreted. The source moves; we follow.</text>
+  <g fill="var(--surface)" stroke="var(--layer-agent)" stroke-width="1.5">
+    <rect x="352" y="244" width="240" height="30" rx="5"/>
+    <rect x="352" y="282" width="240" height="30" rx="5"/>
+    <rect x="352" y="320" width="240" height="30" rx="5"/>
+  </g>
+  <g class="d-small" fill="var(--ink)">
+    <text x="364" y="263">card scheme rules</text>
+    <text x="364" y="301">regulation and compliance</text>
+    <text x="364" y="339">vendor and platform docs</text>
+  </g>
+
+  <text class="d-small" x="320" y="404" text-anchor="middle"
+        fill="var(--ink-secondary)">
+    The test returns an answer, not a debate. Most such splits do not.
+  </text>
+</svg>
+</figure>
+      <ul class="points">
+<li><strong>First party</strong> is ours: we decide it and we change it</li>
+<li><strong>Third party</strong> is interpreted: the source moves and we must follow</li>
+<li>One test decides it — <strong>is there a tight, traceable lineage to an external source?</strong></li>
+<li>It returns an answer, not a debate</li>
+</ul>
+    </div>
+    <aside class="notes"><h4>First-party knowledge</h4>
+<p><em>Knowledge you author yourself — born inside the organization and owned end to end.</em></p>
+<ul>
+<li><strong>Requirements knowledge</strong> — requirement documents.</li>
+<li><strong>Architectural knowledge</strong> — solution architectures, principles, decision</li>
+<p>records.</p>
+<li><strong>Security knowledge</strong> — threat models, standards, controls.</li>
+<li><strong>Engineering knowledge</strong> — code patterns, API contracts.</li>
+<li><strong>Platform knowledge</strong> — infrastructure, deployment.</li>
+<li><strong>The current system view</strong> — the asset registry of what is actually</li>
+<p>deployed.</p>
+</ul>
+<h4>Third-party knowledge</h4>
+<p><em>Knowledge that starts as world knowledge but gets contextualized until it becomes yours.</em></p>
+<ul>
+<li>Our organization&#x27;s specific ruling on how a card scheme rule applies to our</li>
+<p>payment flows.</p>
+<li>Our interpretation of a regulatory requirement, turned into internal policy.</li>
+</ul>
+<h4>The separating test</h4>
+<p><strong>Is there a tight, traceable lineage back to an external source we must keep in sync?</strong></p>
+<ul>
+<li><strong>Yes</strong> → third-party.</li>
+<li><strong>No — it is a genuine synthesis of our own</strong> → first-party.</li>
+</ul></aside>
+  </div>
+</section>
+<section class="slide layout-full" data-slide="3">
+  <div class="canvas">
+    <header><span class="eyebrow">3</span><h2>First-Party Knowledge by Stream</h2></header>
+    <div class="content">
+      <figure class="diagram"><!--
+  The eight streams, in delivery order. A `full` layout diagram, so the
+  viewBox is wide (900 x 300) rather than the 640 x 420 used by the split
+  layout slides.
+
+  Geometry: box width 92, step 107, first box at x = 30, last ends at 871.
+  Eight columns at this width is the reason each label is two short lines
+  and the "owns" hint is three words at most. If a stream is renamed to
+  something longer, widen the viewBox rather than shrinking the type.
+
+  Architecture carries the accent fill because section 9 takes that one
+  stream all the way down. The highlight is what makes the later slide feel
+  like a promise kept rather than a change of subject.
+-->
+<svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Eight streams in delivery order: Product, Design,
+                 Architecture, Engineering, Quality Engineering, Security,
+                 Operations, Platform. Architecture is highlighted as the
+                 stream taken all the way down later in the deck.">
+
+  <g stroke-width="1.5">
+    <rect x="30"  y="40" width="92" height="118" rx="6" fill="var(--surface-sunk)" stroke="var(--rule)"/>
+    <rect x="137" y="40" width="92" height="118" rx="6" fill="var(--surface-sunk)" stroke="var(--rule)"/>
+    <rect x="244" y="40" width="92" height="118" rx="6"
+          fill="var(--accent)" fill-opacity="0.14" stroke="var(--accent)" stroke-width="2.5"/>
+    <rect x="351" y="40" width="92" height="118" rx="6" fill="var(--surface-sunk)" stroke="var(--rule)"/>
+    <rect x="458" y="40" width="92" height="118" rx="6" fill="var(--surface-sunk)" stroke="var(--rule)"/>
+    <rect x="565" y="40" width="92" height="118" rx="6" fill="var(--surface-sunk)" stroke="var(--rule)"/>
+    <rect x="672" y="40" width="92" height="118" rx="6" fill="var(--surface-sunk)" stroke="var(--rule)"/>
+    <rect x="779" y="40" width="92" height="118" rx="6" fill="var(--surface-sunk)" stroke="var(--rule)"/>
+  </g>
+
+  <g text-anchor="middle" class="d-small" fill="var(--ink)" style="font-weight:600;font-size:13px">
+    <text x="76"  y="76">Product</text>
+    <text x="183" y="76">Design</text>
+    <text x="290" y="76">Architecture</text>
+    <text x="397" y="76">Engineering</text>
+    <text x="504" y="70">Quality</text>
+    <text x="504" y="86">Engineering</text>
+    <text x="611" y="76">Security</text>
+    <text x="718" y="76">Operations</text>
+    <text x="825" y="76">Platform</text>
+  </g>
+
+  <g text-anchor="middle" class="d-small">
+    <text x="76"  y="112">the what</text>
+    <text x="76"  y="127">and why</text>
+    <text x="183" y="112">the</text>
+    <text x="183" y="127">experience</text>
+    <text x="290" y="112">structure,</text>
+    <text x="290" y="127">and its change</text>
+    <text x="397" y="112">how it is</text>
+    <text x="397" y="127">built</text>
+    <text x="504" y="112">how we prove</text>
+    <text x="504" y="127">it works</text>
+    <text x="611" y="112">how we keep</text>
+    <text x="611" y="127">it safe</text>
+    <text x="718" y="112">how we</text>
+    <text x="718" y="127">run it</text>
+    <text x="825" y="112">what it</text>
+    <text x="825" y="127">runs on</text>
+  </g>
+
+  <!-- delivery order, stated once along the bottom -->
+  <path class="d-flow" d="M 30 196 L 866 196" marker-end="url(#arrow)"/>
+  <text class="d-small" x="30" y="222" fill="var(--ink-secondary)">delivery order</text>
+
+  <text class="d-small" x="290" y="256" text-anchor="middle" fill="var(--accent)"
+        style="font-weight:600">taken all the way down later</text>
+  <path d="M 290 236 L 290 208" stroke="var(--accent)" stroke-width="1.5"
+        fill="none" marker-end="url(#arrow-accent)"/>
+</svg>
+</figure>
+      <ul class="points">
+<li><strong>Eight streams</strong>, in delivery order, each owning a distinct slice</li>
+<li>This is the unit of decomposition for the whole deck</li>
+<li><strong>Architecture</strong> is the one taken all the way down, at the end</li>
+</ul>
+    </div>
+    <aside class="notes"><p>Eight streams, in delivery order.</p></aside>
+  </div>
+</section>
+<section class="slide layout-split" data-slide="4">
+  <div class="canvas">
+    <header><span class="eyebrow">4</span><h2>The Form of Knowledge</h2></header>
+    <div class="content">
+      <figure class="diagram"><!--
+  The form of knowledge: the tacit to explicit gate, then the four explicit
+  tiers as a rising staircase.
+
+  Two separate claims share one picture on purpose. The tacit gate is a
+  BINARY (an agent can reach it or it cannot), so it is drawn as a gate.
+  The four tiers are an ORDINAL scale, so they are drawn as monotonically
+  rising bars using the four step single hue ramp. Using one visual idiom
+  for both would flatten the difference between a threshold and a slope.
+
+  Bar colours are the tier ramp and must match diagram 05's markers, so a
+  tier keeps one colour wherever it appears in the deck.
+-->
+<svg viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Tacit knowledge sits behind a gate marked make explicit;
+                 until it passes, an agent cannot reach it. Past the gate,
+                 four rising bars show the explicit tiers from noisy
+                 unstructured through deliberate unstructured and semi
+                 structured to structured.">
+
+  <!-- ===== the tacit gate ===== -->
+  <rect x="24" y="26" width="196" height="72" rx="7" fill="var(--surface)"
+        stroke="var(--ink-muted)" stroke-width="2" stroke-dasharray="6 4"/>
+  <text class="d-label" x="122" y="54" text-anchor="middle">Tacit</text>
+  <text class="d-small" x="122" y="74" text-anchor="middle">in people's heads</text>
+  <text class="d-small" x="122" y="89" text-anchor="middle">unreachable by an agent</text>
+
+  <path class="d-flow" d="M 220 62 L 286 62" marker-end="url(#arrow-accent)"
+        stroke-width="2.5"/>
+  <rect x="290" y="34" width="118" height="56" rx="7" fill="var(--accent)"
+        fill-opacity="0.12" stroke="var(--accent)" stroke-width="2"/>
+  <text class="d-small" x="349" y="58" text-anchor="middle" fill="var(--accent)"
+        style="font-weight:600;font-size:13px">make explicit</text>
+  <text class="d-small" x="349" y="76" text-anchor="middle" fill="var(--accent)">the step most skipped</text>
+
+  <path class="d-flow" d="M 408 62 L 474 62" marker-end="url(#arrow)"
+        stroke-width="2.5"/>
+  <text class="d-label" x="482" y="58">Explicit</text>
+  <text class="d-small" x="482" y="78">an artifact exists</text>
+
+  <!-- ===== the four explicit tiers ===== -->
+  <path class="d-axis" d="M 60 356 L 600 356"/>
+
+  <rect x="80"  y="301" width="110" height="55"  rx="4" fill="var(--tier-1)"
+        stroke="var(--tier-3)" stroke-width="1.5"/>
+  <rect x="210" y="256" width="110" height="100" rx="4" fill="var(--tier-2)"
+        stroke="var(--tier-3)" stroke-width="1.5"/>
+  <rect x="340" y="211" width="110" height="145" rx="4" fill="var(--tier-3)"
+        stroke="var(--tier-4)" stroke-width="1.5"/>
+  <rect x="470" y="161" width="110" height="195" rx="4" fill="var(--tier-4)"
+        stroke="var(--tier-4)" stroke-width="1.5"/>
+
+  <g text-anchor="middle" class="d-small" fill="var(--ink)" style="font-weight:600">
+    <text x="135" y="278">noisy</text>
+    <text x="135" y="292">unstructured</text>
+    <text x="265" y="233">deliberate</text>
+    <text x="265" y="247">unstructured</text>
+    <text x="395" y="188">semi</text>
+    <text x="395" y="202">structured</text>
+    <text x="525" y="138">structured</text>
+  </g>
+
+  <g text-anchor="middle" class="d-small">
+    <text x="135" y="374">Slack, tickets,</text>
+    <text x="135" y="388">meeting notes</text>
+    <text x="265" y="374">Confluence,</text>
+    <text x="265" y="388">design docs</text>
+    <text x="395" y="374">markdown,</text>
+    <text x="395" y="388">tags, labels</text>
+    <text x="525" y="374">knowledge graph,</text>
+    <text x="525" y="388">schemas, registry</text>
+  </g>
+
+  <text class="d-small" x="600" y="152" text-anchor="end" fill="var(--tier-4)"
+        style="font-weight:600">most machine readable</text>
+</svg>
+</figure>
+      <ul class="points">
+<li><strong>Tacit knowledge cannot be consumed by an agent at all</strong> — making it explicit is the first step, and the one most often skipped</li>
+<li>Once explicit, four tiers from noisy to structured</li>
+<li>The tiers differ in <strong>how machine-readable</strong> they are, not in how valuable</li>
+</ul>
+    </div>
+    <aside class="notes"><h4>The foundational axis: tacit versus explicit</h4>
+<p><strong>Tacit knowledge</strong> lives in people&#x27;s heads and <strong>cannot be consumed by an agent in that state</strong>. <strong>Explicit knowledge</strong> has been captured into an artifact an agent can reach.</p>
+<p>The critical first step is converting tacit into explicit. Until that happens, a whole layer of our most valuable knowledge is invisible to agents.</p>
+<h4>Once explicit: four categories, least to most machine-readable</h4>
+<ul>
+<li><strong>Noisy unstructured</strong> — the most chaotic. Conversational records: Slack</li>
+<p>threads, ticket comments, meeting notes, meeting recordings.</p>
+<li><strong>Deliberate unstructured</strong> — the Confluence-page type. Authored, durable,</li>
+<p>intentional: requirement documents, architecture docs, technical designs, decision records.</p>
+<li><strong>Semi-structured</strong> — markdown and readme files; tags and metadata labels,</li>
+<p>such as tagged tickets or labelled pages. Some deliberate shape, but still not fully queryable.</p>
+<li><strong>Structured</strong> — the ordered end. The knowledge graph as the most</li>
+<p>explicitly modeled form, plus database schemas and the asset registry.</p>
+</ul></aside>
+  </div>
+</section>
+<section class="slide layout-full" data-slide="5">
+  <div class="canvas">
+    <header><span class="eyebrow">5</span><h2>The Economics of Knowledge Form</h2></header>
+    <div class="content">
+      <figure class="diagram"><!--
+  The economics of knowledge form. THE ONLY REAL CHART IN THE DECK.
+
+  Two panels, not one. Accuracy and token cost are different measures on
+  different scales, and putting them on one plot with two y axes is the
+  single worst thing you can do to a chart: the crossing point becomes an
+  artefact of where you happened to put the axes, and the audience reads a
+  relationship that is not in the data. Two panels sharing the same four
+  categories says the same thing honestly.
+
+  The y axes are deliberately UNNUMBERED, low to high. The underlying claims
+  are not measured yet (review-notes.md item 4), so numbers would be false
+  precision. Unnumbered axes plus the caption make the slide say "this is
+  the shape we expect" rather than "this is what we found", which is what is
+  actually true and is much harder to attack.
+
+  The point of the pairing is the contrast in shape: accuracy is a SLOPE,
+  cost is a CLIFF. Marker colours are the four tier ramp steps, the same
+  encoding diagram 04 uses, so a tier keeps one colour across the deck.
+-->
+<svg viewBox="0 0 900 340" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Two panels over the four knowledge tiers. Left: agent
+                 accuracy rises steadily from noisy unstructured to
+                 structured. Right: token cost stays high across the first
+                 three tiers then collapses at the structured tier. Accuracy
+                 improves as a slope; cost improves as a step change.">
+
+  <!-- ================= panel A: accuracy ================= -->
+  <text class="d-label" x="60" y="34">Agent accuracy</text>
+  <text class="d-small" x="60" y="52">rises steadily, tier by tier</text>
+
+  <path class="d-axis" d="M 60 250 L 400 250"/>
+  <path class="d-axis" d="M 60 60 L 60 250"/>
+  <text class="d-small" x="52" y="66"  text-anchor="end">high</text>
+  <text class="d-small" x="52" y="252" text-anchor="end">low</text>
+
+  <path d="M 95 216 L 190 165 L 285 121 L 380 70"
+        fill="none" stroke="var(--ink-muted)" stroke-width="2"
+        stroke-linecap="round"/>
+  <g stroke="var(--surface)" stroke-width="2">
+    <circle cx="95"  cy="216" r="5.5" fill="var(--tier-1)"/>
+    <circle cx="190" cy="165" r="5.5" fill="var(--tier-2)"/>
+    <circle cx="285" cy="121" r="5.5" fill="var(--tier-3)"/>
+    <circle cx="380" cy="70"  r="5.5" fill="var(--tier-4)"/>
+  </g>
+  <text class="d-small" x="380" y="54" text-anchor="middle"
+        fill="var(--tier-4)">near deterministic</text>
+
+  <!-- ================= panel B: token cost ================= -->
+  <text class="d-label" x="500" y="34">Token cost per answer</text>
+  <text class="d-small" x="500" y="52">barely moves, then collapses</text>
+
+  <path class="d-axis" d="M 500 250 L 840 250"/>
+  <path class="d-axis" d="M 500 60 L 500 250"/>
+  <text class="d-small" x="492" y="66"  text-anchor="end">high</text>
+  <text class="d-small" x="492" y="252" text-anchor="end">low</text>
+
+  <path d="M 535 70 L 630 132 L 725 140 L 820 235"
+        fill="none" stroke="var(--ink-muted)" stroke-width="2"
+        stroke-linecap="round"/>
+  <g stroke="var(--surface)" stroke-width="2">
+    <circle cx="535" cy="70"  r="5.5" fill="var(--tier-1)"/>
+    <circle cx="630" cy="132" r="5.5" fill="var(--tier-2)"/>
+    <circle cx="725" cy="140" r="5.5" fill="var(--tier-3)"/>
+    <circle cx="820" cy="235" r="5.5" fill="var(--tier-4)"/>
+  </g>
+
+  <!-- the cliff, called out because it is the argument -->
+  <path d="M 760 150 L 760 228" stroke="var(--layer-agent)" stroke-width="2"
+        stroke-dasharray="4 3" fill="none"/>
+  <text class="d-label" x="772" y="182" fill="var(--layer-agent)"
+        style="font-size:13px">the step change</text>
+  <text class="d-small" x="772" y="199" fill="var(--layer-agent)">only here</text>
+
+  <!-- ================= shared category labels ================= -->
+  <g class="d-small" text-anchor="middle">
+    <text x="95"  y="272">noisy</text>
+    <text x="95"  y="286">unstructured</text>
+    <text x="190" y="272">deliberate</text>
+    <text x="190" y="286">unstructured</text>
+    <text x="285" y="272">semi</text>
+    <text x="285" y="286">structured</text>
+    <text x="380" y="272">structured</text>
+    <text x="535" y="272">noisy</text>
+    <text x="535" y="286">unstructured</text>
+    <text x="630" y="272">deliberate</text>
+    <text x="630" y="286">unstructured</text>
+    <text x="725" y="272">semi</text>
+    <text x="725" y="286">structured</text>
+    <text x="820" y="272">structured</text>
+  </g>
+
+  <text class="d-small" x="60" y="322" fill="var(--ink-secondary)">
+    Axes are unnumbered on purpose: this is the expected shape, not a measurement.
+  </text>
+</svg>
+</figure>
+      <ul class="points">
+<li>Accuracy improves <strong>gradually</strong> across all four tiers</li>
+<li>Token cost is a <strong>step change, not a slope</strong> — it only pays off at the structured tier</li>
+<li>That asymmetry is what says *where to spend*</li>
+</ul>
+    </div>
+    <aside class="notes"><p><em>As knowledge becomes more structured, agents get more accurate — though the cost benefit only really kicks in at the structured tier.</em></p>
+<h4>Accuracy</h4>
+<p>Agent accuracy rises steadily as knowledge becomes more structured.</p>
+<ul>
+<li><strong>Noisy unstructured</strong> — lowest accuracy. The agent is inferring signal from</li>
+<p>messy, often contradictory chatter.</p>
+<li><strong>Deliberate unstructured</strong> — moderate. The prose is coherent and authored,</li>
+<p>but accuracy still depends on the agent&#x27;s reading comprehension holding up.</p>
+<li><strong>Semi-structured</strong> — good. Metadata constrains the space for the agent to</li>
+<p>get things wrong.</p>
+<li><strong>Structured</strong> — near deterministic. A query returns a correct answer or</li>
+<p>none at all; there is no interpretation step to fail.</p>
+</ul>
+<h4>Token efficiency</h4>
+<ul>
+<li><strong>Noisy unstructured</strong> — most expensive. The agent has to ingest large</li>
+<p>volumes of raw material just to extract signal.</p>
+<li><strong>Deliberate unstructured</strong> and <strong>semi-structured</strong> — roughly the same cost</li>
+<p>as each other. Tags help the agent find the right section, but do not reduce how much it has to read once it is there.</p>
+<li><strong>Structured</strong> — drops sharply to near zero. At the limit, a query or a</li>
+<p>simple script answers the question with no agent inference at all.</p>
+</ul>
+<h4>The upshot</h4>
+<p><strong>Accuracy improves gradually across all four tiers, but the token efficiency gain is not gradual — it is a step change that only really pays off once knowledge crosses into the structured tier.</strong></p></aside>
+  </div>
+</section>
+<section class="slide layout-split" data-slide="6">
+  <div class="canvas">
+    <header><span class="eyebrow">6</span><h2>Current State Architecture</h2></header>
+    <div class="content">
+      <figure class="diagram"><!--
+  Current state. FIRST OF THE THREE BAND FAMILY (06, 07, 08). These three
+  share one literal skeleton: identical band x/y/width/height and identical
+  label positions. Only the contents and the arrows change, so the audience
+  sees the same architecture move across three slides rather than three
+  separate pictures. If you change geometry here, change it in all three.
+
+  Band geometry, fixed across the family:
+    x = 30, width = 580
+    band 1 (top)    y = 18,  h = 88
+    band 2 (middle) y = 126, h = 98
+    band 3 (bottom) y = 242, h = 120
+-->
+<svg viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Current state: AI tooling on top, humans as the mandatory
+                 intermediary in the middle, an unstructured knowledge layer
+                 beneath. Every path from knowledge to tooling converges
+                 through the human layer.">
+
+  <!-- band 1: AI tooling -->
+  <rect x="30" y="18" width="580" height="88" rx="7"
+        fill="var(--layer-agent)" fill-opacity="0.10"
+        stroke="var(--layer-agent)" stroke-width="2"/>
+  <text class="d-label" x="46" y="44">AI tooling, used ad hoc</text>
+  <text class="d-sub"   x="46" y="64">Individual choice, no shared grounding</text>
+  <g fill="var(--surface)" stroke="var(--layer-agent)" stroke-width="1.5">
+    <rect x="352" y="72" width="76" height="22" rx="11"/>
+    <rect x="438" y="72" width="76" height="22" rx="11"/>
+    <rect x="524" y="72" width="70" height="22" rx="11"/>
+  </g>
+  <g class="d-small" text-anchor="middle">
+    <text x="390" y="87">chat</text>
+    <text x="476" y="87">copilot</text>
+    <text x="559" y="87">agents</text>
+  </g>
+
+  <!-- band 2: humans -->
+  <rect x="30" y="126" width="580" height="98" rx="7"
+        fill="var(--layer-human)" fill-opacity="0.12"
+        stroke="var(--layer-human)" stroke-width="2"/>
+  <text class="d-label" x="46" y="152">Humans</text>
+  <text class="d-sub"   x="46" y="172">The mandatory intermediary</text>
+  <text class="d-small" x="46" y="206">Read, interpret, carry, retype</text>
+
+  <!-- band 3: knowledge -->
+  <rect x="30" y="242" width="580" height="120" rx="7"
+        fill="var(--layer-knowledge)" fill-opacity="0.12"
+        stroke="var(--layer-knowledge)" stroke-width="2"/>
+  <text class="d-label" x="46" y="268">Knowledge layer</text>
+  <text class="d-sub"   x="46" y="288">Overwhelmingly unstructured</text>
+  <g fill="var(--tier-1)" stroke="var(--tier-3)" stroke-width="1.5">
+    <rect x="46"  y="306" width="122" height="38" rx="5"/>
+    <rect x="180" y="306" width="122" height="38" rx="5"/>
+    <rect x="314" y="306" width="122" height="38" rx="5"/>
+    <rect x="448" y="306" width="146" height="38" rx="5"/>
+  </g>
+  <g class="d-small" text-anchor="middle" fill="var(--ink)">
+    <text x="107" y="330">Slack, tickets</text>
+    <text x="241" y="330">Confluence</text>
+    <text x="375" y="330">repos, readmes</text>
+    <text x="521" y="330">scattered, unlinked</text>
+  </g>
+
+  <!-- THE POINT: three paths converge into one human, then one path up. -->
+  <g class="d-flow" stroke-linecap="round">
+    <path d="M 150 306 C 150 260 300 230 316 196" marker-end="url(#arrow)"/>
+    <path d="M 320 306 C 320 260 320 230 320 196" marker-end="url(#arrow)"/>
+    <path d="M 490 306 C 490 260 340 230 324 196" marker-end="url(#arrow)"/>
+    <path d="M 320 140 L 320 112" marker-end="url(#arrow)"/>
+  </g>
+  <circle cx="320" cy="188" r="5" fill="var(--layer-human)"/>
+  <text class="d-small" x="334" y="192" fill="var(--layer-human)">every handoff</text>
+
+</svg>
+</figure>
+      <ul class="points">
+<li>AI tooling used <strong>ad hoc</strong>, by individual choice, with no shared grounding</li>
+<li>Humans are the <strong>mandatory intermediary</strong> — every handoff routes through a person</li>
+<li>The knowledge layer is overwhelmingly unstructured</li>
+</ul>
+    </div>
+    <aside class="notes"><h4>Top layer — AI tooling, used ad hoc</h4>
+<p>Claude and Atlassian&#x27;s Rovo agent, picked up occasionally by individuals for one-off tasks: drafting something, summarizing a ticket.</p>
+<h4>Middle layer — humans, the mandatory intermediary</h4>
+<p>Each person draws selectively and unevenly from the knowledge layer beneath them, depending on their role and habits. One person relies mostly on their own tacit knowledge; another is the one who actually reads the architecture docs; another lives mostly in Slack threads.</p>
+<p>Delivery happens through human-to-human communication across the eight streams in order — Product, Design, Architecture, Engineering, Quality Engineering, Security, Operations, Platform — <strong>each stream handing context to the next entirely through people relaying it to each other.</strong></p>
+<h4>Bottom layer — the knowledge layer</h4>
+<p>The substrate everyone is drawing from unevenly. It contains:</p>
+<ul>
+<li><strong>Tacit knowledge</strong>, held only in people&#x27;s heads.</li>
+<li><strong>Noisy unstructured knowledge</strong> — Slack threads, ticket comments, meeting</li>
+<p>notes and recordings.</p>
+<li><strong>Deliberate unstructured knowledge</strong> — requirement documents, architecture</li>
+<p>docs, technical designs, decision records.</p>
+</ul>
+<h4>Takeaway</h4>
+<p>Knowledge access today is fragmented and person-dependent, AI is a side tool, and every cross-stream handoff still runs entirely through humans.</p></aside>
+  </div>
+</section>
+<section class="slide layout-split" data-slide="7">
+  <div class="canvas">
+    <header><span class="eyebrow">7</span><h2>Tactical Solution — Stream-Level Agents</h2></header>
+    <div class="content">
+      <figure class="diagram"><!--
+  Tactical state. SECOND OF THE THREE BAND FAMILY (06, 07, 08). Geometry is
+  identical to 06 by design; see that file's header. What changed from 06:
+
+    * humans move from the middle to the TOP band
+    * the middle band becomes one agent per stream, in parallel
+    * paths run straight up in parallel instead of converging on one point,
+      each through its own review gate
+    * the knowledge layer emphasises unstructured and semi structured
+
+  Only five agent chips are drawn, not eight. Section 3 already carries the
+  full stream list, and eight chips at this width would be unreadable.
+-->
+<svg viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Tactical state: humans on top holding review gates, a row of
+                 per-stream AI agents in the middle working in parallel, and a
+                 knowledge layer beneath weighted to unstructured and semi
+                 structured material.">
+
+  <!-- band 1: humans, now on top -->
+  <rect x="30" y="18" width="580" height="88" rx="7"
+        fill="var(--layer-human)" fill-opacity="0.12"
+        stroke="var(--layer-human)" stroke-width="2"/>
+  <text class="d-label" x="46" y="44">Humans</text>
+  <text class="d-sub"   x="46" y="64">A check or review gate on every output</text>
+  <text class="d-small" x="46" y="86">Still in the loop, no longer the courier</text>
+
+  <!-- band 2: agents, one per stream -->
+  <rect x="30" y="126" width="580" height="98" rx="7"
+        fill="var(--layer-agent)" fill-opacity="0.10"
+        stroke="var(--layer-agent)" stroke-width="2"/>
+  <text class="d-label" x="46" y="150">AI agents, one per stream</text>
+  <g fill="var(--surface)" stroke="var(--layer-agent)" stroke-width="1.5">
+    <rect x="46"  y="172" width="100" height="34" rx="5"/>
+    <rect x="156" y="172" width="100" height="34" rx="5"/>
+    <rect x="266" y="172" width="100" height="34" rx="5"/>
+    <rect x="376" y="172" width="100" height="34" rx="5"/>
+    <rect x="486" y="172" width="100" height="34" rx="5"/>
+  </g>
+  <g class="d-small" text-anchor="middle" fill="var(--ink)">
+    <text x="96"  y="193">Product</text>
+    <text x="206" y="193">Architecture</text>
+    <text x="316" y="193">Engineering</text>
+    <text x="426" y="193">Quality</text>
+    <text x="536" y="193">and the rest</text>
+  </g>
+
+  <!-- band 3: knowledge, weighted low on the tier ramp -->
+  <rect x="30" y="242" width="580" height="120" rx="7"
+        fill="var(--layer-knowledge)" fill-opacity="0.12"
+        stroke="var(--layer-knowledge)" stroke-width="2"/>
+  <text class="d-label" x="46" y="268">Knowledge layer</text>
+  <text class="d-sub"   x="46" y="288">Mostly unstructured and semi structured</text>
+  <rect x="46"  y="306" width="170" height="38" rx="5" fill="var(--tier-1)"
+        stroke="var(--tier-3)" stroke-width="1.5"/>
+  <rect x="226" y="306" width="170" height="38" rx="5" fill="var(--tier-2)"
+        stroke="var(--tier-3)" stroke-width="1.5"/>
+  <rect x="406" y="306" width="188" height="38" rx="5" fill="var(--tier-4)"
+        fill-opacity="0.18" stroke="var(--tier-4)" stroke-width="1.5"
+        stroke-dasharray="4 3"/>
+  <g class="d-small" text-anchor="middle" fill="var(--ink)">
+    <text x="131" y="330">unstructured</text>
+    <text x="311" y="330">semi structured</text>
+    <text x="500" y="330">structured, thin so far</text>
+  </g>
+
+  <!-- THE CHANGE FROM 06: parallel paths, each with its own gate. -->
+  <g class="d-flow" stroke-linecap="round">
+    <path d="M 96  306 L 96  212" marker-end="url(#arrow)"/>
+    <path d="M 206 306 L 206 212" marker-end="url(#arrow)"/>
+    <path d="M 316 306 L 316 212" marker-end="url(#arrow)"/>
+    <path d="M 426 306 L 426 212" marker-end="url(#arrow)"/>
+    <path d="M 536 306 L 536 212" marker-end="url(#arrow)"/>
+    <path d="M 96  166 L 96  112" marker-end="url(#arrow-accent)"/>
+    <path d="M 206 166 L 206 112" marker-end="url(#arrow-accent)"/>
+    <path d="M 316 166 L 316 112" marker-end="url(#arrow-accent)"/>
+    <path d="M 426 166 L 426 112" marker-end="url(#arrow-accent)"/>
+    <path d="M 536 166 L 536 112" marker-end="url(#arrow-accent)"/>
+  </g>
+  <g fill="var(--surface)" stroke="var(--layer-human)" stroke-width="1.5">
+    <rect x="89"  y="132" width="14" height="14" rx="2"/>
+    <rect x="199" y="132" width="14" height="14" rx="2"/>
+    <rect x="309" y="132" width="14" height="14" rx="2"/>
+    <rect x="419" y="132" width="14" height="14" rx="2"/>
+    <rect x="529" y="132" width="14" height="14" rx="2"/>
+  </g>
+  <text class="d-small" x="558" y="144" fill="var(--layer-human)">gates</text>
+</svg>
+</figure>
+      <ul class="points">
+<li>One agent <strong>per stream</strong>, working in parallel instead of through a courier</li>
+<li>Humans move from carrying the work to <strong>holding a review gate</strong> on it</li>
+<li><strong>The honest trade:</strong> organizational consistency for speed</li>
+</ul>
+    </div>
+    <aside class="notes"><h4>Top layer — humans</h4>
+<p>Still steering and still making the judgment calls, but now delegating more of the day-to-day retrieval work to the layer below them instead of doing everything themselves.</p>
+<h4>Middle layer — AI agents, one per stream</h4>
+<p>No longer ad hoc: a standing part of each stream&#x27;s workflow.</p>
+<p>How much each stream&#x27;s agent leans on semi-structured versus unstructured knowledge varies by that stream&#x27;s technical maturity. A stream like Product, which is not heavily technical, might still work mostly off deliberate unstructured content — requirement docs and meeting notes — <strong>and that is acceptable as long as there is a validation step in place</strong>, a human check or review gate, rather than blind trust in the agent&#x27;s read. More technical streams can lean further into semi-structured, tagged content for more reliable retrieval.</p>
+<h4>Bottom layer — the knowledge layer, emphasis on unstructured and semi-structured</h4>
+<ul>
+<li>A deliberate <strong>tagging and labelling effort</strong> layered on top of existing</li>
+<p>noisy and deliberate unstructured content, specifically so agents can consume more of it.</p>
+<li>Critically, this is also where the organization **starts actively converting</li>
+<p>tacit knowledge into explicit knowledge for the first time** — capturing decisions, rationale and experience that used to live only in people&#x27;s heads, since agents cannot consume it any other way. That conversion effort is what grows the pool of usable knowledge over time, not just tagging what already existed.</p>
+</ul>
+<h4>The critical caveat</h4>
+<p><strong>This is still not an organizational, shared knowledge layer.</strong> It is federated: each of the eight streams builds its own agent and tags its own knowledge independently, with no common schema or vocabulary guaranteeing consistency across streams yet.</p>
+<h4>Takeaway</h4>
+<p>This step makes each stream faster on its own while also beginning to unlock tacit knowledge for the first time — but it trades organizational consistency for speed, and validation gates matter most wherever a stream still relies heavily on unstructured input.</p></aside>
+  </div>
+</section>
+<section class="slide layout-split" data-slide="8">
+  <div class="canvas">
+    <header><span class="eyebrow">8</span><h2>Target State Architecture</h2></header>
+    <div class="content">
+      <figure class="diagram"><!--
+  Target state. THIRD OF THE THREE BAND FAMILY (06, 07, 08). Geometry is
+  identical to 06 and 07 by design; see 06's header. What changed from 07:
+
+    * the arrows between agents turn HORIZONTAL. This is the whole point of
+      the slide: agent to agent communication becomes the primary driver,
+      so the picture stops being a column of vertical handoffs.
+    * only one path still runs up to the humans, and it is dashed and
+      labelled as the exception route
+    * the knowledge layer's weight moves to the structured end of the tier
+      ramp, and each block gains a single named owner
+
+  The vertical-to-horizontal flip is what makes the three slide progression
+  legible without narration. Do not restyle it into something prettier that
+  loses the contrast with 07.
+-->
+<svg viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Target state: humans on top handling direction and
+                 exceptions only, per-stream agents in the middle passing
+                 work horizontally to each other, and a structured knowledge
+                 layer beneath with one owner per piece.">
+
+  <!-- band 1: humans, reduced to direction and exceptions -->
+  <rect x="30" y="18" width="580" height="88" rx="7"
+        fill="var(--layer-human)" fill-opacity="0.12"
+        stroke="var(--layer-human)" stroke-width="2"/>
+  <text class="d-label" x="46" y="44">Humans</text>
+  <text class="d-sub"   x="46" y="64">Direction, and the exceptions only</text>
+  <text class="d-small" x="46" y="86">On the loop, not in it</text>
+
+  <!-- band 2: agents, now talking to each other -->
+  <rect x="30" y="126" width="580" height="98" rx="7"
+        fill="var(--layer-agent)" fill-opacity="0.10"
+        stroke="var(--layer-agent)" stroke-width="2"/>
+  <text class="d-label" x="46" y="150">AI agents, one per stream</text>
+  <g fill="var(--surface)" stroke="var(--layer-agent)" stroke-width="1.5">
+    <rect x="46"  y="172" width="100" height="34" rx="5"/>
+    <rect x="156" y="172" width="100" height="34" rx="5"/>
+    <rect x="266" y="172" width="100" height="34" rx="5"/>
+    <rect x="376" y="172" width="100" height="34" rx="5"/>
+    <rect x="486" y="172" width="100" height="34" rx="5"/>
+  </g>
+  <g class="d-small" text-anchor="middle" fill="var(--ink)">
+    <text x="96"  y="193">Product</text>
+    <text x="206" y="193">Architecture</text>
+    <text x="316" y="193">Engineering</text>
+    <text x="426" y="193">Quality</text>
+    <text x="536" y="193">and the rest</text>
+  </g>
+
+  <!-- THE CHANGE FROM 07: the flow is horizontal now. -->
+  <g stroke="var(--layer-agent)" stroke-width="2.5" fill="none"
+     stroke-linecap="round">
+    <path d="M 148 189 L 152 189" marker-end="url(#arrow-warn)"/>
+    <path d="M 258 189 L 262 189" marker-end="url(#arrow-warn)"/>
+    <path d="M 368 189 L 372 189" marker-end="url(#arrow-warn)"/>
+    <path d="M 478 189 L 482 189" marker-end="url(#arrow-warn)"/>
+  </g>
+
+  <!-- the one remaining upward path, deliberately dashed and singular -->
+  <path class="d-flow" d="M 316 166 L 316 112" stroke-dasharray="5 4"
+        marker-end="url(#arrow-accent)"/>
+  <text class="d-small" x="330" y="140" fill="var(--layer-human)">exceptions</text>
+
+  <!-- band 3: knowledge, weight moved to structured, with owners -->
+  <rect x="30" y="242" width="580" height="120" rx="7"
+        fill="var(--layer-knowledge)" fill-opacity="0.12"
+        stroke="var(--layer-knowledge)" stroke-width="2"/>
+  <text class="d-label" x="46" y="268">Knowledge layer, pushed to structured</text>
+  <text class="d-sub"   x="46" y="288">Each piece owned by exactly one agent</text>
+  <rect x="46"  y="306" width="170" height="38" rx="5" fill="var(--tier-1)"
+        fill-opacity="0.35" stroke="var(--tier-3)" stroke-width="1.5"
+        stroke-dasharray="4 3"/>
+  <rect x="226" y="306" width="170" height="38" rx="5" fill="var(--tier-3)"
+        stroke="var(--tier-4)" stroke-width="1.5"/>
+  <rect x="406" y="306" width="188" height="38" rx="5" fill="var(--tier-4)"
+        stroke="var(--tier-4)" stroke-width="1.5"/>
+  <text class="d-small" x="131" y="330" text-anchor="middle" fill="var(--ink)">still some prose</text>
+  <text class="d-onfill" x="311" y="331" text-anchor="middle" style="font-size:12px">schemas, registry</text>
+  <text class="d-onfill" x="500" y="331" text-anchor="middle" style="font-size:12px">the knowledge graph</text>
+</svg>
+</figure>
+      <ul class="points">
+<li><strong>Agent-to-agent communication becomes the primary driver</strong> — the flow turns horizontal</li>
+<li>Humans handle <strong>direction and exceptions</strong>, not every handoff</li>
+<li>Every piece of knowledge has <strong>exactly one owner</strong></li>
+</ul>
+    </div>
+    <aside class="notes"><h4>Top layer — humans</h4>
+<p>Steering the overall direction and evolution of the AI-DLC, and handling exceptions — stepping in for the edge cases and judgment calls that fall outside what agent-to-agent communication can resolve on its own.</p>
+<h4>Middle layer — AI agents, one per stream</h4>
+<p>Each owns its own stream&#x27;s knowledge. The key shift: <strong>agent-to-agent communication becomes the primary driver of the DLC</strong> — Architecture&#x27;s agent talking directly to Engineering&#x27;s agent, Engineering&#x27;s to Quality Engineering&#x27;s, and so on across the streams, rather than every handoff routing through a human as it did in the tactical stage.</p>
+<h4>Bottom layer — the knowledge layer, pushed toward structured</h4>
+<p>The knowledge graph, schemas, the asset registry.</p>
+<p><strong>Each piece of knowledge is owned by exactly one agent</strong> — the single source of truth responsible for keeping it accurate and current. Knowledge is shared and queryable across streams, but other agents access it <em>through its owner</em> rather than maintaining their own duplicate copy. That is what keeps agent-to-agent communication trustworthy instead of creating conflicting sources of truth.</p>
+<h4>Takeaway</h4>
+<p>The target state completes the shift from human-mediated to agent-mediated delivery. Humans move from being the relay for every handoff to being the directional and exception-handling layer, while structured knowledge with clear ownership is what makes machine-to-machine collaboration reliable enough to drive the AI-DLC.</p></aside>
+  </div>
+</section>
+<section class="slide layout-split" data-slide="9">
+  <div class="canvas">
+    <header><span class="eyebrow">9</span><h2>Architecture Knowledge, Set Up for Use Across Tyro</h2></header>
+    <div class="content">
+      <figure class="diagram"><!--
+  Architecture knowledge set up for use across Tyro: the second deliverable.
+
+  The one thing this diagram must do is keep the honest line visible. SOLID
+  is the path that works today; DASHED is the path that is understood and
+  deliberately deferred because Rovo is cloud and the graph is local. A
+  single-styled pipeline would quietly claim the whole chain is built, to an
+  audience that can ask to see it. The legend states the convention rather
+  than leaving it to be inferred.
+
+  git is drawn as the hub with a heavier stroke because it is the source of
+  truth and both paths leave from it. Confluence sits ON the deferred path
+  as an output, which is the inversion of today's arrangement and the single
+  most important thing on the slide to agree.
+-->
+<svg viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Architects curate typed entities in git, where pull request
+                 review is the quality gate. Solid arrows show the path that
+                 works today: git feeds a local agent the architects query.
+                 Dashed arrows show the deferred path: generated pages into a
+                 clean Confluence space, indexed by Rovo, reaching the rest
+                 of Tyro.">
+
+  <!-- ===== the working path, solid ===== -->
+  <rect x="20" y="86" width="120" height="70" rx="7"
+        fill="var(--layer-human)" fill-opacity="0.12"
+        stroke="var(--layer-human)" stroke-width="2"/>
+  <text class="d-small" x="80" y="114" text-anchor="middle" fill="var(--ink)"
+        style="font-weight:600;font-size:13px">Architects</text>
+  <text class="d-small" x="80" y="132" text-anchor="middle">author and</text>
+  <text class="d-small" x="80" y="146" text-anchor="middle">review</text>
+
+  <path class="d-flow" d="M 140 121 L 170 121" marker-end="url(#arrow)"
+        stroke-width="2.5"/>
+
+  <rect x="175" y="80" width="160" height="82" rx="7"
+        fill="var(--layer-knowledge)" fill-opacity="0.16"
+        stroke="var(--layer-knowledge)" stroke-width="3"/>
+  <text class="d-small" x="255" y="104" text-anchor="middle" fill="var(--ink)"
+        style="font-weight:600;font-size:13px">git: the typed graph</text>
+  <text class="d-small" x="255" y="124" text-anchor="middle">7 entity types,</text>
+  <text class="d-small" x="255" y="138" text-anchor="middle">typed relationships</text>
+  <text class="d-small" x="255" y="155" text-anchor="middle" fill="var(--layer-knowledge)"
+        style="font-weight:600">source of truth</text>
+
+  <path class="d-flow" d="M 335 121 L 375 121" marker-end="url(#arrow)"
+        stroke-width="2.5"/>
+
+  <rect x="380" y="86" width="150" height="70" rx="7"
+        fill="var(--layer-agent)" fill-opacity="0.12"
+        stroke="var(--layer-agent)" stroke-width="2"/>
+  <text class="d-small" x="455" y="114" text-anchor="middle" fill="var(--ink)"
+        style="font-weight:600;font-size:13px">A local agent</text>
+  <text class="d-small" x="455" y="132" text-anchor="middle">grounded only on</text>
+  <text class="d-small" x="455" y="146" text-anchor="middle">this content</text>
+
+  <text class="d-small" x="545" y="118" fill="var(--layer-knowledge)"
+        style="font-weight:600">works</text>
+  <text class="d-small" x="545" y="133" fill="var(--layer-knowledge)"
+        style="font-weight:600">today</text>
+
+  <text class="d-small" x="20" y="64" fill="var(--ink-secondary)">
+    Pull request review is the quality gate. Architects never edit Confluence.
+  </text>
+
+  <!-- ===== the deferred path, dashed ===== -->
+  <path class="d-flow" d="M 255 162 C 255 200 150 200 130 246"
+        stroke-dasharray="5 4" marker-end="url(#arrow)" stroke-width="2.5"/>
+
+  <g fill="var(--surface)" stroke="var(--ink-muted)" stroke-width="1.5"
+     stroke-dasharray="5 4">
+    <rect x="30"  y="250" width="150" height="62" rx="6"/>
+    <rect x="200" y="250" width="150" height="62" rx="6"/>
+    <rect x="370" y="250" width="150" height="62" rx="6"/>
+  </g>
+  <g text-anchor="middle" class="d-small" fill="var(--ink)">
+    <text x="105" y="276" style="font-weight:600">one page per entity</text>
+    <text x="105" y="295">generated, never typed</text>
+    <text x="275" y="276" style="font-weight:600">clean Confluence space</text>
+    <text x="275" y="295">an output, not the source</text>
+    <text x="445" y="276" style="font-weight:600">Rovo indexes it</text>
+    <text x="445" y="295">the rest of Tyro asks</text>
+  </g>
+
+  <g class="d-flow" stroke-dasharray="5 4">
+    <path d="M 180 281 L 196 281" marker-end="url(#arrow)"/>
+    <path d="M 350 281 L 366 281" marker-end="url(#arrow)"/>
+  </g>
+
+  <rect x="20" y="330" width="500" height="34" rx="5"
+        fill="var(--layer-agent)" fill-opacity="0.10"
+        stroke="var(--layer-agent)" stroke-width="1.5"/>
+  <text class="d-small" x="34" y="352" fill="var(--ink)">
+    Deferred, not unknown: Rovo is cloud, the graph is local, so this needs the org deployment path.
+  </text>
+
+  <!-- ===== legend, because the line style carries the meaning ===== -->
+  <g class="d-flow">
+    <path d="M 26 392 L 60 392"/>
+  </g>
+  <text class="d-small" x="68" y="396">working today</text>
+  <path class="d-flow" d="M 178 392 L 212 392" stroke-dasharray="5 4"/>
+  <text class="d-small" x="220" y="396">deferred</text>
+  <text class="d-small" x="330" y="396" fill="var(--ink-secondary)">
+    One owner per entity, as in the target state.
+  </text>
+</svg>
+</figure>
+      <ul class="points">
+<li>Curate in git — <strong>Confluence becomes an output, not the source of truth</strong></li>
+<li>The <strong>local path works today</strong>; org-wide reach through Rovo is deferred, not unknown</li>
+<li>A proof of concept with a working local path, explicitly <strong>not a populated knowledge base</strong></li>
+</ul>
+    </div>
+    <aside class="notes"><p><em>The second half of the ask, answered as one stream taken all the way down. Architecture is used as the worked example because it is the only stream with a running proof of concept rather than a proposal.</em></p>
+<h4>Where it sits today: the deliberate-unstructured tier</h4>
+<p>Architecture knowledge is authored, durable and intentional — and it is Confluence pages. That places it squarely in <strong>tier 2 of section 4</strong>: readable by a human, reachable by an agent, but <strong>not queryable</strong>. Nothing tells an agent that a guardrail exists <em>because of</em> a principle, or that a decision has been superseded. Those relationships live only in the prose, or only in an architect&#x27;s head.</p>
+<p>This is the honest current-state read, and it is the reason the move is worth making: by section 5&#x27;s economics, tier 2 is exactly where accuracy is moderate and token cost is high.</p>
+<h4>What structuring it actually means</h4>
+<p>Not &quot;tidier documents&quot; — a <strong>typed graph</strong>. Architecture knowledge is modelled as seven entity types, split by <em>how a statement behaves</em> rather than by subject: <code>principle</code>, <code>guardrail</code>, <code>pattern</code>, <code>reference-architecture</code>, <code>decision</code>, <code>system</code>, <code>domain</code>.</p>
+<p><strong>The relationships are the point</strong>, not the entities: <code>guardrail DERIVES_FROM principle</code>, <code>pattern REQUIRES guardrail</code>, <code>principle CONFLICTS_WITH pattern</code>, <code>decision SUPERSEDES decision</code>, <code>system USES pattern</code>. That shape enables two things flat document retrieval cannot do at any level of tidiness — <strong>contradiction detection</strong> and <strong>dependency tracing</strong>. It is also what makes an unjustified rule visible: a guardrail with no principle behind it is the exact Confluence failure mode being replaced.</p>
+<h4>Curate in git, publish outward</h4>
+<ul>
+<li><strong>Architects edit git, never raw Confluence.</strong> Pull-request review is the</li>
+<p>quality gate, and the history is the audit trail.</p>
+<li><strong>One structured page per entity is generated</strong> into a dedicated clean</li>
+<p>space; Rovo indexes that space.</p>
+<li><strong>Confluence becomes an output, not the source of truth</strong> — which inverts</li>
+<p>today&#x27;s arrangement, and is the single most important thing to agree.</p>
+</ul>
+<h4>How the rest of Tyro reaches it — and the honest constraint</h4>
+<p>Architects reach it <strong>today</strong>, locally, through their AI tooling. Reach for <strong>everyone else</strong> runs through Rovo indexing the published space, and Rovo is cloud while the graph is local — so org-wide access has to go through the standard deployment path, promoted development → staging → production. <strong>That step is deliberately deferred, and is stated as deferred rather than glossed.</strong> The local path is what is proven; the org-wide path is understood but not built.</p>
+<h4>Ownership</h4>
+<p><strong>One owner per entity</strong>, which is simply section 8&#x27;s rule applied to the stream that is furthest along. Consistency matters here: the target state&#x27;s reliability claim rests on single ownership, so the first stream to get there has to demonstrate it rather than special-case itself.</p>
+<h4>Where the proof of concept actually is</h4>
+<p>Real today: the schema above, <strong>39 domain entities</strong> ingested from the Reference Domain Model, a first hand-authored principle, a local agent grounded only on that curated content, and a viewer over the graph. That is a <strong>proof of concept with a working local path</strong> — not a populated architecture knowledge base. The remaining entity types are authored, not invented, and that authoring is the bulk of the work ahead.</p>
+<p><strong>One relationship to settle before the huddle:</strong> those 39 domains come from the Reference Domain Model, which is also the subject of the third item in this same ask. Architecture owns the model; the testing-automation instance is authored separately. Same source, two uses — worth saying out loud so it does not read as two competing answers.</p>
+<h4>Takeaway</h4>
+<p>Architecture knowledge moves from tier 2 to the structured tier by being curated as a typed graph in git, with Confluence as a generated output and single ownership per entity. <strong>The local path is proven and the org-wide path is deferred, not unknown.</strong> Nothing in that sequence is specific to Architecture — it is the template for how any stream&#x27;s knowledge gets set up, which is why taking one stream all the way down answers more than one stream.</p></aside>
+  </div>
+</section>
+</main>
+<div class="counter" id="counter"></div>
+<p class="help"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> move &middot;
+   <kbd>n</kbd> notes &middot; <kbd>p</kbd> print to PDF</p>
+<script>
+// Keyboard navigation. Hand-rolled rather than vendoring a slide framework,
+// per least-infrastructure-first: scroll-snap already does the hard part,
+// so this only has to move the scroll position and keep the counter honest.
+(function () {
+  var deck = document.getElementById('deck');
+  var counter = document.getElementById('counter');
+  var slides = Array.prototype.slice.call(deck.querySelectorAll('.slide'));
+  var current = 0;
+
+  function show(index) {
+    current = Math.max(0, Math.min(slides.length - 1, index));
+    slides[current].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    render();
+  }
+
+  function render() {
+    counter.textContent = (current + 1) + ' / ' + slides.length;
+  }
+
+  // Scrolling by trackpad or scrollbar must update the counter too,
+  // otherwise it silently lies as soon as the deck is not driven by keys.
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        current = slides.indexOf(entry.target);
+        render();
+      }
+    });
+  }, { threshold: 0.6 });
+  slides.forEach(function (slide) { observer.observe(slide); });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    switch (event.key) {
+      case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ':
+        event.preventDefault(); show(current + 1); break;
+      case 'ArrowLeft': case 'ArrowUp': case 'PageUp':
+        event.preventDefault(); show(current - 1); break;
+      case 'Home': event.preventDefault(); show(0); break;
+      case 'End': event.preventDefault(); show(slides.length - 1); break;
+      case 'n': case 'N':
+        document.body.classList.toggle('show-notes'); break;
+      case 'p': case 'P':
+        window.print(); break;
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
