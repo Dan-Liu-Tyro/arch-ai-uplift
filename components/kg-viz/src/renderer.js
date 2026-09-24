@@ -122,6 +122,7 @@
     });
 
     document.getElementById("fit-btn").onclick = function () { frameGraph(); };
+    document.getElementById("reset-layout-btn").onclick = function () { resetLayout(); };
 
     // 3d-force-graph sizes its renderer from the container once, at
     // construction, and does not follow the window. Without this, resizing

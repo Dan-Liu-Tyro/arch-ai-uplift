@@ -109,7 +109,7 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), };', ctx);
 
   return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam, controls: () => fakeControls };
 }
@@ -791,6 +791,39 @@ const el = (r, id) => r.els[id] || EMPTY;
   console.log('P: 3D -> noRotate =', threeD.noRotate, '| left-drag restored to rotate =', threeD.leftIsRotate);
   if (threeD.noRotate) results.push('P: 3D mode lost its orbit rotation');
   if (!threeD.leftIsRotate) results.push('P: 3D mode left-drag was not restored to rotate');
+}
+
+// Q: "Reset positions" undoes a dragged node, in both view types
+{
+  const r = run('Q', { cdnBlocked: false }); await tick();
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+
+  // Layered view: 3d-force-graph's own drag controls overwrite fx/fy/x/y
+  // directly, and nothing else ever recomputes them -- resetLayout() must
+  // reproduce the same values applyLayout() set on first load, derived
+  // fresh from the node's untouched col/lane/row.
+  const target = r.probe.visible().nodes[0];
+  const original = { fx: target.fx, fy: target.fy, x: target.x, y: target.y };
+  target.fx = 9999; target.fy = 9999; target.x = 9999; target.y = 9999;
+  r.probe.resetLayout(); await tick();
+  const restored = { fx: target.fx, fy: target.fy, x: target.x, y: target.y };
+  const layeredOk = JSON.stringify(restored) === JSON.stringify(original);
+  console.log('Q: layered view dragged node restored =', layeredOk);
+  if (!layeredOk) results.push('Q: reset did not restore the layered view\'s computed position: ' + JSON.stringify(restored));
+
+  // Force view: there is no fixed position to snap back to, so a drag's pin
+  // must be released and the simulation reheated, not left wherever dropped.
+  r.probe.switchView('domain-authority'); await tick();
+  const fnodes = r.probe.visible().nodes;
+  fnodes.forEach(n => { n.fx = 42; n.fy = 42; });
+  r.probe.resetLayout(); await tick();
+  const stillPinned = fnodes.some(n => n.fx !== undefined || n.fy !== undefined);
+  const reheated = !!r.calls['d3ReheatSimulation'];
+  console.log('Q: force view drag-pins released =', !stillPinned, '| simulation reheated =', reheated);
+  if (stillPinned) results.push('Q: reset left the force view\'s dragged nodes pinned');
+  if (!reheated) results.push('Q: reset did not reheat the force view\'s simulation');
 }
 
 console.log(results.length ? '\nFAILURES:\n' + results.join('\n') : '\nALL SCENARIOS PASSED');

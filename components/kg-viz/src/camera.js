@@ -116,3 +116,22 @@
     }
     Graph.zoomToFit(300, 30);
   }
+
+  // "Reset positions" undoes node drags. enableNodeDrag defaults to true in
+  // the vendored library and nothing here turns it off, so a dragged node's
+  // fx/fy/x/y stay wherever it was dropped -- permanently, for the layered
+  // view, since nothing else ever recomputes them. applyLayout() is already
+  // the one place that derives a layered node's fx/fy/x/y from its
+  // col/lane/row, so re-running it snaps that view back exactly. The force
+  // view has no fixed "original" position to snap to -- a drag there just
+  // pins the node in place -- so clearing that pin and reheating the
+  // simulation is the closest equivalent: let it settle again rather than
+  // stay wherever it was dropped.
+  function resetLayout() {
+    applyLayout();
+    Graph.graphData(visibleData());
+    if (view.layout !== "layered" && Graph.d3ReheatSimulation) {
+      Graph.d3ReheatSimulation();
+    }
+    setTimeout(frameGraph, 350);
+  }
