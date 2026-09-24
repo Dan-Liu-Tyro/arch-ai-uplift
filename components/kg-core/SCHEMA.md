@@ -251,6 +251,26 @@ overlay may add relationships and non-domain nodes; it may never hold a copy
 of a domain fact. Without that rule an overlay silently becomes a second,
 diverging domain model, and the two drift with no signal that they have.
 
+A node of `kind: actor` also declares an **`actor_type`**, naming the role
+the actor plays. It is a controlled set: `InternalStaff`, `Customer`,
+`Partner`, `Regulator`. Two things about it are deliberate.
+
+It names a **role, not an affiliation.** Whether a role sits inside or
+outside Tyro is not stored, because it is derivable — staff are internal,
+the rest are not — and a stored `affiliation` beside `actor_type` is two
+fields that can contradict each other, which curated data eventually will.
+Anything that wants an internal/external split (a viewer colouring actors,
+a reader grouping them) derives it at read time. This keeps the model
+holding strict types and leaves every presentation choice keyed off them,
+rather than baked into them.
+
+`kind: external` is a **different axis and easy to confuse with it**: that
+is an external *organisation or system* the flow depends on (a card scheme,
+a settlement rail), whereas an external *party* is `kind: actor` with a
+non-staff `actor_type`. Both read as "external" in plain English, so any
+consumer showing these to a person should label the former "external
+system" rather than just "external".
+
 Each edge carries `source`, `target`, `predicate`, `payload` (what data
 crosses the edge) and `stage`. Predicates are **free text today and
 deliberately uncontrolled** — `payments-target-state.json` alone uses 36

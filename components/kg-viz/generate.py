@@ -312,6 +312,12 @@ def _payments_target_state_view(domains_data: dict) -> dict | None:
                 "title": domain["title"] if domain else n["title"],
                 "type": "domain" if domain else n.get("kind", "node"),
                 "kind": n.get("kind", "domain"),
+                # Carried through, not interpreted: the overlay declares an
+                # actor's role and the viewer decides how a role looks. Whether
+                # a role counts as internal or external to Tyro is presentation
+                # grouping, so it is deliberately not derived here -- storing it
+                # would create a second field that can contradict this one.
+                "actor_type": n.get("actor_type"),
                 "category": domain["category"] if domain else None,
                 "scope": domain["scope"] if domain else None,
                 "scope_note": domain.get("scope_note") if domain else None,
