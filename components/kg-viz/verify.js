@@ -470,6 +470,19 @@ const el = (r, id) => r.els[id] || EMPTY;
   console.log('J: overlapping band pairs =', clash);
   if (clash) results.push('J: ' + clash + ' stage bands overlap, defeating the separation');
 
+  // Left edges are aligned across bands: ragged lefts read as three unrelated
+  // regions stacked up rather than three lanes of one process. Right edges
+  // are deliberately NOT aligned -- the stages differ in real width.
+  const lefts = drawn.map(b => b.l);
+  const spread = Math.max(...lefts) - Math.min(...lefts);
+  console.log('J: band left edges =', lefts.map(v => v.toFixed(1)).join(', '),
+    '| spread =', spread.toFixed(2) + 'px',
+    '| right edges =', drawn.map(b => b.r.toFixed(0)).join(', '));
+  if (spread > 0.2) results.push('J: band left edges not aligned, spread ' + spread.toFixed(1) + 'px');
+  if (new Set(drawn.map(b => b.r.toFixed(1))).size < 2) {
+    results.push('J: every band has the same right edge -- stages differ in width, so this is over-alignment');
+  }
+
   // A band must enclose its stage's *labels*, not just its nodes. Boxing the
   // node coordinates alone left dashed edges cutting through the wider names
   // ("Terminal Fleet & Device Management", "Product Bundling & Eligibility"),

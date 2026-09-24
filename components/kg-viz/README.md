@@ -190,6 +190,17 @@ through ingestion is the real fix. See "Known gaps".
   per-frame loop would correct the order within a frame, but the first paint
   would flash under-sized bands. `verify.js` scenario J asserts no label
   escapes its own band, which is what catches a regression here.
+
+  All bands then share a **common left edge** — the leftmost any of them
+  needs, which is whichever stage has the widest label on its leftmost node
+  (currently stage 2, "Customer (self-serve / merchant)"). Ragged left edges
+  read as three unrelated regions that happen to be stacked; a shared edge
+  reads as three lanes of one process, which is the whole point of the view.
+  This is why `positionBands()` is two passes: measure every band, then
+  square them all off. Right edges are deliberately **not** aligned, since
+  the stages differ in genuine width and a common right edge would draw a
+  lot of empty box around stage 1. Scenario J asserts both halves of that —
+  lefts equal, rights not all equal.
 - **Group show/hide** — checkboxes per stage (flow) or per domain category
   (authority), with live counts. Hiding a group drops its nodes *and* every
   edge touching them, so no dangling edges are drawn, and empties that

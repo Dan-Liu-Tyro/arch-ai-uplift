@@ -278,7 +278,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-24b — stage bands and fit enclose node labels";
+  var PAGE_REVISION = "2026-09-24c — stage bands share a common left edge";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
@@ -820,17 +820,21 @@
   function positionBands() {
     if (!Graph || !showBands || !bandEls.length) return;
     var nodes = visibleData().nodes;
-    bandEls.forEach(function (band) {
+
+    // Two passes, because the left edge is shared. Each band is measured
+    // independently first, then every band is squared off against the
+    // leftmost edge any of them needs. Ragged left edges read as three
+    // unrelated regions that happen to be stacked; a common edge reads as
+    // three lanes of one process, which is what the view is for. Only the
+    // left is aligned -- the stages genuinely differ in width, so forcing a
+    // common right edge would draw a lot of empty box around stage 1.
+    var boxes = bandEls.map(function (band) {
       var members = nodes.filter(function (n) {
         return n.stage === band.stage && isFinite(n.x) && isFinite(n.y);
       });
       // A stage whose group is toggled off has no members: hide it rather
       // than drawing a band around nothing.
-      if (!members.length) {
-        band.poly.setAttribute("points", "");
-        band.caption.textContent = "";
-        return;
-      }
+      if (!members.length) return null;
       // A band has to contain the stage's *labels*, not only its nodes: a
       // dashed edge slicing through "Terminal Fleet & Device Management"
       // reads as the band being drawn wrong rather than as a label
@@ -857,6 +861,21 @@
       });
       minY -= drop; maxY += drop;
       minX -= BAND_PAD; maxX += BAND_PAD; minY -= BAND_PAD; maxY += BAND_PAD;
+      return { l: minX, r: maxX, t: minY, b: maxY };
+    });
+
+    var leftEdge = Math.min.apply(null, boxes.filter(Boolean).map(function (b) {
+      return b.l;
+    }));
+
+    bandEls.forEach(function (band, bi) {
+      var box = boxes[bi];
+      if (!box) {
+        band.poly.setAttribute("points", "");
+        band.caption.textContent = "";
+        return;
+      }
+      var minX = leftEdge, maxX = box.r, minY = box.t, maxY = box.b;
 
       var corners = [[minX, minY], [maxX, minY], [maxX, maxY], [minX, maxY]];
       var pts = [];
