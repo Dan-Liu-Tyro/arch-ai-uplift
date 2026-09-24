@@ -37,7 +37,7 @@
     seg.innerHTML = "";
     DATA.views.forEach(function (v) {
       var b = document.createElement("button");
-      b.textContent = v.id === "payments-target-state" ? "Payments flow" : "Authority";
+      b.textContent = v.id === "payments-target-state" ? "Payments flow" : "Ref Domains";
       b.className = v.id === view.id ? "on" : "";
       b.onclick = function () { switchView(v.id); };
       seg.appendChild(b);

@@ -900,6 +900,30 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (/\bsel\b/.test(classDeselected)) results.push('T: actor icon kept glowing after deselecting');
 }
 
+// U: the force view's charge/link forces are tuned to bound outlier drift
+{
+  const r = run('U', { cdnBlocked: false }); await tick();
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+
+  // A node with few or no links has nothing pulling it back toward the
+  // cluster, so unbounded charge repulsion can push it arbitrarily far --
+  // the README documents exactly one such node (an unconnected `principle`)
+  // in the Ref Domains view. distanceMax bounds that drift; this only
+  // checks the configuration was actually applied, not the physics outcome,
+  // which needs a real browser to see.
+  console.log('U: d3Force configured =', r.calls['d3Force'] >= 2,
+    '| charge strength set =', !!r.calls['strength'], '| charge distanceMax set =', !!r.calls['distanceMax'],
+    '| link distance set =', !!r.calls['distance']);
+  if (!(r.calls['d3Force'] >= 2)) results.push('U: charge and link forces were not both configured');
+  if (!r.calls['strength']) results.push('U: charge force strength was never set');
+  if (!r.calls['distanceMax']) {
+    results.push('U: charge force distanceMax was never set -- an unconnected node can drift arbitrarily far');
+  }
+  if (!r.calls['distance']) results.push('U: link force distance was never set');
+}
+
 console.log(results.length ? '\nFAILURES:\n' + results.join('\n') : '\nALL SCENARIOS PASSED');
 process.exitCode = results.length ? 1 : 0;
 }

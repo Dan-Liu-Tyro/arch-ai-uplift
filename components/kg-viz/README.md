@@ -160,7 +160,10 @@ through ingestion is the real fix. See "Known gaps".
 
 ## What the UI does
 
-- **View switch** — flow (default) or authority.
+- **View switch** — "Payments flow" (default) or "Ref Domains" (the
+  `domain-authority` data view — same underlying id and content, the button
+  label is UI copy only, same as "Payments flow" already was for
+  `payments-target-state`).
 - **2D / 3D** — 2D is the default. 3D is genuinely useful on the dense
   authority graph, where a third dimension reduces occlusion; it adds little
   to the flow view, which is a plane by construction.
@@ -308,6 +311,20 @@ through ingestion is the real fix. See "Known gaps".
   pinned planar layout the fit is simple trigonometry, and the arithmetic is
   asserted in the harness (currently 93% of the usable region). The force view
   keeps moving, so it still uses `zoomToFit`.
+
+  `zoomToFit` fits to *all* node positions, and the force layout's own
+  physics has an unforgiving failure mode with no tuning at all: a node with
+  few or no links has nothing pulling it back, so unbounded charge repulsion
+  can push it arbitrarily far from everything else. The Ref Domains view has
+  exactly one such node — the unconnected `principle` noted elsewhere in this
+  file — and once it drifted far enough, `zoomToFit` had to zoom out to keep
+  it in frame, shrinking the entire connected cluster into an unreadably
+  dense, overlapping clump alongside it. `renderer.js` now sets the charge
+  force's `distanceMax` (bounds how far the repulsion still reaches, so a
+  disconnected node's drift is capped) and a longer link `distance` (gives
+  connected nodes breathing room), both via `Graph.d3Force(...)` right after
+  construction. Harmless for the layered view, whose nodes are pinned via
+  `fx`/`fy`/`fz` and so ignore every force, this one included.
 - **Fit to view** — re-frames the camera. Framing also happens automatically
   on `onEngineStop`, but a manual control matters because a camera pointed
   somewhere empty is indistinguishable from a graph that failed to draw.

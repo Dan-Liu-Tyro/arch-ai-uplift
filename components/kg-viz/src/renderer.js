@@ -62,6 +62,26 @@
       })
       .onBackgroundClick(closeDetail);
 
+    // The force view (Ref Domains) has an unforgiving failure mode with no
+    // tuning at all: a node with few or no links has nothing pulling it
+    // back, so pure charge repulsion pushes it arbitrarily far from
+    // everything else -- the README documents exactly one such node, an
+    // unconnected `principle`. zoomToFit() then has to zoom out to include
+    // wherever that node drifted to, shrinking the entire connected cluster
+    // to fit alongside it, which is what made every other node look like an
+    // unreadable clump. distanceMax caps how far the repulsive force still
+    // has effect, which bounds the drift; a longer link distance gives
+    // connected nodes breathing room so individual spheres and labels stop
+    // overlapping. Harmless for the layered view -- its nodes are pinned via
+    // fx/fy/fz, so no force (this one included) has any visible effect
+    // there regardless.
+    if (Graph.d3Force) {
+      var charge = Graph.d3Force("charge");
+      if (charge && charge.strength) charge.strength(-120).distanceMax(260);
+      var link = Graph.d3Force("link");
+      if (link && link.distance) link.distance(90);
+    }
+
     applyControlMode();
 
     document.getElementById("dim-seg").querySelectorAll("button").forEach(function (b) {

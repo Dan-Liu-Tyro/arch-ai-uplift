@@ -363,7 +363,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-24i — actor icon glyph in every view, 3D silhouette removed";
+  var PAGE_REVISION = "2026-09-24j — Ref Domains view: renamed, force layout spacing tuned";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
@@ -555,7 +555,7 @@
     seg.innerHTML = "";
     DATA.views.forEach(function (v) {
       var b = document.createElement("button");
-      b.textContent = v.id === "payments-target-state" ? "Payments flow" : "Authority";
+      b.textContent = v.id === "payments-target-state" ? "Payments flow" : "Ref Domains";
       b.className = v.id === view.id ? "on" : "";
       b.onclick = function () { switchView(v.id); };
       seg.appendChild(b);
@@ -1460,6 +1460,26 @@
         repaint();
       })
       .onBackgroundClick(closeDetail);
+
+    // The force view (Ref Domains) has an unforgiving failure mode with no
+    // tuning at all: a node with few or no links has nothing pulling it
+    // back, so pure charge repulsion pushes it arbitrarily far from
+    // everything else -- the README documents exactly one such node, an
+    // unconnected `principle`. zoomToFit() then has to zoom out to include
+    // wherever that node drifted to, shrinking the entire connected cluster
+    // to fit alongside it, which is what made every other node look like an
+    // unreadable clump. distanceMax caps how far the repulsive force still
+    // has effect, which bounds the drift; a longer link distance gives
+    // connected nodes breathing room so individual spheres and labels stop
+    // overlapping. Harmless for the layered view -- its nodes are pinned via
+    // fx/fy/fz, so no force (this one included) has any visible effect
+    // there regardless.
+    if (Graph.d3Force) {
+      var charge = Graph.d3Force("charge");
+      if (charge && charge.strength) charge.strength(-120).distanceMax(260);
+      var link = Graph.d3Force("link");
+      if (link && link.distance) link.distance(90);
+    }
 
     applyControlMode();
 
