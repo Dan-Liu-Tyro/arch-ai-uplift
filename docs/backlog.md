@@ -145,3 +145,41 @@ hasn't been prioritized yet — that is not the same as `[P3]`.
   with a different presentation (an ownership matrix would read better than a
   hairball, but that is a content decision, not a rendering one). The user
   chose to vendor first and revisit once the graph content has settled.
+- **Manual position overrides for the layered flow view, in a `kg-viz`-owned
+  layout file.** [P3] Raised 2026-09-24, as the parked follow-up to decision
+  44 in `docs/decision-log.md` — see that entry for the full three-tier
+  argument on why layout geometry stays derived; this entry only records the
+  escape hatch it leaves open. The shape: a separate layout file under
+  `components/kg-viz/` pinning chosen nodes' grid position, so a hand-tuned
+  arrangement survives regeneration.
+
+  **Why it might be wanted.** Of the two ordinals `generate.py` writes, only
+  one is semantic. `col` is longest-path depth within a stage, which is what
+  makes the payment path read left-to-right. `row` is assigned by
+  `sorted(members, key=(depth, order_of))` (around line 279 of
+  `generate.py`), where `order_of` is just a node's index in the input list —
+  so it derives from entity enumeration order, not from meaning. Adding or
+  reordering an entity in `kg-content` can therefore reshuffle rows and move
+  nodes nobody intended to move, and the user has confirmed they like the
+  current distribution, so an unintended reshuffle would be a real loss.
+
+  **The constraint that shapes it:** positions must not go into
+  `components/kg-content/`. That would put presentation into the curated
+  source and make PR review of *meaning* harder, which is the one job that
+  tier's quality gate exists to do. Hence a file owned by `kg-viz`.
+
+  **Try the cheaper option first if this is ever picked up.** Re-deriving
+  `row`'s tie-break from something in the data model — category, or title
+  alphabetically — rather than from enumeration order needs no new file and
+  no new concept, and may remove the need for overrides entirely. Decision 44
+  deferred it on the user's explicit call ("good enough for now, and we can
+  add manual adjustment later"), with its cost named: it reshuffles rows once
+  when applied, and that one-off price rises as the layout accumulates
+  expectations.
+
+  **Trigger to reconsider** — the value of this idea is entirely conditional
+  on it, which is why it is P3 rather than merely unprioritized. Either (a) a
+  `kg-content` regeneration actually reshuffles the flow view in a way that
+  matters, or (b) the flow view is about to be used somewhere its exact
+  arrangement carries meaning — an architecture sparring session, or a
+  published Confluence page.
