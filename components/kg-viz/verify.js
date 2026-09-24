@@ -679,7 +679,7 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (!hidden) results.push('N: kind legend still shown on the authority view, which colours by category');
 }
 
-// O: actors get a person silhouette, built by cloning the library's own mesh
+// O: actors' 3D mesh is made fully transparent, in every view, never rebuilt
 {
   const r = run('O', { cdnBlocked: false }); await tick();
   const inp = el(r,'file-input');
@@ -687,111 +687,47 @@ const el = (r, id) => r.els[id] || EMPTY;
   inp.onchange(); await tick();
 
   // The stub has no three.js, so stand in for the mesh the library binds to
-  // each node. Only the instance methods personify() actually uses.
-  const mkObj = (throws, material) => {
-    const o = {
-      children: [], scale: { x:1,y:1,z:1, set(x,y,z){ o.scale.x=x; o.scale.y=y; o.scale.z=z; } },
-      position: { x:0,y:0,z:0, set(x,y,z){ o.position.x=x; o.position.y=y; o.position.z=z; } },
-      geometry: { parameters: { radius: 13 } },
-      material: material || { color: 'initial' },
-      // Mirrors real three.js Mesh.copy(), which shares the material
-      // *reference* rather than cloning it -- the behaviour that makes the
-      // head go stale when the library later reassigns the body's material.
-      clone(){ if (throws) throw new Error('no THREE here'); return mkObj(false, o.material); },
-      add(c){ o.children.push(c); }
-    };
-    return o;
-  };
+  // each node. decorateShapes() now only ever reads/writes .material.
+  const mkObj = (material) => ({ material: material || { color: 'initial' } });
 
   const nodes = r.probe.visible().nodes;
-  nodes.forEach(n => { n.__threeObj = mkObj(false); });
+  nodes.forEach(n => { n.__threeObj = mkObj(); });
   r.probe.decorateShapes();
 
   const actors = nodes.filter(n => n.kind === 'actor');
   const others = nodes.filter(n => n.kind !== 'actor');
-  const actorKids = actors.map(n => n.__threeObj.children.length);
-  const otherKids = others.reduce((a, n) => a + n.__threeObj.children.length, 0);
-  console.log('O: actors =', actors.length, '-> children each =', [...new Set(actorKids)],
-    '| non-actor children =', otherKids);
-  if (!actors.length) results.push('O: no actors in the flow view to shape');
-  if (actorKids.some(k => k !== 1)) results.push('O: an actor did not get exactly one head: ' + actorKids);
-  if (otherKids) results.push('O: ' + otherKids + ' heads added to non-actor nodes');
+  const actorsHidden = actors.every(n => n.__threeObj.material.opacity === 0 &&
+    n.__threeObj.material.transparent === true);
+  const othersUntouched = others.every(n => n.__threeObj.material.opacity === undefined);
+  console.log('O: actors =', actors.length, '-> all made transparent =', actorsHidden,
+    '| non-actor materials untouched =', othersUntouched);
+  if (!actors.length) results.push('O: no actors in the flow view to hide');
+  if (!actorsHidden) results.push('O: not every actor mesh was made transparent');
+  if (!othersUntouched) results.push('O: decorateShapes touched a non-actor node\'s material');
 
-  // Idempotent -- the loop runs every frame, so a second pass must not stack.
-  r.probe.decorateShapes();
-  const afterTwice = actors.map(n => n.__threeObj.children.length);
-  console.log('O: children after a second pass =', [...new Set(afterTwice)]);
-  if (afterTwice.some(k => k !== 1)) results.push('O: decoration is not idempotent: ' + afterTwice);
-
-  // The head must be smaller than the body and sit above it, or it reads as
-  // two stacked dots rather than one figure.
-  const head = actors[0].__threeObj.children[0];
-  console.log('O: head scale =', head.scale.y, '| head y =', head.position.y, '| body radius = 13');
-  if (!(head.scale.y > 0 && head.scale.y < 1)) results.push('O: head is not smaller than the body: ' + head.scale.y);
-  if (!(head.position.y > 13)) results.push('O: head does not sit clear of the body: y=' + head.position.y);
-
-  // Selection/scope-dim recolouring works by the library reassigning the
-  // body's .material to a different cached object, never touching the
-  // head -- decorateShapes() must re-sync it every frame.
-  const body0 = actors[0].__threeObj;
-  const sameMaterialAtClone = body0.children[0].material === body0.material;
-  const newMaterial = { color: 'selected' };
-  body0.material = newMaterial;
-  r.probe.decorateShapes();
-  const syncedAfterRecolour = body0.children[0].material === newMaterial;
-  console.log('O: head shares material at clone =', sameMaterialAtClone,
-    '| re-synced after body recoloured =', syncedAfterRecolour);
-  if (!sameMaterialAtClone) results.push('O: head did not start out sharing the body\'s material');
-  if (!syncedAfterRecolour) results.push('O: head material was not re-synced after the body was recoloured');
-
-  // 2D (the default here) hides the mesh via opacity, not `.visible`, so the
-  // 2D icon overlay (labels.js) can be the only visible representation of
-  // the actor while the mesh itself stays raycastable for onNodeClick.
-  console.log('O: 2D hides the actor mesh via opacity =',
-    newMaterial.opacity === 0 && newMaterial.transparent === true);
-  if (newMaterial.opacity !== 0 || !newMaterial.transparent) {
-    results.push('O: actor mesh was not made transparent in 2D: opacity=' + newMaterial.opacity +
-      ' transparent=' + newMaterial.transparent);
-  }
-
-  // 3D never touches opacity -- it already carries selection/scope dimming
-  // via the colour string's alpha channel (a dimmed node's rgba(...,0.18)),
-  // and forcing it here would fight that.
-  newMaterial.opacity = 0.42;
-  newMaterial.transparent = false;
+  // Still hidden in 3D -- there is no 3D-only silhouette to fall back to
+  // any more, so leaving an actor visible there would be the regression.
   r.probe.setDims(3);
+  actors.forEach(n => { n.__threeObj = mkObj(); });
   r.probe.decorateShapes();
-  const leftAlone = newMaterial.opacity === 0.42 && newMaterial.transparent === false;
-  console.log('O: 3D leaves an existing opacity alone =', leftAlone);
-  if (!leftAlone) {
-    results.push('O: 3D mode touched the actor mesh opacity it should leave alone: opacity=' +
-      newMaterial.opacity + ' transparent=' + newMaterial.transparent);
-  }
+  const hiddenIn3D = actors.every(n => n.__threeObj.material.opacity === 0 &&
+    n.__threeObj.material.transparent === true);
+  console.log('O: also hidden in 3D =', hiddenIn3D);
+  if (!hiddenIn3D) results.push('O: an actor mesh was left visible in 3D');
   r.probe.setDims(2);
 
-  // Self-healing: a view switch rebuilds meshes, which arrive unmarked.
-  actors.forEach(n => { n.__threeObj = mkObj(false); });
+  // Re-asserted every frame, not set once: a recolour (selection, scope
+  // dimming) can swap in a *different* cached material at any time, and a
+  // one-time set on the old object would not follow it.
+  const body0 = actors[0].__threeObj;
+  const freshMaterial = { color: 'reselected' };
+  body0.material = freshMaterial;
   r.probe.decorateShapes();
-  console.log('O: re-decorated after fresh meshes =',
-    actors.every(n => n.__threeObj.children.length === 1));
-  if (!actors.every(n => n.__threeObj.children.length === 1)) {
-    results.push('O: fresh meshes were not re-decorated, so a view switch loses the shape');
+  console.log('O: a freshly swapped-in material is re-hidden =',
+    freshMaterial.opacity === 0 && freshMaterial.transparent === true);
+  if (freshMaterial.opacity !== 0 || !freshMaterial.transparent) {
+    results.push('O: decorateShapes did not re-hide a freshly swapped-in material');
   }
-
-  // A mesh that cannot be cloned must degrade to a sphere and say so, never
-  // throw -- that is the failure that blanked this canvas once already.
-  const r2 = run('O2', { cdnBlocked: false }); await tick();
-  const inp2 = el(r2,'file-input');
-  inp2.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
-  inp2.onchange(); await tick();
-  r2.probe.visible().nodes.forEach(n => { n.__threeObj = mkObj(true); });
-  let threw = null;
-  try { r2.probe.decorateShapes(); } catch (e) { threw = e.message; }
-  const noted = /Actor shapes unavailable/.test(
-    el(r2,'notes-body').children.map(c => c._html).join(' '));
-  console.log('O: unclonable mesh threw =', threw, '| announced on screen =', noted);
-  if (threw) results.push('O: decorateShapes threw instead of degrading: ' + threw);
-  if (!noted) results.push('O: shape failure was silent -- no on-screen note');
 }
 
 // P: dragging pans the plane in 2D, orbits freely in 3D
@@ -911,7 +847,7 @@ const el = (r, id) => r.els[id] || EMPTY;
   }
 }
 
-// T: 2D-only actor icon overlay, coloured like the mesh, hidden in 3D
+// T: actor icon overlay, coloured like the mesh, shown in every view
 {
   const r = run('T', { cdnBlocked: false }); await tick();
   const inp = el(r,'file-input');
@@ -936,17 +872,19 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (!el0.style.transform) results.push('T: actor icon has no screen position in 2D');
   if (!el0.style.color) results.push('T: actor icon has no colour in 2D');
 
-  // 3D: a flat overlay cannot track an orbiting camera, so it must step
-  // aside for the existing sphere-and-head silhouette instead.
+  // 3D: graph2ScreenCoords() reprojects correctly under any camera
+  // transform, orbiting included, so the icon has no reason to hide there --
+  // it is the only representation of an actor in every view now.
   r.probe.setDims(3);
   r.probe.positionIcons();
-  console.log('T: 3D -> display =', el0.style.display);
-  if (el0.style.display !== 'none') results.push('T: actor icon still shown in 3D, where it cannot track the camera');
+  console.log('T: 3D -> display =', el0.style.display, '| transform set =', !!el0.style.transform,
+    '| colour =', el0.style.color);
+  if (el0.style.display === 'none') results.push('T: actor icon hidden in 3D -- there is no silhouette left to fall back to');
+  if (!el0.style.transform) results.push('T: actor icon has no screen position in 3D');
+  if (!el0.style.color) results.push('T: actor icon has no colour in 3D');
 
   r.probe.setDims(2);
   r.probe.positionIcons();
-  console.log('T: back to 2D -> display =', el0.style.display);
-  if (el0.style.display === 'none') results.push('T: actor icon did not reappear when returning to 2D');
 
   // Glow is selection-only: unselected is a plain className, selecting this
   // actor adds "sel" (which carries the glow in CSS), deselecting removes it.

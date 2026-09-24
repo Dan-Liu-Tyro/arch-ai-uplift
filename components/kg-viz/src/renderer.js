@@ -11,11 +11,11 @@
       .nodeRelSize(9)
       .nodeVal(function (n) { return n.kind === "domain" || n.type === "domain" ? 5 : 3; })
       .nodeColor(function (n) { return nodeDisplayColor(n); })
-      // Still no nodeThreeObject, deliberately. Actors do get a person
-      // silhouette, but it is applied by decorateShapes() *after* the
-      // library has built its own mesh, not by an accessor running inside
-      // node construction -- see that function for why that distinction
-      // matters here.
+      // Still no nodeThreeObject, deliberately. Actors' meshes do get
+      // touched (made transparent, in decorateShapes() below), but that
+      // happens *after* the library has built its own mesh, from the
+      // per-frame loop, not by an accessor running inside node construction
+      // -- see that function for why that distinction matters here.
       .linkDirectionalArrowLength(function (l) { return view.layout === "layered" ? 7 : 0; })
       .linkDirectionalArrowRelPos(0.98)
       // Direction as motion, not just as an arrowhead: a slow stream of
@@ -72,12 +72,6 @@
         });
         Graph.numDimensions(dims);
         applyControlMode();
-        // Reasserting nodeColor() forces the library to recompute every
-        // node's material from scratch, which is what undoes 2D's opacity
-        // -0 override on leaving it (see applyActorMeshOpacity()) -- nothing
-        // else ever would, since a material is only replaced when its
-        // colour or opacity no longer match what gets freshly computed.
-        repaint();
         setTimeout(frameGraph, 350);
       };
     });
@@ -172,9 +166,9 @@
   //
   // There is no controlType switch for this: the fix is remapping the mouse
   // button on the trackball controls the library already built, the same
-  // "work with the live object, not a constructor" approach personify() uses
-  // above and for the same reason -- there is still no reachable THREE.MOUSE
-  // enum to build a value from. What *is* reachable is the controls
+  // "work with the live object, not a constructor" approach decorateShapes()
+  // uses below and for the same reason -- there is still no reachable
+  // THREE.MOUSE enum to build a value from. What *is* reachable is the controls
   // instance's own default button assignments, so the PAN sentinel it
   // already put on RIGHT gets copied onto LEFT for 2D, and LEFT's original
   // (rotate) value is restored for 3D.
@@ -195,72 +189,26 @@
     }
   }
 
-  // ---- Shapes: a person silhouette for actors ------------------------------
+  // ---- Shapes: actors render as a 2D icon overlay, never as a mesh --------
   //
-  // Why this is done by mutating the library's own meshes rather than by a
-  // `nodeThreeObject` accessor: the vendored bundle reads `window.THREE` if
-  // the host provides one and otherwise falls back to its own minified
-  // classes, which it never exports. So there is no THREE constructor
-  // reachable from here -- the same wall that made `three-spritetext` throw
-  // on every node and leave the canvas blank while the panel looked healthy.
-  // What *is* reachable is any live object's instance methods, so a head is
-  // a `clone()` of the body the library already built, shrunk and raised.
-  // No constructors, no new dependency, and nothing running inside node
-  // construction that can take the scene down.
+  // Actors used to get a cloned-and-raised "head" mesh as a 3D stand-in for
+  // a person, because there was (and still is) no reachable THREE.Sprite/
+  // Texture to put a real icon on the mesh -- the vendored bundle reads
+  // `window.THREE` when the host supplies one and otherwise falls back to
+  // its own minified classes, which it never exports. That silhouette is
+  // gone now that the HTML icon overlay (`#actor-icons` in labels.js) covers
+  // every view, not just 2D: `graph2ScreenCoords()` reprojects correctly
+  // under any camera transform, orbiting included, so the flat overlay
+  // tracks the node in 3D exactly as it does in 2D -- it just doesn't
+  // rotate *with* the scene, which is the point, not a limitation, now that
+  // every view shows the same flat icon.
   //
-  // Fidelity is set by the size on screen, not by ambition: an actor renders
-  // at nodeRelSize 9 x nodeVal 3, roughly a 10px dot at the default framing,
-  // where arms and legs would be pixel mud. Head-plus-body is what actually
-  // reads, and the task is "which steps involve people", not portraiture.
-  var shapeWarned = false;
-
-  function personify(obj) {
-    var geo = obj.geometry;
-    var r = (geo && geo.parameters && geo.parameters.radius) || 10;
-    // Clone before adding anything, or the head gets a head.
-    var head = obj.clone();
-    head.scale.set(0.58, 0.58, 0.58);
-    // Sits just clear of the body, so the pair reads as one figure rather
-    // than two stacked dots. The body is left unscaled on purpose: scaling
-    // the parent would multiply this offset and the two would drift apart.
-    head.position.set(0, r * 1.3, 0);
-    obj.add(head);
-    // clone() copies the material *reference*, not the material itself
-    // (three.js's Mesh.copy does `this.material = source.material`) -- so
-    // head and body start out sharing one object. That snapshot goes stale
-    // the moment selection or scope dimming changes: the library reacts to
-    // a new nodeColor() result by looking up a *different* cached material
-    // and reassigning it onto the body's mesh, never onto the head, which
-    // is a separate object nobody told about the swap. Keep a direct
-    // reference so decorateShapes() can re-sync it every frame instead.
-    obj.__head = head;
-  }
-
-  // The 2D actor icon overlay (labels.js) is meant to be the only visible
-  // representation of an actor there -- the badge no longer has an opaque
-  // background to hide the mesh behind (see labels.js), and the head sits
-  // offset above the body in world space regardless, so no badge size could
-  // reliably cover both anyway. Hidden via opacity, not `.visible`: the
-  // raycaster behind onNodeClick's hit-testing skips invisible objects but
-  // not transparent ones, and the mesh still has to be clickable under the
-  // overlay. Only forces opacity in 2D -- 3D's opacity already encodes
-  // selection/scope dimming via the colour string's alpha channel (a dimmed
-  // node's rgba(...,0.18)), and overwriting that here would fight it.
-  // Re-asserted every frame, because a recolour can swap in a *different*
-  // cached material at any time (see the head-material-sync comment below)
-  // -- a one-time set would not survive that. Leaving 2D restores it by
-  // re-asserting nodeColor() once in the dim-seg handler, which forces a
-  // fresh material lookup since the opacity forced here no longer matches
-  // what the library would compute.
-  function applyActorMeshOpacity(obj) {
-    if (!obj.material || dims !== 2) return;
-    obj.material.transparent = true;
-    obj.material.opacity = 0;
-  }
-
-  // Idempotent and self-healing: a view switch or a filter change makes the
-  // library build fresh meshes, which arrive without the marker and get
-  // decorated on the next frame.
+  // The mesh itself is never deleted -- it is still what onNodeClick's
+  // raycasting hit-tests against -- only made fully transparent, in every
+  // view. Opacity, not `.visible`: the raycaster skips invisible objects
+  // but not transparent ones. Re-asserted every frame because a recolour
+  // (selection, scope dimming) can swap in a *different* cached material at
+  // any time -- a one-time set would not survive that.
   function decorateShapes() {
     if (!Graph || !DATA) return;
     var nodes = visibleData().nodes;
@@ -268,32 +216,8 @@
       var n = nodes[i];
       if (presentationFor(n).shape !== "person") continue;
       var obj = n.__threeObj;
-      if (!obj) continue;
-      applyActorMeshOpacity(obj);
-      if (obj.__personified) {
-        // The recolour this keeps up with runs every frame too (selection,
-        // scope dimming), so the sync has to be per-frame, not one-shot.
-        if (obj.__head && obj.__head.material !== obj.material) {
-          obj.__head.material = obj.material;
-        }
-        continue;
-      }
-      if (!obj.clone || !obj.add) continue;
-      try {
-        personify(obj);
-        obj.__personified = true;
-      } catch (e) {
-        // Never let a cosmetic flourish cost the graph. Degrade to the
-        // default sphere, and say so once -- an unexplained shape change is
-        // the kind of silent difference this component keeps getting caught
-        // by, so it announces itself rather than just looking wrong.
-        obj.__personified = true;
-        if (!shapeWarned) {
-          shapeWarned = true;
-          note("<b>Actor shapes unavailable</b> — falling back to plain " +
-            "spheres. Colour still distinguishes actors; only the silhouette " +
-            "is missing. (" + escapeHtml(String(e && e.message || e)) + ")");
-        }
-      }
+      if (!obj || !obj.material) continue;
+      obj.material.transparent = true;
+      obj.material.opacity = 0;
     }
   }

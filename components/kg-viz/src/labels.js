@@ -19,15 +19,18 @@
   var LABEL_DY = 11;        // node label sits this far below the node marker
   var LABEL_LINE_H = 14;    // 11px font, one line, plus leading -- fallback only
 
-  // ---- Actor icons: the same HTML-overlay trick, 2D only -------------------
+  // ---- Actor icons: the same HTML-overlay trick, every view -----------------
   //
-  // personify() gives actors a 3D head-and-body silhouette because there is
-  // no reachable THREE.Sprite/Texture to put a real image on the mesh (see
-  // its own comment). An HTML badge sidesteps that the same way labels do --
-  // but only in 2D: a flat overlay can track a camera that pans and zooms
-  // (2D, since applyControlMode() disables rotate there) but not one that
-  // orbits (3D), so positionIcons() hides these outright once dims is 3 and
-  // the sphere-and-head silhouette is what's on screen instead.
+  // Actors have no reachable THREE.Sprite/Texture to put a real icon on
+  // their mesh (the vendored bundle never exports the THREE classes it
+  // falls back to), so this is the same trick #labels already relies on:
+  // an HTML element reprojected via graph2ScreenCoords() every frame. That
+  // works under any camera transform, orbiting included -- there is no 2D-
+  // only restriction here, unlike applyControlMode()'s pan-vs-orbit split,
+  // because graph2ScreenCoords() itself does not care how the camera got
+  // where it is. The actor's own mesh is made fully transparent everywhere
+  // (see decorateShapes() in renderer.js) so this overlay is the only thing
+  // that ever represents an actor on screen, in every view.
   //
   // The glyph itself carries the actor's role colour (fill="currentColor",
   // set per node in positionIcons() from the same nodeDisplayColor() the 3D
@@ -65,12 +68,11 @@
     if (!Graph) return;
     var ids = Object.keys(iconEls);
     if (!ids.length) return;
-    var show = dims === 2;
     for (var i = 0; i < ids.length; i++) {
       var id = ids[i];
       var n = nodeById[id];
       var el = iconEls[id];
-      if (!show || !n || !isFinite(n.x) || !isFinite(n.y)) { el.style.display = "none"; continue; }
+      if (!n || !isFinite(n.x) || !isFinite(n.y)) { el.style.display = "none"; continue; }
       var p = Graph.graph2ScreenCoords(n.x, n.y, isFinite(n.z) ? n.z : 0);
       if (!p || !isFinite(p.x)) { el.style.display = "none"; continue; }
       el.style.display = "flex";

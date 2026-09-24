@@ -223,56 +223,43 @@ through ingestion is the real fix. See "Known gaps".
   external *party* is an actor with a non-staff role. The legend says
   "External system" for the former precisely because both read as "external"
   in English otherwise.
-- **Actors are drawn as a person silhouette** — a head sphere above the body
-  sphere. `shape: "person"` on the actor entries of `NODE_PRESENTATION` is
-  what selects it, so shape is keyed off the strict type the same way colour
-  is.
+- **Actors are drawn as a coloured person-shaped icon** — a flat HTML overlay,
+  not a mesh, in every view (2D and 3D alike). `shape: "person"` on the actor
+  entries of `NODE_PRESENTATION` is what selects it, so shape is keyed off the
+  strict type the same way colour is.
 
-  How it is built matters, because the obvious route is closed. The vendored
-  bundle reads `window.THREE` when the host supplies one and otherwise uses
-  its own minified classes, which it **never exports** — so no THREE
-  constructor is reachable from application code. That is the same wall that
-  made `three-spritetext` throw on every node and leave the canvas blank.
-  What *is* reachable is any live object's instance methods, so
-  `decorateShapes()` in `src/renderer.js` takes the mesh the library already
-  built (`node.__threeObj`), `clone()`s it, shrinks the clone and raises it
-  by `1.3 ×` the body radius. No constructors, no second copy of three.js,
-  and — unlike a `nodeThreeObject` accessor — nothing running inside node
-  construction that can take the scene down. It runs from the per-frame loop,
-  is idempotent via a marker on the mesh, and re-applies itself when a view
-  switch or filter change makes the library build fresh meshes.
+  This used to be a real 3D shape: a cloned-and-raised "head" mesh on top of
+  the body sphere, built by mutating the library's own mesh because the
+  obvious route is closed — the vendored bundle reads `window.THREE` when the
+  host supplies one and otherwise uses its own minified classes, which it
+  **never exports**, so no THREE constructor is reachable from application
+  code (the same wall that made `three-spritetext` throw on every node and
+  leave the canvas blank). That silhouette is gone. Once the icon overlay
+  covered every view instead of only 2D, keeping it around was pure
+  redundancy: `graph2ScreenCoords()` reprojects correctly under *any* camera
+  transform, orbiting included — the flat overlay was never actually
+  restricted to 2D, only assumed to be — so there was never a view left for
+  the mesh silhouette to be the fallback for.
 
-  If a clone ever fails it degrades to the plain sphere and **says so on
-  screen** rather than silently looking wrong. Fidelity is deliberately low:
-  an actor is about a 10px dot at the default framing, where arms and legs
-  would be pixel mud, and the question being answered is "which steps involve
-  people".
+  What is left in `decorateShapes()` (`src/renderer.js`) is much smaller: for
+  every actor's mesh (`node.__threeObj`), force `material.transparent = true`
+  and `material.opacity = 0`, every frame. Opacity, not `.visible` — the
+  raycaster behind `onNodeClick`'s hit-testing skips invisible objects but
+  not transparent ones, so the mesh stays clickable under the overlay. It has
+  to be re-asserted every frame rather than set once, because a recolour
+  (selection, scope dimming) can swap a node's mesh onto a *different* cached
+  material at any time, and a one-time set on the old object would not follow
+  it to the new one.
 
-  **In 2D only, actors instead show a coloured person-shaped icon** — a flat
-  HTML overlay, not a mesh — sitting on top of the same sphere-and-head mesh,
-  which is made fully transparent there (`applyActorMeshOpacity()` in
-  `src/renderer.js`) rather than covered: the icon has no opaque background
-  to hide anything behind, and the 3D head sits offset above the body in
-  world space regardless, so no overlay size could reliably mask both. The
-  mesh stays raycastable (opacity, not `.visible`, is what changes), so
-  `onNodeClick`'s hit-testing is untouched.
-
-  The reachability wall above rules out a real `THREE.Sprite`/`Texture`
-  here too, so this is the other route already proven for text: `#labels`'
-  `graph2ScreenCoords()` overlay trick, applied to an SVG glyph instead of a
-  text node. That trick only works while the camera cannot rotate out from
-  under it, which is exactly 2D (`applyControlMode()` maps drag to pan there,
-  never orbit) and exactly why 3D keeps the silhouette instead: nothing here
-  can make a flat overlay track an orbiting camera. `positionIcons()` in
-  `src/labels.js` hides the icons outright once `numDimensions` is 3.
-
-  The glyph's own fill carries the actor's role colour (`currentColor`, set
-  from `nodeDisplayColor()` — the same selection/scope-dimming logic the
-  mesh's `nodeColor()` accessor uses, factored out so the two can never
-  disagree). It glows only when that actor is the one currently selected
-  (a `.sel`-gated CSS `drop-shadow`, not an ambient effect) — matching the
-  mesh's own "white plus glow" treatment for a selected node, since
-  `nodeDisplayColor()` already returns white for it.
+  The overlay itself (`#actor-icons` in `src/labels.js`) is the same
+  `graph2ScreenCoords()` trick `#labels` already proves for text, applied to
+  an SVG glyph instead. Its fill carries the actor's role colour
+  (`currentColor`, set from `nodeDisplayColor()` — the same selection/scope
+  -dimming logic the mesh's own `nodeColor()` accessor used to drive directly,
+  factored out so the two can never disagree). It glows only when that actor
+  is the one currently selected (a `.sel`-gated CSS `drop-shadow`, not an
+  ambient effect) — matching the "white plus glow" treatment `nodeDisplayColor()`
+  already gives a selected node of any other kind.
 - **Colour legend** — lists only the kinds actually present in the current
   view, built from the same table `colorFor` reads, so it cannot drift from
   the rendering. Hidden on the authority view, which colours domains by

@@ -153,19 +153,15 @@
     text-shadow: 0 0 3px #05070d, 0 0 3px #05070d, 0 0 6px #05070d, 0 0 6px #05070d;
     margin-top: -7px; }
   .elabel.dim { color: rgba(140, 155, 180, 0.28); background: transparent; }
-  /* Actor icons: a 2D-only substitute for the 3D head-and-body silhouette
-     (personify() in renderer.js). Neither a THREE.Sprite/Texture nor a real
-     PNG is reachable here -- same "no THREE constructor" wall documented on
-     personify() -- but 2D never rotates the camera (see applyControlMode()),
-     so a plain HTML glyph tracks the node perfectly there, the same trick
-     #labels already relies on. It sits over the node's own 3D mesh rather
-     than replacing it: pointer-events:none lets clicks fall through to the
-     mesh underneath for onNodeClick's hit-testing, and the mesh itself is
-     made fully transparent in 2D (applyActorMeshOpacity() in renderer.js) --
-     not just covered -- since the glyph has no opaque background and the
-     3D head sits offset above the body in world space regardless, so no
-     badge size could reliably mask both. Hidden outright in 3D, where it
-     cannot track an orbiting camera -- see positionIcons(). */
+  /* Actor icons: the only visible representation of an actor, in every
+     view. Neither a THREE.Sprite/Texture nor a real PNG is reachable here,
+     so this is a plain HTML glyph tracking the node via graph2ScreenCoords()
+     -- the same trick #labels already relies on, which works under any
+     camera transform (orbiting included), not just a 2D pan/zoom. It sits
+     over the node's own 3D mesh rather than replacing it: pointer-events:
+     none lets clicks fall through to the mesh underneath for onNodeClick's
+     hit-testing, and the mesh itself is made fully transparent everywhere
+     (decorateShapes() in renderer.js no longer builds any 3D silhouette). */
   #actor-icons { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
   .actor-icon { position: absolute; top: 0; left: 0; width: 40px; height: 40px;
     display: flex; align-items: center; justify-content: center;
