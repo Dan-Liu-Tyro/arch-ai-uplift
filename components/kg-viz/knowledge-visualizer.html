@@ -79,6 +79,18 @@
   #stats { bottom: 14px; right: 14px; width: 262px; font-size: 11px; color: #9aa4ba;
     line-height: 1.5; }
   #stats b { color: #ffd479; }
+  #stats-toggle { position: absolute; top: 10px; right: 12px; cursor: pointer;
+    font-size: 15px; color: #7b87a0; line-height: 1; }
+  #stats-toggle:hover { color: #c6cde0; }
+  #stats-body { padding-right: 18px; }
+  /* Collapsed is a fixed-size circle holding only the toggle icon -- the
+     provenance/freshness text (this panel's whole reason to exist per
+     renderStats()'s own comment) is a still readable one click away, not
+     lost, so shrinking it this far to stop blocking the canvas costs nothing. */
+  #stats.collapsed { width: 34px; height: 34px; padding: 0; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; }
+  #stats.collapsed #stats-body { display: none; }
+  #stats.collapsed #stats-toggle { position: static; font-size: 17px; }
   #detail { top: 14px; right: 14px; width: 330px; max-height: calc(100vh - 28px);
     overflow-y: auto; display: none; font-size: 12.5px; line-height: 1.5; }
   #detail.open { display: block; }
@@ -233,7 +245,10 @@
     </div>
   </div>
 
-  <div id="stats" class="panel-base"></div>
+  <div id="stats" class="panel-base">
+    <span id="stats-toggle" title="Collapse">&#9432;</span>
+    <div id="stats-body"></div>
+  </div>
 
   <div id="detail" class="panel-base">
     <span class="close" onclick="closeDetail()">&#10005;</span>
@@ -334,6 +349,7 @@
 
   var DATA = null, view = null, Graph = null;
   var dims = 2, scopeMode = "all", showLabels = true, showEdgeLabels = true, edgeLabelStyle = "along";
+  var statsCollapsed = false;
   var showBands = true;
   // Anything that prevents the graph drawing goes on screen. Errors thrown
   // inside the render loop never reach the fetch().catch() below, which is
@@ -552,7 +568,7 @@
 
   function renderStats() {
     var vis = visibleData();
-    var el = document.getElementById("stats");
+    var el = document.getElementById("stats-body");
     var lines = [
       "<b>" + vis.nodes.length + "</b> of " + view.nodes.length + " nodes &middot; " +
       "<b>" + vis.links.length + "</b> of " + view.links.length + " edges shown"
@@ -1101,6 +1117,19 @@
       note("<b>" + (vis.nodes.length - finite.length) + " of " + vis.nodes.length +
         "</b> nodes have non-finite coordinates and will not be drawn.");
     }
+    // Orbiting in 3D (TrackballControls' rotate) rotates the camera's own
+    // `up` vector along with it, and that drift is permanent -- neither
+    // cameraPosition() (used below and by zoomToFit()) nor anything else
+    // ever resets it. fitLayered() always re-points the camera straight
+    // down the z-axis, a direction that only looks level with the default
+    // up of (0,1,0); combined with a stale, rotated-away up left over from
+    // a prior orbit, the same maths produces a visibly tilted or upside
+    // -down frame instead of the intended reset. Levelling it here is what
+    // "Fit to view" and "Reset positions" (which calls back into this) need
+    // to actually look reset after any amount of orbiting.
+    var cam = Graph.camera && Graph.camera();
+    if (cam && cam.up && cam.up.set) cam.up.set(0, 1, 0);
+
     // The layered view is a pinned plane, so its fit is computed exactly.
     // The force view keeps moving, so zoomToFit is the right tool there.
     if (view.layout === "layered") {
@@ -1387,6 +1416,18 @@
 
     document.getElementById("fit-btn").onclick = function () { frameGraph(); };
     document.getElementById("reset-layout-btn").onclick = function () { resetLayout(); };
+
+    // Collapsed state lives in a plain variable, not read back from the
+    // element's own classList, because the CSS class is the *effect* and
+    // this is the one place that decides it -- same pattern as showLabels
+    // and the other toggles above, rather than treating the DOM as storage.
+    document.getElementById("stats-toggle").onclick = function () {
+      statsCollapsed = !statsCollapsed;
+      var panel = document.getElementById("stats");
+      if (statsCollapsed) panel.classList.add("collapsed");
+      else panel.classList.remove("collapsed");
+      document.getElementById("stats-toggle").title = statsCollapsed ? "Expand" : "Collapse";
+    };
 
     // 3d-force-graph sizes its renderer from the container once, at
     // construction, and does not follow the window. Without this, resizing

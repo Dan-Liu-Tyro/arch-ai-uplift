@@ -70,8 +70,11 @@ function run(scenario, opts) {
   // opaque library-internal sentinels (see renderer.js's applyControlMode
   // comment), so any two distinct markers exercise the same swap logic.
   const fakeControls = { mouseButtons: { LEFT: 'ROTATE', MIDDLE: 'ZOOM', RIGHT: 'PAN' }, noRotate: false };
+  // A stable instance (not a fresh object per call) so a test can perturb
+  // .up the way orbiting does, then check that a reset levels it back.
+  const fakeCamera = { fov: 75, up: { x: 0, y: 1, z: 0, set(x, y, z) { this.x = x; this.y = y; this.z = z; } } };
   const G = new Proxy({}, { get: (_t, prop) => {
-    if (prop === 'camera') return () => ({ fov: 75 });
+    if (prop === 'camera') return () => fakeCamera;
     if (prop === 'cameraPosition') return (pos, look, ms) => { calls.__cam = { pos, look, ms }; return G; };
     if (prop === 'graph2ScreenCoords') {
       return (x, y, z) => (opts.badProjection ? { x: NaN, y: NaN } : { x: x / 2 + 500, y: y / 2 + 400 });
@@ -109,9 +112,9 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, };', ctx);
 
-  return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam, controls: () => fakeControls };
+  return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam, controls: () => fakeControls, camera: () => fakeCamera };
 }
 
 const results = [];
@@ -230,7 +233,7 @@ const el = (r, id) => r.els[id] || EMPTY;
     '| picker dismissed =', !el(r,'picker').classList._on);
   if (!gd || gd.nodes.length !== 26) results.push('D: picking payments.json did not render 26 nodes');
   if (el(r,'picker').classList._on) results.push('D: picker still open after a successful load');
-  const stats = el(r,'stats')._html;
+  const stats = el(r,'stats-body')._html;
   if (!/payments\.json/.test(stats)) results.push('D: stats box does not name the file the data came from');
 }
 
@@ -249,7 +252,7 @@ const el = (r, id) => r.els[id] || EMPTY;
   inp.onchange(); await tick();
   const afterSecond = r.fgCount();
   const nodesNow = r.probe.visible().nodes.length;
-  const stats = el(r,'stats')._html;
+  const stats = el(r,'stats-body')._html;
   console.log('E: renderers constructed =', afterFirst, '->', afterSecond,
     '| nodes after reopen =', shrunk, '->', nodesNow,
     '| stats names new file =', /other-graph\.json/.test(stats));
@@ -611,7 +614,7 @@ const el = (r, id) => r.els[id] || EMPTY;
     '| picker dismissed =', !el(r,'picker').classList._on);
   if (!gd || gd.nodes.length !== 26) results.push('M: Load default did not render 26 nodes');
   if (el(r,'picker').classList._on) results.push('M: picker still open after Load default');
-  const stats = el(r,'stats')._html;
+  const stats = el(r,'stats-body')._html;
   if (!/payments\.json/.test(stats)) results.push('M: stats box does not name payments.json after Load default');
 
   // Two clicks must not accumulate mutation on the shared DEFAULT_GRAPH
@@ -824,6 +827,53 @@ const el = (r, id) => r.els[id] || EMPTY;
   console.log('Q: force view drag-pins released =', !stillPinned, '| simulation reheated =', reheated);
   if (stillPinned) results.push('Q: reset left the force view\'s dragged nodes pinned');
   if (!reheated) results.push('Q: reset did not reheat the force view\'s simulation');
+}
+
+// R: Fit to view and Reset positions level a camera drifted by 3D orbiting
+{
+  const r = run('R', { cdnBlocked: false }); await tick();
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+
+  const isLevel = () => r.camera().up.x === 0 && r.camera().up.y === 1 && r.camera().up.z === 0;
+
+  // TrackballControls rotates the camera's own `up` vector while orbiting in
+  // 3D, and nothing else ever resets it -- simulate that drift directly.
+  r.camera().up.set(0.3, 0.9, 0.1);
+  el(r,'fit-btn').click(); await tick();
+  console.log('R: Fit to view levels a drifted up vector =', isLevel());
+  if (!isLevel()) results.push('R: Fit to view left the camera up vector drifted: ' + JSON.stringify(r.camera().up));
+
+  r.camera().up.set(0.3, 0.9, 0.1);
+  r.probe.resetLayout(); await tick();
+  console.log('R: Reset positions levels a drifted up vector =', isLevel());
+  if (!isLevel()) results.push('R: Reset positions left the camera up vector drifted: ' + JSON.stringify(r.camera().up));
+}
+
+// S: the info panel collapses to a small icon on click and expands back
+{
+  const r = run('S', { cdnBlocked: false }); await tick();
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+
+  const before = r.probe.statsCollapsed();
+  el(r,'stats-toggle').click();
+  const afterFirstClick = r.probe.statsCollapsed();
+  const titleAfterCollapse = el(r,'stats-toggle').title;
+  el(r,'stats-toggle').click();
+  const afterSecondClick = r.probe.statsCollapsed();
+  const titleAfterExpand = el(r,'stats-toggle').title;
+  console.log('S: starts expanded =', !before, '| collapses on click =', afterFirstClick,
+    '| expands on a second click =', !afterSecondClick,
+    '| title tracks state =', titleAfterCollapse === 'Expand' && titleAfterExpand === 'Collapse');
+  if (before) results.push('S: stats panel starts collapsed, expected expanded by default');
+  if (!afterFirstClick) results.push('S: clicking the toggle did not collapse the stats panel');
+  if (afterSecondClick) results.push('S: clicking the toggle again did not expand the stats panel back');
+  if (titleAfterCollapse !== 'Expand' || titleAfterExpand !== 'Collapse') {
+    results.push('S: toggle title did not track collapsed state: ' + titleAfterCollapse + ' / ' + titleAfterExpand);
+  }
 }
 
 console.log(results.length ? '\nFAILURES:\n' + results.join('\n') : '\nALL SCENARIOS PASSED');

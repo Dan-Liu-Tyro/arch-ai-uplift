@@ -86,7 +86,7 @@
 
   function renderStats() {
     var vis = visibleData();
-    var el = document.getElementById("stats");
+    var el = document.getElementById("stats-body");
     var lines = [
       "<b>" + vis.nodes.length + "</b> of " + view.nodes.length + " nodes &middot; " +
       "<b>" + vis.links.length + "</b> of " + view.links.length + " edges shown"

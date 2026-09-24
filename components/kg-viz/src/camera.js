@@ -109,6 +109,19 @@
       note("<b>" + (vis.nodes.length - finite.length) + " of " + vis.nodes.length +
         "</b> nodes have non-finite coordinates and will not be drawn.");
     }
+    // Orbiting in 3D (TrackballControls' rotate) rotates the camera's own
+    // `up` vector along with it, and that drift is permanent -- neither
+    // cameraPosition() (used below and by zoomToFit()) nor anything else
+    // ever resets it. fitLayered() always re-points the camera straight
+    // down the z-axis, a direction that only looks level with the default
+    // up of (0,1,0); combined with a stale, rotated-away up left over from
+    // a prior orbit, the same maths produces a visibly tilted or upside
+    // -down frame instead of the intended reset. Levelling it here is what
+    // "Fit to view" and "Reset positions" (which calls back into this) need
+    // to actually look reset after any amount of orbiting.
+    var cam = Graph.camera && Graph.camera();
+    if (cam && cam.up && cam.up.set) cam.up.set(0, 1, 0);
+
     // The layered view is a pinned plane, so its fit is computed exactly.
     // The force view keeps moving, so zoomToFit is the right tool there.
     if (view.layout === "layered") {

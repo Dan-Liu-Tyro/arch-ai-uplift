@@ -79,6 +79,18 @@
   #stats { bottom: 14px; right: 14px; width: 262px; font-size: 11px; color: #9aa4ba;
     line-height: 1.5; }
   #stats b { color: #ffd479; }
+  #stats-toggle { position: absolute; top: 10px; right: 12px; cursor: pointer;
+    font-size: 15px; color: #7b87a0; line-height: 1; }
+  #stats-toggle:hover { color: #c6cde0; }
+  #stats-body { padding-right: 18px; }
+  /* Collapsed is a fixed-size circle holding only the toggle icon -- the
+     provenance/freshness text (this panel's whole reason to exist per
+     renderStats()'s own comment) is a still readable one click away, not
+     lost, so shrinking it this far to stop blocking the canvas costs nothing. */
+  #stats.collapsed { width: 34px; height: 34px; padding: 0; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; }
+  #stats.collapsed #stats-body { display: none; }
+  #stats.collapsed #stats-toggle { position: static; font-size: 17px; }
   #detail { top: 14px; right: 14px; width: 330px; max-height: calc(100vh - 28px);
     overflow-y: auto; display: none; font-size: 12.5px; line-height: 1.5; }
   #detail.open { display: block; }
@@ -233,7 +245,10 @@
     </div>
   </div>
 
-  <div id="stats" class="panel-base"></div>
+  <div id="stats" class="panel-base">
+    <span id="stats-toggle" title="Collapse">&#9432;</span>
+    <div id="stats-body"></div>
+  </div>
 
   <div id="detail" class="panel-base">
     <span class="close" onclick="closeDetail()">&#10005;</span>

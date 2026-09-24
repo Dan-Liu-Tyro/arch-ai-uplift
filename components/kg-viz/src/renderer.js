@@ -124,6 +124,18 @@
     document.getElementById("fit-btn").onclick = function () { frameGraph(); };
     document.getElementById("reset-layout-btn").onclick = function () { resetLayout(); };
 
+    // Collapsed state lives in a plain variable, not read back from the
+    // element's own classList, because the CSS class is the *effect* and
+    // this is the one place that decides it -- same pattern as showLabels
+    // and the other toggles above, rather than treating the DOM as storage.
+    document.getElementById("stats-toggle").onclick = function () {
+      statsCollapsed = !statsCollapsed;
+      var panel = document.getElementById("stats");
+      if (statsCollapsed) panel.classList.add("collapsed");
+      else panel.classList.remove("collapsed");
+      document.getElementById("stats-toggle").title = statsCollapsed ? "Expand" : "Collapse";
+    };
+
     // 3d-force-graph sizes its renderer from the container once, at
     // construction, and does not follow the window. Without this, resizing
     // leaves the canvas at its original size and the label overlay -- which
