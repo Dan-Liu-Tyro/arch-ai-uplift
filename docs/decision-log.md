@@ -2083,6 +2083,41 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       `reference-architectures/`, `systems/`) plus `domains.json` for the
       seventh type, `domain` — checked directly against the schema and the
       real file listing rather than repeated from memory.
+46. **`idea-to-presentation`'s mechanism, undesigned since decision 22
+    scaffolded it, is decided by its first real use: one markdown source of
+    truth, with slides and a Confluence page as generated views of it.** The
+    occasion is a solution-architecture presentation to the CTO on AI-DLC.
+    The user's framing: work on markdown as the source of truth for the
+    solution architecture, generate the deck from it slide by slide now, and
+    output the same content as a Confluence page later.
+    - **The markdown is the artifact, not a staging area for a deck.** This
+      is the load-bearing part. A deck built as the primary artifact cannot
+      later yield a good page, because slide-shaped prose (fragments,
+      build-up, reliance on a narrator) does not read as a document. Writing
+      the architecture as a document first and projecting it into slides
+      works in both directions; the reverse does not.
+    - **Renderings are regenerable artifacts, never hand-edited** — the
+      discipline `kg-viz` already applies to `payments.json` and
+      `knowledge-visualizer.html` (decisions 36, 39). An edit made in
+      PowerPoint or in Confluence is lost on the next generation, so the
+      source is the only place to change content.
+    - **Content and capability are separated across tiers.** The AI-DLC
+      solution architecture is Architecture-stream business work owed to the
+      org, so it belongs under `practice/` (decision 26). The idea → deck/page
+      mechanism stays in `meta/idea-to-presentation/`. Keeping them apart is
+      what lets the next deck reuse the mechanism without inheriting AI-DLC
+      content, and it holds the tier test — what a thing *is*, not what it is
+      about.
+    - **Still open: the rendering step itself.** Whether slides come from a
+      `.pptx` generator, a published slide artifact exported to `.pptx`, or
+      something else is not settled, and the user deliberately deferred it —
+      markdown only, for now — so that the narrative can stop moving before
+      any rendering effort is spent. The Confluence path is less open:
+      `createConfluencePage` via the Atlassian MCP connector already exists
+      and needs no new infrastructure.
+    - **Invocation shape also still open** (Skill vs Agent, per the README).
+      This first run is being done in conversation, which is the cheapest way
+      to find out what the mechanism actually needs before packaging it.
 
 ## Constraints identified
 

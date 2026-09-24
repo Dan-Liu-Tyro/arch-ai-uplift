@@ -41,15 +41,37 @@ the idea should say.
 - Any specific output format beyond PowerPoint and Confluence until asked
   for.
 
-**Not yet designed — see decision-log Next steps:**
-- The actual mechanism: how an idea (as typed, pasted, or dictated) becomes
-  a deck/page. Whether this needs generation tooling (e.g. producing a real
-  `.pptx` file) or works by drafting content Claude Code then pushes through
-  existing channels (e.g. `createConfluencePage` via the Atlassian MCP
-  connector, already used by `components/confluence-publish`'s intended
-  design).
-- Whether it's invoked as a Claude Code Skill, an Agent (mirroring
-  `arc`), or something else.
+## Mechanism
+
+**Decided (decision 46): one markdown source of truth, with every output a
+generated view of it.** The markdown is the artifact — the document itself,
+not a staging area for a deck. Slides and a Confluence page are projections.
+
+The reason this direction and not the other: slide-shaped prose (fragments,
+build-up, reliance on a narrator) does not read as a document, so a deck
+authored first cannot later yield a good page. A document projects into
+slides; slides do not project back into a document.
+
+Consequence: **rendered outputs are regenerable and never hand-edited**, the
+same discipline `kg-viz` applies to `payments.json` and
+`knowledge-visualizer.html`. An edit made in PowerPoint or directly in
+Confluence is lost on the next generation. Content changes go into the
+source.
+
+**Still open:**
+- **The slide rendering step.** Whether a `.pptx` is generated directly, or
+  built as a published slide artifact and exported, is not settled —
+  deliberately deferred so the narrative can stop moving before rendering
+  effort is spent.
+- **Invocation shape.** Whether this is a Claude Code Skill, an Agent
+  (mirroring `arc`), or stays conversational. The first real run is being
+  done in conversation on purpose, to find out what the mechanism needs
+  before packaging it.
+
+The Confluence path is the least open of the three: `createConfluencePage`
+via the Atlassian MCP connector already exists and needs no new
+infrastructure — the same channel `components/confluence-publish` intends to
+use, arrived at independently.
 - If any executable tooling is needed, its language — per org standards,
   Kotlin is preferred for complex applications; something simpler may be
   fine for a first pass, consistent with this project's
@@ -69,7 +91,12 @@ it turns out to be.
 
 ## Status
 
-Just scaffolded. Purpose and boundary are set; mechanism is not designed yet.
+**In first real use.** Purpose and boundary were set at scaffolding; the
+source-of-truth mechanism is now decided (see Mechanism above) because a
+real need arrived: a solution-architecture presentation to the CTO on
+AI-DLC. That content lives under `practice/`, not here — this component
+holds the capability, not any one deck's material. Rendering and invocation
+remain undecided.
 
 ## Extraction notes
 
