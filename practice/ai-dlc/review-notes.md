@@ -214,11 +214,47 @@ correctly: *industry and domain standards* in section 1's world-knowledge
 taxonomy, and *the reference domain model* as a named Architecture-owned
 artefact in section 3. Those are not the same usage and were left alone.
 
-## 6. "AI-DLC" is never defined
+## 6. ~~"AI-DLC" is never defined~~ — REJECTED, replaced by 6a
 
-The title uses the term and no section explains it. If it is adopted from
-AWS's AI-Driven Development Lifecycle, say so and say what has been adapted;
-if it is our own, define it once. One line either way.
+**Rejected by the author, 2026-09-24**, on the grounds that the deck should
+not define the term: *"why do I need to define that?"* The original note asked
+for the term to be defined once, or else attributed to AWS's AI-Driven
+Development Lifecycle with the adaptations stated.
+
+That was wrong, and wrong in the same way as the two items in *Withdrawn*
+below. **The term came from the CTO** — the ask itself was phrased as "AI-DLC
+Solution Architecture" (see [`README.md`](README.md)). Defining a term back to
+the person who used it to commission the work is off-brief, and the reviewer's
+instinct behind it ("is every term defined?") is audience-independent by
+construction, which is exactly why it misfires on a deliverable whose audience
+set the vocabulary.
+
+### 6a. The term is never tied to the deck's own model — one clause, still open
+
+What survives is smaller and is not a definition. "AI-DLC" appears five times
+in the document and **all four body mentions are in sections 6–8**; sections
+1–5 never use it. Section 3 says "Eight streams, in delivery order" — that
+phrase *is* the lifecycle, but the deck never connects the two, so a reader who
+follows sections 1–5 meets a term in section 6 that the deck's own framework
+has not been tied to.
+
+The fix is one clause in section 3, stating that the eight streams in delivery
+order are the lifecycle this deck calls the AI-DLC. It strengthens section 3
+rather than adding content, and it is not a definition of a term the audience
+supplied.
+
+Also: section 8 says "the primary driver of the **DLC**" where every other
+mention says "AI-DLC". Trivial, worth aligning.
+
+### 6b. AWS's AI-DLC is a question for the regroup, not deck content
+
+AWS publishes a methodology by this name, with its own phases and ceremonies.
+If Tyro's term arrived from there, part of the audience may be importing AWS's
+meaning — a materially different thing from this deck's three-stage model. That
+is worth the author *knowing* before the huddle and worth one question at the
+Monday regroup; it is not something the deck should explain. **Flagged from the
+reviewer's recall, which has not been verified against AWS's published
+material** — check it rather than repeat it.
 
 ## 7. Lower priority at this depth
 
