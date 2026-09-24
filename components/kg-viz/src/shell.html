@@ -68,7 +68,15 @@
     box-shadow: 0 0 6px currentColor; }
   .row.off { opacity: 0.42; }
   .count { color: #6f7b93; font-size: 10.5px; margin-left: auto; flex: none; }
-  #stats { bottom: 14px; left: 14px; width: 262px; font-size: 11px; color: #9aa4ba;
+  /* Right-anchored, not left: #controls is top-anchored with enough legend
+     rows and toggles to reach deep into the bottom of a normal-height
+     window, and #stats used to sit left-anchored at the bottom -- directly
+     in that path. Both panels grow independently and neither knows the
+     other's height, so overlap wasn't a corner case, it was guaranteed once
+     #controls' content got tall enough; it painted on top and silently hid
+     "Fit to view" and everything after it. Right-anchored keeps it clear of
+     #controls' column regardless of either panel's content length. */
+  #stats { bottom: 14px; right: 14px; width: 262px; font-size: 11px; color: #9aa4ba;
     line-height: 1.5; }
   #stats b { color: #ffd479; }
   #detail { top: 14px; right: 14px; width: 330px; max-height: calc(100vh - 28px);
