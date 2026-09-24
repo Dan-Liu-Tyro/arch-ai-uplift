@@ -100,6 +100,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 41 | Stage bands invisible in Safari only: `#bands` `<svg>` needs explicit `width`/`height`, `inset:0` alone doesn't stretch a replaced element | `kg-viz` |
 | 42 | Agent's invocation handle renamed `arc-lite` → `arc` for easier `@`-mention; persona identity and disclaimer unchanged | `local-agent` |
 | 43 | New pattern: dedicated agents own one artifact's source of truth and lifecycle; `backlog` agent is the pilot, owning `docs/backlog.md` | `docs/backlog.md`, `CLAUDE.md`, new `.claude/agents/backlog.md` |
+| 45 | `arc`'s missing live-Confluence access (open since decision 17) made an explicit decision: stay local-only for now, for testing | `.claude/agents/arc-lite.md` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2052,6 +2053,36 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       `kg-content` pure. This is the "manual adjustment later" above, and
       belongs in `docs/backlog.md`, which decision 43 hands to the
       `backlog` agent rather than to direct editing.
+45. **`arc`'s missing live-Confluence access, open since decision 17 as an
+    unresolved gap, is now an affirmative decision: stay local-knowledge-only
+    for now, deliberately, for testing.** Surfaced when the user asked what
+    `arc` actually has access to; checking the real `tools:` grant (`Read,
+    Grep, Glob, Skill` — no Atlassian MCP tool) against the file's own
+    description ("with live Confluence read as a fallback") showed the
+    description overstated a capability that was never actually wired up.
+    Offered to either grant the tool now or flag the gap in the file; the
+    user chose neither — explicitly keep it ungranted, to test local-
+    grounding behavior in isolation, not because the tool grant is hard to
+    add.
+    - **This changes the shape of the gap, not just its status.** Decisions
+      17 and 20 treated the missing grant as a backlog item — something not
+      yet done. It is now a deliberate scope boundary with a stated reason,
+      the same distinction `docs/component-model.md`'s "purpose vs. protocol"
+      pattern draws elsewhere: an open question named and reasoned about,
+      not a silent gap that reads as decided by omission.
+    - **`arc-lite.md` updated to match**, so the file stops promising more
+      than it does: the frontmatter `description`, the Identity section, and
+      working-protocol step 3 all now state plainly that live Confluence
+      access is withheld right now rather than instructing a live search the
+      agent has no tool to perform. The `live-unverified` citation shape and
+      `05-ignore-list.md` are left in place as dormant infrastructure for
+      whenever the grant is added back, not removed.
+    - **Also corrected in the same pass:** the working protocol's step 1 said
+      "six type directories"; `kg-content/entities/` actually holds six
+      directories (`decisions/`, `guardrails/`, `patterns/`, `principles/`,
+      `reference-architectures/`, `systems/`) plus `domains.json` for the
+      seventh type, `domain` — checked directly against the schema and the
+      real file listing rather than repeated from memory.
 
 ## Constraints identified
 
