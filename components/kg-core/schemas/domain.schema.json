@@ -69,8 +69,7 @@
         "status",
         "scope",
         "purpose",
-        "authority",
-        "relationships"
+        "authority"
       ],
       "additionalProperties": false,
       "properties": {
@@ -132,60 +131,11 @@
               "items": {
                 "type": "string"
               },
-              "description": "Denormalized, human-readable mirror of relationships[]'s targets (resolved domain titles/ids or the raw unresolved phrase) -- kept for quick scanning without cross-referencing ids; relationships[] is the structured source of truth."
+              "description": "Free-text phrases naming what this domain explicitly disclaims authority over -- the source of truth (not a mirror of anything else). Deliberately not required to resolve to another domain's id: a structured `relationships[]` edge type existed briefly and was removed (see SCHEMA.md's Open items) because it never earned a consumer beyond its own visualization, which then struggled to render a single-predicate, largely-non-mutual graph honestly."
             }
-          }
-        },
-        "relationships": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/relationship"
           }
         }
       }
-    },
-    "relationship": {
-      "type": "object",
-      "oneOf": [
-        {
-          "required": [
-            "type",
-            "target"
-          ],
-          "additionalProperties": false,
-          "properties": {
-            "type": {
-              "type": "string",
-              "enum": [
-                "not_authoritative_for"
-              ]
-            },
-            "target": {
-              "type": "string",
-              "description": "A resolved domain id from this same file's domains[]."
-            }
-          }
-        },
-        {
-          "required": [
-            "type",
-            "target_unresolved"
-          ],
-          "additionalProperties": false,
-          "properties": {
-            "type": {
-              "type": "string",
-              "enum": [
-                "not_authoritative_for"
-              ]
-            },
-            "target_unresolved": {
-              "type": "string",
-              "description": "Raw phrase from the source that could not be confidently resolved to a known domain id -- kept rather than dropped, per this experiment's 'expose gaps, don't hide them' principle. See docs/domain-model-experiment.md for what these actually are."
-            }
-          }
-        }
-      ]
     }
   }
 }

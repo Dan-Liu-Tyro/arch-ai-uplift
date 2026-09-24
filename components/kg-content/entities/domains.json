@@ -60,45 +60,7 @@
           "risk-compliance-and-regulatory",
           "Operational Investigations & Exceptions"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-customer-configuration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "settlement-and-reconciliation"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Banking Domain"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "fraud-and-risk-decisioning"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "risk-compliance-and-regulatory"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Operational Investigations & Exceptions"
-        }
-      ]
+      }
     },
     {
       "id": "digital-channels-and-experience",
@@ -133,57 +95,7 @@
           "risk-compliance-and-regulatory",
           "customer-notifications-and-communications"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-customer-configuration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-channels"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Settlement"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Banking"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "product-quoting-and-pricing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "partnerships"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "fraud-and-risk-decisioning"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "risk-compliance-and-regulatory"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer-notifications-and-communications"
-        }
-      ]
+      }
     },
     {
       "id": "payments-channels",
@@ -220,57 +132,7 @@
           "user-and-identity",
           "digital-channels-and-experience"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-customer-configuration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "fraud-and-risk-decisioning"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "product-quoting-and-pricing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "settlement-and-reconciliation"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "funds-movement"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "deposits-product"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "partnerships"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "integration-enablement-and-certification"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "digital-channels-and-experience"
-        }
-      ]
+      }
     },
     {
       "id": "customer",
@@ -304,41 +166,7 @@
           "customer-service-and-support",
           "corporate-finance"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "partnerships"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer-and-product-onboarding"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Relevant product domains"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "risk-compliance-and-regulatory"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Operational Investigations & Exceptions"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer-service-and-support"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "corporate-finance"
-        }
-      ]
+      }
     },
     {
       "id": "user-and-identity",
@@ -371,45 +199,7 @@
           "customer-service-and-support",
           "data-analytics-and-intelligence"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "partnerships"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Relevant product domains"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "origination"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "servicing domains"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "risk-compliance-and-regulatory"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Operational Investigations & Exceptions"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer-service-and-support"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "data-analytics-and-intelligence"
-        }
-      ]
+      }
     },
     {
       "id": "payments-product",
@@ -447,65 +237,7 @@
           "data-analytics-and-intelligence",
           "ai-and-ml"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-customer-configuration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-channels"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "settlement-and-reconciliation"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "product-quoting-and-pricing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "pos-integration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-vas-integrations"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "integration-enablement-and-certification"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer-service-and-support"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "enterprise-data-governance"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "data-analytics-and-intelligence"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "ai-and-ml"
-        }
-      ]
+      }
     },
     {
       "id": "payments-customer-configuration",
@@ -543,57 +275,7 @@
           "integration-enablement-and-certification",
           "pos-integration"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-channels"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "product-quoting-and-pricing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "settlement-and-reconciliation"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "funds-movement"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "deposits-product"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "hardware-and-asset-management"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "terminal-fleet-and-device-management"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "integration-enablement-and-certification"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "pos-integration"
-        }
-      ]
+      }
     },
     {
       "id": "payments-processing",
@@ -632,65 +314,7 @@
           "data-analytics-and-intelligence",
           "ai-and-ml"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-customer-configuration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-channels"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "fraud-and-risk-decisioning"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "risk-compliance-and-regulatory"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "product-quoting-and-pricing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "disputes-and-recovery"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "settlement-and-reconciliation"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-accounting"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "funds-movement"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "deposits-product"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer-service-and-support"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "enterprise-data-governance"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "data-analytics-and-intelligence"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "ai-and-ml"
-        }
-      ]
+      }
     },
     {
       "id": "settlement-and-reconciliation",
@@ -728,61 +352,7 @@
           "Operational Investigations & Exceptions Domain",
           "corporate-finance"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "disputes-and-recovery"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-channels"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "product-quoting-and-pricing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-accounting"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "funds-movement"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "deposits-product"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-customer-configuration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "risk-compliance-and-regulatory"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Operational Investigations & Exceptions Domain"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "corporate-finance"
-        }
-      ]
+      }
     },
     {
       "id": "payments-accounting",
@@ -822,49 +392,7 @@
           "corporate-finance",
           "accounting-product"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "settlement-and-reconciliation"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "product-quoting-and-pricing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "billing-and-accounts-receivable"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "funds-movement"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "deposits-product"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "corporate-finance"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "accounting-product"
-        }
-      ]
+      }
     },
     {
       "id": "hardware-and-asset-management",
@@ -892,25 +420,7 @@
           "payments-channels",
           "payments-processing"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "terminal-fleet-and-device-management"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-customer-configuration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-channels"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        }
-      ]
+      }
     },
     {
       "id": "terminal-fleet-and-device-management",
@@ -941,29 +451,7 @@
           "payments-channels",
           "payments-processing"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "hardware-and-asset-management"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-customer-configuration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "integration-enablement-and-certification"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-channels"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        }
-      ]
+      }
     },
     {
       "id": "deposits-product",
@@ -991,49 +479,7 @@
           "fraud-and-risk-decisioning",
           "risk-compliance-and-regulatory"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "funds-movement"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "banking-vas-integrations"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "settlement-and-reconciliation"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "billing-and-accounts-receivable"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "corporate-finance"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "credit-and-underwriting"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "fraud-and-risk-decisioning"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "risk-compliance-and-regulatory"
-        }
-      ]
+      }
     },
     {
       "id": "lending-product",
@@ -1061,49 +507,7 @@
           "risk-compliance-and-regulatory",
           "corporate-finance"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "credit-and-underwriting"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer-and-product-onboarding"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "funds-movement"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "deposits-product"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "product-quoting-and-pricing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "fraud-and-risk-decisioning"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "risk-compliance-and-regulatory"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "corporate-finance"
-        }
-      ]
+      }
     },
     {
       "id": "credit-and-underwriting",
@@ -1136,45 +540,7 @@
           "product-quoting-and-pricing",
           "funds-movement"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "lending-product"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer-and-product-onboarding"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Banking Domain"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "fraud-and-risk-decisioning"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "risk-compliance-and-regulatory"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "product-quoting-and-pricing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "funds-movement"
-        }
-      ]
+      }
     },
     {
       "id": "accounting-product",
@@ -1207,49 +573,7 @@
           "partnerships",
           "banking-vas-integrations"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-customer-configuration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "settlement-and-reconciliation"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Banking Domain"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "lending-product"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "corporate-finance"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "partnerships"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "banking-vas-integrations"
-        }
-      ]
+      }
     },
     {
       "id": "funds-movement",
@@ -1282,41 +606,7 @@
           "product-quoting-and-pricing",
           "customer-notifications-and-communications"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Banking Domain"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "settlement-and-reconciliation"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "billing-and-accounts-receivable"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "banking-vas-integrations"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "product-quoting-and-pricing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer-notifications-and-communications"
-        }
-      ]
+      }
     },
     {
       "id": "billing-and-accounts-receivable",
@@ -1349,41 +639,7 @@
           "customer",
           "user-and-identity"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "product-quoting-and-pricing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "settlement-and-reconciliation"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Banking Domain"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "funds-movement"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "corporate-finance"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        }
-      ]
+      }
     },
     {
       "id": "customer-acquisition",
@@ -1422,61 +678,7 @@
           "billing-and-accounts-receivable",
           "risk-compliance-and-regulatory"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "partnerships"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer-and-product-onboarding"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-customer-configuration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-channels"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Settlement"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Banking"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Lending"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "product-quoting-and-pricing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "billing-and-accounts-receivable"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "risk-compliance-and-regulatory"
-        }
-      ]
+      }
     },
     {
       "id": "partnerships",
@@ -1509,45 +711,7 @@
           "payments-customer-configuration",
           "product-quoting-and-pricing"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer-acquisition"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "pos-integration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-vas-integrations"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "banking-vas-integrations"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "integration-enablement-and-certification"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-customer-configuration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "product-quoting-and-pricing"
-        }
-      ]
+      }
     },
     {
       "id": "groups-and-enterprises",
@@ -1581,49 +745,7 @@
           "Credit",
           "partnerships"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-customer-configuration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "settlement-and-reconciliation"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "product-quoting-and-pricing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Banking"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Lending"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Credit"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "partnerships"
-        }
-      ]
+      }
     },
     {
       "id": "corporate-finance",
@@ -1655,45 +777,7 @@
           "data-analytics-and-intelligence",
           "ai-and-ml"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "settlement-and-reconciliation"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Banking Domain"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "accounting-product"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "product-quoting-and-pricing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "billing-and-accounts-receivable"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "enterprise-data-governance"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "data-analytics-and-intelligence"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "ai-and-ml"
-        }
-      ]
+      }
     },
     {
       "id": "risk-compliance-and-regulatory",
@@ -1732,57 +816,7 @@
           "data-analytics-and-intelligence",
           "ai-and-ml"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer-and-product-onboarding"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "disputes-and-recovery"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "settlement-and-reconciliation"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-accounting"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "deposits-product"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "funds-movement"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Operational Investigations & Exceptions Domain"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "data-analytics-and-intelligence"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "ai-and-ml"
-        }
-      ]
+      }
     },
     {
       "id": "fraud-and-risk-decisioning",
@@ -1819,61 +853,7 @@
           "data-analytics-and-intelligence",
           "ai-and-ml"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "risk-compliance-and-regulatory"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-channels"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "digital-channels-and-experience"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-customer-configuration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "settlement-and-reconciliation"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Banking Domain"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Operational Investigations & Exceptions"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "enterprise-data-governance"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "data-analytics-and-intelligence"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "ai-and-ml"
-        }
-      ]
+      }
     },
     {
       "id": "disputes-and-recovery",
@@ -1906,57 +886,7 @@
           "ai-and-ml",
           "payments-customer-configuration"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "settlement-and-reconciliation"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "funds-movement"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-accounting"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "product-quoting-and-pricing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "fraud-and-risk-decisioning"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "risk-compliance-and-regulatory"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer-service-and-support"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "enterprise-data-governance"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "data-analytics-and-intelligence"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "ai-and-ml"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-customer-configuration"
-        }
-      ]
+      }
     },
     {
       "id": "payments-vas-integrations",
@@ -1985,33 +915,7 @@
           "payments-processing",
           "payments-customer-configuration"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "partnerships"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Revenue"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "integration-enablement-and-certification"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-channels"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-customer-configuration"
-        }
-      ]
+      }
     },
     {
       "id": "pos-integration",
@@ -2032,8 +936,7 @@
           "POS integration configuration metadata required to operate the integration surface"
         ],
         "not_authoritative_for": []
-      },
-      "relationships": []
+      }
     },
     {
       "id": "banking-vas-integrations",
@@ -2066,45 +969,7 @@
           "product-quoting-and-pricing",
           "digital-channels-and-experience"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Banking Domain"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "funds-movement"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "accounting-product"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "partnerships"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "integration-enablement-and-certification"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "product-quoting-and-pricing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "digital-channels-and-experience"
-        }
-      ]
+      }
     },
     {
       "id": "partner-developer-experience",
@@ -2141,57 +1006,7 @@
           "customer-acquisition",
           "customer-notifications-and-communications"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "partnerships"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "integration-enablement-and-certification"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "pos-integration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-vas-integrations"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "banking-vas-integrations"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-channels"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-customer-configuration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer-acquisition"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer-notifications-and-communications"
-        }
-      ]
+      }
     },
     {
       "id": "integration-enablement-and-certification",
@@ -2218,8 +1033,7 @@
           "Production eligibility flags"
         ],
         "not_authoritative_for": []
-      },
-      "relationships": []
+      }
     },
     {
       "id": "enterprise-data-governance",
@@ -2251,25 +1065,7 @@
           "data-analytics-and-intelligence",
           "ai-and-ml"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "risk-compliance-and-regulatory"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Operational Domains"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "data-analytics-and-intelligence"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "ai-and-ml"
-        }
-      ]
+      }
     },
     {
       "id": "data-analytics-and-intelligence",
@@ -2300,25 +1096,7 @@
           "enterprise-data-governance",
           "ai-and-ml"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Operational Domains"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Relevant business domains"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "enterprise-data-governance"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "ai-and-ml"
-        }
-      ]
+      }
     },
     {
       "id": "ai-and-ml",
@@ -2351,29 +1129,7 @@
           "enterprise-data-governance",
           "risk-compliance-and-regulatory"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Relevant business domains"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Operational domains"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "data-analytics-and-intelligence"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "enterprise-data-governance"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "risk-compliance-and-regulatory"
-        }
-      ]
+      }
     },
     {
       "id": "customer-and-product-onboarding",
@@ -2403,45 +1159,7 @@
           "payments-processing",
           "Settlement"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-customer-configuration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "risk-compliance-and-regulatory"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "credit-and-underwriting"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Banking"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "lending-product"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Settlement"
-        }
-      ]
+      }
     },
     {
       "id": "customer-lifecycle-management",
@@ -2468,37 +1186,7 @@
           "product-quoting-and-pricing",
           "Operational Investigations & Exceptions"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-customer-configuration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Banking"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "lending-product"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "product-quoting-and-pricing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Operational Investigations & Exceptions"
-        }
-      ]
+      }
     },
     {
       "id": "product-bundling-and-eligibility",
@@ -2525,37 +1213,7 @@
           "Lending",
           "Credit"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "product-quoting-and-pricing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-customer-configuration"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Banking"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Lending"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Credit"
-        }
-      ]
+      }
     },
     {
       "id": "product-quoting-and-pricing",
@@ -2590,45 +1248,7 @@
           "customer",
           "user-and-identity"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "settlement-and-reconciliation"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Banking Domain"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "lending-product"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "billing-and-accounts-receivable"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "corporate-finance"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "partnerships"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        }
-      ]
+      }
     },
     {
       "id": "operational-case-management",
@@ -2656,33 +1276,7 @@
           "fraud-and-risk-decisioning",
           "risk-compliance-and-regulatory"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "customer-service-and-support"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "payments-processing"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "settlement-and-reconciliation"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "Banking"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "fraud-and-risk-decisioning"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "risk-compliance-and-regulatory"
-        }
-      ]
+      }
     },
     {
       "id": "customer-notifications-and-communications",
@@ -2709,29 +1303,7 @@
           "customer-acquisition",
           "digital-channels-and-experience"
         ]
-      },
-      "relationships": [
-        {
-          "type": "not_authoritative_for",
-          "target": "customer"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "user-and-identity"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target_unresolved": "All authoritative domains"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "customer-acquisition"
-        },
-        {
-          "type": "not_authoritative_for",
-          "target": "digital-channels-and-experience"
-        }
-      ]
+      }
     }
   ]
 }

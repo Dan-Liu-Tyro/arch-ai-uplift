@@ -82,11 +82,11 @@ simpler option, chosen deliberately over modelling category as its own node
 until there's a real reason (a query, a second grouping dimension) that a
 string can't serve.
 
-`domain` does have a real relationship type now: `not_authoritative_for`
-(domain → domain), extracted from the source's "Explicit non-authority"
-lists and resolved to real domain ids wherever that could be done
-confidently — see the Open items entry below on how this resolves what was
-previously an open question about negation.
+`domain` has no relationship type. It briefly had one, `not_authoritative_for`
+(domain → domain) — see the Open items entry below for why it was reversed.
+Non-authority is captured only as `authority.not_authoritative_for`, a plain
+string list on the node itself, with no expectation it resolves to other
+domains' ids.
 
 The `principle` / `guardrail` distinction is the load-bearing one. A principle
 explains *why* and cannot be violated in a checkable sense; a guardrail can be
@@ -184,8 +184,8 @@ This YAML-frontmatter contract is for the six file-per-entity types.
 repeated 39 times, and `type` is implicit (every item in the `domains` array
 is one) rather than a field. See `schemas/domain.schema.json` for `domain`'s
 actual required fields (`id`, `title`, `category`, `status`, `purpose`,
-`authority`, `relationships`) — a JSON Schema, not YAML frontmatter, doing
-the same job this section does for the other six types.
+`authority`) — a JSON Schema, not YAML frontmatter, doing the same job this
+section does for the other six types.
 
 `owner` is required because unowned architecture knowledge is how the current
 Confluence sprawl happened. `source` preserves provenance during migration so a
@@ -213,10 +213,9 @@ there are no section headings to fix. Its equivalent structure is
 `schemas/domain.schema.json`'s `domain` definition: `purpose` (a string,
 lean by design — not a transcription of the source's full JTBD/core-data/
 invariants lists), `authority.owns` / `authority.not_authoritative_for`
-(short phrases, same leanness), `scope` (below), and `relationships` (typed,
-structured, described below). See `docs/domain-model-experiment.md` for why
-lean-first was chosen over front-loading every one of the source page's
-per-domain fields.
+(short phrases, same leanness), and `scope` (below). See
+`docs/domain-model-experiment.md` for why lean-first was chosen over
+front-loading every one of the source page's per-domain fields.
 
 ### `scope` on `domain` (decision 35)
 
@@ -239,9 +238,10 @@ Two design points worth keeping:
 ### Overlay graphs (`entities/graphs/<slug>.json`, decision 35)
 
 A named set of typed, directed relationships over entities that already exist
-elsewhere in `kg-content`. This is how the repo gets edge types beyond
-`not_authoritative_for` without every entity type having to grow a
-relationship block first.
+elsewhere in `kg-content`. This is how the repo gets edge types without
+`domain` (or any other entity type) having to grow a relationship block of
+its own first — the original motivation was `not_authoritative_for`, since
+reversed (see Open items).
 
 The governing rule is **reference, never restate**: a node either declares a
 `domain_ref` (title, category, purpose and scope are resolved from
@@ -314,7 +314,15 @@ Checkable by script later; a PR review checklist until then.
   contradiction precision directly.
 - Whether `tags` need a controlled vocabulary. Free-text tags degrade into the
   same inconsistency the KG is meant to fix.
-- **Resolved: `domain` now has a real relationship type, `not_authoritative_for`.**
+- ~~Resolved: `domain` now has a real relationship type,
+  `not_authoritative_for`.~~ **Reversed** — see `docs/decision-log.md`. The
+  relationship never earned a consumer beyond its own visualization, which
+  then struggled to render it honestly: a single-predicate, average-degree
+  -15 graph, only 38% of it mutual, easy to misread as symmetric where it
+  wasn't. Non-authority is domain-level text only now
+  (`authority.not_authoritative_for`), not a graph edge. The reasoning below
+  is kept for the record, not because it still holds.
+
   The earlier open question here was whether the schema needed a genuinely new
   primitive to express a *negative* claim ("this domain does NOT own X"), since
   every other relationship type (`derives_from`, `requires`, `uses`,
@@ -322,15 +330,13 @@ Checkable by script later; a PR review checklist until then.
   the relationship *type itself* after the negative claim rather than adding a
   separate true/false flag to a positive-only vocabulary — `{"type":
   "not_authoritative_for", "target": "..."}` is itself the negative assertion,
-  structurally no different from any other typed edge. This avoids needing a
-  schema-level negation primitive; it does not prove no other entity type will
-  ever need one, but for `domain` specifically the question is closed.
-  Extracting these from the source's prose ("→ Other Domain") required real
-  disambiguation work (some phrases bundle two domains under one legacy name,
-  some are generic collective phrases with no single target) — see
-  `docs/domain-model-experiment.md` for the full method and evidence, and
-  `target_unresolved` in `schemas/domain.schema.json` for how an unresolved
-  reference is kept rather than dropped.
+  structurally no different from any other typed edge. This avoided needing a
+  schema-level negation primitive, at the cost above. Extracting these from
+  the source's prose ("→ Other Domain") required real disambiguation work
+  (some phrases bundle two domains under one legacy name, some are generic
+  collective phrases with no single target) — see
+  `docs/domain-model-experiment.md` for that extraction method, kept as a
+  historical record of the work even though its output is no longer live.
 - Still open: whether cross-domain references should *also* be expressed as
   `system implements domain` / `pattern uses domain` links from the existing
   file-per-entity types inward, once any of those six types actually
