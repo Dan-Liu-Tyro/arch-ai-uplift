@@ -5,6 +5,18 @@ for later inspection rather than tracked as open design questions. Promote an
 entry to `decision-log.md` (as a decision or open question) once it's actually
 being worked, or delete it here once it's superseded.
 
+**Owned by the `backlog` agent** (`.claude/agents/backlog.md`), decision 43 —
+the first pilot of the agent-owns-artifact pattern recorded there. Route
+additions and edits through that agent rather than hand-editing this file
+directly; it keeps this file's structure (priority tags, dedup against
+existing entries) consistent on its own initiative. This file itself stays
+plain, git-versioned Markdown regardless — readable by a teammate who has
+never talked to the agent, per CLAUDE.md's "if it isn't in one of these
+files, it didn't happen" rule. Priority, where set, is tagged inline right
+after an idea's bold title: `[P1]` worth doing next, `[P2]` agreed but not
+urgent, `[P3]` parked, revisit opportunistically. An idea with no tag simply
+hasn't been prioritized yet — that is not the same as `[P3]`.
+
 ## Ideas
 
 - **Better Claude Code ↔ Rovo-agent (Arc) communication than Confluence.**

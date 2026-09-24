@@ -228,3 +228,18 @@ principle's `status` and must not be silently absorbed as if it agreed.
   correctness claim about what the picture says, not a taste preference.
   Would be contradicted by a case where they accept relayouting the data to
   satisfy a purely presentational constraint.
+- 2026-09-24 · Second instance of ship-now-park-the-cleaner-design: accepted a
+  known-unstable layout tie-break rather than fix it while it was cheap ·
+  this conversation · stated · unpromoted — told that `row` in the generated
+  layout derives from entity enumeration order rather than from meaning, so
+  regenerating after an unrelated `kg-content` edit can reshuffle nodes, the
+  reply was "It's good enough for now, and we can add manual adjustment
+  later." Notable because the cost of fixing it rises with time and that was
+  said explicitly in the offer — the reshuffle-once price is lower today than
+  after the layout carries more expectations — and the answer was still to
+  defer. Reinforces the 2026-09-23 vendor-now-SVG-later entry above; the
+  pattern now has two independent instances and a consistent shape (take the
+  working artefact, name the better end state as a follow-up rather than a
+  blocker). Worth watching for the case that would contradict it: a
+  correctness or data-integrity risk, rather than a structural-cleanliness
+  one, where deferring may not be acceptable.

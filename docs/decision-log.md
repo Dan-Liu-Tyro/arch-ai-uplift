@@ -99,6 +99,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 40 | `payments-target-state.json`→`payments.json` after the same-named source overlay caused a real mis-pick; `build.py` embeds it, adding a "Load default" button | `kg-viz` |
 | 41 | Stage bands invisible in Safari only: `#bands` `<svg>` needs explicit `width`/`height`, `inset:0` alone doesn't stretch a replaced element | `kg-viz` |
 | 42 | Agent's invocation handle renamed `arc-lite` → `arc` for easier `@`-mention; persona identity and disclaimer unchanged | `local-agent` |
+| 43 | New pattern: dedicated agents own one artifact's source of truth and lifecycle; `backlog` agent is the pilot, owning `docs/backlog.md` | `docs/backlog.md`, `CLAUDE.md`, new `.claude/agents/backlog.md` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -1947,6 +1948,68 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       create-vs-edit boundary) — Claude could edit the file's `name:`
       field in place but could not perform the rename. That one `git mv`
       needs the user's own hand.
+43. **New standing pattern: a bounded artifact gets one dedicated agent
+    that owns its structure and every write to it; other agents may read
+    it but route changes through the owner.** Reached over several turns
+    of the user proposing "single player" delegation as a way to relieve
+    Claude, the orchestrator, from concrete component/meta work without
+    context exploding, then generalizing from two concrete candidates
+    (a `procedural-memory` bookkeeping pilot, a backlog query agent) to
+    this rule once both turned out to be instances of something this
+    project's own `README.md`-as-contract convention already implied.
+    - **The rule has two preconditions, both argued for and accepted
+      before this was applied, not assumed:** (1) **earn it, don't
+      pre-allocate it** — the same `least-infrastructure-first` discipline
+      `constitution/03-skills.md` already applies to skills, so not every
+      component/artifact gets an owning agent on day one, only ones with
+      demonstrated recurring friction; (2) **a carve-out for the most
+      cross-cutting artifacts** — `docs/decision-log.md` and
+      `docs/program-roadmap.md` stay with the orchestrator specifically
+      *because* they require whole-project context no bounded specialist
+      agent has, the opposite property that makes a component/feature a
+      good candidate in the first place.
+    - **Ownership is a documented convention honored by whichever agent
+      touches the file, not a technical access lock** — unlike the
+      `.claude/agents/` sandbox boundary (decision 42's own entry, right
+      above), nothing stops any agent from `Edit`-ing an owned artifact
+      directly. The guarantee is the same shape as this repo's other
+      contracts (a component's `README.md`, PR review as the quality
+      gate): stated, and expected to be honored, not enforced by tooling.
+    - **`backlog` is the pilot** (`.claude/agents/backlog.md`), owning
+      `docs/backlog.md`. Chosen over the `procedural-memory` candidate to
+      go first because it is read+directed-write rather than
+      write-with-independent-editorial-judgment: the agent files what
+      it's told, it does not decide priority or promote an entry into
+      `docs/decision-log.md` on its own initiative — both stay a
+      stewardship call the orchestrator makes with the user, unchanged
+      from before this agent existed.
+    - **Priority scheme, decided by the user over three options
+      presented** (inline tag / separate priority table / reorder by
+      priority): an inline tag right after each idea's bold title —
+      `[P1]` worth doing next, `[P2]` agreed but not urgent, `[P3]`
+      parked. Chosen specifically to avoid the second-copy drift
+      `docs/component-model.md`'s Status-column note already warns
+      against; no entry is retroactively tagged, since guessing a
+      priority no one gave is exactly what the agent is told never to do.
+    - **What "manage its own data structure internally" does and does not
+      mean**, clarified because the phrase could otherwise be read as
+      moving the source of truth out of the file: the agent may evolve
+      formatting/dedup conventions freely, but `docs/backlog.md` itself
+      must stay plain, git-versioned Markdown, readable by a teammate who
+      has never talked to the agent — CLAUDE.md's "if it isn't in one of
+      these files, it didn't happen" rule applies to this file regardless
+      of which agent maintains it.
+    - **Sandbox note, same shape as decision 42's:** creating the new
+      `.claude/agents/backlog.md` file is itself a create under
+      `.claude/agents/`, which the sandbox blocks — Claude wrote every
+      other file in this decision directly (`docs/backlog.md`'s header,
+      `CLAUDE.md`'s Layout section, this entry) but handed the user one
+      exact command to create the agent file itself.
+    - **Not yet done:** verifying `@backlog` actually invokes the new
+      agent (decision 42 showed the harness may pick up a new persisted
+      agent from its frontmatter before any git operation on the file
+      completes — worth re-checking whether that holds for a genuinely
+      new file, not just a renamed one).
 
 ## Constraints identified
 

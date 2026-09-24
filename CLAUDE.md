@@ -31,7 +31,8 @@ commands. If asked to add tooling, choose per the org language standards
 
 ```
 docs/decision-log.md      running design record — the primary artifact
-docs/backlog.md           parked feature ideas, not yet decided or scheduled
+docs/backlog.md           parked feature ideas; owned by the `backlog` agent
+                                  (decision 43), not hand-edited directly
 docs/component-model.md   component boundaries, dependency + promotion rules
 components/kg-core/       schema contract (SCHEMA.md), validation, traversal
 components/kg-content/    the curated graph — entity files, data only
@@ -61,6 +62,9 @@ practice/capability-maturity/    IN-563: initiative -> process-map mapping
                                   Claude Code's harness scans for it
 .claude/skills/arc-lite-identity/  local-agent's one native Claude Code Skill,
                                   same harness-discovery reason as above
+.claude/agents/backlog.md        owns docs/backlog.md's structure and every
+                                  edit to it (decision 43); the pilot of the
+                                  agent-owns-artifact pattern
 ```
 
 ## Working with the user
