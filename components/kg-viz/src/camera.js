@@ -1,4 +1,5 @@
   function labelLoop() {
+    decorateShapes();
     positionBands();
     positionLabels();
     requestAnimationFrame(labelLoop);

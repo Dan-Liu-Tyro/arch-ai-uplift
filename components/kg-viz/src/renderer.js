@@ -21,10 +21,11 @@
         if (isDimmedByScope(n)) return "rgba(110,120,140,0.22)";
         return base;
       })
-      // No nodeThreeObject: default spheres only. Labels are HTML, positioned
-      // over the canvas -- see rebuildLabels(). Keeping this accessor unset
-      // means there is no application code running inside the render loop
-      // that can take the scene down.
+      // Still no nodeThreeObject, deliberately. Actors do get a person
+      // silhouette, but it is applied by decorateShapes() *after* the
+      // library has built its own mesh, not by an accessor running inside
+      // node construction -- see that function for why that distinction
+      // matters here.
       .linkDirectionalArrowLength(function (l) { return view.layout === "layered" ? 7 : 0; })
       .linkDirectionalArrowRelPos(0.98)
       // Direction as motion, not just as an arrowhead: a slow stream of
@@ -137,4 +138,66 @@
     labelLoop();
 
     Graph.onEngineStop(function () { frameGraph(); });
+  }
+
+  // ---- Shapes: a person silhouette for actors ------------------------------
+  //
+  // Why this is done by mutating the library's own meshes rather than by a
+  // `nodeThreeObject` accessor: the vendored bundle reads `window.THREE` if
+  // the host provides one and otherwise falls back to its own minified
+  // classes, which it never exports. So there is no THREE constructor
+  // reachable from here -- the same wall that made `three-spritetext` throw
+  // on every node and leave the canvas blank while the panel looked healthy.
+  // What *is* reachable is any live object's instance methods, so a head is
+  // a `clone()` of the body the library already built, shrunk and raised.
+  // No constructors, no new dependency, and nothing running inside node
+  // construction that can take the scene down.
+  //
+  // Fidelity is set by the size on screen, not by ambition: an actor renders
+  // at nodeRelSize 9 x nodeVal 3, roughly a 10px dot at the default framing,
+  // where arms and legs would be pixel mud. Head-plus-body is what actually
+  // reads, and the task is "which steps involve people", not portraiture.
+  var shapeWarned = false;
+
+  function personify(obj) {
+    var geo = obj.geometry;
+    var r = (geo && geo.parameters && geo.parameters.radius) || 10;
+    // Clone before adding anything, or the head gets a head.
+    var head = obj.clone();
+    head.scale.set(0.58, 0.58, 0.58);
+    // Sits just clear of the body, so the pair reads as one figure rather
+    // than two stacked dots. The body is left unscaled on purpose: scaling
+    // the parent would multiply this offset and the two would drift apart.
+    head.position.set(0, r * 1.3, 0);
+    obj.add(head);
+  }
+
+  // Idempotent and self-healing: a view switch or a filter change makes the
+  // library build fresh meshes, which arrive without the marker and get
+  // decorated on the next frame.
+  function decorateShapes() {
+    if (!Graph || !DATA) return;
+    var nodes = visibleData().nodes;
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      if (presentationFor(n).shape !== "person") continue;
+      var obj = n.__threeObj;
+      if (!obj || obj.__personified || !obj.clone || !obj.add) continue;
+      try {
+        personify(obj);
+        obj.__personified = true;
+      } catch (e) {
+        // Never let a cosmetic flourish cost the graph. Degrade to the
+        // default sphere, and say so once -- an unexplained shape change is
+        // the kind of silent difference this component keeps getting caught
+        // by, so it announces itself rather than just looking wrong.
+        obj.__personified = true;
+        if (!shapeWarned) {
+          shapeWarned = true;
+          note("<b>Actor shapes unavailable</b> — falling back to plain " +
+            "spheres. Colour still distinguishes actors; only the silhouette " +
+            "is missing. (" + escapeHtml(String(e && e.message || e)) + ")");
+        }
+      }
+    }
   }

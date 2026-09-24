@@ -52,7 +52,7 @@ blob that existed only to let the page auto-load, which it no longer does).
 cd components/kg-viz && node verify.js
 ```
 
-Fourteen scenarios, exit non-zero on failure. This is the only automated check
+Fifteen scenarios, exit non-zero on failure. This is the only automated check
 in the repo, and it exists because **nothing this component renders can be
 observed from a Claude Code session** — see `docs/decision-log.md`'s
 "Constraints identified". It is a floor, not a substitute for opening the
@@ -223,6 +223,30 @@ through ingestion is the real fix. See "Known gaps".
   external *party* is an actor with a non-staff role. The legend says
   "External system" for the former precisely because both read as "external"
   in English otherwise.
+- **Actors are drawn as a person silhouette** — a head sphere above the body
+  sphere. `shape: "person"` on the actor entries of `NODE_PRESENTATION` is
+  what selects it, so shape is keyed off the strict type the same way colour
+  is.
+
+  How it is built matters, because the obvious route is closed. The vendored
+  bundle reads `window.THREE` when the host supplies one and otherwise uses
+  its own minified classes, which it **never exports** — so no THREE
+  constructor is reachable from application code. That is the same wall that
+  made `three-spritetext` throw on every node and leave the canvas blank.
+  What *is* reachable is any live object's instance methods, so
+  `decorateShapes()` in `src/renderer.js` takes the mesh the library already
+  built (`node.__threeObj`), `clone()`s it, shrinks the clone and raises it
+  by `1.3 ×` the body radius. No constructors, no second copy of three.js,
+  and — unlike a `nodeThreeObject` accessor — nothing running inside node
+  construction that can take the scene down. It runs from the per-frame loop,
+  is idempotent via a marker on the mesh, and re-applies itself when a view
+  switch or filter change makes the library build fresh meshes.
+
+  If a clone ever fails it degrades to the plain sphere and **says so on
+  screen** rather than silently looking wrong. Fidelity is deliberately low:
+  an actor is about a 10px dot at the default framing, where arms and legs
+  would be pixel mud, and the question being answered is "which steps involve
+  people".
 - **Colour legend** — lists only the kinds actually present in the current
   view, built from the same table `colorFor` reads, so it cannot drift from
   the rendering. Hidden on the authority view, which colours domains by
@@ -347,7 +371,7 @@ Current content, as reported by `generate.py` rather than asserted here:
   `docs/backlog.md` carries the SVG renderer: SVG output is inspectable text,
   and most of those six defects would have been caught mechanically by it.
 
-  What `verify.js` covers, and what it cannot: fourteen scenarios over the
+  What `verify.js` covers, and what it cannot: fifteen scenarios over the
   real `payments.json` under a stubbed DOM — empty start, load-by-file with
   malformed and wrong-shape rejection, reopening without stacking a renderer
   or inheriting stale filters, the camera-fit arithmetic recomputed

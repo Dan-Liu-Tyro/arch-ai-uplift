@@ -104,7 +104,7 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), };', ctx);
 
   return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam };
 }
@@ -669,6 +669,78 @@ const el = (r, id) => r.els[id] || EMPTY;
   const hidden = el(r,'kind-legend').style.display === 'none';
   console.log('N: legend hidden on the authority view =', hidden);
   if (!hidden) results.push('N: kind legend still shown on the authority view, which colours by category');
+}
+
+// O: actors get a person silhouette, built by cloning the library's own mesh
+{
+  const r = run('O', { cdnBlocked: false }); await tick();
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+
+  // The stub has no three.js, so stand in for the mesh the library binds to
+  // each node. Only the instance methods personify() actually uses.
+  const mkObj = (throws) => {
+    const o = {
+      children: [], scale: { x:1,y:1,z:1, set(x,y,z){ o.scale.x=x; o.scale.y=y; o.scale.z=z; } },
+      position: { x:0,y:0,z:0, set(x,y,z){ o.position.x=x; o.position.y=y; o.position.z=z; } },
+      geometry: { parameters: { radius: 13 } },
+      clone(){ if (throws) throw new Error('no THREE here'); return mkObj(false); },
+      add(c){ o.children.push(c); }
+    };
+    return o;
+  };
+
+  const nodes = r.probe.visible().nodes;
+  nodes.forEach(n => { n.__threeObj = mkObj(false); });
+  r.probe.decorateShapes();
+
+  const actors = nodes.filter(n => n.kind === 'actor');
+  const others = nodes.filter(n => n.kind !== 'actor');
+  const actorKids = actors.map(n => n.__threeObj.children.length);
+  const otherKids = others.reduce((a, n) => a + n.__threeObj.children.length, 0);
+  console.log('O: actors =', actors.length, '-> children each =', [...new Set(actorKids)],
+    '| non-actor children =', otherKids);
+  if (!actors.length) results.push('O: no actors in the flow view to shape');
+  if (actorKids.some(k => k !== 1)) results.push('O: an actor did not get exactly one head: ' + actorKids);
+  if (otherKids) results.push('O: ' + otherKids + ' heads added to non-actor nodes');
+
+  // Idempotent -- the loop runs every frame, so a second pass must not stack.
+  r.probe.decorateShapes();
+  const afterTwice = actors.map(n => n.__threeObj.children.length);
+  console.log('O: children after a second pass =', [...new Set(afterTwice)]);
+  if (afterTwice.some(k => k !== 1)) results.push('O: decoration is not idempotent: ' + afterTwice);
+
+  // The head must be smaller than the body and sit above it, or it reads as
+  // two stacked dots rather than one figure.
+  const head = actors[0].__threeObj.children[0];
+  console.log('O: head scale =', head.scale.y, '| head y =', head.position.y, '| body radius = 13');
+  if (!(head.scale.y > 0 && head.scale.y < 1)) results.push('O: head is not smaller than the body: ' + head.scale.y);
+  if (!(head.position.y > 13)) results.push('O: head does not sit clear of the body: y=' + head.position.y);
+
+  // Self-healing: a view switch rebuilds meshes, which arrive unmarked.
+  actors.forEach(n => { n.__threeObj = mkObj(false); });
+  r.probe.decorateShapes();
+  console.log('O: re-decorated after fresh meshes =',
+    actors.every(n => n.__threeObj.children.length === 1));
+  if (!actors.every(n => n.__threeObj.children.length === 1)) {
+    results.push('O: fresh meshes were not re-decorated, so a view switch loses the shape');
+  }
+
+  // A mesh that cannot be cloned must degrade to a sphere and say so, never
+  // throw -- that is the failure that blanked this canvas once already.
+  const r2 = run('O2', { cdnBlocked: false }); await tick();
+  const inp2 = el(r2,'file-input');
+  inp2.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
+  inp2.onchange(); await tick();
+  r2.probe.visible().nodes.forEach(n => { n.__threeObj = mkObj(true); });
+  let threw = null;
+  try { r2.probe.decorateShapes(); } catch (e) { threw = e.message; }
+  const noted = /Actor shapes unavailable/.test(
+    el(r2,'notes-body').children.map(c => c._html).join(' '));
+  console.log('O: unclonable mesh threw =', threw, '| announced on screen =', noted);
+  if (threw) results.push('O: decorateShapes threw instead of degrading: ' + threw);
+  if (!noted) results.push('O: shape failure was silent -- no on-screen note');
 }
 
 console.log(results.length ? '\nFAILURES:\n' + results.join('\n') : '\nALL SCENARIOS PASSED');

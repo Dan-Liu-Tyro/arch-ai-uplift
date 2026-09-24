@@ -25,11 +25,11 @@
     "external":            { color: "#ff7e8f", label: "External system" },
     "artefact":            { color: "#b79cff", label: "Artefact" },
     "principle":           { color: "#4dff9e", label: "Principle" },
-    "actor:InternalStaff": { color: "#ffd479", label: "Internal user (Tyro staff)" },
-    "actor:Customer":      { color: "#ff6fae", label: "External user (merchant)" },
-    "actor:Partner":       { color: "#ff6fae", label: "External user (partner)" },
-    "actor:Regulator":     { color: "#9ad0ff", label: "Regulator" },
-    "actor":               { color: "#8a93ab", label: "Actor (role unstated)" }
+    "actor:InternalStaff": { color: "#ffd479", label: "Internal user (Tyro staff)", shape: "person" },
+    "actor:Customer":      { color: "#ff6fae", label: "External user (merchant)", shape: "person" },
+    "actor:Partner":       { color: "#ff6fae", label: "External user (partner)", shape: "person" },
+    "actor:Regulator":     { color: "#9ad0ff", label: "Regulator", shape: "person" },
+    "actor":               { color: "#8a93ab", label: "Actor (role unstated)", shape: "person" }
   };
 
   // Internal and external users share a colour family on purpose -- the
@@ -58,7 +58,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-24e — colour encodes kind/actor role, with a legend";
+  var PAGE_REVISION = "2026-09-24f — actors drawn as a person silhouette";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
