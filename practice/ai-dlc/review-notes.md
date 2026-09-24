@@ -28,18 +28,43 @@ they were wrong is the useful part.
   layered view of the knowledge layer, and the ask names "the different layers
   e.g. Knowledge layer" specifically. This is on target, not over-weight.
 
-## 1. The ask has two deliverables and the second one is absent
+## 1. ~~The ask has two deliverables and the second is absent~~ — APPLIED
 
-This is the top item. The leadership ask is two things:
+**Resolved 2026-09-24.** Deliverable 2 is now **section 9, "Architecture
+Knowledge, Set Up for Use Across Tyro"** — written inside deliverable 1 as the
+one stream taken all the way down, exactly as recommended below, rather than
+as a second deck. The recommendation and its reasoning are kept because the
+section still has to be defended at the huddle on the grounds given here.
+
+Two things changed in the drafting that this note did not anticipate, both
+from checking the repo rather than assuming it:
+
+- **The honest inventory is thinner than "a curated graph".** What exists is
+  the seven-type schema, 39 `domain` entities, *one* hand-authored principle,
+  the local agent and the viewer — and nothing yet in guardrails, patterns,
+  decisions, systems or reference-architectures. Section 9 therefore claims "a
+  proof of concept with a working local path", explicitly not a populated
+  knowledge base. This is the caution at the end of this item, applied with
+  numbers.
+- **Item 3's collision is now concrete, not hypothetical.** Those 39 domains
+  were ingested *from* the Reference Domain Model, which is the third item in
+  the same ask. Section 9 states the relationship — same source, two uses —
+  rather than leaving it to surface in the room.
+
+The original note follows.
+
+---
+
+The leadership ask is two things:
 
 1. The AI-DLC layer view — **substantially covered** by the current eight
    sections.
 2. **How we could set up architecture knowledge for use across Tyro** —
    **not present at all.**
 
-Architecture currently appears only as one row of section 3's eight-stream
-table. Nothing in the draft answers how architecture knowledge specifically
-gets set up, curated, owned, or reached by the rest of Tyro.
+Architecture appeared only as one row of section 3's eight-stream table.
+Nothing in the draft answered how architecture knowledge specifically gets set
+up, curated, owned, or reached by the rest of Tyro.
 
 ### The recommendation: make deliverable 2 the worked example, not a second deck
 

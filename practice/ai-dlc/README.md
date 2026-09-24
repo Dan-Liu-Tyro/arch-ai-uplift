@@ -67,10 +67,11 @@ inheriting this one's material.
 
 ## Audience and status
 
-Audience is the CTO and the TLT huddle. Deliverable 1 is drafted and under
-review. **Deliverable 2 is not yet drafted** — see `review-notes.md` item 1,
-which proposes it as the worked example inside deliverable 1 rather than as a
-second deck. The rendering step remains open per decision 46.
+Audience is the CTO and the TLT huddle. **Both deliverables are now drafted
+and under review**: deliverable 1 as sections 1–8, deliverable 2 as section 9,
+written as the worked example inside deliverable 1 rather than as a second
+deck (`review-notes.md` item 1, applied). The rendering step remains open per
+decision 46.
 
 ## Related, not depended on
 

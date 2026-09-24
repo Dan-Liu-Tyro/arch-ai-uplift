@@ -14,12 +14,10 @@ be set up for use across Tyro — is recorded in [`README.md`](README.md).
 "High level" was stated twice in the request and is the binding constraint on
 depth.
 
-**Status:** deliverable 1 (the layer view) is drafted below and under review.
-**Deliverable 2 (architecture knowledge across Tyro) is not yet written** —
-see [`review-notes.md`](review-notes.md) item 1, which proposes it as
-section 9, the one stream taken all the way down, rather than as a separate
-deck. `review-notes.md` is reviewer commentary and not part of the
-architecture.
+**Status:** both deliverables are drafted below and under review — the layer
+view as sections 1–8, and architecture knowledge across Tyro as **section 9**,
+the one stream taken all the way down rather than a separate deck.
+`review-notes.md` is reviewer commentary and not part of the architecture.
 
 **Structure note.** Each numbered section below is one slide's worth of
 content, in presentation order, so the projection into slides is mechanical.
@@ -297,3 +295,90 @@ delivery. Humans move from being the relay for every handoff to being the
 directional and exception-handling layer, while structured knowledge with
 clear ownership is what makes machine-to-machine collaboration reliable enough
 to drive the AI-DLC.
+
+---
+
+## 9. Architecture Knowledge, Set Up for Use Across Tyro
+
+*The second half of the ask, answered as one stream taken all the way down.
+Architecture is used as the worked example because it is the only stream with
+a running proof of concept rather than a proposal.*
+
+### Where it sits today: the deliberate-unstructured tier
+
+Architecture knowledge is authored, durable and intentional — and it is
+Confluence pages. That places it squarely in **tier 2 of section 4**:
+readable by a human, reachable by an agent, but **not queryable**. Nothing
+tells an agent that a guardrail exists *because of* a principle, or that a
+decision has been superseded. Those relationships live only in the prose, or
+only in an architect's head.
+
+This is the honest current-state read, and it is the reason the move is worth
+making: by section 5's economics, tier 2 is exactly where accuracy is
+moderate and token cost is high.
+
+### What structuring it actually means
+
+Not "tidier documents" — a **typed graph**. Architecture knowledge is modelled
+as seven entity types, split by *how a statement behaves* rather than by
+subject: `principle`, `guardrail`, `pattern`, `reference-architecture`,
+`decision`, `system`, `domain`.
+
+**The relationships are the point**, not the entities: `guardrail DERIVES_FROM
+principle`, `pattern REQUIRES guardrail`, `principle CONFLICTS_WITH pattern`,
+`decision SUPERSEDES decision`, `system USES pattern`. That shape enables two
+things flat document retrieval cannot do at any level of tidiness —
+**contradiction detection** and **dependency tracing**. It is also what makes
+an unjustified rule visible: a guardrail with no principle behind it is the
+exact Confluence failure mode being replaced.
+
+### Curate in git, publish outward
+
+- **Architects edit git, never raw Confluence.** Pull-request review is the
+  quality gate, and the history is the audit trail.
+- **One structured page per entity is generated** into a dedicated clean
+  space; Rovo indexes that space.
+- **Confluence becomes an output, not the source of truth** — which inverts
+  today's arrangement, and is the single most important thing to agree.
+
+### How the rest of Tyro reaches it — and the honest constraint
+
+Architects reach it **today**, locally, through their AI tooling. Reach for
+**everyone else** runs through Rovo indexing the published space, and Rovo is
+cloud while the graph is local — so org-wide access has to go through the
+standard deployment path, promoted development → staging → production. **That
+step is deliberately deferred, and is stated as deferred rather than
+glossed.** The local path is what is proven; the org-wide path is understood
+but not built.
+
+### Ownership
+
+**One owner per entity**, which is simply section 8's rule applied to the
+stream that is furthest along. Consistency matters here: the target state's
+reliability claim rests on single ownership, so the first stream to get there
+has to demonstrate it rather than special-case itself.
+
+### Where the proof of concept actually is
+
+Real today: the schema above, **39 domain entities** ingested from the
+Reference Domain Model, a first hand-authored principle, a local agent
+grounded only on that curated content, and a viewer over the graph. That is a
+**proof of concept with a working local path** — not a populated
+architecture knowledge base. The remaining entity types are authored, not
+invented, and that authoring is the bulk of the work ahead.
+
+**One relationship to settle before the huddle:** those 39 domains come from
+the Reference Domain Model, which is also the subject of the third item in
+this same ask. Architecture owns the model; the testing-automation instance is
+authored separately. Same source, two uses — worth saying out loud so it does
+not read as two competing answers.
+
+### Takeaway
+
+Architecture knowledge moves from tier 2 to the structured tier by being
+curated as a typed graph in git, with Confluence as a generated output and
+single ownership per entity. **The local path is proven and the org-wide path
+is deferred, not unknown.** Nothing in that sequence is specific to
+Architecture — it is the template for how any stream's knowledge gets set up,
+which is why taking one stream all the way down answers more than one
+stream.

@@ -2128,6 +2128,28 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       is wanted *earlier* than "later", since a page is how two people
       co-work a draft — the deck is not the only near-term rendering. The ask
       itself lives in `practice/ai-dlc/README.md`.
+    - **Both halves of that ask are now drafted in the one document, not
+      two.** The second deliverable — how architecture knowledge could be set
+      up for use across Tyro — is written as section 9 of
+      `practice/ai-dlc/solution-architecture.md`, inside deliverable 1, as the
+      single stream taken all the way down rather than as a parallel deck.
+      Three reasons: the ask phrases it as *part of* the knowledge layer
+      rather than a separate topic; sections 6–8 otherwise assert a target
+      state without showing that any stream can reach it; and Architecture is
+      the only stream with running code rather than a proposal. This is also
+      the first evidence that the one-source-of-truth mechanism holds up when
+      a *second* deliverable arrives mid-draft — the document absorbed it as a
+      section, where two decks would have needed a shared-content decision.
+    - **The drafting produced a grounding rule worth keeping.** Section 9's
+      claims were written against the repo's actual inventory rather than its
+      intent, which changed them: what exists is the seven-type schema, 39
+      `domain` entities, one hand-authored principle, the local agent and the
+      viewer — with guardrails, patterns, decisions, systems and
+      reference-architectures still empty. So the deck claims "a proof of
+      concept with a working local path", explicitly not a populated
+      knowledge base. When a deliverable's credibility rests on something
+      being real, the inventory is a thing to count rather than recall — this
+      is an audience that can ask to see it.
 
 ## Constraints identified
 
