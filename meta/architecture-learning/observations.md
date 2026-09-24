@@ -288,3 +288,15 @@ principle's `status` and must not be silently absorbed as if it agreed.
   `verify-state-claims` but pointed outward at industry context rather than at
   system state. Would be contradicted by asking for defensive definitions of
   shared vocabulary added for a hypothetical unfamiliar reader.
+- 2026-09-24 · When a visualization kept looking wrong across several rounds of
+  layout fixes (charge tuning, then a custom collision force), checked whether
+  the underlying data model was wrong before continuing to patch the rendering
+  · this conversation · stated · unpromoted — "looking at domain model itself,
+  not visual, I think we should remove the entire relationship type
+  not_authoritative_for cos it only creates confusion". The visualization
+  problem (a hairball) turned out to be a symptom of a modeling choice
+  (a dense, single-predicate, mostly-non-mutual relationship type) rather
+  than a rendering defect, and the fix that stuck was removing the
+  relationship type, not further tuning the physics. Would be contradicted
+  by continuing to iterate on presentation for a model-level defect once one
+  is identified as such.
