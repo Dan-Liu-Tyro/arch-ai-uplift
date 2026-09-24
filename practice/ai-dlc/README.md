@@ -3,6 +3,38 @@
 **Provenance: authored here.** This folder is the source of truth for the
 AI-DLC solution architecture and the presentation generated from it.
 
+## The ask
+
+**Requested by leadership in the TLT huddle, 2026-09-24.** The CTO asked the
+Architecture team to come back to the next huddle with a high-level view.
+Three items were named; **two of them are this folder's scope**, co-assigned
+to the user and a second architect:
+
+1. **AI-DLC Solution Architecture — a high-level view of the different
+   layers**, e.g. the knowledge layer.
+2. **Architecture knowledge as part of the knowledge layer** — how we could
+   set up architecture knowledge for use across Tyro. Again, high-level
+   thinking.
+
+The third item, a **Reference Domain Model** for testing-automation
+dependencies, is owned by another architect and is *not* in this folder's
+scope — but see `review-notes.md` for the one place it intersects this deck.
+
+**"High level" was stated twice and is the binding constraint on depth.** The
+deliverable is breadth and framing, not a detailed design.
+
+### Dates
+
+| When | What |
+|---|---|
+| Thu 2026-09-24 | Ask received; per-slide narration captured |
+| Mon 2026-09-28 | Regroup with the co-assigned architect, who is back that day |
+| Tue 2026-09-29 | TLT huddle — deliverable due |
+
+The Monday regroup means the draft has to be **co-workable by another
+architect**, not just presentable — which is a point in favour of generating
+the Confluence page earlier than decision 46 assumed.
+
 ## What is here
 
 | File | Role |
@@ -35,9 +67,10 @@ inheriting this one's material.
 
 ## Audience and status
 
-Audience is the CTO. The draft is captured and under review; the rendering
-step (how the deck is produced) is deliberately still open per decision 46, so
-that the narrative settles before rendering effort is spent.
+Audience is the CTO and the TLT huddle. Deliverable 1 is drafted and under
+review. **Deliverable 2 is not yet drafted** — see `review-notes.md` item 1,
+which proposes it as the worked example inside deliverable 1 rather than as a
+second deck. The rendering step remains open per decision 46.
 
 ## Related, not depended on
 

@@ -8,9 +8,18 @@ Confluence page (later). See decision 46 in
 [`../../docs/decision-log.md`](../../docs/decision-log.md) for why the
 document, not the deck, is the artefact.
 
-**Audience:** the CTO. **Status:** draft under review — see
-[`review-notes.md`](review-notes.md) for gaps identified against this draft,
-which are reviewer commentary and not part of the architecture.
+**Audience:** the CTO and the TLT huddle, Tue 2026-09-29. **The ask** — a
+high-level view of the AI-DLC's layers, plus how architecture knowledge could
+be set up for use across Tyro — is recorded in [`README.md`](README.md).
+"High level" was stated twice in the request and is the binding constraint on
+depth.
+
+**Status:** deliverable 1 (the layer view) is drafted below and under review.
+**Deliverable 2 (architecture knowledge across Tyro) is not yet written** —
+see [`review-notes.md`](review-notes.md) item 1, which proposes it as
+section 9, the one stream taken all the way down, rather than as a separate
+deck. `review-notes.md` is reviewer commentary and not part of the
+architecture.
 
 **Structure note.** Each numbered section below is one slide's worth of
 content, in presentation order, so the projection into slides is mechanical.

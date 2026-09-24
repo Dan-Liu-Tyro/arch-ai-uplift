@@ -2118,6 +2118,16 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
     - **Invocation shape also still open** (Skill vs Agent, per the README).
       This first run is being done in conversation, which is the cheapest way
       to find out what the mechanism actually needs before packaging it.
+    - **The first run's content is a leadership deliverable, not a pitch**,
+      established after the fact: the CTO asked the Architecture team in the
+      TLT huddle of 2026-09-24 for a high-level view of the AI-DLC's layers
+      and for how architecture knowledge could be set up for use across Tyro,
+      due at the next huddle on 2026-09-29, co-assigned to a second
+      architect. Recorded here because it shifts what the capability has to
+      support: a Monday regroup with a co-author means the Confluence output
+      is wanted *earlier* than "later", since a page is how two people
+      co-work a draft — the deck is not the only near-term rendering. The ask
+      itself lives in `practice/ai-dlc/README.md`.
 
 ## Constraints identified
 

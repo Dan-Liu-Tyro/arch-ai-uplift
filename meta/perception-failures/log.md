@@ -575,3 +575,59 @@ The generalizable guard is in `meta/procedural-memory/lessons.md` — on a
 visual report with an ambiguous noun, get the render or ask before choosing a
 target, and encode the fixed property as an assertion rather than declaring
 it fixed. Not restated here.
+
+## 11. A requested deliverable judged against an invented purpose
+
+**Date.** 2026-09-24.
+
+**Belief asserted.** That the AI-DLC deck's most serious defect was having no
+ask — no decision requested, no investment named, no sequencing, no success
+measure. Stated as settled and placed under a heading reading "Blocking for a
+CTO audience", written into `practice/ai-dlc/review-notes.md` and committed,
+then led with in the reply to the user: "A CTO session that ends on a taxonomy
+conclusion produces agreement and no action." A second finding rode on the
+same assumption — that five of eight sections were over-weighted toward
+taxonomy and sections 1–2 should be compressed with section 3 demoted to an
+appendix.
+
+**Actual evidence behind it.** Only that the eight sections contained no ask,
+which is a fact about the content and says nothing about whether one belonged
+there. The purpose — a pitch seeking a decision — was never stated by the
+user. It was supplied by the general prior that a deck shown to a CTO is a
+pitch, and then treated as given. The user's first message said only "I need
+to do a presentation to CTO about AI-DLC solution architecture", which is
+compatible with a pitch and equally compatible with a requested report.
+
+**What was actually true.** The deck is a deliverable *requested by*
+leadership: in the TLT huddle that morning the CTO asked the Architecture team
+to come back with "a high level view of the different layers e.g. Knowledge
+layer" and "how could we setup architecture knowledge for use across Tyro,
+again a high level thinking." The spine is the question asked, not an ask
+made; a funding request would have been off-brief. And because the ask names
+the layers explicitly and says "high level" twice, the layered classification
+*is* the requested content — so the recommendation to compress it would have
+cut the deliverable itself.
+
+**How it propagated.** Into a committed artefact and a ranked
+recommendation. Two findings were published as the top two priorities, one
+inverted from the truth and one that would have damaged the deliverable if
+acted on. Worse, the framing was self-reinforcing: having assumed a pitch, a
+second finding (governance gates as "the actual solution-architecture content
+here") was escalated to blocking on the same basis, and the maturity-ladder
+item — which is genuinely useful and survives the correction — was ranked
+*below* both of them.
+
+**Caught by.** The user, supplying the context that had never been asked for:
+"This is the ask from leadship. Was in the TLT huddle with Steve earlier."
+Not caught by any amount of re-reading the content, because the content could
+not settle it. The information was cheaply available the whole time — one
+question about who wanted the deck and why would have got it before a single
+finding was written.
+
+**Fix.** `review-notes.md` re-ranked against the real ask, with both wrong
+items moved to a *Withdrawn* section rather than deleted, so the reason they
+were wrong stays visible next to the notes. The absent second deliverable —
+missed entirely while auditing for an ask that was never wanted — is now item
+1. The generalizable rule is in `meta/procedural-memory/universal.md`: a
+deliverable's purpose is a fact to establish, not a prior to apply. Not
+restated here.

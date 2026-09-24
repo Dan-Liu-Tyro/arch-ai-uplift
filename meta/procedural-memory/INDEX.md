@@ -94,3 +94,7 @@ policy this exists to serve.
 - A required value you cannot verify is a blocker, not a blank to fill
   fluently — leave it out, mark it unverified inline, or ask; never emit a
   plausible-looking version/hash/id to complete a structure.
+- A deliverable's purpose is a fact to establish, not a prior to apply —
+  before critiquing a deck or document, ask who requested it and in what
+  words; an invented purpose also decides what you look for, so it hides the
+  real gaps.

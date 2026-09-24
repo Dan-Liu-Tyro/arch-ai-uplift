@@ -686,3 +686,35 @@ a specific value came from. Compare the licence question on the same
 dependency, handled correctly minutes later: the bundle carried no licence
 text, MIT was plausible, and it was recorded as an explicit open item with the
 command to settle it rather than asserted.
+
+## A deliverable's purpose is a fact to establish, not a prior to apply
+
+**What happened.** Asked to help turn per-slide notes into a presentation for
+a CTO, I reviewed the content and reported as the top blocking finding that it
+"has no ask" — no decision requested, no investment, no sequencing, no success
+measure — and as the second that it was over-weighted toward taxonomy and
+should be compressed. Both were written into a committed review file and led
+with in the reply. The deck turned out to be a deliverable the CTO had
+*requested* that morning, in explicit terms: a high-level view of the layers,
+with "high level" stated twice. An ask would have been off-brief, and the
+taxonomy was the requested content, so the second recommendation would have
+cut the deliverable. Meanwhile the real gap — that the request had two parts
+and the second was entirely absent — went unnoticed, because attention was
+spent auditing against the invented purpose.
+
+**Cost.** A committed artefact with its two top priorities wrong, one of them
+inverted; a ranked recommendation that buried the single most useful item
+beneath both; and a round trip to unwind it, on a deliverable with a five-day
+deadline. Cheap only because the user volunteered the context unprompted.
+
+**Rule.** Before critiquing any artefact aimed at an audience — a deck, a
+proposal, a document, a review — establish **who asked for it, in what words,
+and what they said they wanted**. Those are facts obtainable by asking, and
+they determine what counts as a defect: the same missing section is a fatal
+gap in a pitch and off-brief in a requested report. The tell is reaching for a
+generic audience prior — "a CTO deck needs an ask", "an exec audience needs
+one slide" — to supply a purpose the requester never stated. Absence of an
+element in the content is evidence only about the content, never about whether
+it belonged there. And note the second-order cost, which is larger than the
+wrong finding: an invented purpose also sets what you look for, so it hides
+the gaps that the real purpose would have made obvious.

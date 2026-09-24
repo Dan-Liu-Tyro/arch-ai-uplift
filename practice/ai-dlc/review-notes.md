@@ -1,65 +1,96 @@
 # Review notes — AI-DLC Solution Architecture draft
 
 **Provenance: authored here.** Reviewer commentary on
-[`solution-architecture.md`](solution-architecture.md), written against the
-first captured draft (2026-09-24). **Not part of the architecture.** Nothing
-here has been accepted by the author yet; each item is either applied,
-rejected, or still open. Kept as a separate file so the source of truth stays
-the author's own.
+[`solution-architecture.md`](solution-architecture.md). **Not part of the
+architecture.** Nothing here has been accepted by the author yet; each item is
+open until applied or rejected. Kept separate so the source of truth stays the
+author's own.
+
+**Revised 2026-09-24**, when the actual leadership ask arrived (see
+[`README.md`](README.md)). The first version of this file was written before
+the ask was known and got its two highest-priority items wrong — see
+*Withdrawn* at the end, which is kept rather than deleted because the reason
+they were wrong is the useful part.
 
 ## What is strong, and should not be diluted
 
 - **The gradual-versus-step-change distinction in section 5** is the sharpest
   idea in the deck. Accuracy improving smoothly while token cost collapses
   only at the structured tier is a genuine economic argument, and it is the
-  one claim that tells a CTO *where to spend*. It should survive any edit.
+  one claim that says *where to spend*. It should survive any edit.
 - **Section 2's lineage test is decidable.** "Is there a tight, traceable
   lineage back to an external source we must keep in sync?" produces an answer
   rather than a debate. Most first-party/third-party splits do not.
 - **Section 7's federated caveat is honest.** Volunteering that the tactical
   stage trades organizational consistency for speed, before anyone asks, buys
   credibility for the rest of the deck.
+- **The layer structure is exactly what was asked for.** Sections 1–5 build a
+  layered view of the knowledge layer, and the ask names "the different layers
+  e.g. Knowledge layer" specifically. This is on target, not over-weight.
 
-## Blocking for a CTO audience
+## 1. The ask has two deliverables and the second one is absent
 
-### A. The deck has no ask
+This is the top item. The leadership ask is two things:
 
-Eight sections of architecture and taxonomy, ending on a takeaway. There is no
-decision requested, no investment named, no sequencing, no success measure,
-and no "why now". A CTO session that ends on a taxonomy conclusion produces
-agreement and no action.
+1. The AI-DLC layer view — **substantially covered** by the current eight
+   sections.
+2. **How we could set up architecture knowledge for use across Tyro** —
+   **not present at all.**
 
-The target state — agent-mediated delivery across eight streams — is a
-multi-year organizational change. Presented without a sequence or a cost, it
-reads as a vision rather than a proposal.
+Architecture currently appears only as one row of section 3's eight-stream
+table. Nothing in the draft answers how architecture knowledge specifically
+gets set up, curated, owned, or reached by the rest of Tyro.
 
-**What is needed:** name the ask on the first slide and close on it. Whether
-that ask is funding, a pilot stream, a decision to standardise a schema, or
-explicit endorsement to proceed is the author's call, not the reviewer's.
+### The recommendation: make deliverable 2 the worked example, not a second deck
 
-### B. The target state collides with Tyro's change-management standards, and the draft is silent on it
+Deliverable 2 should sit *inside* deliverable 1 as the one stream taken all
+the way down, for three reasons:
 
-Section 8 makes agent-to-agent communication "the primary driver of the DLC",
-with humans reduced to direction and exceptions. Tyro's standards require
-that every change land via a reviewed pull request, that promotion run
-development → staging → production through Drydock, that a production deploy
-carry an approved Change Request endorsed by *both* platform and capability
-owners, and that AI tools not access production environments at all.
+- It gives the deck a spine. Right now sections 6–8 assert a target state
+  without demonstrating that any stream can reach it. One stream shown
+  concretely makes the model credible.
+- **It is the only part that is already real.** `IN-562` ("Foundation – PoC of
+  Architecture agent") is in progress, and this repo *is* the PoC. Every other
+  stream's path is a proposal; Architecture's is running code.
+- It answers the nesting in the ask itself — point 2 is phrased as *part of*
+  the knowledge layer, not as a parallel topic.
 
-So the most predictable question in the room is: **where do the gates live in
-the target state?** An answer almost certainly exists — agents compress
-everything up to the pull request, and the human gates are not an exception to
-the model but precisely the "exception and direction layer" section 8 already
-describes. But while it is unstated, section 8 reads as proposing to remove
-humans from governance, which is the one reading that loses a payments CTO.
+### Proposed content, high level only
 
-This is not a small addition. It is arguably the actual solution-architecture
-content of an AI-DLC at Tyro: the interesting engineering is in how a fast
-generative lifecycle meets a deliberately slow, human-endorsed release path.
+Drawn from this repo's own baseline decisions, so nothing here needs inventing:
 
-## High value
+- **Where architecture knowledge sits today:** the deliberate-unstructured
+  tier of section 4 — Confluence pages, authored and durable but not
+  queryable. This is the honest current-state read and it sets up the move.
+- **What structuring it actually means:** typed entities (principles,
+  patterns, guardrails, decisions, systems, domains, reference architectures)
+  connected by typed relationships — `pattern REQUIRES guardrail`, `principle
+  CONFLICTS_WITH pattern`, `decision SUPERSEDES decision`, `system USES
+  pattern`. The graph shape is the point, because it enables contradiction
+  detection and dependency tracing that flat document retrieval cannot do.
+  This is the concrete, high-level answer to "how".
+- **Curate in git, publish outward** (decision 5): architects edit git, where
+  pull-request review is the quality gate; one structured page per entity is
+  generated into a dedicated clean Confluence space; Rovo indexes that space.
+  Confluence is an output, never the source of truth.
+- **How the rest of Tyro reaches it** — and this is the honest constraint:
+  architects reach it locally today through Claude Code, while org-wide access
+  goes through Rovo indexing the published space. Rovo is cloud and the graph
+  is local, so anything Rovo queries has to go through the org deployment path
+  (TAP/CTAP, promoted development → staging → production). That is deliberately
+  deferred and should be *stated* as deferred rather than glossed.
+- **Ownership:** one owner per entity, which is section 8's own rule applied
+  to the stream that is furthest along. Consistency with section 8 is worth
+  making explicit.
 
-### C. Anchor sections 6, 7 and 8 to Tyro's own maturity ladder
+### One caution on saying "this is already running"
+
+The PoC is real but early. Claiming more than a curated graph with a local
+agent and a viewer over it would be over-claiming to an audience that can ask
+to see it. Naming it a proof of concept with a working local path is both true
+and sufficient.
+
+## 2. Anchor sections 6, 7 and 8 to Tyro's own maturity ladder
 
 The *Architecture Capability & Process Map* (Confluence space `AE`, "AI
 Powered Delivery", page `2280227087`) already defines a five-level
@@ -79,128 +110,123 @@ The draft's three stages map onto it almost verbatim:
 - **Section 6, current state** — AI as an ad hoc side tool, humans the
   mandatory intermediary → **L2, manually managed**, with sporadic individual
   L3 use.
-- **Section 7, tactical** — agents standing in each stream, with "a human
-  check or review gate" → **L3, AI-assisted, human in the loop**. The
-  ladder's own definition is "AI drafts and checks; a human reviews every
-  output".
-- **Section 8, target** — humans "handling exceptions… edge cases and
-  judgment calls" → **L4, AI-driven, human on the loop**. The ladder's own
-  definition is "AI acts continuously; humans handle exceptions".
+- **Section 7, tactical** — agents standing in each stream with "a human check
+  or review gate" → **L3, AI-assisted, human in the loop** ("AI drafts and
+  checks; a human reviews every output").
+- **Section 8, target** — humans "handling exceptions… edge cases and judgment
+  calls" → **L4, AI-driven, human on the loop** ("AI acts continuously; humans
+  handle exceptions").
 
-Three reasons this is worth doing:
+Why it is worth the three labels it costs:
 
-1. It stops the deck being a new framework the CTO has to accept, and makes it
+1. The deck stops being a new framework the audience has to accept and becomes
    **our own published ladder applied to the whole delivery lifecycle** rather
    than to the Architecture stream alone.
-2. **The target is L4, not L5** — and saying so out loud pre-empts the "are
-   you trying to remove people" reading that item B also creates. Declining to
-   propose full autonomy is a credibility asset; leaving it ambiguous is a
-   liability.
-3. It connects the deck to work already funded and in flight — the Architecture
-   stream's own initiatives are already named by maturity level (`IN-564`
-   AI-Validated / Maturity 1, `IN-566` AI-Augmented / Maturity 2, `IN-568`
-   AI-Driven / Maturity 3, per
+2. **The target is L4, not L5** — saying so out loud pre-empts the "are you
+   trying to remove people" reading.
+3. It lands inside already-funded work: the Architecture stream's initiatives
+   are already named by maturity level (`IN-564` Maturity 1, `IN-566` Maturity
+   2, `IN-568` Maturity 3, per
    [`../capability-maturity/initiative-row-mapping.md`](../capability-maturity/initiative-row-mapping.md)).
-   A deck that lands inside existing program structure is far cheaper to say
-   yes to than one that sits beside it.
 
-**Caveat on that mapping.** The level reads above are this reviewer's, derived
-from the ladder's published definitions against the draft's own wording. They
-have not been validated with the process map's owner, and
-`initiative-row-mapping.md` already records that target-level assignment is
-ambiguous in places. Treat them as a proposal to check, not as an assessment.
+**Caveat.** These level reads are the reviewer's, derived from the ladder's
+published definitions against the draft's wording. They have not been
+validated with the process map's owner, and `initiative-row-mapping.md`
+already records that target-level assignment is ambiguous in places. A
+proposal to check, not an assessment.
 
-### D. Section 5's claims are unsourced but sound quantitative
+## 3. The Reference Domain Model intersects the third item in the ask
+
+Section 3 lists **the reference domain model** among Architecture's owned
+artefacts. The third item in the same leadership ask is a Reference Domain
+Model brought by another architect, for testing-automation dependencies.
+
+Both may be right — Architecture owning the model while another architect
+authors the instance — but two answers arriving at one huddle from one team
+without a stated relationship is an avoidable own goal. Worth settling at the
+Monday regroup: is it the same artefact, and if so, does the deck claim
+ownership of something someone else is presenting?
+
+## 4. Section 5's claims are unsourced but sound quantitative
 
 "Near deterministic", "drops sharply to near zero", "most expensive" — stated
-as findings, with no axis values and no cited basis. If the CTO asks "measured
-on what?", the strongest slide in the deck becomes the weakest moment in the
-room.
+as findings, with no axis values and no cited basis. At high-level framing
+this is survivable, but section 5 is the most likely slide to draw a "measured
+on what?" and it is a poor one to be caught on because it is otherwise the
+strongest.
 
-Two ways out, and they are not exclusive:
+Two ways out, not exclusive:
 
-- **Cite real evidence.** This repo has been measuring exactly this:
-  `meta/token-tracking/` holds per-task token data with a summarizer, and the
-  whole `arch-ai-uplift` project *is* an instance of moving architecture
-  knowledge from the deliberate-unstructured tier into the structured tier.
-  That makes section 5 a claim with a live experiment behind it rather than an
-  assertion. Compare on output and cache-write tokens, never on cache reads —
-  those scale with conversation length, not with work done.
-- **Label it as a hypothesis.** If the numbers are not measured, say the shape
-  is expected rather than observed, and say what would change the reading.
-  A curve presented as measured and then challenged costs more than one
-  presented as a hypothesis and then confirmed.
+- **Cite real evidence.** `meta/token-tracking/` holds per-task token data with
+  a summarizer, and `arch-ai-uplift` *is* an instance of moving architecture
+  knowledge from the deliberate-unstructured tier to the structured tier. That
+  makes section 5 a claim with a live experiment behind it. Compare on output
+  and cache-write tokens, never on cache reads — those scale with conversation
+  length, not with work done.
+- **Label it as a hypothesis.** If it is not measured, say the shape is
+  expected rather than observed, and say what would change the reading.
 
-## Worth fixing
+## 5. Section 8 switches the unit of decomposition without defining it
 
-### E. Section 8 switches the unit of decomposition without defining it
+Sections 3, 6 and 7 are organized around **eight streams**. Section 8 says "AI
+agents, one per **domain**, each owning its own domain knowledge" — then gives
+stream examples (Architecture's agent, Engineering's agent).
 
-Sections 3, 6 and 7 are organized around **eight streams**. Section 8 says
-"AI agents, one per **domain**, each owning its own domain knowledge" — and
-then gives stream examples (Architecture's agent, Engineering's agent).
+Either domains *are* the streams, in which case say stream and stay
+consistent, or a second decomposition axis has appeared on the final slide
+undefined. The second reading is the dangerous one: a payments organization
+has obvious business domains (acquiring, settlement, disputes, terminals) that
+are not streams at all, and a listener may hear "one agent per business
+domain" — a materially different and much larger architecture. This one is
+cheap to fix and expensive to leave.
 
-Either domains *are* the streams, in which case the draft should say stream
-and stay consistent, or a second decomposition axis has been introduced on the
-final slide without being defined. The second reading is the dangerous one: a
-payments organization has obvious business domains (acquiring, settlement,
-disputes, terminals) that are not streams at all, and a listener may hear
-"one agent per business domain", which is a materially different and much
-larger architecture.
-
-### F. The bridge from section 1 disappears from the architecture
-
-Section 1 establishes the bridge as the place where "both the value and the
-risk concentrate", and requires translated knowledge to carry lineage back to
-its source so it can be kept fresh. Sections 6, 7 and 8 then show only
-first-party knowledge layers. The bridge is never staffed, owned, or placed.
-
-The same gap reaches section 2's third-party knowledge. Under section 8's rule
-that each piece of knowledge is owned by exactly one agent, **who owns a
-contextualized card scheme ruling** — Security's agent, or the agent of
-whichever stream interpreted it? And what keeps it in sync when the scheme
-publishes a revision? In a payments organization this is the highest-risk
-knowledge in the whole model, and it is the one piece the ownership rule does
-not yet resolve.
-
-If the bridge is load-bearing in the framing, it needs a place in the target
-state. If it is not, section 1 is overselling it.
-
-### G. There is no failure-mode content
-
-Agent-to-agent handoff as the primary driver means an error in Architecture's
-agent propagates into Engineering's agent **with no human reading it in
-between** — which is the deliberate point of the design and also its main
-risk. The draft does not address it, nor stale knowledge, ownership decay when
-a domain has no active owner, or hallucination in the streams section 7
-explicitly allows to keep running on unstructured input.
-
-For a regulated payments audience, the absence of this content is conspicuous
-rather than neutral. Note that section 7's validation gates are the beginning
-of an answer; it just is not stated as a risk position.
-
-## Minor
-
-### H. "AI-DLC" is never defined
+## 6. "AI-DLC" is never defined
 
 The title uses the term and no section explains it. If it is adopted from
-AWS's AI-Driven Development Lifecycle, say so and say what has been adapted —
-borrowing a vendor's lifecycle naming without acknowledgement invites "why are
-we adopting someone else's framing of how we build software", and
-acknowledging it costs one line. If the term is our own, define it once.
+AWS's AI-Driven Development Lifecycle, say so and say what has been adapted;
+if it is our own, define it once. One line either way.
 
-### I. The weight sits on taxonomy
+## 7. Lower priority at this depth
 
-Five of eight sections are classification before any architecture appears, and
-sections 1, 2 and 3 are three successive layers of one tree. Section 3 in
-particular is a reference table of roughly forty artefacts — useful as a
-handout, hard to present.
+These were weighted higher before the ask was known. At explicitly high-level
+framing they are worth a line each at most, and are listed so they are not
+lost rather than because they should be added now.
 
-Two options, in preference order:
+- **Where the governance gates live.** Section 8 makes agent-to-agent
+  communication the primary driver, while Tyro requires every change to land
+  via reviewed pull request, promote development → staging → production through
+  Drydock, and carry a Change Request endorsed by both platform and capability
+  owners — with AI tools barred from production entirely. The likely answer is
+  that agents compress everything *up to* the pull request and the human gates
+  are precisely section 8's exception-and-direction layer. One sentence
+  pre-empts a reading of section 8 as removing humans from governance. A full
+  treatment is a later deliverable, not this one.
+- **The bridge from section 1 disappears** from sections 6–8, and under
+  section 8's one-owner rule nobody owns a contextualized card scheme ruling
+  or keeps it in sync on a scheme revision. Highest-risk knowledge in the
+  model; currently unassigned. A placeholder in the target state is enough for
+  now.
+- **No failure-mode content.** Agent-to-agent handoff means an error in
+  Architecture's agent propagates into Engineering's with no human reading it
+  — the design's point and its main risk. Section 7's validation gates are the
+  start of an answer but are not stated as a risk position.
 
-1. **Make section 3 do work instead of shortening it.** Show, per stream,
-   whether its knowledge is tacit, unstructured, semi-structured or structured
-   *today*. That converts a taxonomy into a coverage gap analysis, which is
-   both more presentable and directly sets up the ask in item A — the gaps are
-   the argument for the investment.
-2. Compress sections 1 and 2 into one slide and move the full stream table to
-   an appendix.
+## Withdrawn — and why they were wrong
+
+Kept deliberately. Both were stated confidently as blocking, and both came
+from assuming a purpose the deck was never given.
+
+- **"The deck has no ask"** — withdrawn. It was judged as a pitch seeking a
+  decision, and criticized for having no funding request, sequencing or
+  success measure. It is the opposite: a deliverable *requested by* leadership,
+  answering a question the CTO asked. The spine is the question, not an ask.
+  A funding request would have been off-brief.
+- **"Five of eight sections are taxonomy"** — withdrawn, and inverted. The ask
+  is explicitly for "a high level view of the different layers", so the
+  layered classification *is* the requested content. The suggestion to
+  compress sections 1–2 and demote section 3 to an appendix would have cut the
+  deliverable.
+
+The common error: judging an artefact against an assumed purpose before
+establishing who asked for it and why. The generalizable rule is in
+[`../../meta/procedural-memory/universal.md`](../../meta/procedural-memory/universal.md).
