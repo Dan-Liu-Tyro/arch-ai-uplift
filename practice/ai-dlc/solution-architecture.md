@@ -30,10 +30,10 @@ Section headings are the slide titles.
 <!-- slide
 diagram: 01-knowledge-boundary.svg
 layout: split
-point: **Organizational knowledge** is everything inside the boundary; world knowledge is everything outside it
-point: Organizational knowledge is **our focus and our moat**
 point: World knowledge **cannot be consumed directly** — it has to cross a bridge
-point: Once translated, it *becomes* organizational knowledge
+point: Organizational knowledge is **our focus and our moat**, not a type list — that comes later
+point: World knowledge runs **broad to specific**, ending in the standards we must track
+point: What crosses **keeps its lineage** — regulation becomes our interpreted rulings
 -->
 
 

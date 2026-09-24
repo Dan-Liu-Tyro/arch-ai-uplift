@@ -1,98 +1,103 @@
 <!--
-  Organizational versus world knowledge.
+  Organizational versus world knowledge. THE SUBJECT OF THIS SLIDE IS THE
+  BRIDGE, not either side's contents.
 
-  ORGANIZATIONAL KNOWLEDGE IS ON THE LEFT, deliberately: it is the subject of
-  the deck, and the left position is the primary one. The consequence is that
-  the bridge reads right to left, which is unusual but correct here, because
-  the arrow's direction is itself the claim.
+  Deliberately asymmetric, and the asymmetry is the design:
 
-  THE WORLD BOXES ARE ALL THE SAME SIZE. An earlier version narrowed them to
-  encode "broad to specific" in their width, which put two encodings on one
-  axis for no gain. The ordering top to bottom plus the subheading carry it.
+    * The WORLD side is enumerated, because "broad to specific" is a claim
+      slide 1 actually makes. Four identical boxes, ordered top to bottom.
+    * The ORGANIZATIONAL side is NOT enumerated. Its examples are plain
+      prose, marked "e.g.", so they read as illustration rather than as a
+      classification. An earlier version drew them as four equal boxes,
+      which gave examples the visual grammar of categories and invited
+      exactly the question "shouldn't these be knowledge types?"
 
-  ARROW TERMINI ARE EXACT. The single bridge arrow starts on the left edge of
-  the bottom world box (x=376) and ends on the right edge of the
-  organizational container (x=256). It is drawn BEFORE the gate so the gate
-  occludes its middle, which is why there is one arrow rather than two short
-  ones: one terminus at each end, nothing landing inside a shape.
+  It must stay that way. Slides 2 and 3 introduce the other axes: who
+  controls the knowledge (first versus third party) and who owns it (the
+  eight streams). Putting a type taxonomy here would pre-empt section 3
+  with a less complete version of section 3's own cut, and the audience
+  would read the difference between four and eight as meaningful.
+
+  The bridge lands on "our interpreted compliance rulings" on purpose. Card
+  scheme rules and regulation, the highlighted world box, become interpreted
+  rulings, the highlighted organizational box. That is a real lineage from
+  the document's own list, so the slide SHOWS translation instead of
+  asserting it. The two highlighted boxes are a matched pair and share a
+  centre line at y=272, which is what lets the arrow be dead horizontal.
 
   Geometry:
-    boundary          x = 318
-    organizational    x = 14..256   (container 242 wide, inner boxes 28..242)
-    world             x = 376..620  (four identical boxes, 244 x 40)
-    bridge            y = 250, from x 376 to x 256
+    boundary   x = 318
+    org        x = 14..270   (container; bridge target flush at its right edge)
+    world      x = 376..620  (four identical boxes, 244 x 40)
+    bridge     y = 272, x 376 to 270, gate occluding its middle at x=318
 -->
 <svg viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg" role="img"
-     aria-label="Organizational knowledge on the left, inside the boundary:
-                 how our services are designed, our API contracts and data
-                 models, our principles and decision records, our interpreted
-                 compliance rulings. World knowledge on the right, outside it,
-                 from the entire internet down to industry and domain
-                 standards. A single arrow crosses the boundary right to left
-                 through a gate marked translate, ending inside the
-                 organizational side.">
+     aria-label="The organizational boundary runs down the middle.
+                 Organizational knowledge on the left, described by example
+                 rather than classified. World knowledge on the right in four
+                 levels, from the entire internet down to industry and domain
+                 standards. One horizontal arrow crosses the boundary through
+                 a gate marked translate, running from card scheme rules and
+                 regulation to our interpreted compliance rulings.">
 
-  <!-- ===== the boundary, drawn first so the gate can sit on it ===== -->
+  <!-- ===== the boundary, drawn first so the gate sits on it ===== -->
   <path d="M 318 26 L 318 376" stroke="var(--ink-muted)" stroke-width="2"
         stroke-dasharray="7 5" fill="none"/>
   <text class="d-small" x="318" y="18" text-anchor="middle">the organizational boundary</text>
 
-  <!-- ===== inside: organizational knowledge, on the left ===== -->
+  <!-- ===== inside: described, not classified ===== -->
   <text class="d-label" x="14" y="48">Organizational knowledge</text>
   <text class="d-sub"   x="14" y="67">Everything inside. Our focus, our moat.</text>
 
-  <rect x="14" y="86" width="242" height="196" rx="7"
+  <rect x="14" y="86" width="256" height="224" rx="7"
         fill="var(--layer-knowledge)" fill-opacity="0.12"
         stroke="var(--layer-knowledge)" stroke-width="2"/>
-  <g fill="var(--surface)" stroke="var(--layer-knowledge)" stroke-width="1.5">
-    <rect x="28" y="108" width="214" height="34" rx="5"/>
-    <rect x="28" y="150" width="214" height="34" rx="5"/>
-    <rect x="28" y="192" width="214" height="34" rx="5"/>
-    <rect x="28" y="234" width="214" height="34" rx="5"/>
-  </g>
-  <g class="d-small" fill="var(--ink)" text-anchor="middle">
-    <text x="135" y="129">how our services are designed</text>
-    <text x="135" y="171">our API contracts and data models</text>
-    <text x="135" y="213">our principles and decision records</text>
-    <text x="135" y="255">our interpreted compliance rulings</text>
+
+  <g class="d-small" fill="var(--ink-secondary)">
+    <text x="30" y="116">e.g. how our payment services are</text>
+    <text x="30" y="134">designed, our internal API contracts</text>
+    <text x="30" y="152">and data models, our architecture</text>
+    <text x="30" y="170">principles and decision records.</text>
   </g>
 
-  <rect x="14" y="300" width="242" height="36" rx="5"
-        fill="var(--accent)" fill-opacity="0.10"
-        stroke="var(--accent)" stroke-width="1.5"/>
-  <text x="135" y="323" text-anchor="middle" class="d-small"
-        fill="var(--accent)" style="font-weight:600">once translated, it is ours</text>
+  <text class="d-small" x="30" y="236" fill="var(--accent)"
+        style="font-weight:600">And one that came across the bridge:</text>
+  <rect x="28" y="250" width="242" height="44" rx="5"
+        fill="var(--accent)" fill-opacity="0.14"
+        stroke="var(--accent)" stroke-width="2"/>
+  <text x="149" y="277" text-anchor="middle" class="d-small" fill="var(--ink)"
+        style="font-weight:600">our interpreted compliance rulings</text>
 
-  <!-- ===== outside: world knowledge, on the right, identical boxes ===== -->
+  <!-- ===== outside: enumerated, because the ordering is a claim ===== -->
   <text class="d-label" x="376" y="48">World knowledge</text>
   <text class="d-sub"   x="376" y="67">Everything outside. Broad to specific.</text>
 
   <g stroke="var(--ink-muted)" stroke-width="1.5" fill="var(--surface-sunk)">
-    <rect x="376" y="86"  width="244" height="40" rx="5"/>
-    <rect x="376" y="134" width="244" height="40" rx="5"/>
-    <rect x="376" y="182" width="244" height="40" rx="5"/>
+    <rect x="376" y="108" width="244" height="40" rx="5"/>
+    <rect x="376" y="156" width="244" height="40" rx="5"/>
+    <rect x="376" y="204" width="244" height="40" rx="5"/>
   </g>
-  <rect x="376" y="230" width="244" height="40" rx="5"
-        fill="var(--layer-knowledge)" fill-opacity="0.16"
-        stroke="var(--layer-knowledge)" stroke-width="1.5"/>
-  <g class="d-small" fill="var(--ink)" text-anchor="middle">
-    <text x="498" y="111">the entire internet</text>
-    <text x="498" y="159">the model's baked-in wisdom</text>
-    <text x="498" y="207">software engineering knowledge</text>
-    <text x="498" y="255">industry and domain standards</text>
-  </g>
-  <text class="d-small" x="376" y="290" fill="var(--ink-secondary)">card scheme rules, regulation,</text>
-  <text class="d-small" x="376" y="305" fill="var(--ink-secondary)">reference domain models</text>
-
-  <!-- ===== the bridge: one arrow, both termini exactly on an edge ===== -->
-  <path d="M 376 250 L 256 250" class="d-flow" stroke-width="2.5"
-        marker-end="url(#arrow-accent)"/>
-  <rect x="286" y="237" width="64" height="26" rx="13" fill="var(--surface)"
+  <rect x="376" y="252" width="244" height="40" rx="5"
+        fill="var(--accent)" fill-opacity="0.14"
         stroke="var(--accent)" stroke-width="2"/>
-  <text x="318" y="254" text-anchor="middle" class="d-small"
+  <g class="d-small" fill="var(--ink)" text-anchor="middle">
+    <text x="498" y="132">the entire internet</text>
+    <text x="498" y="180">the model's baked-in wisdom</text>
+    <text x="498" y="228">software engineering knowledge</text>
+    <text x="498" y="276" style="font-weight:600">industry and domain standards</text>
+  </g>
+  <text class="d-small" x="376" y="312" fill="var(--ink-secondary)">card scheme rules, regulation,</text>
+  <text class="d-small" x="376" y="327" fill="var(--ink-secondary)">reference domain models</text>
+
+  <!-- ===== the bridge: one arrow, a terminus on each box's edge ===== -->
+  <path d="M 376 272 L 270 272" class="d-flow" stroke-width="2.5"
+        marker-end="url(#arrow-accent)"/>
+  <circle cx="318" cy="272" r="13" fill="var(--surface)"
+          stroke="var(--accent)" stroke-width="2"/>
+  <text x="318" y="300" text-anchor="middle" class="d-small"
         fill="var(--accent)" style="font-weight:600">translate</text>
 
-  <text class="d-small" x="14" y="396" fill="var(--ink-secondary)">
-    Nothing on the right can be consumed by an agent until it has crossed.
+  <text class="d-small" x="14" y="400" fill="var(--ink-secondary)">
+    Nothing on the right can be consumed until it crosses — and what crosses keeps its lineage.
   </text>
 </svg>
