@@ -259,3 +259,16 @@ principle's `status` and must not be silently absorbed as if it agreed.
   effect: here deferring *protects* the artefact rather than accepting debt in
   it. Would be contradicted by a case where they author directly in a
   presentation tool and treat the deck as the thing to keep.
+- 2026-09-24 · When new scope arrived for an existing deliverable, extended the
+  one artefact rather than forking a second one · this conversation · stated ·
+  unpromoted — told that the leadership ask had a second, undrafted deliverable
+  and offered it as either a section inside the existing document or a separate
+  deck, answered "I think we can add another slide near the end talking about
+  deliverable 2." Distinct from the source-of-truth-first entry above even
+  though it is the same conversation: that one was about *where* content lives,
+  this is about *what happens when scope grows* — the default is one artefact
+  absorbing it, not a matching set of artefacts mirroring the request's
+  structure. Consistent with `least-infrastructure-first`, applied to documents
+  instead of systems. Would be contradicted by splitting a deliverable into
+  parallel artefacts because the request naming two things was itself treated as
+  the reason to produce two.
