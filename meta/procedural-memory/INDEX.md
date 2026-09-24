@@ -67,7 +67,10 @@ policy this exists to serve.
   not a same-session re-invocation.
 - `git commit` commits everything already staged, not just what this turn
   `git add`ed — run a full, unscoped `git status` immediately before
-  committing.
+  committing, and make the commit itself narrow (`git commit -- <paths>`),
+  because looking at a dirty index is not a mitigation for it. A dirty
+  index belonging to another session is a stop-and-ask, not a thing to
+  step around.
 - A staleness warning is not a mitigation — refresh a known-stale input or
   say the conclusion is unavailable; don't derive on top of it. And if a
   stale source contradicts the user's own recollection, doubt the source

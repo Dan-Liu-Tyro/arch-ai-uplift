@@ -419,6 +419,39 @@ the full staged set matches what the commit message is about to claim. A
 path-scoped check only tells you that path's state — it actively hides
 other already-staged content sitting in the index from earlier work.
 
+**Recurred 2026-09-24, and the rule above was not sufficient.** Same repo,
+same mechanism, but this time the unscoped `git status` *was* run, and the
+pre-staged content — another concurrently-running session's in-flight work
+on `CLAUDE.md`, `docs/backlog.md` and a `docs/decision-log.md` entry — was
+seen, named in conversation, and reasoned about as a hazard to avoid. Then a
+plain `git add <my-one-file> && git commit` swept all of it into a commit
+whose message described only my file. Looking is not the mitigation; the
+looking happened and changed nothing. **The mitigation is to make the commit
+itself narrow**: `git commit -- <explicit paths>` (which commits only those
+paths regardless of what else is staged), or move the foreign staged content
+out of the way first, and then verify with `git show --stat HEAD` that the
+commit contains exactly the intended files — after committing, not only
+before. Treat a dirty index belonging to someone else as a stop-and-ask
+condition, not a thing to step around carefully: another session may commit
+or reset underneath you mid-operation, so the sequencing is the user's call.
+Note the trap in the recovery too — `git reset --soft HEAD~1` would restore
+their staged state, but running it while another session is active races
+with whatever that session does next.
+
+**The entanglement runs both ways, which is the part worth internalising.**
+Minutes later the other session committed its own work and swept up *my*
+uncommitted `docs/decision-log.md` entry (decision 44) in exactly the same
+way, under a message about adding the backlog agent. Two sessions sharing
+one worktree do not have separable commits: an uncommitted change is
+visible to, and committable by, whichever session commits next, regardless
+of who wrote it. So the hazard is not "don't contaminate their commit" —
+it is that concurrent sessions in one checkout cannot keep authorship
+straight at all. No content was lost in either direction here, and both
+entries ended up committed; what was lost was the correspondence between
+each commit message and its diff. If concurrent sessions are expected, the
+sequencing has to be agreed with the user up front, or the work has to go
+in separate worktrees (`EnterWorktree`), not coordinated commit-by-commit.
+
 ## A staleness warning is not a mitigation
 
 **What happened.** Building a credit-budget tool, I read the account's
