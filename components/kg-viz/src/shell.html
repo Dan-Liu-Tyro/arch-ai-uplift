@@ -153,6 +153,24 @@
     text-shadow: 0 0 3px #05070d, 0 0 3px #05070d, 0 0 6px #05070d, 0 0 6px #05070d;
     margin-top: -7px; }
   .elabel.dim { color: rgba(140, 155, 180, 0.28); background: transparent; }
+  /* Actor icons: a 2D-only substitute for the 3D head-and-body silhouette
+     (personify() in renderer.js). Neither a THREE.Sprite/Texture nor a real
+     PNG is reachable here -- same "no THREE constructor" wall documented on
+     personify() -- but 2D never rotates the camera (see applyControlMode()),
+     so a plain HTML badge tracks the node perfectly there, the same trick
+     #labels already relies on. It sits over the node's own 3D mesh rather
+     than replacing it: pointer-events:none lets clicks fall through to the
+     mesh underneath for onNodeClick's hit-testing, and the badge's solid
+     background hides the sphere it is centred on. Hidden outright in 3D,
+     where it cannot track an orbiting camera -- see positionIcons(). */
+  #actor-icons { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+  .actor-icon { position: absolute; top: 0; left: 0; width: 26px; height: 26px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.4);
+    box-shadow: 0 0 7px currentColor, inset 0 1px 3px rgba(255,255,255,0.35);
+    will-change: transform; }
+  .actor-icon svg { width: 15px; height: 15px; }
+  .actor-icon.sel { border-color: #fff; box-shadow: 0 0 10px #fff, inset 0 1px 3px rgba(255,255,255,0.6); }
   #hint { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
     font-size: 11px; color: #67718a; z-index: 4; }
   /* Deliberately loud and centred. A silent blank canvas cost a round trip
@@ -184,6 +202,7 @@
 <body>
   <div id="graph"></div>
   <svg id="bands" width="100%" height="100%"></svg>
+  <div id="actor-icons"></div>
   <div id="labels"></div>
 
   <div id="controls" class="panel-base">

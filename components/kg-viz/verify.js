@@ -112,7 +112,7 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), };', ctx);
 
   return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam, controls: () => fakeControls, camera: () => fakeCamera };
 }
@@ -884,6 +884,44 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (titleAfterCollapse !== 'Expand' || titleAfterExpand !== 'Collapse') {
     results.push('S: toggle title did not track collapsed state: ' + titleAfterCollapse + ' / ' + titleAfterExpand);
   }
+}
+
+// T: 2D-only actor icon overlay, coloured like the mesh, hidden in 3D
+{
+  const r = run('T', { cdnBlocked: false }); await tick();
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+
+  const actors = r.probe.visible().nodes.filter(n => n.kind === 'actor');
+  const iconEls = r.probe.iconEls();
+  const built = actors.every(n => !!iconEls[n.id]);
+  const noExtra = Object.keys(iconEls).length === actors.length;
+  console.log('T: actor icons built =', built, '| one per actor, no extra =', noExtra,
+    '(', Object.keys(iconEls).length, 'of', actors.length, ')');
+  if (!built) results.push('T: not every actor got an icon element');
+  if (!noExtra) results.push('T: icon count does not match actor count: ' + Object.keys(iconEls).length + ' vs ' + actors.length);
+
+  // 2D is the default: visible, positioned, and coloured per role.
+  const sample = actors[0];
+  const el0 = iconEls[sample.id];
+  console.log('T: 2D -> display =', el0.style.display, '| transform set =', !!el0.style.transform,
+    '| background =', el0.style.background);
+  if (el0.style.display === 'none') results.push('T: actor icon hidden in 2D, the default');
+  if (!el0.style.transform) results.push('T: actor icon has no screen position in 2D');
+  if (!el0.style.background) results.push('T: actor icon has no colour in 2D');
+
+  // 3D: a flat overlay cannot track an orbiting camera, so it must step
+  // aside for the existing sphere-and-head silhouette instead.
+  r.probe.setDims(3);
+  r.probe.positionIcons();
+  console.log('T: 3D -> display =', el0.style.display);
+  if (el0.style.display !== 'none') results.push('T: actor icon still shown in 3D, where it cannot track the camera');
+
+  r.probe.setDims(2);
+  r.probe.positionIcons();
+  console.log('T: back to 2D -> display =', el0.style.display);
+  if (el0.style.display === 'none') results.push('T: actor icon did not reappear when returning to 2D');
 }
 
 console.log(results.length ? '\nFAILURES:\n' + results.join('\n') : '\nALL SCENARIOS PASSED');

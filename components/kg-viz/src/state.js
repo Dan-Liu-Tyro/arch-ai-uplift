@@ -58,7 +58,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-24f — actors drawn as a person silhouette";
+  var PAGE_REVISION = "2026-09-24g — actor icon badge in 2D, silhouette in 3D";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 

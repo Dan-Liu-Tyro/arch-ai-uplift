@@ -153,6 +153,24 @@
     text-shadow: 0 0 3px #05070d, 0 0 3px #05070d, 0 0 6px #05070d, 0 0 6px #05070d;
     margin-top: -7px; }
   .elabel.dim { color: rgba(140, 155, 180, 0.28); background: transparent; }
+  /* Actor icons: a 2D-only substitute for the 3D head-and-body silhouette
+     (personify() in renderer.js). Neither a THREE.Sprite/Texture nor a real
+     PNG is reachable here -- same "no THREE constructor" wall documented on
+     personify() -- but 2D never rotates the camera (see applyControlMode()),
+     so a plain HTML badge tracks the node perfectly there, the same trick
+     #labels already relies on. It sits over the node's own 3D mesh rather
+     than replacing it: pointer-events:none lets clicks fall through to the
+     mesh underneath for onNodeClick's hit-testing, and the badge's solid
+     background hides the sphere it is centred on. Hidden outright in 3D,
+     where it cannot track an orbiting camera -- see positionIcons(). */
+  #actor-icons { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+  .actor-icon { position: absolute; top: 0; left: 0; width: 26px; height: 26px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.4);
+    box-shadow: 0 0 7px currentColor, inset 0 1px 3px rgba(255,255,255,0.35);
+    will-change: transform; }
+  .actor-icon svg { width: 15px; height: 15px; }
+  .actor-icon.sel { border-color: #fff; box-shadow: 0 0 10px #fff, inset 0 1px 3px rgba(255,255,255,0.6); }
   #hint { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
     font-size: 11px; color: #67718a; z-index: 4; }
   /* Deliberately loud and centred. A silent blank canvas cost a round trip
@@ -184,6 +202,7 @@
 <body>
   <div id="graph"></div>
   <svg id="bands" width="100%" height="100%"></svg>
+  <div id="actor-icons"></div>
   <div id="labels"></div>
 
   <div id="controls" class="panel-base">
@@ -343,7 +362,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-24f — actors drawn as a person silhouette";
+  var PAGE_REVISION = "2026-09-24g — actor icon badge in 2D, silhouette in 3D";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
@@ -434,6 +453,22 @@
     if (scopeMode === "all") return false;
     if (!node.scope) return true;
     return node.scope !== scopeMode;
+  }
+
+  // The single source of truth for "what colour is this node right now",
+  // selection and scope dimming included -- shared by the 3D mesh's
+  // nodeColor() accessor and the 2D actor icon overlay, so the two never
+  // drift into disagreeing about which nodes are highlighted or dimmed.
+  function nodeDisplayColor(node) {
+    var base = colorFor(node);
+    if (selected) {
+      var keep = neighbourIds(selected);
+      if (node.id === selected.id) return "#ffffff";
+      if (!keep[node.id]) return "rgba(110,120,140,0.18)";
+      return base;
+    }
+    if (isDimmedByScope(node)) return "rgba(110,120,140,0.22)";
+    return base;
   }
 
   function visibleData() {
@@ -711,6 +746,70 @@
   var LABEL_DY = 11;        // node label sits this far below the node marker
   var LABEL_LINE_H = 14;    // 11px font, one line, plus leading -- fallback only
 
+  // ---- Actor icons: the same HTML-overlay trick, 2D only -------------------
+  //
+  // personify() gives actors a 3D head-and-body silhouette because there is
+  // no reachable THREE.Sprite/Texture to put a real image on the mesh (see
+  // its own comment). An HTML badge sidesteps that the same way labels do --
+  // but only in 2D: a flat overlay can track a camera that pans and zooms
+  // (2D, since applyControlMode() disables rotate there) but not one that
+  // orbits (3D), so positionIcons() hides these outright once dims is 3 and
+  // the sphere-and-head silhouette is what's on screen instead.
+  //
+  // A dark silhouette on a colour-filled circle, not a coloured glyph on a
+  // dark circle: the fill on the shapes below is a fixed near-black ink, and
+  // only the badge's own background/glow (set per node in positionIcons(),
+  // from the same nodeDisplayColor() the 3D mesh uses) carries the actor's
+  // role colour -- the classic flat-avatar look, and it means selection/scope
+  // highlighting stays visually consistent with every other node kind.
+  var iconEls = {};
+  var PERSON_ICON_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+    '<circle cx="12" cy="8.3" r="4.1" fill="#0b0d14"/>' +
+    '<path d="M4 21c0-4.7 3.8-8.3 8-8.3s8 3.6 8 8.3" fill="#0b0d14"/>' +
+    '</svg>';
+
+  function rebuildIcons() {
+    var vis = visibleData();
+    var host = document.getElementById("actor-icons");
+    host.innerHTML = "";
+    iconEls = {};
+    vis.nodes.forEach(function (n) {
+      if (presentationFor(n).shape !== "person") return;
+      var el = document.createElement("div");
+      el.className = "actor-icon";
+      el.innerHTML = PERSON_ICON_SVG;
+      host.appendChild(el);
+      iconEls[n.id] = el;
+    });
+    // Matches positionLabels() being called inside rebuildLabels() rather
+    // than left to the next animation frame: a freshly created div has no
+    // transform yet, so without this it would flash at the CSS default of
+    // (0,0) for one frame -- the same "first paint with stale geometry" flash
+    // labels.js's own rebuild already avoids for the same reason.
+    positionIcons();
+  }
+
+  function positionIcons() {
+    if (!Graph) return;
+    var ids = Object.keys(iconEls);
+    if (!ids.length) return;
+    var show = dims === 2;
+    for (var i = 0; i < ids.length; i++) {
+      var id = ids[i];
+      var n = nodeById[id];
+      var el = iconEls[id];
+      if (!show || !n || !isFinite(n.x) || !isFinite(n.y)) { el.style.display = "none"; continue; }
+      var p = Graph.graph2ScreenCoords(n.x, n.y, isFinite(n.z) ? n.z : 0);
+      if (!p || !isFinite(p.x)) { el.style.display = "none"; continue; }
+      el.style.display = "flex";
+      el.style.transform = "translate(-50%, -50%) translate(" + p.x + "px," + p.y + "px)";
+      var col = nodeDisplayColor(n);
+      el.style.background = col;
+      el.style.color = col;
+      el.className = "actor-icon" + (selected && selected.id === n.id ? " sel" : "");
+    }
+  }
+
   function shortTitle(n) {
     return String(n.title).replace(/ Domain$/, "");
   }
@@ -770,6 +869,10 @@
       });
     }
     positionLabels();
+    // Same node membership as the labels just rebuilt above -- rebuilding
+    // here, rather than at every rebuildLabels() call site, means a future
+    // caller can't forget it.
+    rebuildIcons();
   }
 
   // Greedy collision suppression. Text that overlaps other text -- or sits on
@@ -1010,6 +1113,7 @@
     decorateShapes();
     positionBands();
     positionLabels();
+    positionIcons();
     requestAnimationFrame(labelLoop);
   }
 
@@ -1303,17 +1407,7 @@
       // speck once the whole graph is framed.
       .nodeRelSize(9)
       .nodeVal(function (n) { return n.kind === "domain" || n.type === "domain" ? 5 : 3; })
-      .nodeColor(function (n) {
-        var base = colorFor(n);
-        if (selected) {
-          var keep = neighbourIds(selected);
-          if (n.id === selected.id) return "#ffffff";
-          if (!keep[n.id]) return "rgba(110,120,140,0.18)";
-          return base;
-        }
-        if (isDimmedByScope(n)) return "rgba(110,120,140,0.22)";
-        return base;
-      })
+      .nodeColor(function (n) { return nodeDisplayColor(n); })
       // Still no nodeThreeObject, deliberately. Actors do get a person
       // silhouette, but it is applied by decorateShapes() *after* the
       // library has built its own mesh, not by an accessor running inside

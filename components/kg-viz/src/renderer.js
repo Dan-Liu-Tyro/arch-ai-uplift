@@ -10,17 +10,7 @@
       // speck once the whole graph is framed.
       .nodeRelSize(9)
       .nodeVal(function (n) { return n.kind === "domain" || n.type === "domain" ? 5 : 3; })
-      .nodeColor(function (n) {
-        var base = colorFor(n);
-        if (selected) {
-          var keep = neighbourIds(selected);
-          if (n.id === selected.id) return "#ffffff";
-          if (!keep[n.id]) return "rgba(110,120,140,0.18)";
-          return base;
-        }
-        if (isDimmedByScope(n)) return "rgba(110,120,140,0.22)";
-        return base;
-      })
+      .nodeColor(function (n) { return nodeDisplayColor(n); })
       // Still no nodeThreeObject, deliberately. Actors do get a person
       // silhouette, but it is applied by decorateShapes() *after* the
       // library has built its own mesh, not by an accessor running inside

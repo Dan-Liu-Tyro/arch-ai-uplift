@@ -2,6 +2,7 @@
     decorateShapes();
     positionBands();
     positionLabels();
+    positionIcons();
     requestAnimationFrame(labelLoop);
   }
 

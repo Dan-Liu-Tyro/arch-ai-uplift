@@ -19,6 +19,70 @@
   var LABEL_DY = 11;        // node label sits this far below the node marker
   var LABEL_LINE_H = 14;    // 11px font, one line, plus leading -- fallback only
 
+  // ---- Actor icons: the same HTML-overlay trick, 2D only -------------------
+  //
+  // personify() gives actors a 3D head-and-body silhouette because there is
+  // no reachable THREE.Sprite/Texture to put a real image on the mesh (see
+  // its own comment). An HTML badge sidesteps that the same way labels do --
+  // but only in 2D: a flat overlay can track a camera that pans and zooms
+  // (2D, since applyControlMode() disables rotate there) but not one that
+  // orbits (3D), so positionIcons() hides these outright once dims is 3 and
+  // the sphere-and-head silhouette is what's on screen instead.
+  //
+  // A dark silhouette on a colour-filled circle, not a coloured glyph on a
+  // dark circle: the fill on the shapes below is a fixed near-black ink, and
+  // only the badge's own background/glow (set per node in positionIcons(),
+  // from the same nodeDisplayColor() the 3D mesh uses) carries the actor's
+  // role colour -- the classic flat-avatar look, and it means selection/scope
+  // highlighting stays visually consistent with every other node kind.
+  var iconEls = {};
+  var PERSON_ICON_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+    '<circle cx="12" cy="8.3" r="4.1" fill="#0b0d14"/>' +
+    '<path d="M4 21c0-4.7 3.8-8.3 8-8.3s8 3.6 8 8.3" fill="#0b0d14"/>' +
+    '</svg>';
+
+  function rebuildIcons() {
+    var vis = visibleData();
+    var host = document.getElementById("actor-icons");
+    host.innerHTML = "";
+    iconEls = {};
+    vis.nodes.forEach(function (n) {
+      if (presentationFor(n).shape !== "person") return;
+      var el = document.createElement("div");
+      el.className = "actor-icon";
+      el.innerHTML = PERSON_ICON_SVG;
+      host.appendChild(el);
+      iconEls[n.id] = el;
+    });
+    // Matches positionLabels() being called inside rebuildLabels() rather
+    // than left to the next animation frame: a freshly created div has no
+    // transform yet, so without this it would flash at the CSS default of
+    // (0,0) for one frame -- the same "first paint with stale geometry" flash
+    // labels.js's own rebuild already avoids for the same reason.
+    positionIcons();
+  }
+
+  function positionIcons() {
+    if (!Graph) return;
+    var ids = Object.keys(iconEls);
+    if (!ids.length) return;
+    var show = dims === 2;
+    for (var i = 0; i < ids.length; i++) {
+      var id = ids[i];
+      var n = nodeById[id];
+      var el = iconEls[id];
+      if (!show || !n || !isFinite(n.x) || !isFinite(n.y)) { el.style.display = "none"; continue; }
+      var p = Graph.graph2ScreenCoords(n.x, n.y, isFinite(n.z) ? n.z : 0);
+      if (!p || !isFinite(p.x)) { el.style.display = "none"; continue; }
+      el.style.display = "flex";
+      el.style.transform = "translate(-50%, -50%) translate(" + p.x + "px," + p.y + "px)";
+      var col = nodeDisplayColor(n);
+      el.style.background = col;
+      el.style.color = col;
+      el.className = "actor-icon" + (selected && selected.id === n.id ? " sel" : "");
+    }
+  }
+
   function shortTitle(n) {
     return String(n.title).replace(/ Domain$/, "");
   }
@@ -78,6 +142,10 @@
       });
     }
     positionLabels();
+    // Same node membership as the labels just rebuilt above -- rebuilding
+    // here, rather than at every rebuildLabels() call site, means a future
+    // caller can't forget it.
+    rebuildIcons();
   }
 
   // Greedy collision suppression. Text that overlaps other text -- or sits on

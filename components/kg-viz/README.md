@@ -247,6 +247,22 @@ through ingestion is the real fix. See "Known gaps".
   an actor is about a 10px dot at the default framing, where arms and legs
   would be pixel mud, and the question being answered is "which steps involve
   people".
+
+  **In 2D only, actors instead show a coloured icon badge** — a flat HTML
+  overlay, not a mesh — sitting on top of (and fully covering) the same
+  sphere. The reachability wall above rules out a real `THREE.Sprite`/
+  `Texture` here too, so this is the other route already proven for text:
+  `#labels`' `graph2ScreenCoords()` overlay trick, applied to a `<div>` badge
+  instead of a text node. That trick only works while the camera cannot
+  rotate out from under it, which is exactly 2D (`applyControlMode()` maps
+  drag to pan there, never orbit) and exactly why 3D keeps the silhouette
+  instead: nothing here can make a flat overlay track an orbiting camera.
+  `positionIcons()` in `src/labels.js` hides the badges outright once
+  `numDimensions` is 3. The badge's fill and glow come from
+  `nodeDisplayColor()` — the same selection/scope-dimming logic the mesh's
+  `nodeColor()` accessor uses, factored out so the two can never disagree —
+  and the glyph inside is a fixed dark silhouette, not tinted, so it reads
+  against any role colour.
 - **Colour legend** — lists only the kinds actually present in the current
   view, built from the same table `colorFor` reads, so it cannot drift from
   the rendering. Hidden on the authority view, which colours domains by

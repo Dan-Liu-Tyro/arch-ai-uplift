@@ -43,6 +43,22 @@
     return node.scope !== scopeMode;
   }
 
+  // The single source of truth for "what colour is this node right now",
+  // selection and scope dimming included -- shared by the 3D mesh's
+  // nodeColor() accessor and the 2D actor icon overlay, so the two never
+  // drift into disagreeing about which nodes are highlighted or dimmed.
+  function nodeDisplayColor(node) {
+    var base = colorFor(node);
+    if (selected) {
+      var keep = neighbourIds(selected);
+      if (node.id === selected.id) return "#ffffff";
+      if (!keep[node.id]) return "rgba(110,120,140,0.18)";
+      return base;
+    }
+    if (isDimmedByScope(node)) return "rgba(110,120,140,0.22)";
+    return base;
+  }
+
   function visibleData() {
     var nodes = view.nodes.filter(function (n) { return !isHidden(n); });
     var ids = {};
