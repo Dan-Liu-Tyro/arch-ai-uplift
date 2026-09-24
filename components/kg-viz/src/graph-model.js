@@ -15,13 +15,16 @@
     return cats;
   }
 
+  // In the flow view node colour means *what a node is*, and nothing else.
+  // It used to mean two things at once: a domain took its stage's colour
+  // while a non-domain took its kind's, so green meant "stage-3 domain" and
+  // gold meant "an actor, any stage" -- a reader could not tell whether a
+  // colour was telling them what something is or where it sits. Stage is
+  // already carried twice over by the bands (tint plus caption), so it gives
+  // that channel up here and colour becomes a single, honest encoding.
   function colorFor(node) {
-    if (view.id === "payments-target-state") {
-      if (node.kind !== "domain") return KIND_COLORS[node.kind] || KIND_COLORS.domain;
-      var i = view.stages.findIndex(function (s) { return s.id === node.stage; });
-      return STAGE_COLORS[(i < 0 ? 0 : i) % STAGE_COLORS.length];
-    }
-    if (node.type !== "domain") return KIND_COLORS[node.type] || CATEGORY_COLORS._uncategorized;
+    if (view.id === "payments-target-state") return presentationFor(node).color;
+    if (node.type !== "domain") return presentationFor(node).color;
     return CATEGORY_COLORS[node.category] || CATEGORY_COLORS._uncategorized;
   }
 

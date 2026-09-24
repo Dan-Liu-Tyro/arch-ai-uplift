@@ -104,7 +104,7 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), switchView: id => switchView(id), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), };', ctx);
 
   return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam };
 }
@@ -618,6 +618,57 @@ const el = (r, id) => r.els[id] || EMPTY;
   const secondX = r.probe.visible().nodes[0].x;
   console.log('M: coordinate stable across two Load default clicks =', firstX === secondX);
   if (firstX !== secondX) results.push('M: repeated Load default drifted a node coordinate: ' + firstX + ' -> ' + secondX);
+}
+
+// N: node colour encodes kind (and an actor's role), and the legend agrees
+{
+  const r = run('N', { cdnBlocked: false }); await tick();
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+
+  const nodes = r.probe.visible().nodes;
+  const keys = [...new Set(nodes.map(n => r.probe.presentationKey(n)))].sort();
+  console.log('N: presentation keys in view =', keys.join(', '));
+
+  // Every key present must exist in the table -- an unmapped kind silently
+  // falls back to grey, which looks deliberate and is not.
+  const table = r.probe.presentation();
+  const unmapped = keys.filter(k => !table[k]);
+  if (unmapped.length) results.push('N: no presentation entry for ' + unmapped.join(', '));
+
+  // Internal and external users must not render identically: that is the
+  // whole distinction the model carries actor_type for.
+  const staff = nodes.find(n => n.actor_type === 'InternalStaff');
+  const cust = nodes.find(n => n.actor_type === 'Customer');
+  const sameColor = staff && cust && r.probe.colorFor(staff) === r.probe.colorFor(cust);
+  console.log('N: internal staff =', staff && r.probe.colorFor(staff),
+    '| customer =', cust && r.probe.colorFor(cust), '| distinct =', !sameColor);
+  if (!staff || !cust) results.push('N: expected both an InternalStaff and a Customer actor in the flow view');
+  if (sameColor) results.push('N: internal and external users render the same colour');
+
+  // Colour must mean exactly one thing now: two domains in different stages
+  // used to differ, which made colour ambiguous between kind and stage.
+  const doms = nodes.filter(n => n.kind === 'domain');
+  const domStages = [...new Set(doms.map(n => n.stage))];
+  const domColors = [...new Set(doms.map(n => r.probe.colorFor(n)))];
+  console.log('N: domains span', domStages.length, 'stages ->', domColors.length, 'colour(s)');
+  if (domStages.length > 1 && domColors.length !== 1) {
+    results.push('N: domain colour still varies by stage (' + domColors.length + ' colours), so colour encodes two things');
+  }
+
+  // The legend must list exactly the kinds on screen, no more and no fewer.
+  const legendRows = el(r,'kind-legend').children.length;
+  console.log('N: legend rows =', legendRows, 'for', keys.length, 'kinds present');
+  if (legendRows !== keys.length) {
+    results.push('N: legend shows ' + legendRows + ' rows but ' + keys.length + ' kinds are present');
+  }
+
+  // ...and must be hidden on the authority view, which colours by category.
+  r.probe.switchView('domain-authority'); await tick();
+  const hidden = el(r,'kind-legend').style.display === 'none';
+  console.log('N: legend hidden on the authority view =', hidden);
+  if (!hidden) results.push('N: kind legend still shown on the authority view, which colours by category');
 }
 
 console.log(results.length ? '\nFAILURES:\n' + results.join('\n') : '\nALL SCENARIOS PASSED');

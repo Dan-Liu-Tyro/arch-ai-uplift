@@ -52,7 +52,7 @@ blob that existed only to let the page auto-load, which it no longer does).
 cd components/kg-viz && node verify.js
 ```
 
-Thirteen scenarios, exit non-zero on failure. This is the only automated check
+Fourteen scenarios, exit non-zero on failure. This is the only automated check
 in the repo, and it exists because **nothing this component renders can be
 observed from a Claude Code session** — see `docs/decision-log.md`'s
 "Constraints identified". It is a floor, not a substitute for opening the
@@ -201,6 +201,32 @@ through ingestion is the real fix. See "Known gaps".
   the stages differ in genuine width and a common right edge would draw a
   lot of empty box around stage 1. Scenario J asserts both halves of that —
   lefts equal, rights not all equal.
+- **Node colour means what a node is, and only that.** `NODE_PRESENTATION`
+  in `src/state.js` is the single table mapping a model type to its visual
+  treatment, keyed by `kind` or — for actors — `kind:actor_type`. The model
+  declares the strict type (`kg-core/SCHEMA.md`); this table decides how it
+  looks, and adding a channel (a shape, a border) means extending the table
+  rather than touching `kg-content`. In particular **affiliation is not
+  stored**: an actor declares a role, and "internal user" vs "external user"
+  is a grouping made here at read time, so there is no second field that can
+  contradict the first.
+
+  This channel used to carry two meanings at once — a domain took its
+  *stage's* colour while a non-domain took its *kind's*, so green meant
+  "stage-3 domain" and gold meant "an actor, in any stage." Stage is already
+  carried twice by the bands (tint plus caption), so colour gives that up:
+  all domains are now one colour and the nine non-domain nodes are what the
+  eye finds. Scenario N asserts it, including that domains spanning three
+  stages resolve to exactly one colour.
+
+  `external` is an external *system* (a card scheme, a settlement rail); an
+  external *party* is an actor with a non-staff role. The legend says
+  "External system" for the former precisely because both read as "external"
+  in English otherwise.
+- **Colour legend** — lists only the kinds actually present in the current
+  view, built from the same table `colorFor` reads, so it cannot drift from
+  the rendering. Hidden on the authority view, which colours domains by
+  category rather than by kind and would make a kind legend actively wrong.
 - **Group show/hide** — checkboxes per stage (flow) or per domain category
   (authority), with live counts. Hiding a group drops its nodes *and* every
   edge touching them, so no dangling edges are drawn, and empties that
@@ -321,7 +347,7 @@ Current content, as reported by `generate.py` rather than asserted here:
   `docs/backlog.md` carries the SVG renderer: SVG output is inspectable text,
   and most of those six defects would have been caught mechanically by it.
 
-  What `verify.js` covers, and what it cannot: thirteen scenarios over the
+  What `verify.js` covers, and what it cannot: fourteen scenarios over the
   real `payments.json` under a stubbed DOM — empty start, load-by-file with
   malformed and wrong-shape rejection, reopening without stacking a renderer
   or inheriting stale filters, the camera-fit arithmetic recomputed

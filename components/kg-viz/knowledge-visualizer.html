@@ -189,6 +189,11 @@
     <div class="group-label" id="groups-label">Groups</div>
     <div id="group-rows"></div>
 
+    <!-- Node colour encodes what a node *is*. Without this the encoding is
+         guesswork: gold meant "internal user" and nothing on screen said so. -->
+    <div class="group-label" id="legend-label">What the colours mean</div>
+    <div id="kind-legend"></div>
+
     <div class="group-label">Display</div>
     <div class="row" id="labels-row">
       <input type="checkbox" id="labels-cb" checked />
@@ -263,10 +268,46 @@
     "cross-domain-orchestrators": "#ff8ad8",
     "_uncategorized": "#8a93ab"
   };
-  var KIND_COLORS = {
-    "domain": "#3fd0ff", "actor": "#ffd479", "external": "#ff7e8f",
-    "artefact": "#b79cff", "principle": "#4dff9e"
+  // ---- Presentation, keyed off the model's strict types -------------------
+  //
+  // The model says what a thing *is* -- `kind`, plus `actor_type` for an
+  // actor (see kg-core/SCHEMA.md). This table is the only place that decides
+  // how it looks, and the split is deliberate: affiliation is deliberately
+  // not stored on an actor, so "internal vs external user" is a grouping
+  // made here, at read time, rather than a fact the graph carries. Adding a
+  // presentation channel (a shape, a border) means extending this table, not
+  // touching kg-content.
+  //
+  // Keys are `kind` or, for actors, `kind:actor_type`. The bare `actor` key
+  // is the fallback for an actor whose role the overlay left unstated, which
+  // the schema permits but the viewer should not render as if it knew.
+  var NODE_PRESENTATION = {
+    "domain":              { color: "#3fd0ff", label: "Domain" },
+    "external":            { color: "#ff7e8f", label: "External system" },
+    "artefact":            { color: "#b79cff", label: "Artefact" },
+    "principle":           { color: "#4dff9e", label: "Principle" },
+    "actor:InternalStaff": { color: "#ffd479", label: "Internal user (Tyro staff)" },
+    "actor:Customer":      { color: "#ff6fae", label: "External user (merchant)" },
+    "actor:Partner":       { color: "#ff6fae", label: "External user (partner)" },
+    "actor:Regulator":     { color: "#9ad0ff", label: "Regulator" },
+    "actor":               { color: "#8a93ab", label: "Actor (role unstated)" }
   };
+
+  // Internal and external users share a colour family on purpose -- the
+  // question the flow view gets asked is "who outside Tyro touches this
+  // step", so merchant and partner read as one class at a glance and staff
+  // reads as another.
+  function presentationKey(node) {
+    var kind = node.kind || node.type || "domain";
+    if (kind !== "actor") return kind;
+    return node.actor_type ? "actor:" + node.actor_type : "actor";
+  }
+
+  function presentationFor(node) {
+    return NODE_PRESENTATION[presentationKey(node)] ||
+      NODE_PRESENTATION[node.kind || node.type] ||
+      { color: "#8a93ab", label: "Unknown" };
+  }
   var STAGE_COLORS = ["#8b7bff", "#3fd0ff", "#4dff9e"];
 
   var COL_SPACING = 230, LANE_HEIGHT = 300, ROW_SPACING = 62;
@@ -278,7 +319,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-24d — edge labels default to along-line";
+  var PAGE_REVISION = "2026-09-24e — colour encodes kind/actor role, with a legend";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
@@ -342,13 +383,16 @@
     return cats;
   }
 
+  // In the flow view node colour means *what a node is*, and nothing else.
+  // It used to mean two things at once: a domain took its stage's colour
+  // while a non-domain took its kind's, so green meant "stage-3 domain" and
+  // gold meant "an actor, any stage" -- a reader could not tell whether a
+  // colour was telling them what something is or where it sits. Stage is
+  // already carried twice over by the bands (tint plus caption), so it gives
+  // that channel up here and colour becomes a single, honest encoding.
   function colorFor(node) {
-    if (view.id === "payments-target-state") {
-      if (node.kind !== "domain") return KIND_COLORS[node.kind] || KIND_COLORS.domain;
-      var i = view.stages.findIndex(function (s) { return s.id === node.stage; });
-      return STAGE_COLORS[(i < 0 ? 0 : i) % STAGE_COLORS.length];
-    }
-    if (node.type !== "domain") return KIND_COLORS[node.type] || CATEGORY_COLORS._uncategorized;
+    if (view.id === "payments-target-state") return presentationFor(node).color;
+    if (node.type !== "domain") return presentationFor(node).color;
     return CATEGORY_COLORS[node.category] || CATEGORY_COLORS._uncategorized;
   }
 
@@ -411,6 +455,40 @@
     });
   }
 
+  // Built from NODE_PRESENTATION, and listing only the kinds actually in the
+  // current view -- a legend naming things that are not on screen is noise,
+  // and one that can disagree with the rendering is worse than none. Both
+  // are avoided by reading the same table `colorFor` reads.
+  function buildLegend() {
+    var host = document.getElementById("kind-legend");
+    host.innerHTML = "";
+    var counts = {}, order = [];
+    view.nodes.forEach(function (n) {
+      var k = presentationKey(n);
+      if (!counts[k]) { counts[k] = 0; order.push(k); }
+      counts[k]++;
+    });
+    order.sort(function (a, b) { return counts[b] - counts[a]; });
+    order.forEach(function (k) {
+      var p = NODE_PRESENTATION[k] || { color: "#8a93ab", label: k };
+      var row = document.createElement("div");
+      row.className = "row";
+      var sw = document.createElement("span");
+      sw.className = "swatch";
+      sw.style.background = p.color;
+      var txt = document.createElement("span");
+      txt.textContent = p.label + " (" + counts[k] + ")";
+      row.appendChild(sw);
+      row.appendChild(txt);
+      host.appendChild(row);
+    });
+    // The authority view colours domains by category, not by kind, so the
+    // kind legend would be actively wrong there.
+    var show = view.id === "payments-target-state";
+    document.getElementById("legend-label").style.display = show ? "" : "none";
+    host.style.display = show ? "" : "none";
+  }
+
   function buildControls() {
     var seg = document.getElementById("view-seg");
     seg.innerHTML = "";
@@ -459,6 +537,8 @@
       row.appendChild(cb); row.appendChild(sw); row.appendChild(label); row.appendChild(count);
       rows.appendChild(row);
     });
+
+    buildLegend();
   }
 
   function renderStats() {

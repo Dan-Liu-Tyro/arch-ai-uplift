@@ -7,10 +7,46 @@
     "cross-domain-orchestrators": "#ff8ad8",
     "_uncategorized": "#8a93ab"
   };
-  var KIND_COLORS = {
-    "domain": "#3fd0ff", "actor": "#ffd479", "external": "#ff7e8f",
-    "artefact": "#b79cff", "principle": "#4dff9e"
+  // ---- Presentation, keyed off the model's strict types -------------------
+  //
+  // The model says what a thing *is* -- `kind`, plus `actor_type` for an
+  // actor (see kg-core/SCHEMA.md). This table is the only place that decides
+  // how it looks, and the split is deliberate: affiliation is deliberately
+  // not stored on an actor, so "internal vs external user" is a grouping
+  // made here, at read time, rather than a fact the graph carries. Adding a
+  // presentation channel (a shape, a border) means extending this table, not
+  // touching kg-content.
+  //
+  // Keys are `kind` or, for actors, `kind:actor_type`. The bare `actor` key
+  // is the fallback for an actor whose role the overlay left unstated, which
+  // the schema permits but the viewer should not render as if it knew.
+  var NODE_PRESENTATION = {
+    "domain":              { color: "#3fd0ff", label: "Domain" },
+    "external":            { color: "#ff7e8f", label: "External system" },
+    "artefact":            { color: "#b79cff", label: "Artefact" },
+    "principle":           { color: "#4dff9e", label: "Principle" },
+    "actor:InternalStaff": { color: "#ffd479", label: "Internal user (Tyro staff)" },
+    "actor:Customer":      { color: "#ff6fae", label: "External user (merchant)" },
+    "actor:Partner":       { color: "#ff6fae", label: "External user (partner)" },
+    "actor:Regulator":     { color: "#9ad0ff", label: "Regulator" },
+    "actor":               { color: "#8a93ab", label: "Actor (role unstated)" }
   };
+
+  // Internal and external users share a colour family on purpose -- the
+  // question the flow view gets asked is "who outside Tyro touches this
+  // step", so merchant and partner read as one class at a glance and staff
+  // reads as another.
+  function presentationKey(node) {
+    var kind = node.kind || node.type || "domain";
+    if (kind !== "actor") return kind;
+    return node.actor_type ? "actor:" + node.actor_type : "actor";
+  }
+
+  function presentationFor(node) {
+    return NODE_PRESENTATION[presentationKey(node)] ||
+      NODE_PRESENTATION[node.kind || node.type] ||
+      { color: "#8a93ab", label: "Unknown" };
+  }
   var STAGE_COLORS = ["#8b7bff", "#3fd0ff", "#4dff9e"];
 
   var COL_SPACING = 230, LANE_HEIGHT = 300, ROW_SPACING = 62;
@@ -22,7 +58,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-24d — edge labels default to along-line";
+  var PAGE_REVISION = "2026-09-24e — colour encodes kind/actor role, with a legend";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
