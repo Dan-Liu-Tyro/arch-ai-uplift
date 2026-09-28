@@ -89,6 +89,14 @@ hasn't been prioritized yet — that is not the same as `[P3]`.
     to-remote-initiative case this idea was raised for, rather than the
     hypothetical it was when parked. Still deferred; the trigger above is
     unchanged.
+  - **Direction reversed, 2026-09-29 (decision 50 in
+    `docs/decision-log.md`).** Jira is the plan of record and read-only for
+    Claude. The user curates it directly; the internal view maps onto
+    existing Jira, never the reverse. The push half of this idea ("any local
+    task *can* be pushed to Jira", "push a local item outward only when
+    asked") is superseded. What survives is the pull/map half: read live
+    Jira state and map local work onto it, flagging unmapped work for the
+    user rather than creating tickets.
 - **Generalize the control layers behind Claude's behaviour beyond this
   project.** Raised 2026-09-14, after the user asked what actually drives
   pushback/answer style in this repo and the answer turned out to span four
