@@ -106,6 +106,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 47 | Slide rendering: self-contained HTML deck from markdown + committed SVGs via stdlib `build_deck.py`; print-to-PDF handover, no PowerPoint | `meta/idea-to-presentation`, `CLAUDE.md` |
 | 48 | `not_authoritative_for` reversed to node-level text only; `kg-viz`'s `domain-authority`/"Ref Domains" view removed entirely | `kg-core/SCHEMA.md`, `kg-core/schemas/domain.schema.json`, `kg-content/entities/domains.json`, `kg-viz` |
 | 49 | `authority.not_authoritative_for` becomes `{content, ref}` objects (optional `unresolved` flag), restoring what is excluded, not just who owns it | `kg-core/schemas/domain.schema.json`, `kg-content/entities/domains.json`, backlog |
+| 50 | Jira is the plan of record and read-only for Claude; the repo maps onto Jira, not the reverse; internal milestones in question | `CLAUDE.md`, program roadmap, Jira, backlog |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2341,6 +2342,34 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       "data change first with document follows cos they need to be
       consistent with each other. Visualizer adaptation can be put in the
       backlog for follow up work." Tracked in `docs/backlog.md`.
+50. **Jira is the plan of record and read-only for Claude; the repo's
+    internal view maps onto Jira, never the reverse.** Stated directly by
+    the user on 2026-09-29, after the rewritten Next steps listed "create the
+    IN-564 build-learn-adjust story" as Claude's action: "Do NOT update JIRA
+    by yourself. I've managed the JIRA at the moment to make sure it aligns
+    with our goal. Our internal view should reflect/update and map our work
+    into existing JIRA, not the other way around. Check with me if anything
+    is uncertain. I don't think the internal milestones still valid."
+    - **What it reverses.** A 2026-09-08 delegation, held only in Claude's
+      local memory and never written into the repo, under which Claude edited
+      IN-562–IN-565 to match slide 26 and treated keeping IN initiatives in
+      sync with the plan as its own job. Decisions 13, 16 and 34 record Jira
+      edits made under it; those stand as history, and nothing further is
+      done that way.
+    - **Direction of truth.** Jira → repo. Where `docs/program-roadmap.md`,
+      the Next steps below, or a `practice/` artefact disagrees with Jira, the
+      repo copy is what's stale. The fix is to re-map the repo, not to propose
+      a Jira change. Reads (JQL, fetching an issue) stay allowed and are how
+      the mapping is done.
+    - **The internal milestones are in question.** The user doubts they are
+      still valid. Which list is meant — `docs/program-roadmap.md`'s
+      1.1–3.3 snapshot, decision 6's local three-step plan, or both — is
+      open and has been asked. Until it's answered, don't cite either one as
+      current status.
+    - **Knock-on.** `docs/backlog.md`'s `jira-management` idea assumed a push
+      direction ("any local task *can* be pushed to Jira"); that part is
+      superseded by this decision, and the pull/map half is what survives.
+      Rule recorded in `CLAUDE.md` working conventions.
 
 ## Constraints identified
 
@@ -2549,7 +2578,17 @@ state. Items are **named, not numbered**; cite them by bold title, because
 the old numbers were cited from other files and had drifted out of order.
 Ordered by priority.
 
-**Now — moves a Phase 1 milestone (FY27 Q2, Dec 2026).**
+**First — re-map onto Jira (decision 50).**
+
+- **Map this repo's work onto the current Jira structure.** Jira is the plan
+  of record; the milestone framing below (and `docs/program-roadmap.md`) is
+  in question. Read the Architecture stream's live IN initiatives and
+  AIDLC epics, map each item in this list to the Jira item it serves, and
+  flag any work with no Jira home — for the user to decide on, not as a
+  ticket to create. Blocked on the user saying which internal milestones
+  are no longer valid (asked 2026-09-29).
+
+**Now — Phase 1 work (milestone framing pending the re-map above).**
 
 - **Run CP1 on the Architecture Capability & Process Map** (decision 28).
   IN-563's critical path; `practice/capability-maturity/validation-plan.md`
@@ -2569,13 +2608,9 @@ Ordered by priority.
   one.
 - **Use Arc Lite for real, on real architecture questions, through
   `ui/server.py`** (decision 17). `components/local-agent/gap-log.md` still
-  has zero rows as of 2026-09-29 — designed, never exercised. This is also
-  the raw material milestone 1.3 (first build-learn-adjust loop) needs, and
-  1.3 is the only Phase 1 milestone still "not started".
-- **Create the IN-564 / AIDLC-117 story for the first build-learn-adjust
-  loop** (decision 13's resolution). Re-checked in Jira 2026-09-29: no such
-  issue exists. Starting content is AIDLC-116's preserved original
-  description (decision 13, "what was traded away").
+  has zero rows as of 2026-09-29 — designed, never exercised. It is also the
+  raw material any build-learn-adjust loop needs, whichever Jira item that
+  loop turns out to map to.
 - **Decide the Arc Lite eval set's scope, then grow it** (toward program
   milestone 2.1's AKB Golden Evaluation Set).
   `components/local-agent/eval-examples.md` holds two candidates. Open
@@ -2594,14 +2629,11 @@ Ordered by priority.
   (scenario W included), so it is not exercising the real object shape from
   `domains.json`. The gap is real and currently *undetected*; tighten
   scenario W against the real shape first, then fix the renderer.
-- **Bring `docs/program-roadmap.md` and "Activity & Evidence Home"
-  (2212429894) in line with decision 34's FY27 re-baseline.** The snapshot
-  still says Apr 2027 / Aug 2027 for Phases 2/3; the approved quarters are
-  FY27 Q3 (~Mar 2027) and Q4 (~Jun 2027), and the two Confluence pages
-  disagree with each other until the second is updated. Deliberately
-  deferred by the user in decision 34, not forgotten. Absorbs the old
-  "re-evaluate against slide 26 once approved" step, which decision 34
-  already carried out for the Programme Stream page.
+- **Refresh or retire `docs/program-roadmap.md`.** Its snapshot (Apr/Aug
+  2027 phases) is stale, and decision 50 puts its milestones in question.
+  Whether to re-snapshot it from Jira, or drop the milestone table, waits
+  on the re-map above. Updating the "Activity & Evidence Home" Confluence
+  page is the user's call, not a Claude action.
 - **Merge `foundation` into `main` via a reviewed PR.** 137 commits ahead as
   of 2026-09-29, none reviewed. PR review is this repo's designated quality
   gate (decision 1), so right now the gate isn't operating.
@@ -2632,6 +2664,9 @@ drop this block at the next rewrite):
 - *Design `idea-to-presentation`'s mechanism* — decided by decisions 46–47
   and built (`build_deck.py`, `verify_deck.py`).
 - *Hand-edit `arc-lite.md`'s file-pointer list* — done 2026-09-08.
+- *Create the IN-564 build-learn-adjust story* — withdrawn by decision 50:
+  Claude doesn't create Jira issues. Whether that work has a Jira home is
+  part of the re-map.
 - *Rename the repo to `arch-ai-uplift`* — done, verified 2026-09-18
   (decision 33). Local residue (the empty old directory and old memory
   directory) is the user's to delete.

@@ -223,6 +223,14 @@ absent.
   changes priorities — but that's a reason to propose a change and ask, never
   to edit the committed phases/milestones unilaterally on the strength of a
   good argument. Flag it, wait for a clear yes, then write it down.
+- **Jira is read-only for Claude; the repo maps onto Jira, never the
+  reverse** (decision 50). The user curates the Architecture stream's Jira
+  directly so that it matches the goal. Never create, edit, transition,
+  comment on, or link a Jira issue on your own initiative, even where a repo
+  document says a ticket should exist or disagrees with Jira. Reading Jira
+  to map the internal view is expected. When the repo and Jira disagree, the
+  repo is stale: update the repo's view to map onto the existing Jira
+  structure. If the mapping is uncertain, ask, with context first.
 - **No personal names in anything committed — use the role.** Refer to
   people by role ("the Head of Architecture", "the initiative's reporter")
   in every tracked file *and in commit messages*, which are equally

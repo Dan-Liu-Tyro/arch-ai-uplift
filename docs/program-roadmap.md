@@ -5,6 +5,12 @@ Confluence is the source of truth for this page's content — re-fetch rather
 than hand-edit if it drifts. Fetched 2026-08-19 from
 [Architecture AI Uplift - Activity & Evidence Home](https://tyropaymentsltd.atlassian.net/wiki/spaces/AE/pages/2212429894/Architecture+AI+Uplift+-+Activity+Evidence+Home).
 
+> **Not current — do not cite as status (2026-09-29).** Jira is the plan of
+> record (decision 50 in `docs/decision-log.md`), and the user doubts these
+> milestones are still valid. This snapshot is also stale against decision
+> 34's FY27 re-baseline. Kept until the Jira re-map decides whether to
+> refresh or retire it.
+
 **Vision:** clarity and coherence at AI speed — trusted guidance at the point
 of decision, reduced design friction, an architectural intelligence layer that
 compounds through real delivery experience.
