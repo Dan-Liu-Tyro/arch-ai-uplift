@@ -2342,6 +2342,18 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       "data change first with document follows cos they need to be
       consistent with each other. Visualizer adaptation can be put in the
       backlog for follow up work." Tracked in `docs/backlog.md`.
+    - **Visualizer follow-up landed 2026-09-29.** The detail panel groups
+      items by `content`, lists owners under each (with a `ref_title` that
+      `generate.py` derives, since most owners are outside the flow view),
+      and draws `unresolved` refs as gap pills. The root cause is worth
+      keeping: `payments.json` was never regenerated after this decision,
+      and scenario W's `html.includes(item)` would have passed on objects
+      anyway, because both sides coerce to `"[object Object]"`. So the
+      verifier was green for two independent reasons, and neither one
+      showed the gap. W now asserts named string fields and the gap
+      styling. A new scenario X fails whenever `payments.json` drifts from
+      `domains.json`. Both were confirmed failing on the old state before
+      the fix.
 50. **Jira is the plan of record and read-only for Claude; the repo's
     internal view maps onto Jira, never the reverse.** Stated directly by
     the user on 2026-09-29, after the rewritten Next steps listed "create the
@@ -2623,12 +2635,6 @@ Ordered by priority.
 
 **Next — correctness debt in what already exists.**
 
-- **Update `kg-viz` for decision 49's `{content, ref}` shape.** Tracked as
-  [P1] in `docs/backlog.md`. Found 2026-09-29: the backlog's claim that
-  `verify.js` fails until this lands is wrong — the verifier passes
-  (scenario W included), so it is not exercising the real object shape from
-  `domains.json`. The gap is real and currently *undetected*; tighten
-  scenario W against the real shape first, then fix the renderer.
 - **Refresh or retire `docs/program-roadmap.md`.** Its snapshot (Apr/Aug
   2027 phases) is stale, and decision 50 puts its milestones in question.
   Whether to re-snapshot it from Jira, or drop the milestone table, waits
@@ -2664,6 +2670,8 @@ drop this block at the next rewrite):
 - *Design `idea-to-presentation`'s mechanism* — decided by decisions 46–47
   and built (`build_deck.py`, `verify_deck.py`).
 - *Hand-edit `arc-lite.md`'s file-pointer list* — done 2026-09-08.
+- *Update `kg-viz` for decision 49's `{content, ref}` shape* — done
+  2026-09-29; see decision 49's closing note.
 - *Create the IN-564 build-learn-adjust story* — withdrawn by decision 50:
   Claude doesn't create Jira issues. Whether that work has a Jira home is
   part of the re-map.

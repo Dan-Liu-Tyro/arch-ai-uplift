@@ -889,23 +889,78 @@ const el = (r, id) => r.els[id] || EMPTY;
   // type and was reversed (kg-core/SCHEMA.md's Open items): the source of
   // truth is domain-level text only now, surfaced in that domain's own
   // detail panel rather than as a graph edge to jump to.
-  const domainNode = r.probe.visible().nodes.find(
+  //
+  // Since decision 49 each item is `{content, ref, unresolved?}`. The old
+  // check here did `html.includes(item)`, which still passed once items were
+  // objects -- both sides coerce to "[object Object]" -- so it could not see
+  // that the renderer was never updated. Every assertion below names a
+  // string field explicitly for that reason.
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const withNaf = r.probe.visible().nodes.filter(
     n => n.kind === 'domain' && n.not_authoritative_for && n.not_authoritative_for.length);
+  const domainNode = withNaf[0];
   if (!domainNode) {
     results.push('W: no domain node in the flow view carries not_authoritative_for text to test against');
   } else {
+    const first = domainNode.not_authoritative_for[0];
+    const isObject = first && typeof first === 'object' && typeof first.content === 'string';
     r.probe.renderDetail(domainNode);
     const html = el(r,'detail-body')._html;
     const hasSection = /Not authoritative for/.test(html);
-    const hasFirstTarget = html.includes(domainNode.not_authoritative_for[0]);
-    console.log('W: detail panel shows a "Not authoritative for" section =', hasSection,
-      '| includes its first target =', hasFirstTarget);
+    const hasContent = isObject && html.includes(esc(first.content));
+    const resolved = domainNode.not_authoritative_for.find(i => i.ref && !i.unresolved);
+    const hasOwner = !!resolved && html.includes(esc(resolved.ref_title || resolved.ref));
+    const noCoercion = !html.includes('[object Object]');
+    console.log('W: object shape =', isObject, '| section =', hasSection,
+      '| shows content =', hasContent, '| shows owner =', hasOwner, '| no [object Object] =', noCoercion);
+    if (!isObject) results.push('W: not_authoritative_for items are not {content, ref} objects -- payments.json predates decision 49, run `python3 generate.py`');
     if (!hasSection) results.push('W: domain detail panel has no "Not authoritative for" section');
-    if (!hasFirstTarget) {
-      results.push('W: "Not authoritative for" section is missing an actual target: ' +
-        domainNode.not_authoritative_for[0]);
+    if (isObject && !hasContent) results.push('W: "Not authoritative for" is missing its excluded content: ' + first.content);
+    if (!hasOwner) results.push('W: "Not authoritative for" does not name a resolved owner domain');
+    if (!noCoercion) results.push('W: detail panel renders "[object Object]" -- an item was stringified, not read');
+
+    // Owner titles resolve at generation time: most owners are outside the
+    // flow view, so a bare id would otherwise be all the panel could show.
+    const titled = resolved && typeof resolved.ref_title === 'string' && resolved.ref_title !== resolved.ref;
+    console.log('W: resolved owner carries a derived ref_title =', !!titled);
+    if (!titled) results.push('W: resolved not_authoritative_for owner has no ref_title from generate.py');
+
+    // An unresolved ref is a gap and must look like one, not like an owner.
+    const gapNode = withNaf.find(n => n.not_authoritative_for.some(i => i.unresolved));
+    if (!gapNode) {
+      results.push('W: no flow-view domain has an unresolved not_authoritative_for ref to test against');
+    } else {
+      r.probe.renderDetail(gapNode);
+      const gapHtml = el(r,'detail-body')._html;
+      const gap = gapNode.not_authoritative_for.find(i => i.unresolved);
+      const flagged = /class="pill gap"/.test(gapHtml) && gapHtml.includes(esc(gap.ref));
+      console.log('W: unresolved ref rendered as a gap pill =', flagged);
+      if (!flagged) results.push('W: unresolved ref "' + gap.ref + '" is not rendered as a gap pill');
     }
   }
+}
+
+// X: payments.json's not_authoritative_for matches kg-content's domains.json.
+// L and K catch a stale page against payments.json and src/; nothing caught
+// payments.json itself going stale against kg-content -- which is exactly
+// how decision 49's data change went unrendered: the renderer check passed
+// against a payments.json generated before it. ref_title is derived by
+// generate.py, so it is stripped before comparing.
+{
+  const domains = JSON.parse(fs.readFileSync('../kg-content/entities/domains.json', 'utf8')).domains;
+  const byId = Object.fromEntries(domains.map(d => [d.id, d]));
+  const stale = data.views.flatMap(v => v.nodes).filter(n => n.domain_ref && byId[n.domain_ref]).filter(n => {
+    const got = (n.not_authoritative_for || []).map(i => {
+      if (typeof i !== 'object') return i;
+      const { ref_title, ...rest } = i; return rest;
+    });
+    return JSON.stringify(got) !== JSON.stringify(byId[n.domain_ref].authority.not_authoritative_for);
+  });
+  console.log('X: payments.json not_authoritative_for matches domains.json =', stale.length === 0,
+    '(' + stale.length + ' stale domain nodes)');
+  if (stale.length) results.push('X: payments.json is stale against domains.json for ' + stale.length +
+    ' domain node(s), e.g. ' + stale[0].id + ' -- run `python3 generate.py` then `python3 build.py`');
 }
 
 console.log(results.length ? '\nFAILURES:\n' + results.join('\n') : '\nALL SCENARIOS PASSED');

@@ -155,11 +155,31 @@
     // relationship type and was reversed (kg-core/SCHEMA.md's Open items):
     // it never had a consumer beyond its own visualization, and the source
     // domain model is itself the citation, not another node to jump to.
+    // Each item is `{content, ref, unresolved?}` (decision 49): *what* is
+    // excluded, and *who* owns it instead. Grouped by content, because the
+    // source routinely splits one exclusion across several owners, and a
+    // flat pill per item repeated the same text once per owner. An
+    // `unresolved` ref is prose that matched no modelled domain -- shown as
+    // a gap, not dressed up as a resolved owner.
     if (node.not_authoritative_for && node.not_authoritative_for.length) {
-      html += '<div class="section-label">Not authoritative for</div><div>' +
-        node.not_authoritative_for.map(function (t) {
-          return '<span class="pill">' + escapeHtml(t) + "</span>";
-        }).join("") + "</div>";
+      var groups = [], byContent = {};
+      node.not_authoritative_for.forEach(function (item) {
+        // A graph file generated before decision 49 carries plain strings.
+        if (typeof item === "string") item = { content: item };
+        var g = byContent[item.content];
+        if (!g) { g = byContent[item.content] = { content: item.content, refs: [] }; groups.push(g); }
+        if (item.ref) g.refs.push(item);
+      });
+      html += '<div class="section-label">Not authoritative for</div>' +
+        groups.map(function (g) {
+          return '<div class="rel"><div class="who">' + escapeHtml(g.content) + "</div>" +
+            (g.refs.length ? '<div class="payload">owned by ' + g.refs.map(function (r) {
+              return r.unresolved
+                ? '<span class="pill gap" title="No modelled domain matches this reference">' +
+                  "unresolved: " + escapeHtml(r.ref) + "</span>"
+                : '<span class="pill">' + escapeHtml(r.ref_title || titleOf(r.ref)) + "</span>";
+            }).join("") + "</div>" : "") + "</div>";
+        }).join("");
     }
     document.getElementById("detail-body").innerHTML = html;
     document.getElementById("detail").classList.add("open");

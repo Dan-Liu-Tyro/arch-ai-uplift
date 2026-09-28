@@ -222,7 +222,15 @@ def _payments_target_state_view(domains_data: dict) -> dict | None:
                 "responsibility": n.get("responsibility", ""),
                 # Explicit non-authority, node-level text only -- see the
                 # module docstring for why this is no longer a graph edge.
-                "not_authoritative_for": domain["authority"]["not_authoritative_for"] if domain else [],
+                # Each `{content, ref, unresolved?}` item (decision 49) gains
+                # a derived `ref_title`, resolved here like every other
+                # domain fact: most owners are domains outside this flow, so
+                # the viewer has no node to read a title from.
+                "not_authoritative_for": [
+                    {**item, "ref_title": by_id[item["ref"]]["title"]}
+                    if item.get("ref") in by_id else dict(item)
+                    for item in domain["authority"]["not_authoritative_for"]
+                ] if domain else [],
                 "touchpoints": n.get("touchpoints", []),
                 "stage": n["stage"],
                 "stage_ordinal": stage_ordinal[n["stage"]],
