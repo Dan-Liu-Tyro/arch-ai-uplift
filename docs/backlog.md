@@ -228,6 +228,17 @@ hasn't been prioritized yet — that is not the same as `[P3]`.
 
   **Re-prioritized to P1 on 2026-09-28** — the user raised this item's
   priority. The underlying data is already correct and useful without this
-  landing — `kg-viz` simply won't render the extra detail yet — but
-  `verify.js`'s own checks against this field will fail against the new
-  shape until this is picked up.
+  landing — `kg-viz` simply won't render the extra detail yet.
+
+  **Correction, 2026-09-29** — this entry previously said `verify.js`'s own
+  checks against this field would fail against the new shape until this was
+  picked up. That was wrong: `node verify.js`, run from `components/kg-viz/`
+  on 2026-09-29, printed "ALL SCENARIOS PASSED", scenario W included
+  ("detail panel shows a 'Not authoritative for' section = true | includes
+  its first target = true"). So the verifier is not exercising the real
+  `{content, ref}` object shape from
+  `components/kg-content/entities/domains.json` — the rendering gap is real,
+  but the check cannot see it. The first step of this work is therefore to
+  tighten scenario W against the real object shape so that it fails, and
+  only then fix `controls-panel.js`. `docs/decision-log.md`'s "## Next
+  steps" section now points at this entry.
