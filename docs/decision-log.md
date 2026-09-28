@@ -2409,6 +2409,15 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       scenario Y drives the clicks through the pane's delegated handler.
       Scenario X now also fails if `domain_index` drifts from
       `domains.json`.
+    - **Back button, added the same day at the user's request.** A ← in the
+      pane retraces the owner links followed, across on-graph nodes and
+      off-graph domains alike. It is hidden when there is nothing to go
+      back to. A trail resets when a node is picked on the graph or the
+      pane is closed, so "back" means back along links, not through every
+      click. This mirrors browser history without adding forward, which
+      nobody asked for. Scenario Z covers it. The canvas click path
+      (`onNodeClick` → `openFromGraph`) is the one step the stubbed DOM
+      cannot drive.
 
 ## Constraints identified
 

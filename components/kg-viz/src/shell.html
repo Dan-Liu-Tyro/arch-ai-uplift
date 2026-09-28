@@ -112,6 +112,9 @@
   .rel .backedge { color: #ff7e8f; font-size: 10.5px; }
   .close { float: right; cursor: pointer; color: #8d97ad; font-size: 15px; line-height: 1; }
   .close:hover { color: #fff; }
+  .back { float: left; cursor: pointer; color: #8d97ad; font-size: 15px; line-height: 1.2;
+    margin-right: 8px; }
+  .back:hover { color: #fff; }
   .pill { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 99px;
     border: 1px solid rgba(120,140,180,0.4); color: #c6cde0; margin: 0 4px 4px 0; }
   .pill.acq { border-color: #ffb454; color: #ffb454; }
@@ -277,6 +280,7 @@
 
   <div id="detail" class="panel-base">
     <span class="close" onclick="closeDetail()">&#10005;</span>
+    <span class="back" id="detail-back" onclick="goBack()" title="Back to the previous domain" style="display:none">&#8592;</span>
     <div id="detail-body"></div>
   </div>
 

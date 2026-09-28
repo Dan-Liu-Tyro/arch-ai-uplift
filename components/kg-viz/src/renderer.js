@@ -59,8 +59,8 @@
       })
       .onNodeClick(function (n) {
         selected = (selected && selected.id === n.id) ? null : n;
-        if (selected) renderDetail(selected);
-        else document.getElementById("detail").classList.remove("open");
+        if (selected) openFromGraph(selected);
+        else closeDetail();
         repaint();
       })
       .onBackgroundClick(closeDetail);

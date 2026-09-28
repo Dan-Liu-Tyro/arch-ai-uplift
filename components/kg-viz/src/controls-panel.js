@@ -159,9 +159,17 @@
       }).join("");
   }
 
+  // Owner-link navigation history for the pane's back (←) button. Each
+  // entry is what the pane showed before a link was followed: `{id}` for a
+  // graph node, `{ref}` for an off-graph domain. A trail starts fresh
+  // whenever the user picks a node on the graph or closes the pane --
+  // "back" means back along the links followed, not through every click.
+  var paneHistory = [], paneCurrent = null;
+
   function showDetail(html) {
     var body = document.getElementById("detail-body");
     body.innerHTML = html;
+    document.getElementById("detail-back").style.display = paneHistory.length ? "" : "none";
     // One delegated handler rather than one per pill: the pane's HTML is
     // replaced wholesale on every render.
     body.onclick = function (e) {
@@ -181,17 +189,35 @@
   // the graph is that domain.
   function openDomainRef(ref) {
     var n = view.nodes.find(function (x) { return x.domain_ref === ref; });
-    if (n) {
-      selected = n;
-      if (isHidden(n)) { delete hiddenSet()[groupKeyOf(n)]; refresh(); }
-      else repaint();
-      renderDetail(n);
-      return;
-    }
     var d = view.domain_index && view.domain_index[ref];
-    if (!d) return;
+    if (!n && !d) return;
+    if (paneCurrent) paneHistory.push(paneCurrent);
+    if (n) selectNode(n);
+    else showOffGraphDomain(ref);
+  }
+  window.openDomainRef = openDomainRef;
+
+  function goBack() {
+    var entry = paneHistory.pop();
+    if (!entry) return;
+    var n = entry.id && view.nodes.find(function (x) { return x.id === entry.id; });
+    if (n) selectNode(n);
+    else if (entry.ref) showOffGraphDomain(entry.ref);
+  }
+  window.goBack = goBack;
+
+  function selectNode(n) {
+    selected = n;
+    if (isHidden(n)) { delete hiddenSet()[groupKeyOf(n)]; refresh(); }
+    else repaint();
+    renderDetail(n);
+  }
+
+  function showOffGraphDomain(ref) {
+    var d = view.domain_index[ref];
     selected = null;
     repaint();
+    paneCurrent = { ref: ref };
     showDetail(
       "<h2>" + escapeHtml(d.title) + "</h2>" +
       '<div class="meta">domain &middot; not in this flow' +
@@ -200,10 +226,16 @@
       (d.purpose ? '<div class="section-label">Purpose</div><div>' + escapeHtml(d.purpose) + "</div>" : "") +
       nafHtml(d.not_authoritative_for));
   }
-  window.openDomainRef = openDomainRef;
+
+  // A node picked on the graph itself starts a new trail.
+  function openFromGraph(node) {
+    paneHistory = [];
+    renderDetail(node);
+  }
 
   function renderDetail(node) {
     var adj = adjacency[node.id] || { out: [], in: [] };
+    paneCurrent = { id: node.id };
     var html =
       "<h2>" + escapeHtml(node.title) + "</h2>" +
       '<div class="meta">' + escapeHtml(node.kind || node.type) +
@@ -235,6 +267,8 @@
 
   function closeDetail() {
     selected = null;
+    paneHistory = [];
+    paneCurrent = null;
     document.getElementById("detail").classList.remove("open");
     repaint();
   }

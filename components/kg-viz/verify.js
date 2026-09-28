@@ -112,7 +112,7 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), select: n => { selected = n; positionIcons(); }, renderDetail: n => renderDetail(n), openDomainRef: ref => openDomainRef(ref), selectedNode: () => selected, };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), select: n => { selected = n; positionIcons(); }, renderDetail: n => renderDetail(n), openDomainRef: ref => openDomainRef(ref), selectedNode: () => selected, openFromGraph: n => openFromGraph(n), goBack: () => goBack(), closeDetail: () => closeDetail(), };', ctx);
 
   return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam, controls: () => fakeControls, camera: () => fakeCamera };
 }
@@ -1015,6 +1015,46 @@ const el = (r, id) => r.els[id] || EMPTY;
     const gapLinked = el(r,'detail-body')._html.includes('data-ref="' + gap.ref.replace(/&/g, '&amp;') + '"');
     console.log('Y: unresolved ref rendered as a link =', gapLinked);
     if (gapLinked) results.push('Y: unresolved ref "' + gap.ref + '" is rendered as a clickable link');
+  }
+}
+
+// Z: the pane's back (←) button retraces followed owner links, across both
+// on-graph nodes and off-graph domains, and a graph pick or close starts a
+// fresh trail. Hidden whenever there is nothing to go back to.
+{
+  const r = run('Z', { cdnBlocked: false }); await tick();
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+
+  const v = r.probe.view();
+  const onGraph = new Set(v.nodes.map(n => n.domain_ref).filter(Boolean));
+  const A = v.nodes.find(n => (n.not_authoritative_for || []).some(i => onGraph.has(i.ref)) &&
+    (n.not_authoritative_for || []).some(i => i.ref && !i.unresolved && !onGraph.has(i.ref)));
+  if (!A) {
+    results.push('Z: no flow domain has both an on-graph and an off-graph owner to test against');
+  } else {
+    const bRef = A.not_authoritative_for.find(i => onGraph.has(i.ref)).ref;
+    const cRef = A.not_authoritative_for.find(i => i.ref && !i.unresolved && !onGraph.has(i.ref)).ref;
+    const B = v.nodes.find(n => n.domain_ref === bRef);
+    const backShown = () => el(r,'detail-back').style.display !== 'none';
+    const sel = () => r.probe.selectedNode();
+    const steps = [];
+
+    r.probe.openFromGraph(A);           steps.push(['start hidden', !backShown()]);
+    r.probe.openDomainRef(bRef);        steps.push(['after link, shown', backShown() && sel() && sel().id === B.id]);
+    r.probe.openDomainRef(cRef);        steps.push(['off-graph, nothing selected', backShown() && sel() === null]);
+    r.probe.goBack();                   steps.push(['back to B', !!sel() && sel().id === B.id && backShown()]);
+    r.probe.goBack();                   steps.push(['back to A, hidden again', !!sel() && sel().id === A.id && !backShown()]);
+    r.probe.goBack();                   steps.push(['back at trail start is a no-op', !!sel() && sel().id === A.id]);
+    r.probe.openDomainRef(bRef);
+    r.probe.openFromGraph(A);           steps.push(['graph pick resets trail', !backShown()]);
+    r.probe.openDomainRef(bRef);
+    r.probe.closeDetail();
+    r.probe.openFromGraph(B);           steps.push(['close resets trail', !backShown()]);
+
+    console.log('Z: ' + steps.map(([k, ok]) => k + ' = ' + !!ok).join(' | '));
+    steps.filter(([, ok]) => !ok).forEach(([k]) => results.push('Z: back navigation failed at "' + k + '"'));
   }
 }
 
