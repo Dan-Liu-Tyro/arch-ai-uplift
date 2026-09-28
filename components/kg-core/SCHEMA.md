@@ -84,9 +84,14 @@ string can't serve.
 
 `domain` has no relationship type. It briefly had one, `not_authoritative_for`
 (domain → domain) — see the Open items entry below for why it was reversed.
-Non-authority is captured only as `authority.not_authoritative_for`, a plain
-string list on the node itself, with no expectation it resolves to other
-domains' ids.
+Non-authority is captured only as `authority.not_authoritative_for`, a list on
+the node itself of `{content, ref}` objects (plus an `unresolved` flag on the
+minority `ref` can't resolve to a real id — see the item description in
+`domain.schema.json`), with no expectation `ref` resolves back the other way.
+`content` exists because the plain-string version (and the graph-edge version
+before it) both kept only `ref`, discarding exactly the text a solution-phase
+reader needs to know *what* is excluded, not just *who* owns it instead — see
+the Open items entry below for how that gap was found and closed.
 
 The `principle` / `guardrail` distinction is the load-bearing one. A principle
 explains *why* and cannot be violated in a checkable sense; a guardrail can be

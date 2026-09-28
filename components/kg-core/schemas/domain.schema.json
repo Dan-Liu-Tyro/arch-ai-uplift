@@ -129,9 +129,30 @@
             "not_authoritative_for": {
               "type": "array",
               "items": {
-                "type": "string"
+                "type": "object",
+                "required": [
+                  "content",
+                  "ref"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "content": {
+                    "type": "string",
+                    "description": "What is specifically excluded -- the thing a solution-phase reader might otherwise assume this domain covers. Free text, sourced from the same Confluence page's own per-domain 'Explicit non-authority' bullets, not invented here."
+                  },
+                  "ref": {
+                    "type": "string",
+                    "description": "The domain that owns `content` instead. Must be another domain's `id` unless `unresolved` is set -- see that property."
+                  },
+                  "unresolved": {
+                    "type": "boolean",
+                    "const": true,
+                    "description": "Present (and always true) only when `ref` could not be resolved to a real domain id -- e.g. a collective phrase like 'Relevant product domains' or 'All authoritative domains' that names no single domain, or a legacy source term this ingestion never split cleanly. Absence means `ref` is a real id; do not add this to soften an unresolved case into a resolved-looking one, and do not resolve a collective phrase to one id just to avoid setting it."
+                  }
+                },
+                "description": "One explicit non-authority claim, pairing what is excluded with who owns it instead. Was a plain string, and briefly a structured `relationships[]` edge type before that (both removed -- see SCHEMA.md's Open items): this shape restores the content half that both versions dropped, without reintroducing a graph edge -- `ref` is not required to resolve to an id that itself points back, and nothing renders this as a graph."
               },
-              "description": "Free-text phrases naming what this domain explicitly disclaims authority over -- the source of truth (not a mirror of anything else). Deliberately not required to resolve to another domain's id: a structured `relationships[]` edge type existed briefly and was removed (see SCHEMA.md's Open items) because it never earned a consumer beyond its own visualization, which then struggled to render a single-predicate, largely-non-mutual graph honestly."
+              "description": "Every non-authority claim this domain's source page makes, each paired with the specific content excluded -- see the item schema."
             }
           }
         }

@@ -2286,6 +2286,58 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       reachable, just as text on the node rather than a jump to another
       node.
 
+49. **`authority.not_authoritative_for` becomes `{content, ref}` objects
+    (plus an optional `unresolved` flag), restoring the content half of the
+    claim that both the plain-string version and the earlier
+    `not_authoritative_for` relationship type (decision 48) had dropped.**
+    Raised by the user: a bare target reference ("this domain is not
+    authoritative for `settlement-and-reconciliation`") names *who* owns the
+    boundary but not *what* is being excluded, so a solution-phase reasoning
+    pass has nothing to check a proposed design against and can't catch a
+    misplaced concept. The gap was real but not new — it traces back to the
+    very first extraction (`bcedb31`), not to decision 48's reversal, which
+    only ever changed the target's shape, never restored the content.
+    - **Recovered, not authored.** `components/confluence-ingest/sources/reference-domain-model-domain-definitions.md`
+      states every one of these claims as `**<content>** → <target>` under
+      each domain's own "Explicit non-authority" heading — the content half
+      was simply never carried into `domains.json`. All 338 `content` values
+      were parsed back out of that cache; none were invented. Verified by
+      construction: the parse preserved every existing `ref` value in its
+      original order for all 39 domains, so this is additive to the
+      currently-curated targets, not a re-derivation that could have
+      silently changed one.
+    - **`ref` now resolves to a real domain id wherever the content makes
+      that possible, closing part of the gap decision 48 named and declined
+      to chase ("42 of 338 references never did, and now never will").**
+      Content gave enough context to resolve 32 of those 42 with confidence
+      — mostly legacy bucket names the source still uses (`"Banking"` /
+      `"Banking Domain"` → `deposits-product`, `"Settlement"` →
+      `settlement-and-reconciliation`, `"Lending"` → `lending-product`,
+      `"Credit"` → `credit-and-underwriting`, `"Operational Investigations &
+      Exceptions"` [/ `Domain`] → `operational-case-management`, `"Revenue"`
+      → `product-quoting-and-pricing`) rather than genuine ambiguity.
+    - **The remaining 10 are a real, named gap, not a silently-dropped
+      one.** `"Relevant product domains"`, `"origination"`, `"servicing
+      domains"`, `"Operational Domains"` / `"Operational domains"`,
+      `"Relevant business domains"`, and `"All authoritative domains"` are
+      collective phrases in the source itself — they don't name one domain,
+      so resolving them to a single id would be a fabrication, not a
+      recovery. Each of these ten now carries `"unresolved": true` alongside
+      its (unchanged, literal) `ref` text, so the gap is machine-checkable
+      instead of indistinguishable from a resolved reference — directly the
+      user's ask: "ref should reference the real domain id, and identify the
+      gap if there is missing reference."
+    - **Deliberately not bundled into this decision: updating `kg-viz` to
+      render the new shape.** `controls-panel.js`, `generate.py`, and
+      `verify.js` all still expect `not_authoritative_for` as a plain string
+      list (per decision 48's "what replaced the edge" above) and will need
+      updating to read `{content, ref, unresolved?}` objects instead. Landing
+      the data and its schema/decision-log/README together, and the
+      visualizer's consumer-side update separately, is the user's own call:
+      "data change first with document follows cos they need to be
+      consistent with each other. Visualizer adaptation can be put in the
+      backlog for follow up work." Tracked in `docs/backlog.md`.
+
 ## Constraints identified
 
 - **Nothing browser-facing can be verified from inside this session, and the

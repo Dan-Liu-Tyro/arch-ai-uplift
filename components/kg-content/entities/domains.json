@@ -50,15 +50,42 @@
           "Resolution notes and references to authoritative actions taken"
         ],
         "not_authoritative_for": [
-          "customer",
-          "user-and-identity",
-          "payments-customer-configuration",
-          "payments-processing",
-          "settlement-and-reconciliation",
-          "Banking Domain",
-          "fraud-and-risk-decisioning",
-          "risk-compliance-and-regulatory",
-          "Operational Investigations & Exceptions"
+          {
+            "content": "Customer master, user identity, group hierarchy",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer master, user identity, group hierarchy",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Merchant configuration (locations, enablement, terminal sharing groups)",
+            "ref": "payments-customer-configuration"
+          },
+          {
+            "content": "Transaction truth, clearing, chargebacks lifecycle",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Settlement batches and payout calculation",
+            "ref": "settlement-and-reconciliation"
+          },
+          {
+            "content": "Bank ledger entries and balances",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Fraud decisions and compliance outcomes",
+            "ref": "fraud-and-risk-decisioning"
+          },
+          {
+            "content": "Fraud decisions and compliance outcomes",
+            "ref": "risk-compliance-and-regulatory"
+          },
+          {
+            "content": "Cross-domain workflow engines (investigations, broader exceptions) (if kept separate)",
+            "ref": "operational-case-management"
+          }
         ]
       }
     },
@@ -82,18 +109,54 @@
           "Non-authoritative caches/read models for performance"
         ],
         "not_authoritative_for": [
-          "customer",
-          "user-and-identity",
-          "payments-customer-configuration",
-          "payments-channels",
-          "payments-processing",
-          "Settlement",
-          "Banking",
-          "product-quoting-and-pricing",
-          "partnerships",
-          "fraud-and-risk-decisioning",
-          "risk-compliance-and-regulatory",
-          "customer-notifications-and-communications"
+          {
+            "content": "Authentication/identity master and RBAC truth (experience consumes)",
+            "ref": "customer"
+          },
+          {
+            "content": "Authentication/identity master and RBAC truth (experience consumes)",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Merchant configuration truth",
+            "ref": "payments-customer-configuration"
+          },
+          {
+            "content": "Payments runtime execution",
+            "ref": "payments-channels"
+          },
+          {
+            "content": "Transaction truth & reporting truth",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Transaction truth & reporting truth",
+            "ref": "settlement-and-reconciliation"
+          },
+          {
+            "content": "Transaction truth & reporting truth",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Pricing and revenue policy",
+            "ref": "product-quoting-and-pricing"
+          },
+          {
+            "content": "Partner lifecycle",
+            "ref": "partnerships"
+          },
+          {
+            "content": "Risk/compliance decisions",
+            "ref": "fraud-and-risk-decisioning"
+          },
+          {
+            "content": "Risk/compliance decisions",
+            "ref": "risk-compliance-and-regulatory"
+          },
+          {
+            "content": "Notifications orchestration (if separated)",
+            "ref": "customer-notifications-and-communications"
+          }
         ]
       }
     },
@@ -119,18 +182,54 @@
           "Channel operational telemetry"
         ],
         "not_authoritative_for": [
-          "payments-customer-configuration",
-          "payments-processing",
-          "fraud-and-risk-decisioning",
-          "product-quoting-and-pricing",
-          "settlement-and-reconciliation",
-          "funds-movement",
-          "deposits-product",
-          "partnerships",
-          "integration-enablement-and-certification",
-          "customer",
-          "user-and-identity",
-          "digital-channels-and-experience"
+          {
+            "content": "Merchant configuration truth (locations, enablement, terminal sharing groups, MIDs)",
+            "ref": "payments-customer-configuration"
+          },
+          {
+            "content": "Transaction truth (authorisation, clearing, disputes)",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Fraud scoring and allow/deny policy (channels may invoke, not own)",
+            "ref": "fraud-and-risk-decisioning"
+          },
+          {
+            "content": "Scheme fee records and commercial pricing policy",
+            "ref": "product-quoting-and-pricing"
+          },
+          {
+            "content": "Settlement batches and payout calculation",
+            "ref": "settlement-and-reconciliation"
+          },
+          {
+            "content": "Funds transfer execution (BECS/NPP/internal)",
+            "ref": "funds-movement"
+          },
+          {
+            "content": "Banking ledger balances/postings",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Partner lifecycle/commercial agreements",
+            "ref": "partnerships"
+          },
+          {
+            "content": "Integration certification lifecycle",
+            "ref": "integration-enablement-and-certification"
+          },
+          {
+            "content": "Customer identity master and access relationships",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer identity master and access relationships",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Customer-facing “portal” experience composition (if kept separate; payments channels are acceptance surfaces)",
+            "ref": "digital-channels-and-experience"
+          }
         ]
       }
     },
@@ -157,14 +256,39 @@
           "Business access grant intent records and audit metadata"
         ],
         "not_authoritative_for": [
-          "user-and-identity",
-          "partnerships",
-          "customer-and-product-onboarding",
-          "Relevant product domains",
-          "risk-compliance-and-regulatory",
-          "Operational Investigations & Exceptions",
-          "customer-service-and-support",
-          "corporate-finance"
+          {
+            "content": "Authentication, credentials, MFA, identity provider linkage; Authorisation policy evaluation, token/session lifecycle, API keys/service principals",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Commercial agreements, partner contracts, referral program lifecycle",
+            "ref": "partnerships"
+          },
+          {
+            "content": "Product onboarding/origination workflow state",
+            "ref": "customer-and-product-onboarding"
+          },
+          {
+            "content": "Product-specific lifecycle status (merchant acquiring, accounts, loans, subscriptions)",
+            "ref": "Relevant product domains",
+            "unresolved": true
+          },
+          {
+            "content": "AML/KYC/CDD decision outcomes, customer risk ratings, monitoring alerts",
+            "ref": "risk-compliance-and-regulatory"
+          },
+          {
+            "content": "Case workflow for investigations/support",
+            "ref": "operational-case-management"
+          },
+          {
+            "content": "Case workflow for investigations/support",
+            "ref": "customer-service-and-support"
+          },
+          {
+            "content": "Statutory corporate GL",
+            "ref": "corporate-finance"
+          }
         ]
       }
     },
@@ -189,15 +313,45 @@
           "Access governance audit logs and security telemetry"
         ],
         "not_authoritative_for": [
-          "customer",
-          "partnerships",
-          "Relevant product domains",
-          "origination",
-          "servicing domains",
-          "risk-compliance-and-regulatory",
-          "Operational Investigations & Exceptions",
-          "customer-service-and-support",
-          "data-analytics-and-intelligence"
+          {
+            "content": "Customer, person, group, partner party master data and relationships; Business meaning of roles (director, beneficial owner, authorised representative)",
+            "ref": "customer"
+          },
+          {
+            "content": "Commercial partner agreements and program lifecycle",
+            "ref": "partnerships"
+          },
+          {
+            "content": "Product configuration and lifecycle state",
+            "ref": "Relevant product domains",
+            "unresolved": true
+          },
+          {
+            "content": "Product configuration and lifecycle state",
+            "ref": "origination",
+            "unresolved": true
+          },
+          {
+            "content": "Product configuration and lifecycle state",
+            "ref": "servicing domains",
+            "unresolved": true
+          },
+          {
+            "content": "AML/KYC/CDD decisions and monitoring alerts",
+            "ref": "risk-compliance-and-regulatory"
+          },
+          {
+            "content": "Case workflow lifecycle",
+            "ref": "operational-case-management"
+          },
+          {
+            "content": "Case workflow lifecycle",
+            "ref": "customer-service-and-support"
+          },
+          {
+            "content": "Data products, analytics semantics, dashboards",
+            "ref": "data-analytics-and-intelligence"
+          }
         ]
       }
     },
@@ -222,20 +376,62 @@
           "References to pricing plan IDs / offer constructs"
         ],
         "not_authoritative_for": [
-          "payments-customer-configuration",
-          "payments-channels",
-          "payments-processing",
-          "settlement-and-reconciliation",
-          "product-quoting-and-pricing",
-          "pos-integration",
-          "payments-vas-integrations",
-          "integration-enablement-and-certification",
-          "customer",
-          "user-and-identity",
-          "customer-service-and-support",
-          "enterprise-data-governance",
-          "data-analytics-and-intelligence",
-          "ai-and-ml"
+          {
+            "content": "Merchant-specific configuration (MerchantID, locations, terminal sharing groups, enablement flags)",
+            "ref": "payments-customer-configuration"
+          },
+          {
+            "content": "Checkout/session runtime and channel UX",
+            "ref": "payments-channels"
+          },
+          {
+            "content": "Transaction truth (authorisation, clearing, chargebacks); Scheme/network fee calculation",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Merchant payout calculation and settlement batches",
+            "ref": "settlement-and-reconciliation"
+          },
+          {
+            "content": "Commercial fee rules and pricing calculations",
+            "ref": "product-quoting-and-pricing"
+          },
+          {
+            "content": "Partner technical integration specs",
+            "ref": "pos-integration"
+          },
+          {
+            "content": "Partner technical integration specs",
+            "ref": "payments-vas-integrations"
+          },
+          {
+            "content": "Integration certification status",
+            "ref": "integration-enablement-and-certification"
+          },
+          {
+            "content": "Customer master identity and access model",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer master identity and access model",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Support case lifecycle",
+            "ref": "customer-service-and-support"
+          },
+          {
+            "content": "Analytics datasets and model outputs",
+            "ref": "enterprise-data-governance"
+          },
+          {
+            "content": "Analytics datasets and model outputs",
+            "ref": "data-analytics-and-intelligence"
+          },
+          {
+            "content": "Analytics datasets and model outputs",
+            "ref": "ai-and-ml"
+          }
         ]
       }
     },
@@ -262,18 +458,54 @@
           "Configuration versions and audit trail"
         ],
         "not_authoritative_for": [
-          "customer",
-          "user-and-identity",
-          "payments-channels",
-          "payments-processing",
-          "product-quoting-and-pricing",
-          "settlement-and-reconciliation",
-          "funds-movement",
-          "deposits-product",
-          "hardware-and-asset-management",
-          "terminal-fleet-and-device-management",
-          "integration-enablement-and-certification",
-          "pos-integration"
+          {
+            "content": "Customer legal entity master, users, groups/franchises",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer legal entity master, users, groups/franchises",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Checkout/session runtime and channel UX",
+            "ref": "payments-channels"
+          },
+          {
+            "content": "Transaction truth (authorisation, clearing, disputes); Scheme/network fee records",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Commercial pricing rules/fee calculation (Tyro fees, discounts, commissions)",
+            "ref": "product-quoting-and-pricing"
+          },
+          {
+            "content": "Settlement batch formation and net payout calculation",
+            "ref": "settlement-and-reconciliation"
+          },
+          {
+            "content": "Transfer execution (BECS/NPP/internal)",
+            "ref": "funds-movement"
+          },
+          {
+            "content": "Banking ledger balances/postings",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Physical asset lifecycle (warehouse/shipping/ownership)",
+            "ref": "hardware-and-asset-management"
+          },
+          {
+            "content": "Firmware/OTA/device runtime control",
+            "ref": "terminal-fleet-and-device-management"
+          },
+          {
+            "content": "Partner technical certification and conformance state",
+            "ref": "integration-enablement-and-certification"
+          },
+          {
+            "content": "POS protocol/spec authority",
+            "ref": "pos-integration"
+          }
         ]
       }
     },
@@ -299,20 +531,62 @@
           "Processing lifecycle audit trail and correlation metadata"
         ],
         "not_authoritative_for": [
-          "payments-customer-configuration",
-          "payments-channels",
-          "fraud-and-risk-decisioning",
-          "risk-compliance-and-regulatory",
-          "product-quoting-and-pricing",
-          "disputes-and-recovery",
-          "settlement-and-reconciliation",
-          "payments-accounting",
-          "funds-movement",
-          "deposits-product",
-          "customer-service-and-support",
-          "enterprise-data-governance",
-          "data-analytics-and-intelligence",
-          "ai-and-ml"
+          {
+            "content": "Merchant configuration, enablement, terminal sharing groups",
+            "ref": "payments-customer-configuration"
+          },
+          {
+            "content": "Checkout session UX and terminal/app runtime orchestration",
+            "ref": "payments-channels"
+          },
+          {
+            "content": "Fraud scoring / allow-deny-step-up decisions",
+            "ref": "fraud-and-risk-decisioning"
+          },
+          {
+            "content": "AML/CTF monitoring, sanctions screening, regulatory reporting",
+            "ref": "risk-compliance-and-regulatory"
+          },
+          {
+            "content": "Commercial pricing and fee rules (Tyro fees/discounts/commissions)",
+            "ref": "product-quoting-and-pricing"
+          },
+          {
+            "content": "Dispute/chargeback case lifecycle (stages, deadlines, representment, outcomes)",
+            "ref": "disputes-and-recovery"
+          },
+          {
+            "content": "Merchant payout calculation and settlement batches",
+            "ref": "settlement-and-reconciliation"
+          },
+          {
+            "content": "Payments sub-ledger journals, control accounts, accounting balances",
+            "ref": "payments-accounting"
+          },
+          {
+            "content": "Transfer execution (BECS/NPP/internal)",
+            "ref": "funds-movement"
+          },
+          {
+            "content": "Regulated deposit ledger balances/postings",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Customer support case workflow",
+            "ref": "customer-service-and-support"
+          },
+          {
+            "content": "Analytics/feature store/model outputs",
+            "ref": "enterprise-data-governance"
+          },
+          {
+            "content": "Analytics/feature store/model outputs",
+            "ref": "data-analytics-and-intelligence"
+          },
+          {
+            "content": "Analytics/feature store/model outputs",
+            "ref": "ai-and-ml"
+          }
         ]
       }
     },
@@ -338,19 +612,58 @@
           "Links between settlement outcomes and transfer execution references"
         ],
         "not_authoritative_for": [
-          "payments-processing",
-          "disputes-and-recovery",
-          "payments-channels",
-          "product-quoting-and-pricing",
-          "payments-accounting",
-          "funds-movement",
-          "deposits-product",
-          "customer",
-          "user-and-identity",
-          "payments-customer-configuration",
-          "risk-compliance-and-regulatory",
-          "Operational Investigations & Exceptions Domain",
-          "corporate-finance"
+          {
+            "content": "Transaction truth and clearing state",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Dispute/chargeback case lifecycle and outcomes",
+            "ref": "disputes-and-recovery"
+          },
+          {
+            "content": "Runtime checkout and payment initiation",
+            "ref": "payments-channels"
+          },
+          {
+            "content": "Commercial pricing policy and fee rule definitions (Settlement consumes pricing outputs/fees; it does not define the rules.)",
+            "ref": "product-quoting-and-pricing"
+          },
+          {
+            "content": "Payments sub-ledger journals, control accounts, accounting balances",
+            "ref": "payments-accounting"
+          },
+          {
+            "content": "Transfer execution on rails (BECS/NPP/internal)",
+            "ref": "funds-movement"
+          },
+          {
+            "content": "Deposit ledger entries and balances",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Customer identity master and merchant configuration truth",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer identity master and merchant configuration truth",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Customer identity master and merchant configuration truth",
+            "ref": "payments-customer-configuration"
+          },
+          {
+            "content": "Regulatory compliance posture and decisions (Settlement enforces holds, but compliance owns the compliance decision.)",
+            "ref": "risk-compliance-and-regulatory"
+          },
+          {
+            "content": "Case workflow lifecycle for investigation (Settlement raises breaks; Case domain manages investigation workflow.)",
+            "ref": "operational-case-management"
+          },
+          {
+            "content": "Corporate statutory accounting",
+            "ref": "corporate-finance"
+          }
         ]
       }
     },
@@ -381,16 +694,46 @@
           "GL export batch records and export/reconciliation status"
         ],
         "not_authoritative_for": [
-          "payments-processing",
-          "settlement-and-reconciliation",
-          "product-quoting-and-pricing",
-          "billing-and-accounts-receivable",
-          "funds-movement",
-          "customer",
-          "user-and-identity",
-          "deposits-product",
-          "corporate-finance",
-          "accounting-product"
+          {
+            "content": "Transaction truth, clearing lifecycle, scheme chargebacks/disputes lifecycle",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Settlement obligation calculation, settlement batching, payout composition (the “what we owe merchants” computation)",
+            "ref": "settlement-and-reconciliation"
+          },
+          {
+            "content": "Pricing plans, fee rules, discounts, commissions policy and fee calculation logic",
+            "ref": "product-quoting-and-pricing"
+          },
+          {
+            "content": "Invoicing, AR balances, collections, credit notes, ageing",
+            "ref": "billing-and-accounts-receivable"
+          },
+          {
+            "content": "Execution of money movement (rail instruction lifecycle/outcomes)",
+            "ref": "funds-movement"
+          },
+          {
+            "content": "Customer master, user identity, group hierarchy",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer master, user identity, group hierarchy",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Bank ledger entries and regulated account balances/statements (Banking Ledger)",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Statutory GL, external financial reporting, corporate close ownership",
+            "ref": "corporate-finance"
+          },
+          {
+            "content": "Merchant’s own bookkeeping (merchant COA/journals/GST/BAS artefacts)",
+            "ref": "accounting-product"
+          }
         ]
       }
     },
@@ -415,10 +758,22 @@
           "RMA and repair history"
         ],
         "not_authoritative_for": [
-          "terminal-fleet-and-device-management",
-          "payments-customer-configuration",
-          "payments-channels",
-          "payments-processing"
+          {
+            "content": "Firmware versions and OTA updates; Runtime device configuration (payment params, UI settings)",
+            "ref": "terminal-fleet-and-device-management"
+          },
+          {
+            "content": "Merchant eligibility/config to use devices",
+            "ref": "payments-customer-configuration"
+          },
+          {
+            "content": "Payment runtime execution",
+            "ref": "payments-channels"
+          },
+          {
+            "content": "Any transaction truth",
+            "ref": "payments-processing"
+          }
         ]
       }
     },
@@ -445,11 +800,26 @@
           "Fleet health state"
         ],
         "not_authoritative_for": [
-          "hardware-and-asset-management",
-          "payments-customer-configuration",
-          "integration-enablement-and-certification",
-          "payments-channels",
-          "payments-processing"
+          {
+            "content": "Physical asset lifecycle, warehousing, shipping",
+            "ref": "hardware-and-asset-management"
+          },
+          {
+            "content": "Merchant configuration truth (e.g., which MerchantIDs, terminal sharing groups, enablement rules)",
+            "ref": "payments-customer-configuration"
+          },
+          {
+            "content": "Partner certification/testing frameworks",
+            "ref": "integration-enablement-and-certification"
+          },
+          {
+            "content": "Checkout session lifecycle and terminal UX flows",
+            "ref": "payments-channels"
+          },
+          {
+            "content": "Transaction switching, authorisation, clearing",
+            "ref": "payments-processing"
+          }
         ]
       }
     },
@@ -468,16 +838,46 @@
           "Banking audit trail for account/config changes"
         ],
         "not_authoritative_for": [
-          "funds-movement",
-          "banking-vas-integrations",
-          "settlement-and-reconciliation",
-          "billing-and-accounts-receivable",
-          "corporate-finance",
-          "customer",
-          "user-and-identity",
-          "credit-and-underwriting",
-          "fraud-and-risk-decisioning",
-          "risk-compliance-and-regulatory"
+          {
+            "content": "Transfer execution on rails (NPP/BECS/internal)",
+            "ref": "funds-movement"
+          },
+          {
+            "content": "Partner consent and external workflow orchestration",
+            "ref": "banking-vas-integrations"
+          },
+          {
+            "content": "Merchant payout calculation and settlement batches",
+            "ref": "settlement-and-reconciliation"
+          },
+          {
+            "content": "Customer invoicing and AR",
+            "ref": "billing-and-accounts-receivable"
+          },
+          {
+            "content": "Corporate statutory accounting",
+            "ref": "corporate-finance"
+          },
+          {
+            "content": "Customer identity master and group hierarchy",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer identity master and group hierarchy",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Credit decisions",
+            "ref": "credit-and-underwriting"
+          },
+          {
+            "content": "Real-time fraud allow/deny decisions",
+            "ref": "fraud-and-risk-decisioning"
+          },
+          {
+            "content": "AML/CTF posture and regulatory reporting",
+            "ref": "risk-compliance-and-regulatory"
+          }
         ]
       }
     },
@@ -496,16 +896,46 @@
           "Lending audit trail for changes within domain scope"
         ],
         "not_authoritative_for": [
-          "credit-and-underwriting",
-          "customer-and-product-onboarding",
-          "funds-movement",
-          "deposits-product",
-          "product-quoting-and-pricing",
-          "customer",
-          "user-and-identity",
-          "fraud-and-risk-decisioning",
-          "risk-compliance-and-regulatory",
-          "corporate-finance"
+          {
+            "content": "Credit approval/decline and risk grade truth",
+            "ref": "credit-and-underwriting"
+          },
+          {
+            "content": "Application workflow orchestration",
+            "ref": "customer-and-product-onboarding"
+          },
+          {
+            "content": "Transfer execution for disbursement/repayments",
+            "ref": "funds-movement"
+          },
+          {
+            "content": "Regulated deposit ledger truth",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Commercial pricing and fee rule calculation",
+            "ref": "product-quoting-and-pricing"
+          },
+          {
+            "content": "Customer identity master and group hierarchy",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer identity master and group hierarchy",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Fraud allow/deny decisions (operational)",
+            "ref": "fraud-and-risk-decisioning"
+          },
+          {
+            "content": "AML/CTF posture and regulatory reporting",
+            "ref": "risk-compliance-and-regulatory"
+          },
+          {
+            "content": "Corporate statutory accounting",
+            "ref": "corporate-finance"
+          }
         ]
       }
     },
@@ -530,15 +960,42 @@
           "Decision validity windows/expiry metadata"
         ],
         "not_authoritative_for": [
-          "lending-product",
-          "customer-and-product-onboarding",
-          "customer",
-          "user-and-identity",
-          "Banking Domain",
-          "fraud-and-risk-decisioning",
-          "risk-compliance-and-regulatory",
-          "product-quoting-and-pricing",
-          "funds-movement"
+          {
+            "content": "Loan contract, repayment schedule, outstanding principal",
+            "ref": "lending-product"
+          },
+          {
+            "content": "Application workflow state machine",
+            "ref": "customer-and-product-onboarding"
+          },
+          {
+            "content": "Customer identity master",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer identity master",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Regulated banking ledger/balances",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Fraud allow/deny decisions",
+            "ref": "fraud-and-risk-decisioning"
+          },
+          {
+            "content": "AML/CTF compliance posture",
+            "ref": "risk-compliance-and-regulatory"
+          },
+          {
+            "content": "Commercial pricing policy (general) (credit may produce risk grade used as an input/reference)",
+            "ref": "product-quoting-and-pricing"
+          },
+          {
+            "content": "Transfer execution for disbursement/repayments",
+            "ref": "funds-movement"
+          }
         ]
       }
     },
@@ -562,16 +1019,46 @@
           "Merchant financial statements"
         ],
         "not_authoritative_for": [
-          "customer",
-          "user-and-identity",
-          "payments-customer-configuration",
-          "payments-processing",
-          "settlement-and-reconciliation",
-          "Banking Domain",
-          "lending-product",
-          "corporate-finance",
-          "partnerships",
-          "banking-vas-integrations"
+          {
+            "content": "Customer legal entity master and identity",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer legal entity master and identity",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Merchant acquiring configuration (MID, locations, terminal sharing groups)",
+            "ref": "payments-customer-configuration"
+          },
+          {
+            "content": "Transaction truth (authorisation/clearing/chargebacks)",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Settlement truth and payout balances",
+            "ref": "settlement-and-reconciliation"
+          },
+          {
+            "content": "Deposit ledger entries and balances",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Loan contract truth",
+            "ref": "lending-product"
+          },
+          {
+            "content": "Corporate accounting and statutory reporting",
+            "ref": "corporate-finance"
+          },
+          {
+            "content": "Partner commercial lifecycle",
+            "ref": "partnerships"
+          },
+          {
+            "content": "External accounting platform integrations consent/workflows (if applicable)",
+            "ref": "banking-vas-integrations"
+          }
         ]
       }
     },
@@ -597,14 +1084,38 @@
           "Idempotency/correlation records and audit trail"
         ],
         "not_authoritative_for": [
-          "Banking Domain",
-          "settlement-and-reconciliation",
-          "billing-and-accounts-receivable",
-          "banking-vas-integrations",
-          "customer",
-          "user-and-identity",
-          "product-quoting-and-pricing",
-          "customer-notifications-and-communications"
+          {
+            "content": "Regulated deposit ledger and balances",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Settlement batch calculation and payable balances",
+            "ref": "settlement-and-reconciliation"
+          },
+          {
+            "content": "Customer invoicing and collections policy",
+            "ref": "billing-and-accounts-receivable"
+          },
+          {
+            "content": "External partner consent workflows (batch/payroll initiation)",
+            "ref": "banking-vas-integrations"
+          },
+          {
+            "content": "Customer master identity",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer master identity",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Product pricing and fee policy",
+            "ref": "product-quoting-and-pricing"
+          },
+          {
+            "content": "Customer-facing notifications (Funds Movement emits events; notifications decide what to send)",
+            "ref": "customer-notifications-and-communications"
+          }
         ]
       }
     },
@@ -630,14 +1141,38 @@
           "Collections and billing-dispute state"
         ],
         "not_authoritative_for": [
-          "product-quoting-and-pricing",
-          "payments-processing",
-          "settlement-and-reconciliation",
-          "Banking Domain",
-          "funds-movement",
-          "corporate-finance",
-          "customer",
-          "user-and-identity"
+          {
+            "content": "Commercial pricing/fee calculation policy",
+            "ref": "product-quoting-and-pricing"
+          },
+          {
+            "content": "Transaction truth (auth/clearing)",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Settlement netting/payout",
+            "ref": "settlement-and-reconciliation"
+          },
+          {
+            "content": "Regulated bank ledger and customer bank account balances",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Transfer execution (direct debit/collections rails) (Billing requests collection; Funds Movement executes)",
+            "ref": "funds-movement"
+          },
+          {
+            "content": "Corporate GL posting",
+            "ref": "corporate-finance"
+          },
+          {
+            "content": "Customer master identity",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer master identity",
+            "ref": "user-and-identity"
+          }
         ]
       }
     },
@@ -664,19 +1199,58 @@
           "Acquisition attribution linkages"
         ],
         "not_authoritative_for": [
-          "customer",
-          "user-and-identity",
-          "partnerships",
-          "customer-and-product-onboarding",
-          "payments-customer-configuration",
-          "payments-channels",
-          "payments-processing",
-          "Settlement",
-          "Banking",
-          "Lending",
-          "product-quoting-and-pricing",
-          "billing-and-accounts-receivable",
-          "risk-compliance-and-regulatory"
+          {
+            "content": "Customer legal entity master, users, groups/franchises",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer legal entity master, users, groups/franchises; Consent/preference master, if centralised (Growth consumes)",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Partner master record & partner lifecycle",
+            "ref": "partnerships"
+          },
+          {
+            "content": "Application workflow state machine & activation sequencing",
+            "ref": "customer-and-product-onboarding"
+          },
+          {
+            "content": "Merchant configuration (MIDs, locations, terminal sharing groups)",
+            "ref": "payments-customer-configuration"
+          },
+          {
+            "content": "Payments runtime/transaction/settlement truth",
+            "ref": "payments-channels"
+          },
+          {
+            "content": "Payments runtime/transaction/settlement truth",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Payments runtime/transaction/settlement truth",
+            "ref": "settlement-and-reconciliation"
+          },
+          {
+            "content": "Banking ledger / lending contract truth",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Banking ledger / lending contract truth",
+            "ref": "lending-product"
+          },
+          {
+            "content": "Authoritative pricing rules, fee calculation, commissions policy",
+            "ref": "product-quoting-and-pricing"
+          },
+          {
+            "content": "Billing invoices/AR",
+            "ref": "billing-and-accounts-receivable"
+          },
+          {
+            "content": "Regulatory decisions (KYC/AML)",
+            "ref": "risk-compliance-and-regulatory"
+          }
         ]
       }
     },
@@ -701,15 +1275,42 @@
           "Relationship links"
         ],
         "not_authoritative_for": [
-          "customer",
-          "user-and-identity",
-          "customer-acquisition",
-          "pos-integration",
-          "payments-vas-integrations",
-          "banking-vas-integrations",
-          "integration-enablement-and-certification",
-          "payments-customer-configuration",
-          "product-quoting-and-pricing"
+          {
+            "content": "Customer legal entity master & group/franchise hierarchy",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer legal entity master & group/franchise hierarchy",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Lead/opportunity pipeline and sales stages",
+            "ref": "customer-acquisition"
+          },
+          {
+            "content": "Technical integration specs and runtime connectivity",
+            "ref": "pos-integration"
+          },
+          {
+            "content": "Technical integration specs and runtime connectivity",
+            "ref": "payments-vas-integrations"
+          },
+          {
+            "content": "Technical integration specs and runtime connectivity",
+            "ref": "banking-vas-integrations"
+          },
+          {
+            "content": "Certification lifecycle and conformance evidence",
+            "ref": "integration-enablement-and-certification"
+          },
+          {
+            "content": "Merchant configuration to enable a partner’s service (+ VAS enablement where relevant)",
+            "ref": "payments-customer-configuration"
+          },
+          {
+            "content": "Commission/revenue calculations and invoicing",
+            "ref": "product-quoting-and-pricing"
+          }
         ]
       }
     },
@@ -734,16 +1335,46 @@
           "Governance audit trail"
         ],
         "not_authoritative_for": [
-          "customer",
-          "user-and-identity",
-          "payments-customer-configuration",
-          "payments-processing",
-          "settlement-and-reconciliation",
-          "product-quoting-and-pricing",
-          "Banking",
-          "Lending",
-          "Credit",
-          "partnerships"
+          {
+            "content": "Group/franchise membership and hierarchy identity (GroupID + membership)",
+            "ref": "customer"
+          },
+          {
+            "content": "User identities and access enforcement (RBAC; this domain only defines delegation policy)",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Merchant configuration records (locations, enablement, terminal sharing groups)",
+            "ref": "payments-customer-configuration"
+          },
+          {
+            "content": "Transaction truth, clearing, disputes",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Settlement batch computation and merchant balances",
+            "ref": "settlement-and-reconciliation"
+          },
+          {
+            "content": "Commercial fee calculation and rate engine",
+            "ref": "product-quoting-and-pricing"
+          },
+          {
+            "content": "Bank ledger balances / regulated account state",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Loan contracts / credit decisions",
+            "ref": "lending-product"
+          },
+          {
+            "content": "Loan contracts / credit decisions",
+            "ref": "credit-and-underwriting"
+          },
+          {
+            "content": "Partner commercial lifecycle",
+            "ref": "partnerships"
+          }
         ]
       }
     },
@@ -767,15 +1398,42 @@
           "Corporate reconciliation status metadata and evidence references"
         ],
         "not_authoritative_for": [
-          "settlement-and-reconciliation",
-          "Banking Domain",
-          "accounting-product",
-          "payments-processing",
-          "product-quoting-and-pricing",
-          "billing-and-accounts-receivable",
-          "enterprise-data-governance",
-          "data-analytics-and-intelligence",
-          "ai-and-ml"
+          {
+            "content": "Merchant settlement balances and payout truth",
+            "ref": "settlement-and-reconciliation"
+          },
+          {
+            "content": "Banking deposit ledger entries and balances",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Merchant accounting/journals (customer books)",
+            "ref": "accounting-product"
+          },
+          {
+            "content": "Transaction-level acquiring truth (authorisations/clearing/chargebacks)",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Commercial pricing rules/fee calculation policy",
+            "ref": "product-quoting-and-pricing"
+          },
+          {
+            "content": "Invoicing and receivables (customer billing)",
+            "ref": "billing-and-accounts-receivable"
+          },
+          {
+            "content": "Enterprise analytics and derived reporting datasets",
+            "ref": "enterprise-data-governance"
+          },
+          {
+            "content": "Enterprise analytics and derived reporting datasets",
+            "ref": "data-analytics-and-intelligence"
+          },
+          {
+            "content": "Enterprise analytics and derived reporting datasets",
+            "ref": "ai-and-ml"
+          }
         ]
       }
     },
@@ -803,18 +1461,54 @@
           "Control operation evidence, attestations, exceptions/waivers, and audit trail metadata"
         ],
         "not_authoritative_for": [
-          "customer",
-          "user-and-identity",
-          "customer-and-product-onboarding",
-          "payments-processing",
-          "disputes-and-recovery",
-          "settlement-and-reconciliation",
-          "payments-accounting",
-          "deposits-product",
-          "funds-movement",
-          "Operational Investigations & Exceptions Domain",
-          "data-analytics-and-intelligence",
-          "ai-and-ml"
+          {
+            "content": "Customer/party master identity, legal entity/person records, and user access control (this domain stores references to identity evidence; it does not master identity)",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer/party master identity, legal entity/person records, and user access control (this domain stores references to identity evidence; it does not master identity)",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Onboarding/origination journey state and product activation orchestration (and relevant servicing/orchestration domains)",
+            "ref": "customer-and-product-onboarding"
+          },
+          {
+            "content": "Transaction truth (authorisation, clearing lifecycle)",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Dispute/chargeback case lifecycle",
+            "ref": "disputes-and-recovery"
+          },
+          {
+            "content": "Settlement obligation calculation and payout truth",
+            "ref": "settlement-and-reconciliation"
+          },
+          {
+            "content": "Payments sub-ledger journals/control accounts",
+            "ref": "payments-accounting"
+          },
+          {
+            "content": "Regulated deposit ledger postings/balances (banking ledger)",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Funds transfer execution lifecycle (rails outcomes)",
+            "ref": "funds-movement"
+          },
+          {
+            "content": "Investigation case workflow tooling and queues (this domain triggers/escalates cases and provides decisions/outcomes; case workflow is managed elsewhere)",
+            "ref": "operational-case-management"
+          },
+          {
+            "content": "Analytical data products, semantic models, and dashboards",
+            "ref": "data-analytics-and-intelligence"
+          },
+          {
+            "content": "AI/ML model lifecycle tooling and deployment operations",
+            "ref": "ai-and-ml"
+          }
         ]
       }
     },
@@ -839,19 +1533,58 @@
           "Canonical decision request/response schemas"
         ],
         "not_authoritative_for": [
-          "risk-compliance-and-regulatory",
-          "payments-processing",
-          "payments-channels",
-          "digital-channels-and-experience",
-          "payments-customer-configuration",
-          "settlement-and-reconciliation",
-          "Banking Domain",
-          "Operational Investigations & Exceptions",
-          "customer",
-          "user-and-identity",
-          "enterprise-data-governance",
-          "data-analytics-and-intelligence",
-          "ai-and-ml"
+          {
+            "content": "AML/CTF monitoring, sanctions screening, regulatory reporting",
+            "ref": "risk-compliance-and-regulatory"
+          },
+          {
+            "content": "Transaction truth and chargeback lifecycle",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Checkout UX/session state",
+            "ref": "payments-channels"
+          },
+          {
+            "content": "Checkout UX/session state",
+            "ref": "digital-channels-and-experience"
+          },
+          {
+            "content": "Merchant configuration truth (incl. terminal sharing groups)",
+            "ref": "payments-customer-configuration"
+          },
+          {
+            "content": "Settlement computation",
+            "ref": "settlement-and-reconciliation"
+          },
+          {
+            "content": "Bank ledger",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Case workflow lifecycle",
+            "ref": "operational-case-management"
+          },
+          {
+            "content": "Customer identity master",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer identity master",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Enterprise analytics/feature store (where centralised)",
+            "ref": "enterprise-data-governance"
+          },
+          {
+            "content": "Enterprise analytics/feature store (where centralised)",
+            "ref": "data-analytics-and-intelligence"
+          },
+          {
+            "content": "Enterprise analytics/feature store (where centralised)",
+            "ref": "ai-and-ml"
+          }
         ]
       }
     },
@@ -873,18 +1606,54 @@
           "Operational audit trails and correlation metadata"
         ],
         "not_authoritative_for": [
-          "payments-processing",
-          "settlement-and-reconciliation",
-          "funds-movement",
-          "payments-accounting",
-          "product-quoting-and-pricing",
-          "fraud-and-risk-decisioning",
-          "risk-compliance-and-regulatory",
-          "customer-service-and-support",
-          "enterprise-data-governance",
-          "data-analytics-and-intelligence",
-          "ai-and-ml",
-          "payments-customer-configuration"
+          {
+            "content": "Transaction master record, authorisation state; Scheme clearing ingestion & clearing truth (incl. clearing adjustments as records)",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Merchant payout calculation, settlement batches, merchant payable balances, application of debits/credits",
+            "ref": "settlement-and-reconciliation"
+          },
+          {
+            "content": "Transfer execution (rails movement)",
+            "ref": "funds-movement"
+          },
+          {
+            "content": "Payment GL journals and statutory books",
+            "ref": "payments-accounting"
+          },
+          {
+            "content": "Commercial pricing plans / product fee rules (Disputes may *trigger* fee commitments; it does not own fee plan policy.)",
+            "ref": "product-quoting-and-pricing"
+          },
+          {
+            "content": "Fraud policy ownership / risk decision policy",
+            "ref": "fraud-and-risk-decisioning"
+          },
+          {
+            "content": "AML/CTF & regulatory reporting",
+            "ref": "risk-compliance-and-regulatory"
+          },
+          {
+            "content": "Customer support case workflow",
+            "ref": "customer-service-and-support"
+          },
+          {
+            "content": "Analytics/feature store/model outputs",
+            "ref": "enterprise-data-governance"
+          },
+          {
+            "content": "Analytics/feature store/model outputs",
+            "ref": "data-analytics-and-intelligence"
+          },
+          {
+            "content": "Analytics/feature store/model outputs",
+            "ref": "ai-and-ml"
+          },
+          {
+            "content": "Merchant configuration / enablement",
+            "ref": "payments-customer-configuration"
+          }
         ]
       }
     },
@@ -908,12 +1677,30 @@
           "Provider health state and operational control flags"
         ],
         "not_authoritative_for": [
-          "partnerships",
-          "Revenue",
-          "integration-enablement-and-certification",
-          "payments-channels",
-          "payments-processing",
-          "payments-customer-configuration"
+          {
+            "content": "Commercial contract/commission",
+            "ref": "partnerships"
+          },
+          {
+            "content": "Commercial contract/commission",
+            "ref": "product-quoting-and-pricing"
+          },
+          {
+            "content": "Certification state (“is this integration certified?”)",
+            "ref": "integration-enablement-and-certification"
+          },
+          {
+            "content": "Checkout UX/session truth",
+            "ref": "payments-channels"
+          },
+          {
+            "content": "Transaction truth (authorisation/clearing/chargebacks)",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Merchant master/config (beyond VAS enablement subset)",
+            "ref": "payments-customer-configuration"
+          }
         ]
       }
     },
@@ -959,15 +1746,42 @@
           "Provider health state and operational control flags"
         ],
         "not_authoritative_for": [
-          "Banking Domain",
-          "funds-movement",
-          "accounting-product",
-          "partnerships",
-          "integration-enablement-and-certification",
-          "customer",
-          "user-and-identity",
-          "product-quoting-and-pricing",
-          "digital-channels-and-experience"
+          {
+            "content": "Account lifecycle, balances, ledger entries",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Transfer execution on rails (NPP/BECS/internal), return codes",
+            "ref": "funds-movement"
+          },
+          {
+            "content": "Merchant bookkeeping/journals and tax records",
+            "ref": "accounting-product"
+          },
+          {
+            "content": "Partner commercial contract and lifecycle (as a partner)",
+            "ref": "partnerships"
+          },
+          {
+            "content": "Integration certification lifecycle and conformance evidence",
+            "ref": "integration-enablement-and-certification"
+          },
+          {
+            "content": "Customer legal entity master, users, group hierarchy",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer legal entity master, users, group hierarchy",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Pricing/fees/commission policy calculation",
+            "ref": "product-quoting-and-pricing"
+          },
+          {
+            "content": "Customer-facing UX composition (this domain supplies APIs/events; channels render)",
+            "ref": "digital-channels-and-experience"
+          }
         ]
       }
     },
@@ -993,18 +1807,54 @@
           "Developer-facing change notice and distribution logs"
         ],
         "not_authoritative_for": [
-          "partnerships",
-          "integration-enablement-and-certification",
-          "pos-integration",
-          "payments-vas-integrations",
-          "banking-vas-integrations",
-          "payments-channels",
-          "payments-processing",
-          "payments-customer-configuration",
-          "customer",
-          "user-and-identity",
-          "customer-acquisition",
-          "customer-notifications-and-communications"
+          {
+            "content": "Partner commercial lifecycle, contracts, commissions",
+            "ref": "partnerships"
+          },
+          {
+            "content": "Certification lifecycle, conformance evidence, production eligibility",
+            "ref": "integration-enablement-and-certification"
+          },
+          {
+            "content": "POS integration specifications and runtime connectivity",
+            "ref": "pos-integration"
+          },
+          {
+            "content": "In-flow payments VAS orchestration",
+            "ref": "payments-vas-integrations"
+          },
+          {
+            "content": "Banking consent/workflow orchestration",
+            "ref": "banking-vas-integrations"
+          },
+          {
+            "content": "Payment acceptance runtime and checkout session state",
+            "ref": "payments-channels"
+          },
+          {
+            "content": "Transaction truth and clearing/disputes",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Merchant-specific acquiring configuration (MIDs, enablement, terminal sharing groups)",
+            "ref": "payments-customer-configuration"
+          },
+          {
+            "content": "Customer identity master and access model (DevEx consumes identity/auth patterns, doesn’t own them)",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer identity master and access model (DevEx consumes identity/auth patterns, doesn’t own them)",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Marketing campaign execution",
+            "ref": "customer-acquisition"
+          },
+          {
+            "content": "Customer operational/regulatory notifications",
+            "ref": "customer-notifications-and-communications"
+          }
         ]
       }
     },
@@ -1060,10 +1910,23 @@
           "Data quality policy definitions and assurance artefacts"
         ],
         "not_authoritative_for": [
-          "risk-compliance-and-regulatory",
-          "Operational Domains",
-          "data-analytics-and-intelligence",
-          "ai-and-ml"
+          {
+            "content": "Regulatory interpretation and compliance policy",
+            "ref": "risk-compliance-and-regulatory"
+          },
+          {
+            "content": "Authoritative business semantics; systems of record",
+            "ref": "Operational Domains",
+            "unresolved": true
+          },
+          {
+            "content": "Data pipeline implementation; analytical marts and dashboards",
+            "ref": "data-analytics-and-intelligence"
+          },
+          {
+            "content": "AI/ML operational tooling",
+            "ref": "ai-and-ml"
+          }
         ]
       }
     },
@@ -1091,10 +1954,24 @@
           "Data quality monitoring records"
         ],
         "not_authoritative_for": [
-          "Operational Domains",
-          "Relevant business domains",
-          "enterprise-data-governance",
-          "ai-and-ml"
+          {
+            "content": "Operational master truth",
+            "ref": "Operational Domains",
+            "unresolved": true
+          },
+          {
+            "content": "Business decisions",
+            "ref": "Relevant business domains",
+            "unresolved": true
+          },
+          {
+            "content": "Governance standards",
+            "ref": "enterprise-data-governance"
+          },
+          {
+            "content": "AI/ML model lifecycle tooling",
+            "ref": "ai-and-ml"
+          }
         ]
       }
     },
@@ -1123,11 +2000,28 @@
           "AI/ML audit logs"
         ],
         "not_authoritative_for": [
-          "Relevant business domains",
-          "Operational domains",
-          "data-analytics-and-intelligence",
-          "enterprise-data-governance",
-          "risk-compliance-and-regulatory"
+          {
+            "content": "Fraud/credit/pricing decision policy",
+            "ref": "Relevant business domains",
+            "unresolved": true
+          },
+          {
+            "content": "Operational master truth",
+            "ref": "Operational domains",
+            "unresolved": true
+          },
+          {
+            "content": "Analytical data products",
+            "ref": "data-analytics-and-intelligence"
+          },
+          {
+            "content": "Governance standards",
+            "ref": "enterprise-data-governance"
+          },
+          {
+            "content": "Regulatory policy interpretation",
+            "ref": "risk-compliance-and-regulatory"
+          }
         ]
       }
     },
@@ -1149,15 +2043,42 @@
           "Activation orchestration log"
         ],
         "not_authoritative_for": [
-          "customer",
-          "user-and-identity",
-          "payments-customer-configuration",
-          "risk-compliance-and-regulatory",
-          "credit-and-underwriting",
-          "Banking",
-          "lending-product",
-          "payments-processing",
-          "Settlement"
+          {
+            "content": "Customer master",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer master",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Merchant config",
+            "ref": "payments-customer-configuration"
+          },
+          {
+            "content": "KYC/AML outcomes",
+            "ref": "risk-compliance-and-regulatory"
+          },
+          {
+            "content": "Credit decision",
+            "ref": "credit-and-underwriting"
+          },
+          {
+            "content": "Bank ledger/account truth",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Loan contract truth",
+            "ref": "lending-product"
+          },
+          {
+            "content": "Transaction/settlement truth",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Transaction/settlement truth",
+            "ref": "settlement-and-reconciliation"
+          }
         ]
       }
     },
@@ -1178,13 +2099,34 @@
           "Lifecycle reason codes and policy references"
         ],
         "not_authoritative_for": [
-          "customer",
-          "user-and-identity",
-          "payments-customer-configuration",
-          "Banking",
-          "lending-product",
-          "product-quoting-and-pricing",
-          "Operational Investigations & Exceptions"
+          {
+            "content": "Customer identity truth",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer identity truth",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Merchant configuration truth",
+            "ref": "payments-customer-configuration"
+          },
+          {
+            "content": "Ledger/account balances",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Loan contract truth",
+            "ref": "lending-product"
+          },
+          {
+            "content": "Pricing rules truth",
+            "ref": "product-quoting-and-pricing"
+          },
+          {
+            "content": "Case/investigation workflow truth",
+            "ref": "operational-case-management"
+          }
         ]
       }
     },
@@ -1205,13 +2147,34 @@
           "Bundle subscription/orchestration state"
         ],
         "not_authoritative_for": [
-          "product-quoting-and-pricing",
-          "customer",
-          "user-and-identity",
-          "payments-customer-configuration",
-          "Banking",
-          "Lending",
-          "Credit"
+          {
+            "content": "Pricing calculation truth",
+            "ref": "product-quoting-and-pricing"
+          },
+          {
+            "content": "Customer master",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer master",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Merchant config and enablement",
+            "ref": "payments-customer-configuration"
+          },
+          {
+            "content": "Banking/loan/account truth",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Banking/loan/account truth",
+            "ref": "lending-product"
+          },
+          {
+            "content": "Banking/loan/account truth",
+            "ref": "credit-and-underwriting"
+          }
         ]
       }
     },
@@ -1238,15 +2201,42 @@
           "Revenue attribution mappings/policies"
         ],
         "not_authoritative_for": [
-          "payments-processing",
-          "settlement-and-reconciliation",
-          "Banking Domain",
-          "lending-product",
-          "billing-and-accounts-receivable",
-          "corporate-finance",
-          "partnerships",
-          "customer",
-          "user-and-identity"
+          {
+            "content": "Scheme/network fees and clearing-level fees; Transaction truth and volumes (Revenue consumes as input)",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Settlement calculation and payout",
+            "ref": "settlement-and-reconciliation"
+          },
+          {
+            "content": "Deposit ledger balances and interest accrual",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Loan contracts and repayment schedules",
+            "ref": "lending-product"
+          },
+          {
+            "content": "Invoice issuance and receivables",
+            "ref": "billing-and-accounts-receivable"
+          },
+          {
+            "content": "Corporate GL posting",
+            "ref": "corporate-finance"
+          },
+          {
+            "content": "Partner master record & lifecycle",
+            "ref": "partnerships"
+          },
+          {
+            "content": "Group/franchise hierarchy (and policy specifics may sit in Groups & Enterprises )",
+            "ref": "customer"
+          },
+          {
+            "content": "Group/franchise hierarchy (and policy specifics may sit in Groups & Enterprises )",
+            "ref": "user-and-identity"
+          }
         ]
       }
     },
@@ -1269,12 +2259,30 @@
           "SLA metrics and routing metadata"
         ],
         "not_authoritative_for": [
-          "customer-service-and-support",
-          "payments-processing",
-          "settlement-and-reconciliation",
-          "Banking",
-          "fraud-and-risk-decisioning",
-          "risk-compliance-and-regulatory"
+          {
+            "content": "Customer-facing support ticketing (if separated)",
+            "ref": "customer-service-and-support"
+          },
+          {
+            "content": "Transaction/clearing/chargeback truth",
+            "ref": "payments-processing"
+          },
+          {
+            "content": "Settlement truth",
+            "ref": "settlement-and-reconciliation"
+          },
+          {
+            "content": "Ledger truth",
+            "ref": "deposits-product"
+          },
+          {
+            "content": "Fraud decision truth (case consumes outputs)",
+            "ref": "fraud-and-risk-decisioning"
+          },
+          {
+            "content": "Compliance posture truth (case uses outcomes/evidence)",
+            "ref": "risk-compliance-and-regulatory"
+          }
         ]
       }
     },
@@ -1297,11 +2305,27 @@
           "Template metadata references and dispatch records"
         ],
         "not_authoritative_for": [
-          "customer",
-          "user-and-identity",
-          "All authoritative domains",
-          "customer-acquisition",
-          "digital-channels-and-experience"
+          {
+            "content": "Customer identity and preferences master (or dedicated preferences capability, if created)",
+            "ref": "customer"
+          },
+          {
+            "content": "Customer identity and preferences master (or dedicated preferences capability, if created)",
+            "ref": "user-and-identity"
+          },
+          {
+            "content": "Domain events generation",
+            "ref": "All authoritative domains",
+            "unresolved": true
+          },
+          {
+            "content": "Marketing campaign systems (lead gen)",
+            "ref": "customer-acquisition"
+          },
+          {
+            "content": "In-app UX presentation (this domain triggers; channels render)",
+            "ref": "digital-channels-and-experience"
+          }
         ]
       }
     }
