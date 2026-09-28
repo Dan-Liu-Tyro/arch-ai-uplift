@@ -793,3 +793,28 @@ against the new mechanism, not the surface similarity to the old one. Before
 writing a capability limit down as fact, check whether anything already in
 the codebase is *already doing the thing you are about to claim is
 impossible* — it was, here, in the next file over.
+
+---
+
+## A green check after a shape change proves nothing until it has failed once
+
+**What happened.** A data field changed from a list of strings to a list of
+`{content, ref}` objects. The viewer's verifier stayed green, and a backlog
+entry predicted it would fail until the renderer caught up. It never failed,
+for two independent reasons. First, the verifier read a generated file
+(`payments.json`) that had not been regenerated since the change, so it only
+ever saw strings. Second, the assertion was `html.includes(item)`, which
+would have passed on objects too: the renderer's `escapeHtml(item)` and
+`includes` both coerce an object to `"[object Object]"`, so the string
+matched itself.
+
+**Cost.** A real rendering gap sat undetected behind a passing suite, and a
+written claim about the suite ("will fail") was wrong without anyone
+noticing.
+
+**Rule.** After changing a data shape, make the relevant check fail against
+the old state *before* fixing anything. If it won't fail, the check is
+blind, and fixing the code proves nothing. Two specific traps: assert on a
+named primitive field (`item.content`), never on a value that can be
+stringified; and a check that reads a *derived* artefact is only as fresh as
+that artefact, so also assert that the artefact matches its source.

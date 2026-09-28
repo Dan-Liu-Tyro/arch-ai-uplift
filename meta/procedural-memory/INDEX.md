@@ -110,3 +110,7 @@ policy this exists to serve.
   another that hits the same wall for a different reason; check what it
   actually depends on, and check whether the codebase is already doing the
   thing you're about to call impossible.
+- A green check after a data-shape change proves nothing until it has
+  failed once — make it fail on the old state first; assert on named
+  primitive fields, never stringifiable values; and check that any derived
+  artefact the test reads is fresh against its source.
