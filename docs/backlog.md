@@ -196,3 +196,38 @@ hasn't been prioritized yet — that is not the same as `[P3]`.
   matters, or (b) the flow view is about to be used somewhere its exact
   arrangement carries meaning — an architecture sparring session, or a
   published Confluence page.
+- **Update `components/kg-viz` to render the new
+  `authority.not_authoritative_for` shape.** [P2] Raised 2026-09-28, as the
+  agreed-but-deferred follow-up to decision 49 in `docs/decision-log.md`,
+  which changed `components/kg-content/entities/domains.json`'s
+  `authority.not_authoritative_for` field from a list of plain strings to a
+  list of `{content, ref}` objects (plus an optional `unresolved: true` flag
+  when `ref` can't be resolved to a real domain id), so a solution-phase
+  reasoning pass can see *what* a domain excludes, not just *who* owns it
+  instead. Deliberately not touched in that same change — the user's own
+  call, quoted in decision 49: "data change first with document follows cos
+  they need to be consistent with each other. Visualizer adaptation can be
+  put in the backlog for follow up work."
+
+  **Three files still expect the old plain-string shape:**
+  - `components/kg-viz/src/controls-panel.js` (around line 158-163) renders
+    `node.not_authoritative_for.map(t => ...)` as pills of the raw string
+    `t`; needs to render `item.content` and `item.ref` instead, and probably
+    flag `item.unresolved` visually (a distinct pill style, or a "(gap)"
+    marker).
+  - `components/kg-viz/generate.py` (around line 225) passes
+    `domain["authority"]["not_authoritative_for"]` straight through as a
+    passthrough field; may not need its own code change, but
+    `knowledge-visualizer.html` needs rebuilding via
+    `components/kg-viz/build.py` after `controls-panel.js` changes, per that
+    component's build/verify pattern (decision 39).
+  - `components/kg-viz/verify.js` (around line 888-906) checks
+    `domainNode.not_authoritative_for[0]` as a string and does
+    `html.includes(...)` against it directly; needs updating to check the
+    `{content, ref}` object shape instead.
+
+  **Low-risk, but not purely cosmetic to leave open indefinitely.** The
+  underlying data is already correct and useful without this landing —
+  `kg-viz` simply won't render the extra detail yet — but `verify.js`'s own
+  checks against this field will fail against the new shape until this is
+  picked up.
