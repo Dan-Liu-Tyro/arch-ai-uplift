@@ -108,6 +108,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 49 | `authority.not_authoritative_for` becomes `{content, ref}` objects (optional `unresolved` flag), restoring what is excluded, not just who owns it | `kg-core/schemas/domain.schema.json`, `kg-content/entities/domains.json`, backlog |
 | 50 | Jira is the plan of record and read-only for Claude; the repo maps onto Jira, not the reverse; internal milestones in question | `CLAUDE.md`, program roadmap, Jira, backlog |
 | 51 | `kg-viz` "Not authoritative for" owners are links; off-graph owners open from a generated `domain_index` | `kg-viz` |
+| 52 | `kg-viz` actor colours: Tyro staff white, all external actors light yellow | `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2418,6 +2419,19 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       nobody asked for. Scenario Z covers it. The canvas click path
       (`onNodeClick` → `openFromGraph`) is the one step the stubbed DOM
       cannot drive.
+52. **`kg-viz` actor colours: Tyro staff white, every external actor one
+    light yellow.** Requested by the user on 2026-09-29. Previously staff
+    were light yellow (`#ffd479`), merchant and partner pink, and regulator
+    light blue. Now `InternalStaff` is `#ffffff`, and `Customer`, `Partner`
+    and `Regulator` all share `#ffd479`. "All external actor" was read as
+    including the regulator, which sits outside Tyro's boundary. The role
+    still shows in the legend label ("External user (regulator)") and the
+    detail pane. Scenario N asserts both colours.
+    - **Known overlap, flagged rather than fixed.** A selected node is
+      drawn white (`nodeDisplayColor`), so a selected external actor briefly
+      shares staff's colour. The glow on a selected actor icon and the
+      dimming of everything else still mark the selection. Change the
+      selection colour only if this confuses in practice.
 
 ## Constraints identified
 
