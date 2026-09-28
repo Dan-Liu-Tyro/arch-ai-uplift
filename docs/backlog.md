@@ -197,9 +197,9 @@ hasn't been prioritized yet — that is not the same as `[P3]`.
   arrangement carries meaning — an architecture sparring session, or a
   published Confluence page.
 - **Update `components/kg-viz` to render the new
-  `authority.not_authoritative_for` shape.** [P2] Raised 2026-09-28, as the
-  agreed-but-deferred follow-up to decision 49 in `docs/decision-log.md`,
-  which changed `components/kg-content/entities/domains.json`'s
+  `authority.not_authoritative_for` shape.** [P1] Raised 2026-09-28, as the
+  follow-up to decision 49 in `docs/decision-log.md`, which changed
+  `components/kg-content/entities/domains.json`'s
   `authority.not_authoritative_for` field from a list of plain strings to a
   list of `{content, ref}` objects (plus an optional `unresolved: true` flag
   when `ref` can't be resolved to a real domain id), so a solution-phase
@@ -226,8 +226,8 @@ hasn't been prioritized yet — that is not the same as `[P3]`.
     `html.includes(...)` against it directly; needs updating to check the
     `{content, ref}` object shape instead.
 
-  **Low-risk, but not purely cosmetic to leave open indefinitely.** The
-  underlying data is already correct and useful without this landing —
-  `kg-viz` simply won't render the extra detail yet — but `verify.js`'s own
-  checks against this field will fail against the new shape until this is
-  picked up.
+  **Re-prioritized to P1 on 2026-09-28** — the user raised this item's
+  priority. The underlying data is already correct and useful without this
+  landing — `kg-viz` simply won't render the extra detail yet — but
+  `verify.js`'s own checks against this field will fail against the new
+  shape until this is picked up.
