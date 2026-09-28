@@ -118,3 +118,27 @@ that file exists. Writing the assertion is also what catches a fix that does not
 work — the band assertion added here failed on the first run and exposed a
 `rebuildBands()`-before-`rebuildLabels()` ordering bug that reasoning about the
 code had missed.
+
+---
+
+## A stale steward-owned doc is a fix to make, not a finding to offer
+
+**What happened.** Asked "where we are for the project" on 2026-09-29, I read
+`docs/decision-log.md`'s Next steps and correctly reported it as stale: its
+first item still called the schema "the critical path" weeks after
+`SCHEMA.md` existed, three items were long resolved, and the numbering ran
+out of order. Then I ended by asking whether the user wanted me to rewrite
+it. The user replied: "fix the stale decision log, which you should handle
+and keep track, not me."
+
+**Cost.** A round trip, and — worse — the drift itself. Next steps had gone
+stale across many sessions because nobody updated it when items changed
+state; each of those sessions had the same stewardship rule in `CLAUDE.md`.
+
+**Rule.** The decision log, the component READMEs and the other artefacts
+`CLAUDE.md`'s stewardship model assigns to Claude are Claude's to keep
+current. Finding one stale is the trigger to fix it in the same turn and
+report what changed — never an offer. And prevent the drift upstream: when a
+turn resolves, supersedes or advances a Next steps item, update that item in
+the same commit as the work. Only genuinely outward-facing actions (push, PR,
+Jira, Confluence) still get confirmed first.

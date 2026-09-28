@@ -100,8 +100,12 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 41 | Stage bands invisible in Safari only: `#bands` `<svg>` needs explicit `width`/`height`, `inset:0` alone doesn't stretch a replaced element | `kg-viz` |
 | 42 | Agent's invocation handle renamed `arc-lite` → `arc` for easier `@`-mention; persona identity and disclaimer unchanged | `local-agent` |
 | 43 | New pattern: dedicated agents own one artifact's source of truth and lifecycle; `backlog` agent is the pilot, owning `docs/backlog.md` | `docs/backlog.md`, `CLAUDE.md`, new `.claude/agents/backlog.md` |
+| 44 | Layout geometry stays derived, not curated: graph data holds no pixels or stored positions | `kg-content`, `kg-viz` |
 | 45 | `arc`'s missing live-Confluence access (open since decision 17) made an explicit decision: stay local-only for now, for testing | `.claude/agents/arc-lite.md` |
+| 46 | `idea-to-presentation` mechanism: one markdown source of truth, slides and Confluence page as generated views | `meta/idea-to-presentation`, `practice/ai-dlc` |
+| 47 | Slide rendering: self-contained HTML deck from markdown + committed SVGs via stdlib `build_deck.py`; print-to-PDF handover, no PowerPoint | `meta/idea-to-presentation`, `CLAUDE.md` |
 | 48 | `not_authoritative_for` reversed to node-level text only; `kg-viz`'s `domain-authority`/"Ref Domains" view removed entirely | `kg-core/SCHEMA.md`, `kg-core/schemas/domain.schema.json`, `kg-content/entities/domains.json`, `kg-viz` |
+| 49 | `authority.not_authoritative_for` becomes `{content, ref}` objects (optional `unresolved` flag), restoring what is excluded, not just who owns it | `kg-core/schemas/domain.schema.json`, `kg-content/entities/domains.json`, backlog |
 
 ## Decisions so far (tentative — open to change)
 
@@ -766,7 +770,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       20), not something this restructuring pass folds in. The real
       end-to-end run decision 20 just verified went through direct CLI
       invocation, not `ui/server.py`, so it exercised the old contract and
-      still left `gap-log.md` empty; that gap (and next step 7) is
+      still left `gap-log.md` empty; that gap (and the "Use Arc Lite for real" next step) is
       unaffected by this decision.
 
 22. **Widened `meta/`'s charter to include general-purpose capabilities
@@ -2536,101 +2540,98 @@ Resolved since first draft:
 
 ## Next steps
 
-1. Define the KG schema (entity types, relation types, frontmatter shape). This
-   is now the critical path — nothing downstream can be built against it until
-   it exists.
-2. Design the Confluence publish/sync mechanism (page generation from entities,
-   cadence, handling of hand-edited pages).
-3. Sample a representative slice of the 100+ existing Confluence pages to
-   pressure-test the draft schema against real content before committing to it.
-4. **Once the Architecture capability stream plan (slide 26) is finished and
-   approved by XLT:** re-evaluate `docs/program-roadmap.md` for alignment
-   against it (see decision 15), and update the Confluence milestone tracker
-   to match wherever the approved plan has moved ahead of it — starting with
-   the Q2 milestone 1.3 displacement (decision 13) and the M1/M2/M3 naming
-   introduced on the slide and in IN-564/AIDLC-117.
-5. **Create a Story (or Epic) under IN-564 / AIDLC-117 for the first
-   build-learn-adjust loop** (decision 13's resolution). Use AIDLC-116's
-   preserved original description (decision 13, "what was traded away") as
-   the starting content: gathering lived experience and technical learnings
-   from Maturity 1 to adjust grounding logic, content structure, and agent
-   behaviour. Explicitly not actioned yet — the user asked to document this
-   only, not touch Jira again this session.
-6. ~~Hand-edit `.claude/agents/arc-lite.md`'s file-pointer list~~ —
-   **done 2026-09-08.** Turned out not to need a human hand at all; see
-   decision 17's correction note. Both missing entries
-   (`constitution/05-ignore-list.md`, `constitution/06-answer-format.md`)
-   are in the file now.
-7. **Use Arc Lite for real, on real architecture questions, through
-   `ui/server.py`,** so `gap-log.md` (decision 17) actually starts
-   filling from lived usage rather than staying a designed-but-untested
-   mechanism.
-8. **Design an eval set for the local agent (Arc Lite).** Raised
-   2026-09-08, right after decisions 18–20's native-skill wiring was
-   verified end to end. Already has a first concrete artifact, built
-   concurrently by another session the same day:
-   `components/local-agent/eval-examples.md`, which migrated the two
-   non-canonical rows out of the now-retired `02-canonical-sources.md`
-   (see decision 21) as candidate material, and connects them explicitly
-   to `docs/program-roadmap.md`'s AKB 50+-question Golden Evaluation Set
-   (program milestone 2.1). Still open, beyond adding more candidates:
-   whether this stays a small local rehearsal of that same program-scale
-   set, or grows into something scoped to what Arc Lite alone can be
-   graded on (e.g. `kg-content` citation correctness, refusal correctness
-   per `.claude/agents/arc-lite.md`'s working protocol, skill-trigger
-   accuracy) — worth deciding before it grows much past two entries.
-9. **Design `meta/idea-to-presentation`'s actual mechanism (decision 22).**
-   Placement and purpose are settled; how an idea actually becomes a
-   deck/page is not — output formats beyond PowerPoint/Confluence,
-   whether any generation tooling is needed (and if so, its language per
-   org standards), and how it's invoked (skill, agent, or something else)
-   are all still open.
-11. **Run CP1 on the Architecture Capability & Process Map** (decision 28).
-    IN-563's critical path. Four unresolved inline comments from the Head of
-    Architecture are already on the page and are the agenda: two propose
-    deleting *Technology Radar* and *Technical Excellence / Knowledge Sharing*
-    as Platform Engineering's, two ask whether *Architecture baseline refresh*
-    and *Diagram asset management* are separate processes. Also needing
-    resolution: four rows have no Inputs or Outputs at all (the same four),
-    three rows have no maturity-level descriptions so cannot be rated
-    (*Architecture Governance*, *Architecture Debt Management*, *Post
-    Implementation Conformance Check*), and *Sensible Defaults Maintenance* has
-    no Inputs. Also on the agenda, and not fixed on the page: *Architecture
-    Sparring Preparation & Jamming* carries no 🌟 although IN-567 targets it
-    (the edit was deliberately not made — see the full-body-replacement
-    constraint above). CP2 and CP3 are both blocked on this; until it passes,
-    `practice/capability-maturity/` holds a proposal for correction, not an
-    assessment, and should not be reported as one.
-13. ~~**Rename the repo to `arch-ai-uplift`**~~ (decision 29, executed by
-    decision 33) — **complete, verified 2026-09-18.** All three
-    sandbox-blocked steps the user had to run by hand are confirmed done:
-    `origin` now points at `.../arch-ai-uplift.git`, the per-project memory
-    directory exists at the new path, and the working directory is
-    `/Users/bliu/code/claude workspace/arch-ai-uplift`. The README's "On the
-    name" note — which existed only to keep the mismatch visible — was
-    removed in the same pass. One harmless residue: the old
-    `arch-knowledge-graph` directory still exists containing nothing but an
-    empty `.claude/`, and the old memory directory under `~/.claude/projects/`
-    also remains; both are local machine state, neither affects the repo, and
-    deleting them is the user's call.
-12. **Decide whether `docs/program-roadmap.md` moves into `practice/`**
-    (decision 26). It is structurally a `practice/` artefact — an
-    externally-owned snapshot of the program's Confluence milestone tracker —
-    but it is cited by path from many entries in this log, so the move needs a
-    pass that updates those citations rather than a rename. Not urgent; worth
-    doing before a second snapshot-shaped artefact lands in `docs/` and makes
-    the inconsistency the norm.
-10. **Seed `meta/CDCD/observations.md` with a contradicting instance**
-    (a real cost or rework caused by a deferred spec), not just
-    supporting ones — decision 24 names this as required before
-    treating the CDCD hypothesis as more than a working claim. Also
-    revisit CDCD's working-title name once there's enough material to
-    test it against a reader unfamiliar with the founding conversation.
-14. **Bring "Activity & Evidence Home" (2212429894) and this repo's
-    `docs/program-roadmap.md` into line with decision 34's FY27 Q2/Q3/Q4
-    re-baseline and new IN-564 epic references** — deliberately deferred,
-    not forgotten: the user chose to update only the "Programme Stream"
-    page this round. Until this happens the two Confluence pages disagree
-    with each other on Phase 2/3 dates, and `program-roadmap.md`'s own
-    snapshot (still Apr 2027 / Aug 2027) is stale against both the approved
-    slide-26 quarters and the page it's supposed to mirror.
+Rewritten 2026-09-29 from the actual repo and Jira state rather than
+appended to: the previous list still called the schema "the critical path"
+weeks after it existed, which is exactly the failure this section exists to
+prevent. Keeping it current is Claude's job under the stewardship model, not
+the user's — update it in the same turn as anything that changes an item's
+state. Items are **named, not numbered**; cite them by bold title, because
+the old numbers were cited from other files and had drifted out of order.
+Ordered by priority.
+
+**Now — moves a Phase 1 milestone (FY27 Q2, Dec 2026).**
+
+- **Run CP1 on the Architecture Capability & Process Map** (decision 28).
+  IN-563's critical path; `practice/capability-maturity/validation-plan.md`
+  marks it "ready to run — this is the next action", and CP2/CP3 are blocked
+  on it. Agenda: the Head of Architecture's four unresolved inline comments
+  (two propose deleting *Technology Radar* and *Technical Excellence /
+  Knowledge Sharing* as Platform Engineering's; two ask whether
+  *Architecture baseline refresh* and *Diagram asset management* are
+  separate processes); those same four rows have no Inputs/Outputs; three
+  rows have no maturity-level descriptions and cannot be rated
+  (*Architecture Governance*, *Architecture Debt Management*, *Post
+  Implementation Conformance Check*); *Sensible Defaults Maintenance* has no
+  Inputs; *Architecture Sparring Preparation & Jamming* carries no 🌟 although
+  IN-567 targets it (deliberately not edited — see the full-body-replacement
+  constraint above). Until CP1 passes, `practice/capability-maturity/` is a
+  proposal for correction, not an assessment, and must not be reported as
+  one.
+- **Use Arc Lite for real, on real architecture questions, through
+  `ui/server.py`** (decision 17). `components/local-agent/gap-log.md` still
+  has zero rows as of 2026-09-29 — designed, never exercised. This is also
+  the raw material milestone 1.3 (first build-learn-adjust loop) needs, and
+  1.3 is the only Phase 1 milestone still "not started".
+- **Create the IN-564 / AIDLC-117 story for the first build-learn-adjust
+  loop** (decision 13's resolution). Re-checked in Jira 2026-09-29: no such
+  issue exists. Starting content is AIDLC-116's preserved original
+  description (decision 13, "what was traded away").
+- **Decide the Arc Lite eval set's scope, then grow it** (toward program
+  milestone 2.1's AKB Golden Evaluation Set).
+  `components/local-agent/eval-examples.md` holds two candidates. Open
+  choice, to make before it grows: a small local rehearsal of the program's
+  50+-question set, or a set scoped to what Arc Lite alone can be graded on
+  (`kg-content` citation correctness, refusal correctness, skill-trigger
+  accuracy). `docs/program-roadmap.md`'s lead — three prior experiments in
+  the Activity & Learning Log that may already hold real Q&A — is still
+  uninvestigated.
+
+**Next — correctness debt in what already exists.**
+
+- **Update `kg-viz` for decision 49's `{content, ref}` shape.** Tracked as
+  [P1] in `docs/backlog.md`. Found 2026-09-29: the backlog's claim that
+  `verify.js` fails until this lands is wrong — the verifier passes
+  (scenario W included), so it is not exercising the real object shape from
+  `domains.json`. The gap is real and currently *undetected*; tighten
+  scenario W against the real shape first, then fix the renderer.
+- **Bring `docs/program-roadmap.md` and "Activity & Evidence Home"
+  (2212429894) in line with decision 34's FY27 re-baseline.** The snapshot
+  still says Apr 2027 / Aug 2027 for Phases 2/3; the approved quarters are
+  FY27 Q3 (~Mar 2027) and Q4 (~Jun 2027), and the two Confluence pages
+  disagree with each other until the second is updated. Deliberately
+  deferred by the user in decision 34, not forgotten. Absorbs the old
+  "re-evaluate against slide 26 once approved" step, which decision 34
+  already carried out for the Programme Stream page.
+- **Merge `foundation` into `main` via a reviewed PR.** 137 commits ahead as
+  of 2026-09-29, none reviewed. PR review is this repo's designated quality
+  gate (decision 1), so right now the gate isn't operating.
+
+**Later — design work with no current forcing function.**
+
+- **Design `confluence-publish`'s divergence handling.** Transport is
+  settled (MCP create/update); what happens when someone hand-edits a
+  published page is not — see `components/confluence-publish/README.md`.
+  Needed before the first page is published, not before.
+- **Decide whether `docs/program-roadmap.md` moves into `practice/`**
+  (decision 26). Structurally a `practice/` snapshot, but cited by path from
+  many entries here, so the move means updating those citations. Do it
+  before a second snapshot-shaped artefact lands in `docs/`.
+- **Seed `meta/CDCD/observations.md` with a contradicting instance** (a real
+  cost or rework caused by a deferred spec). Decision 24 requires one before
+  the CDCD hypothesis counts as more than a working claim; all eight entries
+  so far support it. Also revisit the working-title name once there is
+  enough material to test on a reader unfamiliar with it.
+
+**Resolved — removed 2026-09-29** (listed once so the rewrite is auditable;
+drop this block at the next rewrite):
+
+- *Define the KG schema* — done: `components/kg-core/SCHEMA.md` and
+  `schemas/domain.schema.json` (decisions 30, 32, 35, 48, 49).
+- *Sample Confluence pages to pressure-test the schema* — superseded by
+  decision 30's full ingestion of all 39 domains.
+- *Design `idea-to-presentation`'s mechanism* — decided by decisions 46–47
+  and built (`build_deck.py`, `verify_deck.py`).
+- *Hand-edit `arc-lite.md`'s file-pointer list* — done 2026-09-08.
+- *Rename the repo to `arch-ai-uplift`* — done, verified 2026-09-18
+  (decision 33). Local residue (the empty old directory and old memory
+  directory) is the user's to delete.

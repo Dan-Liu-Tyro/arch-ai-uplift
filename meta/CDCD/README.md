@@ -76,7 +76,8 @@ depend on `meta/` regardless.
 
 Just scaffolded, seeded with the founding conversation (2026-09-11) as its
 first evidence. No contradicting evidence collected yet — see
-`definition.md`'s Status section and next step 10 in `docs/decision-log.md`.
+`definition.md`'s Status section and the "Seed `meta/CDCD/observations.md` with a
+contradicting instance" next step in `docs/decision-log.md`.
 
 ## Extraction notes
 

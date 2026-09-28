@@ -29,6 +29,9 @@ policy this exists to serve.
   stage band, label collision box) — on a visual report, check the
   screenshot or ask before picking one, then encode the fix as a
   `verify.js` assertion rather than declaring it fixed.
+- A stale steward-owned doc (decision log Next steps, a README) is a fix to
+  make in the same turn, not a finding to offer — and update a Next steps
+  item in the same commit as the work that changes its state.
 
 ## Universal (`universal.md`)
 

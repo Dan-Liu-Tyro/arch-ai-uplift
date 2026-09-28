@@ -53,7 +53,8 @@ already requires of itself.
 ## Next steps
 
 - Find and record a contradicting instance, not just supporting ones — see
-  next step 10 in `docs/decision-log.md`.
+  the "Seed `meta/CDCD/observations.md` with a contradicting instance" next
+  step in `docs/decision-log.md`.
 - Decide whether this needs its own index/reindex tooling once volume
   grows, mirroring `architecture-learning`, or whether two files stay
   enough (least-infrastructure-first favors the latter until proven
