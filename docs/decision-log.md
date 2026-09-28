@@ -107,6 +107,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 48 | `not_authoritative_for` reversed to node-level text only; `kg-viz`'s `domain-authority`/"Ref Domains" view removed entirely | `kg-core/SCHEMA.md`, `kg-core/schemas/domain.schema.json`, `kg-content/entities/domains.json`, `kg-viz` |
 | 49 | `authority.not_authoritative_for` becomes `{content, ref}` objects (optional `unresolved` flag), restoring what is excluded, not just who owns it | `kg-core/schemas/domain.schema.json`, `kg-content/entities/domains.json`, backlog |
 | 50 | Jira is the plan of record and read-only for Claude; the repo maps onto Jira, not the reverse; internal milestones in question | `CLAUDE.md`, program roadmap, Jira, backlog |
+| 51 | `kg-viz` "Not authoritative for" owners are links; off-graph owners open from a generated `domain_index` | `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2382,6 +2383,32 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       direction ("any local task *can* be pushed to Jira"); that part is
       superseded by this decision, and the pull/map half is what survives.
       Rule recorded in `CLAUDE.md` working conventions.
+51. **`kg-viz` owner pills in "Not authoritative for" are links. An owner
+    with no node in the flow opens from a generated `domain_index` instead of
+    dead-ending.** Requested by the user on 2026-09-29: clicking an "owned
+    by" domain should switch to that domain on the graph and show its info
+    in the pane.
+    - **The question the request left open.** Only 94 of the flow view's
+      163 owner references point at a domain that has a node in the
+      payments flow. The other ~40% (for example *Partnerships*, *AI & ML*,
+      *Enterprise Data Governance*) have nothing to switch to. Two options
+      were put to the user: embed a summary of every domain so the pane can
+      still show it, or make only on-graph owners clickable. The user chose
+      the first, which was also the recommendation, because a browse-the-
+      boundary chain that breaks on 40% of clicks fails the task the
+      feature exists for.
+    - **Behaviour.** On-graph owner: selected exactly as a node click would
+      select it, with its stage un-hidden first if filtered out. Off-graph
+      owner: pane shows title, scope, purpose and its own non-authority,
+      marked "not in this flow", with no graph selection (nothing on the
+      graph *is* that domain). Unresolved refs stay non-clickable gap pills.
+      The camera does not move; the selection highlight is the "switch".
+    - **Data.** `generate.py` adds a `domain_index` (all 39 domains) to the
+      view. It is derived from `domains.json`, so the viewer still derives
+      nothing itself (the three-tier split in decision 44). `verify.js`
+      scenario Y drives the clicks through the pane's delegated handler.
+      Scenario X now also fails if `domain_index` drifts from
+      `domains.json`.
 
 ## Constraints identified
 

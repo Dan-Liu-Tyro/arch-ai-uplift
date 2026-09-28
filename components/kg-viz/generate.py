@@ -186,6 +186,36 @@ def _layer_positions(nodes: list[dict], links: list[dict]) -> dict:
     }
 
 
+def _titled_naf(domain: dict, by_id: dict) -> list:
+    """A domain's `{content, ref, unresolved?}` items (decision 49), each
+    resolvable ref gaining a derived `ref_title`: most owners are domains
+    outside the flow view, so the viewer has no node to read a title from."""
+    return [
+        {**item, "ref_title": by_id[item["ref"]]["title"]}
+        if item.get("ref") in by_id else dict(item)
+        for item in domain["authority"]["not_authoritative_for"]
+    ]
+
+
+def _domain_index(by_id: dict) -> dict:
+    """Every domain's pane-level facts, keyed by id, so clicking an owner in
+    the "Not authoritative for" section can show that domain even when it
+    has no node in this flow. Derived from domains.json like everything
+    else here -- the viewer still derives nothing itself."""
+    return {
+        d_id: {
+            "title": d["title"],
+            "category": d.get("category"),
+            "scope": d.get("scope"),
+            "scope_note": d.get("scope_note"),
+            "status": d.get("status"),
+            "purpose": d.get("purpose", ""),
+            "not_authoritative_for": _titled_naf(d, by_id),
+        }
+        for d_id, d in by_id.items()
+    }
+
+
 def _payments_target_state_view(domains_data: dict) -> dict | None:
     path = GRAPHS_DIR / "payments-target-state.json"
     if not path.exists():
@@ -226,11 +256,7 @@ def _payments_target_state_view(domains_data: dict) -> dict | None:
                 # a derived `ref_title`, resolved here like every other
                 # domain fact: most owners are domains outside this flow, so
                 # the viewer has no node to read a title from.
-                "not_authoritative_for": [
-                    {**item, "ref_title": by_id[item["ref"]]["title"]}
-                    if item.get("ref") in by_id else dict(item)
-                    for item in domain["authority"]["not_authoritative_for"]
-                ] if domain else [],
+                "not_authoritative_for": _titled_naf(domain, by_id) if domain else [],
                 "touchpoints": n.get("touchpoints", []),
                 "stage": n["stage"],
                 "stage_ordinal": stage_ordinal[n["stage"]],
@@ -273,6 +299,7 @@ def _payments_target_state_view(domains_data: dict) -> dict | None:
         "source_notes": data["source_notes"],
         "nodes": nodes,
         "links": links,
+        "domain_index": _domain_index(by_id),
         "stats": {
             "unresolved_domain_refs": missing_refs,
             "back_edges": layered["back_edges"],

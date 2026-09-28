@@ -112,7 +112,7 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), select: n => { selected = n; positionIcons(); }, renderDetail: n => renderDetail(n), };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), select: n => { selected = n; positionIcons(); }, renderDetail: n => renderDetail(n), openDomainRef: ref => openDomainRef(ref), selectedNode: () => selected, };', ctx);
 
   return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam, controls: () => fakeControls, camera: () => fakeCamera };
 }
@@ -941,6 +941,83 @@ const el = (r, id) => r.els[id] || EMPTY;
   }
 }
 
+// Y: an owner pill in "Not authoritative for" is a link. An owner on the
+// graph is selected (its stage un-hidden if filtered out); an owner with no
+// node in this flow is shown from the view's domain_index; a gap is never a
+// link. Clicks go through the pane's one delegated handler, so that is what
+// is driven here, not openDomainRef directly.
+{
+  const r = run('Y', { cdnBlocked: false }); await tick();
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+
+  const v = r.probe.view();
+  const onGraph = new Set(v.nodes.map(n => n.domain_ref).filter(Boolean));
+  const idx = v.domain_index || {};
+  const resolvedRefs = v.nodes.flatMap(n => (n.not_authoritative_for || []))
+    .filter(i => i.ref && !i.unresolved).map(i => i.ref);
+  const dead = [...new Set(resolvedRefs)].filter(ref => !onGraph.has(ref) && !idx[ref]);
+  console.log('Y: domain_index entries =', Object.keys(idx).length, '| dead owner links =', dead.length);
+  if (!Object.keys(idx).length) results.push('Y: view has no domain_index -- run `python3 generate.py`');
+  if (dead.length) results.push('Y: owner link(s) resolve to nothing: ' + dead.join(', '));
+
+  const click = ref => {
+    const h = el(r,'detail-body').onclick;
+    if (typeof h !== 'function') { results.push('Y: detail pane has no click handler for owner links'); return; }
+    h({ target: { getAttribute: a => a === 'data-ref' ? ref : null, parentNode: null } });
+  };
+  const from = v.nodes.find(n => (n.not_authoritative_for || []).some(i => onGraph.has(i.ref)) &&
+    (n.not_authoritative_for || []).some(i => i.ref && !i.unresolved && !onGraph.has(i.ref)));
+  if (!from) {
+    results.push('Y: no flow domain has both an on-graph and an off-graph owner to test against');
+  } else {
+    const inRef = from.not_authoritative_for.find(i => onGraph.has(i.ref)).ref;
+    const offRef = from.not_authoritative_for.find(i => i.ref && !i.unresolved && !onGraph.has(i.ref)).ref;
+    const target = v.nodes.find(n => n.domain_ref === inRef);
+
+    r.probe.renderDetail(from);
+    const linked = el(r,'detail-body')._html.includes('data-ref="' + inRef + '"');
+
+    // On-graph owner, with its stage filtered out first.
+    r.probe.hidden()[target.stage] = true;
+    click(inRef);
+    const sel = r.probe.selectedNode();
+    const selectedIt = !!sel && sel.domain_ref === inRef;
+    const unhidden = r.probe.visible().nodes.some(n => n.id === target.id);
+    const paneIt = el(r,'detail-body')._html.includes('<h2>' + target.title.replace(/&/g, '&amp;') + '</h2>');
+    console.log('Y: on-graph owner -> linked =', linked, '| selected =', selectedIt,
+      '| un-hidden =', unhidden, '| pane shows it =', paneIt);
+    if (!linked) results.push('Y: resolved owner "' + inRef + '" is not rendered as a data-ref link');
+    if (!selectedIt) results.push('Y: clicking on-graph owner "' + inRef + '" did not select its node');
+    if (!unhidden) results.push('Y: clicking an owner whose stage is filtered out left it hidden');
+    if (!paneIt) results.push('Y: pane does not show "' + target.title + '" after clicking its owner link');
+
+    // Off-graph owner: pane shows it from domain_index, graph selects nothing.
+    click(offRef);
+    const offHtml = el(r,'detail-body')._html;
+    const offShown = !!idx[offRef] && offHtml.includes(idx[offRef].title.replace(/&/g, '&amp;')) &&
+      /not in this flow/.test(offHtml);
+    const nothingSelected = r.probe.selectedNode() === null;
+    const chains = !(idx[offRef] && idx[offRef].not_authoritative_for.length) || /Not authoritative for/.test(offHtml);
+    console.log('Y: off-graph owner -> pane shows it =', offShown, '| graph selection cleared =',
+      nothingSelected, '| its own owners listed =', chains);
+    if (!offShown) results.push('Y: clicking off-graph owner "' + offRef + '" did not show it from domain_index');
+    if (!nothingSelected) results.push('Y: an off-graph owner left a graph node selected');
+    if (!chains) results.push('Y: off-graph domain pane omits its own "Not authoritative for" links');
+  }
+
+  // A gap is never a link.
+  const gapNode = v.nodes.find(n => (n.not_authoritative_for || []).some(i => i.unresolved));
+  if (gapNode) {
+    r.probe.renderDetail(gapNode);
+    const gap = gapNode.not_authoritative_for.find(i => i.unresolved);
+    const gapLinked = el(r,'detail-body')._html.includes('data-ref="' + gap.ref.replace(/&/g, '&amp;') + '"');
+    console.log('Y: unresolved ref rendered as a link =', gapLinked);
+    if (gapLinked) results.push('Y: unresolved ref "' + gap.ref + '" is rendered as a clickable link');
+  }
+}
+
 // X: payments.json's not_authoritative_for matches kg-content's domains.json.
 // L and K catch a stale page against payments.json and src/; nothing caught
 // payments.json itself going stale against kg-content -- which is exactly
@@ -961,6 +1038,18 @@ const el = (r, id) => r.els[id] || EMPTY;
     '(' + stale.length + ' stale domain nodes)');
   if (stale.length) results.push('X: payments.json is stale against domains.json for ' + stale.length +
     ' domain node(s), e.g. ' + stale[0].id + ' -- run `python3 generate.py` then `python3 build.py`');
+
+  // domain_index (scenario Y's off-graph panes) is derived from the same
+  // file, so it goes stale the same way.
+  const strip = l => (l || []).map(i => { const { ref_title, ...rest } = i; return rest; });
+  const staleIdx = data.views.filter(v => v.domain_index).flatMap(v =>
+    domains.filter(d => !v.domain_index[d.id] || v.domain_index[d.id].title !== d.title ||
+      JSON.stringify(strip(v.domain_index[d.id].not_authoritative_for)) !==
+        JSON.stringify(d.authority.not_authoritative_for)).map(d => d.id));
+  console.log('X: domain_index matches domains.json =', staleIdx.length === 0,
+    '(' + staleIdx.length + ' stale entries)');
+  if (staleIdx.length) results.push('X: domain_index is stale against domains.json, e.g. ' + staleIdx[0] +
+    ' -- run `python3 generate.py` then `python3 build.py`');
 }
 
 console.log(results.length ? '\nFAILURES:\n' + results.join('\n') : '\nALL SCENARIOS PASSED');
