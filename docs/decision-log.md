@@ -2516,6 +2516,11 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
     every single-key shortcut shares the same guards: no modifier, not in
     a field, only once a graph is loaded. The checkbox is updated to match,
     and the panel label reads "Edge labels (E)". Scenario FS covers it.
+    - **The left arrow key joins the same table as "back"** (decision 51's
+      ← button), added the same day after the user found it missing. The
+      first back button had been built on-screen only, with the key
+      offered as optional. Scenario Z now drives a step through the real
+      keydown handler.
     - **Known overlap, flagged rather than fixed.** A selected node is
       drawn white (`nodeDisplayColor`), so a selected external actor briefly
       shares staff's colour. The glow on a selected actor icon and the

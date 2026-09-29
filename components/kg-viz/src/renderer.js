@@ -172,7 +172,7 @@
     document.getElementById("focus-btn").onclick = function () { setFocusMode(true); };
     document.getElementById("focus-exit").onclick = function () { setFocusMode(false); };
     // Single-key shortcuts: "f" toggles focus mode (decision 56), "e" edge
-    // labels (decision 57). Never while typing into a field, and never with
+    // labels (decision 57), left arrow goes back along followed owner links. Never while typing into a field, and never with
     // a modifier -- Cmd/Ctrl+F is the browser's find, and the same rule
     // keeps every future shortcut clear of browser chords.
     var SHORTCUTS = {
@@ -182,7 +182,9 @@
         // The checkbox mirrors state, so the panel never disagrees with it.
         document.getElementById("edge-labels-cb").checked = showEdgeLabels;
         rebuildLabels();
-      }
+      },
+      // The pane's back (←) button, from the keyboard (decision 51).
+      arrowleft: function () { goBack(); }
     };
     window.addEventListener("keydown", function (e) {
       var action = SHORTCUTS[String(e.key || "").toLowerCase()];

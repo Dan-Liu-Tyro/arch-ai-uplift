@@ -1192,7 +1192,10 @@ const el = (r, id) => r.els[id] || EMPTY;
     r.probe.openFromGraph(A);           steps.push(['start hidden', !backShown()]);
     r.probe.openDomainRef(bRef);        steps.push(['after link, shown', backShown() && sel() && sel().id === B.id]);
     r.probe.openDomainRef(cRef);        steps.push(['off-graph, nothing selected', backShown() && sel() === null]);
-    r.probe.goBack();                   steps.push(['back to B', !!sel() && sel().id === B.id && backShown()]);
+    // Through the real keydown handler, not goBack() directly: the left
+    // arrow key is how the user reaches it.
+    r.listeners.keydown && r.listeners.keydown({ key: 'ArrowLeft', target: { tagName: 'CANVAS' } });
+                                        steps.push(['left arrow key back to B', !!sel() && sel().id === B.id && backShown()]);
     r.probe.goBack();                   steps.push(['back to A, hidden again', !!sel() && sel().id === A.id && !backShown()]);
     r.probe.goBack();                   steps.push(['back at trail start is a no-op', !!sel() && sel().id === A.id]);
     r.probe.openDomainRef(bRef);

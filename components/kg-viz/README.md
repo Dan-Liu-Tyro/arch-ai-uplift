@@ -38,7 +38,8 @@ shows it from the view's `domain_index` — every domain's title, scope,
 purpose and own non-authority, generated from `domains.json` — marked "not
 in this flow", with nothing selected on the graph. Its owners are links
 too, so the chain never dead-ends. Gap pills are never links. A ← button
-at the top left of the pane goes back along the links followed, and is
+at the top left of the pane, or the left arrow key, goes back along the
+links followed, and is
 hidden when there is nothing to go back to. Picking a node on the graph,
 or closing the pane, starts a fresh trail.
 
