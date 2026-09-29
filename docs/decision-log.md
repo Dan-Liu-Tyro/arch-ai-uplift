@@ -109,6 +109,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 50 | Jira is the plan of record and read-only for Claude; the repo maps onto Jira, not the reverse; internal milestones in question | `CLAUDE.md`, program roadmap, Jira, backlog |
 | 51 | `kg-viz` "Not authoritative for" owners are links; off-graph owners open from a generated `domain_index` | `kg-viz` |
 | 52 | `kg-viz` colours: Tyro staff white; all external actors and external systems light yellow | `kg-viz` |
+| 53 | `kg-viz` edge labels off by default; a selected node's edges always labelled | `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2431,6 +2432,17 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       systems join the same light yellow** (previously `#ff7e8f`). Light
       yellow now means "outside Tyro" for people and systems alike. Shape
       (person icon or sphere) still separates the two.
+53. **`kg-viz` edge labels are off by default, and a selected node's edges
+    are always labelled.** Requested by the user on 2026-09-29. The rule:
+    an edge label shows if and only if *(a node is selected) ? (the edge
+    touches it) : (the global toggle is on)*. Previously labels were on by
+    default and the toggle also governed the selected node's edges, so
+    turning labels off hid exactly the predicates a selection is asking
+    about. The checkbox is now set from state at startup, because a browser
+    restoring an old checked state would otherwise disagree with the
+    default. Scenario U asserts all five toggle/selection combinations.
+    Scenarios H and I, which test label behaviour when labels are on, now
+    turn labels on explicitly instead of relying on the old default.
     - **Known overlap, flagged rather than fixed.** A selected node is
       drawn white (`nodeDisplayColor`), so a selected external actor briefly
       shares staff's colour. The glow on a selected actor icon and the

@@ -106,8 +106,13 @@
   // Edge labels use the same overlay. The predicate is the single most
   // informative thing about an edge in this graph -- a typed relationship is
   // the reason the flow view exists at all -- so hover-only was hiding the
-  // content. Drawn at the edge midpoint. Off by default on the authority
-  // view, where 296 copies of the same predicate would be pure noise.
+  // content. Drawn at the edge midpoint.
+  //
+  // The global toggle is off by default (decision 53): 43 predicates at once
+  // crowd the flow. Selecting a node labels that node's own edges whatever
+  // the toggle says, because a selection is exactly the question "what does
+  // this step exchange with its neighbours". So an edge label shows iff
+  // (a node is selected) ? (the edge touches it) : (the toggle is on).
   function edgeText(l) {
     return String(l.label || l.predicate || "").replace(/_/g, " ");
   }
@@ -133,7 +138,7 @@
         labelEls[n.id] = el;
       });
     }
-    if (showEdgeLabels) {
+    if (showEdgeLabels || selected) {
       vis.links.forEach(function (l) {
         var el = document.createElement("div");
         el.className = "elabel";
@@ -229,7 +234,7 @@
       }
     }
 
-    if (showEdgeLabels) {
+    if (showEdgeLabels || selected) {
       for (var j = 0; j < vis.links.length; j++) {
         var l = vis.links[j];
         var el2 = edgeEls[linkKey(l)];

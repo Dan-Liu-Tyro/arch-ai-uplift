@@ -252,7 +252,7 @@
       <span>Stage bands</span>
     </div>
     <div class="row" id="edge-labels-row">
-      <input type="checkbox" id="edge-labels-cb" checked />
+      <input type="checkbox" id="edge-labels-cb" />
       <span>Edge labels</span>
     </div>
     <div class="group-label">Edge label style</div>
@@ -366,12 +366,12 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29e — external systems light yellow too";
+  var PAGE_REVISION = "2026-09-29f — edge labels off by default; selected node's edges always labelled";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
   var DATA = null, view = null, Graph = null;
-  var dims = 2, scopeMode = "all", showLabels = true, showEdgeLabels = true, edgeLabelStyle = "along";
+  var dims = 2, scopeMode = "all", showLabels = true, showEdgeLabels = false, edgeLabelStyle = "along";
   var statsCollapsed = false;
   var showBands = true;
   // Anything that prevents the graph drawing goes on screen. Errors thrown
@@ -920,8 +920,13 @@
   // Edge labels use the same overlay. The predicate is the single most
   // informative thing about an edge in this graph -- a typed relationship is
   // the reason the flow view exists at all -- so hover-only was hiding the
-  // content. Drawn at the edge midpoint. Off by default on the authority
-  // view, where 296 copies of the same predicate would be pure noise.
+  // content. Drawn at the edge midpoint.
+  //
+  // The global toggle is off by default (decision 53): 43 predicates at once
+  // crowd the flow. Selecting a node labels that node's own edges whatever
+  // the toggle says, because a selection is exactly the question "what does
+  // this step exchange with its neighbours". So an edge label shows iff
+  // (a node is selected) ? (the edge touches it) : (the toggle is on).
   function edgeText(l) {
     return String(l.label || l.predicate || "").replace(/_/g, " ");
   }
@@ -947,7 +952,7 @@
         labelEls[n.id] = el;
       });
     }
-    if (showEdgeLabels) {
+    if (showEdgeLabels || selected) {
       vis.links.forEach(function (l) {
         var el = document.createElement("div");
         el.className = "elabel";
@@ -1043,7 +1048,7 @@
       }
     }
 
-    if (showEdgeLabels) {
+    if (showEdgeLabels || selected) {
       for (var j = 0; j < vis.links.length; j++) {
         var l = vis.links[j];
         var el2 = edgeEls[linkKey(l)];
@@ -1559,6 +1564,10 @@
       rebuildLabels();
     };
 
+    // Sync from state, not the other way: a browser can restore a checkbox's
+    // old checked state on reload, which would silently disagree with the
+    // default above.
+    document.getElementById("edge-labels-cb").checked = showEdgeLabels;
     document.getElementById("edge-labels-cb").onchange = function (e) {
       showEdgeLabels = e.target.checked;
       rebuildLabels();

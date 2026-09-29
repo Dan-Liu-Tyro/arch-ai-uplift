@@ -275,8 +275,14 @@ const el = (r, id) => r.els[id] || EMPTY;
   console.log('F: camera framed =', framed, '| via computed fit =', !!r.cam());
   if (!framed) results.push('F: the view was never framed');
 
-  // edge labels are on by default -- assert that, do not enable them first
-  if (!r.probe.edgeLabelsOn()) results.push('F: edge labels are not on by default');
+  // edge labels are OFF by default (decision 53) -- assert that before
+  // enabling them to check their text
+  const offByDefault = !r.probe.edgeLabelsOn();
+  const cbUnchecked = !el(r,'edge-labels-cb').checked;
+  console.log('F: edge labels off by default =', offByDefault, '| checkbox unchecked =', cbUnchecked);
+  if (!offByDefault) results.push('F: edge labels are on by default');
+  if (!cbUnchecked) results.push('F: edge-labels checkbox starts checked, disagreeing with the default');
+  r.probe.setEdgeLabels(true);
   const eEls = r.probe.edgeEls();
   const nEdge = Object.keys(eEls).length;
   // Prefix match, not an exact class: the active style appends its own class
@@ -357,6 +363,9 @@ const el = (r, id) => r.els[id] || EMPTY;
   const inp = el(r,'file-input');
   inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
+  // Edge labels are off by default (decision 53); this scenario is about
+  // how they behave when on, so turn them on rather than assume it.
+  r.probe.setEdgeLabels(true);
   r.probe.positionLabels();
 
   const boxOf = (c) => {
@@ -408,7 +417,9 @@ const el = (r, id) => r.els[id] || EMPTY;
   inp.onchange(); await tick();
 
   // Along-line is the default, so the default state is what gets checked for
-  // rotation; flat has to be selected explicitly to sample it.
+  // rotation; flat has to be selected explicitly to sample it. Edge labels
+  // themselves are off by default (decision 53), so turn them on first.
+  r.probe.setEdgeLabels(true);
   const defaultStyle = r.probe.edgeStyle();
   r.probe.setEdgeStyle('flat'); await tick();
   r.probe.positionLabels();
@@ -886,6 +897,32 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (/\bsel\b/.test(classUnselected)) results.push('T: actor icon glows before anything is selected');
   if (!/\bsel\b/.test(classSelected)) results.push('T: actor icon did not glow when selected');
   if (/\bsel\b/.test(classDeselected)) results.push('T: actor icon kept glowing after deselecting');
+}
+
+// U: decision 53's rule -- an edge label shows iff
+// (a node is selected) ? (the edge touches it) : (the global toggle is on).
+{
+  const r = run('U', { cdnBlocked: false }); await tick();
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+
+  const vis = r.probe.visible();
+  const n = vis.nodes.find(x => vis.links.filter(l => [l.source.id || l.source, l.target.id || l.target].includes(x.id)).length >= 2);
+  const touching = vis.links.filter(l => [l.source.id || l.source, l.target.id || l.target].includes(n.id)).length;
+  const shown = () => Object.values(r.probe.edgeEls()).filter(e => e.style.display !== 'none').length;
+  const at = (sel, on) => { r.probe.setEdgeLabels(on); r.probe.select(sel); r.probe.rebuild(); return shown(); };
+
+  const cases = [
+    ['toggle off, nothing selected -> 0', at(null, false), 0],
+    ['toggle off, node selected -> its edges', at(n, false), touching],
+    ['toggle off, deselected -> 0', at(null, false), 0],
+    ['toggle on, nothing selected -> all', at(null, true), vis.links.length],
+    ['toggle on, node selected -> its edges', at(n, true), touching],
+  ];
+  console.log('U: ' + cases.map(([k, got, want]) => k + ' = ' + got + (got === want ? '' : ' (want ' + want + ')')).join(' | '));
+  cases.filter(([, got, want]) => got !== want).forEach(([k, got]) => results.push('U: ' + k + ', got ' + got));
+  r.probe.select(null);
 }
 
 // W: a domain's explicit non-authority renders as node-level text, not edges

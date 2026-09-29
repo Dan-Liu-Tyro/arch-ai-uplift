@@ -100,6 +100,10 @@
       rebuildLabels();
     };
 
+    // Sync from state, not the other way: a browser can restore a checkbox's
+    // old checked state on reload, which would silently disagree with the
+    // default above.
+    document.getElementById("edge-labels-cb").checked = showEdgeLabels;
     document.getElementById("edge-labels-cb").onchange = function (e) {
       showEdgeLabels = e.target.checked;
       rebuildLabels();

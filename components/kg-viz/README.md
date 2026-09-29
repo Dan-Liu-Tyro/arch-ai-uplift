@@ -71,7 +71,7 @@ blob that existed only to let the page auto-load, which it no longer does).
 cd components/kg-viz && node verify.js
 ```
 
-Twenty-four scenarios (A–T, W–Z), exit non-zero on failure. This is the only automated check
+Twenty-five scenarios (A–U, W–Z), exit non-zero on failure. This is the only automated check
 in the repo, and it exists because **nothing this component renders can be
 observed from a Claude Code session** — see `docs/decision-log.md`'s
 "Constraints identified". It is a floor, not a substitute for opening the
@@ -277,13 +277,15 @@ no longer turns it into edges of any kind.
 - **Click a node** — highlights it and everything linked to it, dims the
   rest, and opens a panel listing every inbound and outbound relationship
   with its predicate, payload, and whether it is a feedback arc.
-- **Edge labels on the lines, on by default, and never hidden.** The
-  predicate at each edge midpoint. Two styles, switchable: **Flat**
-  (horizontal, with a backing pill so it survives crossing the line) or
-  **Along line** (rotated to the edge's screen angle, flipped past vertical
-  so text never reads upside down). With a node selected, only that node's
-  edges are labelled. The toggle is the user's and a view switch does not
-  silently override it.
+- **Edge labels on the lines: off by default, always on for a selected
+  node's edges** (decision 53). The predicate at each edge midpoint. Two
+  styles, switchable: **Flat** (horizontal, with a backing pill so it
+  survives crossing the line) or **Along line** (rotated to the edge's
+  screen angle, flipped past vertical so text never reads upside down). The
+  rule: with a node selected, exactly that node's edges are labelled,
+  whatever the global toggle says; with nothing selected, the toggle
+  decides. The toggle is the user's and a view switch does not silently
+  override it.
 - **Node labels are suppressed on collision; edge labels never are.** Greedy
   placement reserves node markers first, then places node labels, hiding any
   that would collide — a node's identity is recoverable by clicking it, so a
