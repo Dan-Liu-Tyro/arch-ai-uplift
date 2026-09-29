@@ -77,7 +77,10 @@ function run(scenario, opts) {
     if (prop === 'camera') return () => fakeCamera;
     if (prop === 'cameraPosition') return (pos, look, ms) => { calls.__cam = { pos, look, ms }; return G; };
     if (prop === 'graph2ScreenCoords') {
-      return (x, y, z) => (opts.badProjection ? { x: NaN, y: NaN } : { x: x / 2 + 500, y: y / 2 + 400 });
+      // opts.zoom stands in for the camera's distance: smaller packs the
+      // same graph into fewer pixels, as zooming out does.
+      const s = opts.zoom || 0.5;
+      return (x, y, z) => (opts.badProjection ? { x: NaN, y: NaN } : { x: x * s + 500, y: y * s + 400 });
     }
     if (prop === 'controls') return () => fakeControls;
     return (...args) => {
@@ -388,7 +391,24 @@ const el = (r, id) => r.els[id] || EMPTY;
   const nodeLabels = kids.filter(c => /^nlabel/.test(c.className));
   const edgeLabels = kids.filter(c => /^elabel/.test(c.className));
   const edgeHidden = edgeLabels.filter(c => c.style.display === 'none');
-  const nodeClash = overlaps(nodeLabels.filter(c => c.style.display === 'block').map(boxOf).filter(Boolean));
+  // Domain labels are never suppressed (decision 55), so two domain labels
+  // may overlap when crowded -- this stub projects at scale 0.5, well below
+  // the real default fit (~1.8, scenario G), so it is a zoomed-out view.
+  // Any overlap involving a suppressible label is still a bug. Scenario V
+  // checks domain-on-domain overlap at the real default zoom.
+  const domainLabelEls = new Set(r.probe.visible().nodes.filter(n => n.kind === 'domain')
+    .map(n => r.probe.labelEls()[n.id]).filter(Boolean));
+  const shownBoxes = nodeLabels.filter(c => c.style.display === 'block')
+    .map(c => { const b = boxOf(c); if (b) b.domain = domainLabelEls.has(c); return b; }).filter(Boolean);
+  const nodeClash = (() => {
+    let n = 0, ex = null;
+    for (let i = 0; i < shownBoxes.length; i++) for (let j = i + 1; j < shownBoxes.length; j++) {
+      const a = shownBoxes[i], b = shownBoxes[j];
+      if (a.domain && b.domain) continue;
+      if (a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t) { n++; if (!ex) ex = a.txt + ' / ' + b.txt; }
+    }
+    return { n, ex };
+  })();
 
   const flow = data.views.find(v => v.layout === 'layered');
   console.log('H: node labels', nodeLabels.length, '-> overlapping pairs', nodeClash.n,
@@ -958,6 +978,52 @@ const el = (r, id) => r.els[id] || EMPTY;
   console.log('U: ' + cases.map(([k, got, want]) => k + ' = ' + got + (got === want ? '' : ' (want ' + want + ')')).join(' | '));
   cases.filter(([, got, want]) => got !== want).forEach(([k, got]) => results.push('U: ' + k + ', got ' + got));
   r.probe.select(null);
+}
+
+// V: decision 55 -- zoomed far out, every domain label still shows; other
+// node labels keep collision suppression and give way to domain labels.
+{
+  const r = run('V', { cdnBlocked: false, zoom: 0.06 }); await tick();
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+  r.probe.positionLabels();
+
+  const nodes = r.probe.visible().nodes;
+  const lbl = r.probe.labelEls();
+  const shownOf = list => list.filter(n => lbl[n.id] && lbl[n.id].style.display !== 'none').length;
+  const doms = nodes.filter(n => n.kind === 'domain');
+  const others = nodes.filter(n => n.kind !== 'domain');
+  const domShown = shownOf(doms), otherShown = shownOf(others);
+  console.log('V: zoomed out -> domain labels shown =', domShown, 'of', doms.length,
+    '| other node labels shown =', otherShown, 'of', others.length);
+  if (domShown !== doms.length) results.push('V: ' + (doms.length - domShown) + ' domain label(s) hidden when zoomed out');
+  // Proves the zoom really is crowded, and that suppression still applies
+  // to non-domain labels -- otherwise the check above passes vacuously.
+  if (otherShown === others.length) results.push('V: no non-domain label was suppressed, so the zoom-out is not actually crowded');
+}
+// ...and at the real default fit (scenario G's scale), always-on domain
+// labels must not overlap each other: the accepted cost is for zoom-out only.
+{
+  const r = run('V', { cdnBlocked: false, zoom: 1.83 }); await tick();
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+  r.probe.positionLabels();
+  const lbl = r.probe.labelEls();
+  const boxes = r.probe.visible().nodes.filter(n => n.kind === 'domain' && lbl[n.id]).map(n => {
+    const m = /translate\((-?[\d.]+)px,(-?[\d.]+)px\)/.exec(lbl[n.id].style.transform || '');
+    if (!m) return null;
+    const x = +m[1], y = +m[2], w = lbl[n.id].textContent.length * 5.6;
+    return { l: x - w / 2, r: x + w / 2, t: y, b: y + 12, txt: n.title };
+  }).filter(Boolean);
+  let clash = 0, ex = null;
+  for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) {
+    const a = boxes[i], b = boxes[j];
+    if (a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t) { clash++; if (!ex) ex = a.txt + ' / ' + b.txt; }
+  }
+  console.log('V: default fit -> overlapping domain-label pairs =', clash, ex ? '(' + ex + ')' : '');
+  if (clash) results.push('V: ' + clash + ' domain labels overlap at the default zoom, e.g. ' + ex);
 }
 
 // W: a domain's explicit non-authority renders as node-level text, not edges

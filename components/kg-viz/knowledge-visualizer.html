@@ -374,7 +374,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29h — external systems drawn as a server icon";
+  var PAGE_REVISION = "2026-09-29i — domain labels never hidden on zoom-out";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
@@ -1010,10 +1010,13 @@
   // the node or edge, and by selecting a node.
   var placed = [];
 
-  function claim(el, x, y) {
+  // `force` records the box without checking it: the label is shown anyway,
+  // but later suppressible labels still see it as taken.
+  function claim(el, x, y, force) {
     var w = el.offsetWidth || el.textContent.length * 5.6;
     var h = el.offsetHeight || 12;
     var box = { l: x - w / 2 - 2, r: x + w / 2 + 2, t: y - 1, b: y + h + 1 };
+    if (force) { placed.push(box); return true; }
     for (var i = 0; i < placed.length; i++) {
       var o = placed[i];
       if (box.l < o.r && box.r > o.l && box.t < o.b && box.b > o.t) return false;
@@ -1039,6 +1042,7 @@
     } else {
       el.style.transform = "translate(-50%, 0) translate(" + x + "px," + y + "px)";
     }
+    if (opts.reserve) claim(el, x, y, true);
     if (opts.suppress && !claim(el, x, y)) { el.style.display = "none"; return false; }
     return true;
   }
@@ -1068,18 +1072,28 @@
       }
     }
 
+    // Domain labels are never suppressed (decision 55): domains are what the
+    // flow is about, and a domain name vanishing on zoom-out read as missing
+    // data. They are placed first and still reserve their space, so other
+    // node labels (actors, external systems, artefacts) give way to them
+    // rather than piling on top. Those others keep collision suppression.
+    // The cost, accepted: zoomed far enough out, domain names can overlap
+    // each other.
     if (showLabels) {
-      for (var i = 0; i < vis.nodes.length; i++) {
-        var n = vis.nodes[i];
-        var el = labelEls[n.id];
-        if (!el) continue;
-        if (!isFinite(n.x) || !isFinite(n.y)) { el.style.display = "none"; continue; }
-        var dim = keep ? !keep[n.id] : isDimmedByScope(n);
-        el.className = "nlabel" + (dim ? " dim" : "") +
-          (selected && selected.id === n.id ? " sel" : "");
-        place(el, Graph.graph2ScreenCoords(n.x, n.y, isFinite(n.z) ? n.z : 0), LABEL_DY,
-          { suppress: true });
-      }
+      [true, false].forEach(function (domainPass) {
+        for (var i = 0; i < vis.nodes.length; i++) {
+          var n = vis.nodes[i];
+          if ((n.kind === "domain") !== domainPass) continue;
+          var el = labelEls[n.id];
+          if (!el) continue;
+          if (!isFinite(n.x) || !isFinite(n.y)) { el.style.display = "none"; continue; }
+          var dim = keep ? !keep[n.id] : isDimmedByScope(n);
+          el.className = "nlabel" + (dim ? " dim" : "") +
+            (selected && selected.id === n.id ? " sel" : "");
+          place(el, Graph.graph2ScreenCoords(n.x, n.y, isFinite(n.z) ? n.z : 0), LABEL_DY,
+            domainPass ? { reserve: true } : { suppress: true });
+        }
+      });
     }
 
     if (showEdgeLabels || selected) {

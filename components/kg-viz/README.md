@@ -71,7 +71,7 @@ blob that existed only to let the page auto-load, which it no longer does).
 cd components/kg-viz && node verify.js
 ```
 
-Twenty-five scenarios (A–U, W–Z), exit non-zero on failure. This is the only automated check
+Twenty-six scenarios (A–Z), exit non-zero on failure. This is the only automated check
 in the repo, and it exists because **nothing this component renders can be
 observed from a Claude Code session** — see `docs/decision-log.md`'s
 "Constraints identified". It is a floor, not a substitute for opening the
@@ -289,10 +289,14 @@ no longer turns it into edges of any kind.
   whatever the global toggle says; with nothing selected, the toggle
   decides. The toggle is the user's and a view switch does not silently
   override it.
-- **Node labels are suppressed on collision; edge labels never are.** Greedy
-  placement reserves node markers first, then places node labels, hiding any
-  that would collide — a node's identity is recoverable by clicking it, so a
-  dropped node label costs little. Edge labels are exempt, because the
+- **Non-domain node labels are suppressed on collision; domain and edge
+  labels never are.** Greedy placement reserves node markers first, then
+  places every domain label unconditionally, still reserving its space
+  (decision 55: a domain name vanishing on zoom-out read as missing data).
+  Then it places the remaining node labels (actors, external systems,
+  artefacts), hiding any that would collide. A node's identity is
+  recoverable by clicking it. Zoomed far out, domain labels can overlap each
+  other; that is the accepted cost. Edge labels are exempt, because the
   predicate is the only place an edge's meaning appears on the canvas.
   Suppressing them was actively wrong: a longer label has a bigger box, so it
   collides more often and was dropped first, meaning **the most informative

@@ -111,6 +111,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 52 | `kg-viz` colours: Tyro staff white; all external actors and external systems light yellow | `kg-viz` |
 | 53 | `kg-viz` edge labels off by default; a selected node's edges always labelled | `kg-viz` |
 | 54 | `kg-viz` external systems drawn as a flat server-rack SVG icon, not a sphere | `kg-viz` |
+| 55 | `kg-viz` domain labels never suppressed when node labels are on; overlap on deep zoom-out accepted | `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2478,6 +2479,22 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       so those three cannot disagree about which nodes are icons.
       Scenarios T, O and N now cover external systems too. T was confirmed
       failing on the old page first.
+55. **`kg-viz` domain labels are never hidden by collision suppression when
+    node labels are on.** Requested by the user on 2026-09-29 after seeing
+    domain names disappear on zoom-out. Domain labels are placed first,
+    unconditionally, and still reserve their space. Other node labels
+    (actors, external systems, artefacts) keep suppression and give way to
+    them.
+    - **The trade-off, accepted.** This partly reverses the earlier "text
+      that overlaps is worse than absent text" rule: zoomed far enough out,
+      domain names can overlap each other. The alternative, a vanishing
+      domain name, read to the user as missing data. Scenario V checks both
+      halves. Zoomed out, all 17 domain labels show while non-domain labels
+      are still suppressed; this was confirmed failing at 1 of 17 on the old
+      page. At the real default fit, no two domain labels overlap. Scenario
+      H now tolerates only domain-on-domain overlap, because the stub
+      projects at scale 0.5, well below the ~1.8 default fit, so it is
+      effectively a zoomed-out view.
     - **Known overlap, flagged rather than fixed.** A selected node is
       drawn white (`nodeDisplayColor`), so a selected external actor briefly
       shares staff's colour. The glow on a selected actor icon and the
