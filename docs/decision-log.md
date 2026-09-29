@@ -121,6 +121,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 62 | `kg-viz` legend titled "Legend"; actors shown as Internal user (white) / External user (light yellow) | `kg-viz` |
 | 63 | `kg-viz` light/dark theme (`T`); light re-maps sphere colours (≥3:1), icons keep white/light-yellow with a dark outline; print stylesheet + preserved canvas | `kg-viz` |
 | 64 | `kg-viz` arrowheads: flat 12×10px 2D triangles in a screen overlay (replacing enlarged 3D cones), tip on target edge | `kg-viz` |
+| 65 | `kg-viz` `linkOpacity` pinned to 1 (was an unset 0.2 default): selected edges solid, unselected look unchanged, arrowheads get their own alpha | `kg-viz`, `meta/perception-failures` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2755,6 +2756,28 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       while the data has none. Scenario F checks that the library arrows
       are off, that there is one flat arrowhead per edge, its tip distance,
       its 12×10 size, and that its colour matches its line.
+65. **Edge colour alphas are now real opacity: the library's `linkOpacity`
+    is pinned to 1, so selected edges draw solid.** Found from the user's
+    report that selected edges were too transparent in both themes. The
+    library's `linkOpacity` defaults to 0.2 and multiplies every edge. It
+    had never been set, so "solid" selected edges drew at 0.2 and the
+    "0.85" flow colour at about 0.17. Recorded as perception failure 13.
+    - **What changes on screen.** Only selected (and next-level) edges,
+      which go from 20% to fully solid. Unselected, feedback-arc and dimmed
+      edge alphas in `THEME` are rewritten to their old effective values
+      (0.85 × 0.2 and so on), so everything the user had already judged
+      looks the same as before.
+    - **Arrowheads get their own colour** (`arrowDisplayColor`). A flat
+      arrowhead coloured like its now-truly-faint unselected line would be
+      unreadable, undoing decision 64. So unselected arrowheads use a
+      stronger alpha (about 0.8), a highlighted edge's arrowhead is exactly
+      its solid line colour, and an edge dimmed by selection has a dim
+      arrowhead.
+    - **Verified.** Scenario F measures effective opacity (colour alpha ×
+      `linkOpacity`): selected must be at least 0.95, unselected must stay
+      between 0.12 and 0.25, and unselected arrowheads must be at least
+      0.7. It was confirmed failing on the old page, which reported
+      selected edges at 0.20.
     - **Known overlap, flagged rather than fixed.** A selected node is
       drawn white (`nodeDisplayColor`), so a selected external actor briefly
       shares staff's colour. The glow on a selected actor icon and the

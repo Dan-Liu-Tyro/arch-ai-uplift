@@ -57,22 +57,30 @@
   // and amber). NODE_PRESENTATION's `color` is the dark value; `nodes` below
   // overrides it per presentation key for light.
   var THEME = {
+    // Edge alphas here are the *real* on-screen opacity (decision 65): the
+    // library's linkOpacity is pinned to 1 in renderer.js. It used to be
+    // left at its 0.2 default, which silently multiplied every edge -- the
+    // "0.85" flow colour really drew at 0.17, and a solid selected edge at
+    // 0.2. The unselected values below are those old effective values, so
+    // unselected edges look exactly as before; selected ones are now solid.
     dark: {
-      bg: "#05070d", flow: "rgba(196,212,240,0.85)", back: "rgba(255,140,155,0.9)",
-      backSel: "#ff7e8f", dimEdge: "rgba(110,120,140,0.09)", dimNode: "rgba(110,120,140,0.18)",
+      bg: "#05070d", flow: "rgba(196,212,240,0.17)", back: "rgba(255,140,155,0.18)",
+      backSel: "#ff7e8f", dimEdge: "rgba(110,120,140,0.03)", dimNode: "rgba(110,120,140,0.18)",
       scopeDim: "rgba(110,120,140,0.22)", selNode: "#ffffff",
       particle: "#7ff0c0", particleBack: "#ff9fae", up: "#ffb454", down: "#6fe3a8",
       selEdge: "#6fe3a8",
+      arrow: "rgba(196,212,240,0.8)", backArrow: "rgba(255,140,155,0.85)", dimArrow: "rgba(110,120,140,0.15)",
       stages: ["#8b7bff", "#3fd0ff", "#4dff9e"], nodes: {}
     },
     light: {
-      bg: "#ffffff", flow: "rgba(55,65,90,0.7)", back: "rgba(200,55,80,0.85)",
-      backSel: "#c8374f", dimEdge: "rgba(120,130,150,0.14)", dimNode: "rgba(150,160,175,0.3)",
+      bg: "#ffffff", flow: "rgba(55,65,90,0.14)", back: "rgba(200,55,80,0.17)",
+      backSel: "#c8374f", dimEdge: "rgba(120,130,150,0.04)", dimNode: "rgba(150,160,175,0.3)",
       scopeDim: "rgba(150,160,175,0.35)", selNode: "#0b0f19",
       particle: "#1f9d5c", particleBack: "#c8374f", up: "#d9822b", down: "#1f9d5c",
       // A selected node's own edges (Next-level off): black on white, the
       // user's call -- green read as just another colour on a white page.
       selEdge: "#111722",
+      arrow: "rgba(55,65,90,0.75)", backArrow: "rgba(200,55,80,0.8)", dimArrow: "rgba(120,130,150,0.2)",
       stages: ["#6a5ae0", "#1a8fc4", "#1f9d5c"],
       nodes: {
         "domain": "#1a8fc4", "artefact": "#7a5cd6", "principle": "#1f9d5c", "actor": "#6b7488"
@@ -101,7 +109,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29y — light: selected node's edges black";
+  var PAGE_REVISION = "2026-09-29z — selected edges fully opaque (linkOpacity 1)";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 

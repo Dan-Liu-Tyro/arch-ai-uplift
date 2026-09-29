@@ -115,7 +115,7 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), select: n => { selected = n; positionIcons(); }, renderDetail: n => renderDetail(n), openDomainRef: ref => openDomainRef(ref), selectedNode: () => selected, openFromGraph: n => openFromGraph(n), goBack: () => goBack(), closeDetail: () => closeDetail(), focusMode: () => focusMode, bodyFocus: () => document.body.classList._on, nextLevel: () => nextLevel, highlightIds: () => highlightIds(), chainRole: l => chainRole(l), theme: () => theme, nodeDisplayColor: n => nodeDisplayColor(n), arrowEls: () => arrowEls, };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), select: n => { selected = n; positionIcons(); }, renderDetail: n => renderDetail(n), openDomainRef: ref => openDomainRef(ref), selectedNode: () => selected, openFromGraph: n => openFromGraph(n), goBack: () => goBack(), closeDetail: () => closeDetail(), focusMode: () => focusMode, bodyFocus: () => document.body.classList._on, nextLevel: () => nextLevel, highlightIds: () => highlightIds(), chainRole: l => chainRole(l), theme: () => theme, nodeDisplayColor: n => nodeDisplayColor(n), arrowEls: () => arrowEls, positionArrows: () => positionArrows(), };', ctx);
 
   return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam, controls: () => fakeControls, camera: () => fakeCamera };
 }
@@ -322,7 +322,9 @@ const el = (r, id) => r.els[id] || EMPTY;
     if (Math.abs(gotR - wantR) > 0.6) { tipOff++; ex = ex || (t.title + ': ' + gotR.toFixed(1) + ' vs ' + wantR.toFixed(1)); }
     const bx = (b1x + b2x) / 2, by = (b1y + b2y) / 2;
     if (Math.abs(Math.hypot(tx - bx, ty - by) - 12) > 0.3 || Math.abs(Math.hypot(b1x - b2x, b1y - b2y) - 10) > 0.3) sizeOff++;
-    if (el.getAttribute('fill') !== r.calls['__last_linkColor'](l)) colourOff++;
+    // Unselected: a readable arrowhead even though its line is faint.
+    const fa = parseFloat((String(el.getAttribute('fill')).match(/[\d.]+\)$/) || ['1)'])[0]);
+    if (!(fa >= 0.7)) colourOff++;
   });
   console.log('F: library 3D arrowheads =', libArrow, '| flat arrowheads drawn =', drawn, 'of', live.length,
     '| tip off target edge =', tipOff, ex ? '(' + ex + ')' : '', '| wrong size =', sizeOff, '| colour mismatch =', colourOff);
@@ -330,7 +332,22 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (drawn !== live.length) results.push('F: only ' + drawn + ' of ' + live.length + ' edges have a flat arrowhead');
   if (tipOff) results.push('F: ' + tipOff + ' arrowhead tips not on the target edge, e.g. ' + ex);
   if (sizeOff) results.push('F: ' + sizeOff + ' arrowheads not 12x10px');
-  if (colourOff) results.push('F: ' + colourOff + ' arrowheads coloured differently from their line');
+  if (colourOff) results.push('F: ' + colourOff + ' unselected arrowheads fainter than 0.7 alpha');
+  // Selected: a highlighted edge's arrowhead is exactly its (solid) line
+  // colour; an edge dimmed by the selection has a dim arrowhead.
+  {
+    const sn = r.probe.visible().nodes.find(n => live.some(l => (l.source.id || l.source) === n.id));
+    r.probe.select(sn); r.probe.positionArrows();
+    const kOf = l => (l.source.id || l.source) + '->' + (l.target.id || l.target) + ':' + (l.predicate || '');
+    const on = live.find(l => (l.source.id || l.source) === sn.id);
+    const off = live.find(l => !r.probe.chainRole(l));
+    const onOk = arrows[kOf(on)].getAttribute('fill') === r.calls['__last_linkColor'](on);
+    const offA = off ? parseFloat((String(arrows[kOf(off)].getAttribute('fill')).match(/[\d.]+\)$/) || ['1)'])[0]) : 0;
+    console.log('F: selected arrowhead matches its line =', onOk, '| dimmed arrowhead alpha =', offA);
+    if (!onOk) results.push('F: a highlighted edge\'s arrowhead is not its line colour');
+    if (!(offA <= 0.25)) results.push('F: an edge dimmed by selection kept a strong arrowhead (' + offA + ')');
+    r.probe.select(null); r.probe.positionArrows();
+  }
 
   // particles: direction as motion on every edge
   const parts = r.calls['__last_linkDirectionalParticles'];
@@ -341,14 +358,29 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (!flowParts) results.push('F: no directional particles on the flow view');
   if (!(speed > 0 && speed < 0.02)) results.push('F: particle speed not a slow drift: ' + speed);
 
-  // edge weight: flow edges must be far more opaque than before (was 0.42)
+  // edge weight, as *effective* opacity = colour alpha x linkOpacity
+  // (decision 65). This check used to assert the colour alpha alone
+  // (>= 0.8) and passed while the library's unset 0.2 linkOpacity drew
+  // every edge at a fifth of that -- the reason selected edges never looked
+  // solid. Unselected keep their old effective look; selected are solid.
   const colFn = r.calls['__last_linkColor'];
   const wFn = r.calls['__last_linkWidth'];
+  const linkOp = r.calls['__last_linkOpacity'];
+  const alphaOf = c => /^#/.test(c) ? 1 : parseFloat((String(c).match(/[\d.]+\)$/) || ['1)'])[0]);
   const col = colFn(flow.links[0]);
   const wid = wFn(flow.links[0]);
-  const alpha = parseFloat((String(col).match(/[\d.]+\)$/) || ['1)'])[0]);
-  console.log('F: flow edge colour =', col, '| alpha =', alpha, '| width =', wid);
-  if (!(alpha >= 0.8)) results.push('F: flow edge still faint, alpha ' + alpha);
+  const effUnsel = alphaOf(col) * (linkOp === undefined ? 0.2 : linkOp);
+  const selNode = r.probe.visible().nodes.find(n => r.probe.visible().links.some(l => (l.source.id || l.source) === n.id));
+  r.probe.select(selNode);
+  const selLink = r.probe.visible().links.find(l => (l.source.id || l.source) === selNode.id);
+  const effSel = alphaOf(colFn(selLink)) * (linkOp === undefined ? 0.2 : linkOp);
+  const selWid = wFn(selLink);
+  r.probe.select(null);
+  console.log('F: linkOpacity =', linkOp, '| unselected effective opacity =', effUnsel.toFixed(2),
+    '| selected effective opacity =', effSel.toFixed(2), '| width unselected/selected =', wid, '/', selWid);
+  if (linkOp !== 1) results.push('F: linkOpacity is ' + linkOp + ', not 1 -- every edge colour is being multiplied down');
+  if (!(effSel >= 0.95)) results.push('F: selected edge not solid, effective opacity ' + effSel.toFixed(2));
+  if (!(effUnsel >= 0.12 && effUnsel <= 0.25)) results.push('F: unselected edge opacity changed from its old look: ' + effUnsel.toFixed(2));
   if (!(wid >= 1.5)) results.push('F: flow edge still thin, width ' + wid);
 }
 

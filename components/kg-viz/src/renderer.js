@@ -60,6 +60,10 @@
       // Edges were too faint to read against the near-black background --
       // 43 of them are the content, so they are nearly opaque.
       .linkColor(function (l) { return edgeDisplayColor(l); })
+      // Pinned to 1 so an edge's colour alpha is its real opacity (decision
+      // 65); the library default of 0.2 multiplied every edge, which is why
+      // selected edges never looked solid.
+      .linkOpacity(1)
       .linkWidth(function (l) {
         if (!selected) return 1.6;
         return chainRole(l) ? 3 : 0.4;

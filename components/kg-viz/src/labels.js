@@ -123,7 +123,9 @@
   // edge: a sphere's world radius (the library's own cbrt(val) * relSize)
   // times the live px-per-unit along this edge, or a fixed pixel radius for
   // an icon, whose glyph is a fixed pixel size. Colour comes from
-  // edgeDisplayColor, the function that colours the line itself. Curved
+  // arrowDisplayColor: the line's own colour when it is highlighted, a
+  // stronger alpha than the deliberately faint unselected line otherwise
+  // (decision 65). Curved
   // edges (feedback arcs) take the straight-line direction -- an
   // approximation, and none are in the current data.
   var arrowEls = {};
@@ -164,7 +166,7 @@
       el.setAttribute("d", "M" + tx.toFixed(1) + " " + ty.toFixed(1) +
         " L" + (bx + px).toFixed(1) + " " + (by + py).toFixed(1) +
         " L" + (bx - px).toFixed(1) + " " + (by - py).toFixed(1) + " Z");
-      el.setAttribute("fill", edgeDisplayColor(l));
+      el.setAttribute("fill", arrowDisplayColor(l));
     }
   }
 

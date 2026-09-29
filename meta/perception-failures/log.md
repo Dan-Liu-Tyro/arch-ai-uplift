@@ -685,3 +685,48 @@ here. The 3D silhouette mechanism (`personify()`, its clone/head bookkeeping,
 material-resync, and degrade-on-failure path) was removed entirely rather
 than merely relabelled, once the icon covered every view and there was no
 view left for it to be the fallback for.
+
+## 13. An edge's colour alpha taken to be its on-screen opacity
+
+**Date.** 2026-09-29.
+
+**Belief asserted.** That `kg-viz`'s edges were drawn "nearly opaque".
+The flow colour was `rgba(196,212,240,0.85)` and selected edges used a
+solid hex. This was stated in a `renderer.js` comment ("43 of them are the
+content, so they are nearly opaque") and encoded in `verify.js` scenario F,
+which asserted the colour alpha was at least 0.8 and passed on that basis.
+Held from 2026-09-23 (`0aade0b`) until the user reported, six days later,
+that selected edges looked too transparent in both themes.
+
+**Actual evidence behind it.** None about rendering. The library
+multiplies every link material's opacity by `linkOpacity`, which defaults
+to 0.2 and was never set. So flow edges really drew at about 0.17, and
+"solid" selected edges at 0.2. The colour string was read as the result,
+when it is only an input to a multiplication whose other factor sat in a
+library default nobody had looked at.
+
+**How it formed.** An accessor's return value was treated as the output of
+the pipeline, because it is the last value in the code that sets it. The
+library's own property table (`linkOpacity:{default:.2}`) was never
+checked, although the same table's `nodeOpacity` default is exactly the
+kind of thing that silently changes what a colour means.
+
+**How it propagated.** Into a comment that justified a design choice ("too
+faint, so nearly opaque"). Into a verifier check that measured the
+unrendered input and so passed while the rendered output was a fifth of
+what it claimed. Into every later decision that tuned edge colours by alpha
+(themes, dimming, next-level tints), all of it scaled by 0.2 without anyone
+knowing.
+
+**Caught by.** The user, from looking at the page: "the selected edge is a
+bit too transparent."
+
+**Fix.** `linkOpacity` is pinned to 1, so a colour's alpha is its real
+opacity. The unselected alphas are rewritten to their old effective values
+(0.85 × 0.2 ≈ 0.17), so nothing that looked right changes, and selected
+edges become truly solid. Scenario F now asserts effective opacity (colour
+alpha × `linkOpacity`) and fails if `linkOpacity` isn't 1. It was confirmed
+failing on the old page, reporting selected edges at 0.20. The procedural
+rule is `universal.md`'s "A green check after a data-shape change proves
+nothing until it has failed once", in its general form: check the rendered
+quantity, not the input to it. Not restated as a new rule.

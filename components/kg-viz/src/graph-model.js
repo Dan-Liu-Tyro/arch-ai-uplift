@@ -114,6 +114,15 @@
     return T("flow");
   }
 
+  // An arrowhead's colour. Same as its line wherever the line is solid (a
+  // highlighted edge), but an unselected line is deliberately faint (~0.17)
+  // and a triangle that faint is unreadable -- so unselected arrowheads get
+  // their own, stronger alpha (decision 65), and dimmed ones stay dim.
+  function arrowDisplayColor(l) {
+    if (selected) return chainRole(l) ? edgeDisplayColor(l) : T("dimArrow");
+    return l.back_edge ? T("backArrow") : T("arrow");
+  }
+
   // The single source of truth for "what colour is this node right now",
   // selection and scope dimming included -- shared by the 3D mesh's
   // nodeColor() accessor and the 2D actor icon overlay, so the two never
