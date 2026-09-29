@@ -198,6 +198,20 @@
   #notes h3 { margin: 0 0 6px; font-size: 13px; color: #fff; }
   #notes code { background: rgba(0,0,0,0.35); padding: 1px 5px; border-radius: 4px; }
   #notes div + div { margin-top: 6px; }
+  /* Focus mode (decision 56): everything but the graph and its overlays
+     hidden. !important because #controls.ready / #stats.ready and
+     #detail.open each set their own display. Diagnostics (#notes) stay --
+     an error should never be hidden by a viewing mode. */
+  body.focus #controls, body.focus #stats, body.focus #detail,
+  body.focus #hint { display: none !important; }
+  #focus-exit { display: none; position: absolute; top: 12px; right: 14px; z-index: 6;
+    font-size: 11px; color: #8d97ad; background: rgba(12, 16, 26, 0.7);
+    border: 1px solid rgba(120, 140, 180, 0.28); border-radius: 99px;
+    padding: 4px 10px; cursor: pointer; user-select: none; }
+  #focus-exit:hover { color: #fff; }
+  #focus-exit span { border: 1px solid rgba(120,140,180,0.4); border-radius: 3px;
+    padding: 0 4px; margin-left: 4px; font-size: 10px; }
+  body.focus #focus-exit { display: block; }
   #picker { position: absolute; inset: 0; display: none; z-index: 20;
     background: rgba(5, 7, 13, 0.92); align-items: center; justify-content: center; }
   #picker.open { display: flex; }
@@ -267,6 +281,9 @@
       <button id="fit-btn">Fit to view</button>
       <button id="reset-layout-btn">Reset positions</button>
     </div>
+    <div class="seg" style="margin-top: 4px;">
+      <button id="focus-btn" title="Hide every panel and show only the graph">Full screen (F)</button>
+    </div>
 
     <div class="group-label">Graph file</div>
     <div class="seg">
@@ -285,6 +302,8 @@
     <span class="back" id="detail-back" onclick="goBack()" title="Back to the previous domain" style="display:none">&#8592;</span>
     <div id="detail-body"></div>
   </div>
+
+  <div id="focus-exit" title="Exit full screen (F or Esc)">&#10005; Exit full screen <span>F</span></div>
 
   <div id="hint">Click a node to inspect it and its relationships &middot; drag to pan &middot; scroll to zoom</div>
 

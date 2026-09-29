@@ -115,7 +115,7 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), select: n => { selected = n; positionIcons(); }, renderDetail: n => renderDetail(n), openDomainRef: ref => openDomainRef(ref), selectedNode: () => selected, openFromGraph: n => openFromGraph(n), goBack: () => goBack(), closeDetail: () => closeDetail(), };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), select: n => { selected = n; positionIcons(); }, renderDetail: n => renderDetail(n), openDomainRef: ref => openDomainRef(ref), selectedNode: () => selected, openFromGraph: n => openFromGraph(n), goBack: () => goBack(), closeDetail: () => closeDetail(), focusMode: () => focusMode, bodyFocus: () => document.body.classList._on, };', ctx);
 
   return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam, controls: () => fakeControls, camera: () => fakeCamera };
 }
@@ -1204,6 +1204,37 @@ const el = (r, id) => r.els[id] || EMPTY;
     console.log('Z: ' + steps.map(([k, ok]) => k + ' = ' + !!ok).join(' | '));
     steps.filter(([, ok]) => !ok).forEach(([k]) => results.push('Z: back navigation failed at "' + k + '"'));
   }
+}
+
+// FS: decision 56's full-screen focus mode -- "f" and the buttons toggle it,
+// it hides the panels (body.focus), the camera refits without the panel
+// keep-out, and "f" is ignored with a modifier (Cmd/Ctrl+F is find) or
+// while typing in a field.
+{
+  const r = run('FS', { cdnBlocked: false }); await tick();
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+
+  const key = (extra) => r.listeners.keydown && r.listeners.keydown(Object.assign({ key: 'f', target: { tagName: 'CANVAS' } }, extra || {}));
+  const on = () => r.probe.focusMode();
+  const bodyOn = () => r.probe.bodyFocus();
+  const lookX = () => r.cam() && r.cam().look.x;
+
+  const steps = [];
+  steps.push(['has a keydown handler', typeof r.listeners.keydown === 'function']);
+  const xBefore = lookX();
+  key();                          steps.push(['f enters', on() && bodyOn()]);
+  const xAfter = lookX();         steps.push(['refit drops the panel keep-out', xBefore !== undefined && xAfter > xBefore]);
+  key({ metaKey: true });         steps.push(['Cmd+F ignored', on()]);
+  key({ target: { tagName: 'INPUT' } }); steps.push(['f in a field ignored', on()]);
+  key();                          steps.push(['f exits', !on() && !bodyOn()]);
+  steps.push(['refit restores the keep-out', lookX() === xBefore]);
+  el(r,'focus-btn').onclick && el(r,'focus-btn').onclick();   steps.push(['button enters', on()]);
+  el(r,'focus-exit').onclick && el(r,'focus-exit').onclick(); steps.push(['exit button exits', !on()]);
+
+  console.log('FS: ' + steps.map(([k, ok]) => k + ' = ' + !!ok).join(' | '));
+  steps.filter(([, ok]) => !ok).forEach(([k]) => results.push('FS: focus mode failed at "' + k + '"'));
 }
 
 // X: payments.json's not_authoritative_for matches kg-content's domains.json.

@@ -293,6 +293,28 @@
     rebuildBands();
   }
 
+  // Full-screen focus mode (decision 56): every panel hidden, the browser in
+  // real fullscreen where it allows it, and the camera refit to the whole
+  // window -- fitLayered() drops its control-panel keep-out while this is
+  // on. Selecting a node still highlights it and labels its edges; only the
+  // detail pane is hidden. Browser fullscreen is best-effort: if the
+  // request is refused, the panels still hide, which is the part that
+  // matters. Esc leaves browser fullscreen natively, and the
+  // fullscreenchange handler in renderer.js follows it out of focus mode
+  // too, so the two can't disagree.
+  function setFocusMode(on) {
+    if (on === focusMode) return;
+    focusMode = on;
+    document.body.classList[on ? "add" : "remove"]("focus");
+    var root = document.documentElement;
+    if (on && root && root.requestFullscreen && !document.fullscreenElement) {
+      var p = root.requestFullscreen();
+      if (p && p.catch) p.catch(function () {});
+    }
+    if (!on && document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+    setTimeout(frameGraph, 350);
+  }
+
   function refresh() {
     buildControls();
     Graph.graphData(visibleData());

@@ -71,7 +71,7 @@ blob that existed only to let the page auto-load, which it no longer does).
 cd components/kg-viz && node verify.js
 ```
 
-Twenty-six scenarios (A–Z), exit non-zero on failure. This is the only automated check
+Twenty-seven scenarios (A–Z, then FS), exit non-zero on failure. This is the only automated check
 in the repo, and it exists because **nothing this component renders can be
 observed from a Claude Code session** — see `docs/decision-log.md`'s
 "Constraints identified". It is a floor, not a substitute for opening the
@@ -302,6 +302,13 @@ no longer turns it into edges of any kind.
   collides more often and was dropped first, meaning **the most informative
   predicates were the ones that disappeared**. `verify.js` asserts that all 43
   are placed and that the longest is among them.
+- **Full-screen focus mode** (decision 56) — **Full screen (F)** in the
+  control panel, or the `F` key, hides every panel and puts the browser in
+  real fullscreen where it allows it. The camera refits to the whole
+  window. `F`, the **Exit full screen** pill at the top right, or Esc
+  leaves it. `F` is ignored with a modifier (Cmd/Ctrl+F stays the browser's
+  find) and while typing in a field. Selection still highlights and labels
+  edges; only the detail pane is hidden. Diagnostics stay visible.
 - **Direction as motion** — a slow stream of particles runs source → target on
   every edge, so direction reads without tracing an arrowhead.
 - **Feedback arcs** drawn dashed/curved, in a contrasting colour for both the

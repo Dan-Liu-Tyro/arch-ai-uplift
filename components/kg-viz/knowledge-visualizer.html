@@ -198,6 +198,20 @@
   #notes h3 { margin: 0 0 6px; font-size: 13px; color: #fff; }
   #notes code { background: rgba(0,0,0,0.35); padding: 1px 5px; border-radius: 4px; }
   #notes div + div { margin-top: 6px; }
+  /* Focus mode (decision 56): everything but the graph and its overlays
+     hidden. !important because #controls.ready / #stats.ready and
+     #detail.open each set their own display. Diagnostics (#notes) stay --
+     an error should never be hidden by a viewing mode. */
+  body.focus #controls, body.focus #stats, body.focus #detail,
+  body.focus #hint { display: none !important; }
+  #focus-exit { display: none; position: absolute; top: 12px; right: 14px; z-index: 6;
+    font-size: 11px; color: #8d97ad; background: rgba(12, 16, 26, 0.7);
+    border: 1px solid rgba(120, 140, 180, 0.28); border-radius: 99px;
+    padding: 4px 10px; cursor: pointer; user-select: none; }
+  #focus-exit:hover { color: #fff; }
+  #focus-exit span { border: 1px solid rgba(120,140,180,0.4); border-radius: 3px;
+    padding: 0 4px; margin-left: 4px; font-size: 10px; }
+  body.focus #focus-exit { display: block; }
   #picker { position: absolute; inset: 0; display: none; z-index: 20;
     background: rgba(5, 7, 13, 0.92); align-items: center; justify-content: center; }
   #picker.open { display: flex; }
@@ -267,6 +281,9 @@
       <button id="fit-btn">Fit to view</button>
       <button id="reset-layout-btn">Reset positions</button>
     </div>
+    <div class="seg" style="margin-top: 4px;">
+      <button id="focus-btn" title="Hide every panel and show only the graph">Full screen (F)</button>
+    </div>
 
     <div class="group-label">Graph file</div>
     <div class="seg">
@@ -285,6 +302,8 @@
     <span class="back" id="detail-back" onclick="goBack()" title="Back to the previous domain" style="display:none">&#8592;</span>
     <div id="detail-body"></div>
   </div>
+
+  <div id="focus-exit" title="Exit full screen (F or Esc)">&#10005; Exit full screen <span>F</span></div>
 
   <div id="hint">Click a node to inspect it and its relationships &middot; drag to pan &middot; scroll to zoom</div>
 
@@ -374,12 +393,12 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29i — domain labels never hidden on zoom-out";
+  var PAGE_REVISION = "2026-09-29j — full-screen focus mode (F)";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
   var DATA = null, view = null, Graph = null;
-  var dims = 2, scopeMode = "all", showLabels = true, showEdgeLabels = false, edgeLabelStyle = "along";
+  var dims = 2, scopeMode = "all", focusMode = false, showLabels = true, showEdgeLabels = false, edgeLabelStyle = "along";
   var statsCollapsed = false;
   var showBands = true;
   // Anything that prevents the graph drawing goes on screen. Errors thrown
@@ -811,6 +830,28 @@
     // Labels before bands -- bands are sized from the label elements.
     rebuildLabels();
     rebuildBands();
+  }
+
+  // Full-screen focus mode (decision 56): every panel hidden, the browser in
+  // real fullscreen where it allows it, and the camera refit to the whole
+  // window -- fitLayered() drops its control-panel keep-out while this is
+  // on. Selecting a node still highlights it and labels its edges; only the
+  // detail pane is hidden. Browser fullscreen is best-effort: if the
+  // request is refused, the panels still hide, which is the part that
+  // matters. Esc leaves browser fullscreen natively, and the
+  // fullscreenchange handler in renderer.js follows it out of focus mode
+  // too, so the two can't disagree.
+  function setFocusMode(on) {
+    if (on === focusMode) return;
+    focusMode = on;
+    document.body.classList[on ? "add" : "remove"]("focus");
+    var root = document.documentElement;
+    if (on && root && root.requestFullscreen && !document.fullscreenElement) {
+      var p = root.requestFullscreen();
+      if (p && p.catch) p.catch(function () {});
+    }
+    if (!on && document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+    setTimeout(frameGraph, 350);
   }
 
   function refresh() {
@@ -1313,7 +1354,9 @@
     // names* are centred in the space actually visible rather than behind
     // the controls or run off the edge.
     var margin = labelPixelMargins();
-    var availW = Math.max(160, W - LEFT_INSET - 2 * margin.x);
+    // No panel to keep clear of in focus mode (decision 56).
+    var inset = focusMode ? 0 : LEFT_INSET;
+    var availW = Math.max(160, W - inset - 2 * margin.x);
     var availH = Math.max(160, H - 2 * margin.y);
     var scale = Math.min(availW / (w + 2 * FIT_PADDING), availH / (h + 2 * FIT_PADDING));
 
@@ -1322,7 +1365,7 @@
 
     // Shift the look-at point left so the box lands centred inside the
     // available region instead of the full window.
-    var cx = (minX + maxX) / 2 - (LEFT_INSET / 2) / scale;
+    var cx = (minX + maxX) / 2 - (inset / 2) / scale;
     var cy = (minY + maxY) / 2;
     Graph.cameraPosition({ x: cx, y: cy, z: dist }, { x: cx, y: cy, z: 0 }, 400);
     return true;
@@ -1680,6 +1723,28 @@
       var host = document.getElementById("graph");
       Graph.width(host.clientWidth).height(host.clientHeight);
     });
+
+    document.getElementById("focus-btn").onclick = function () { setFocusMode(true); };
+    document.getElementById("focus-exit").onclick = function () { setFocusMode(false); };
+    // "f" toggles focus mode. Not while typing into a field, and not with a
+    // modifier -- Cmd/Ctrl+F is the browser's find.
+    window.addEventListener("keydown", function (e) {
+      if (e.key !== "f" && e.key !== "F") return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      var t = e.target;
+      if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName || "")) return;
+      if (!DATA) return;
+      if (e.preventDefault) e.preventDefault();
+      setFocusMode(!focusMode);
+    });
+    if (document.addEventListener) {
+      document.addEventListener("fullscreenchange", function () {
+        // Esc (or any browser-initiated exit) leaves focus mode with it.
+        if (!document.fullscreenElement && focusMode) setFocusMode(false);
+        // The window has changed size; refit once it has settled.
+        else setTimeout(frameGraph, 150);
+      });
+    }
 
     document.getElementById("open-btn").onclick = function () {
       document.getElementById("file-input").click();

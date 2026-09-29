@@ -58,12 +58,12 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29i — domain labels never hidden on zoom-out";
+  var PAGE_REVISION = "2026-09-29j — full-screen focus mode (F)";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
   var DATA = null, view = null, Graph = null;
-  var dims = 2, scopeMode = "all", showLabels = true, showEdgeLabels = false, edgeLabelStyle = "along";
+  var dims = 2, scopeMode = "all", focusMode = false, showLabels = true, showEdgeLabels = false, edgeLabelStyle = "along";
   var statsCollapsed = false;
   var showBands = true;
   // Anything that prevents the graph drawing goes on screen. Errors thrown

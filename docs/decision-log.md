@@ -112,6 +112,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 53 | `kg-viz` edge labels off by default; a selected node's edges always labelled | `kg-viz` |
 | 54 | `kg-viz` external systems drawn as a flat server-rack SVG icon, not a sphere | `kg-viz` |
 | 55 | `kg-viz` domain labels never suppressed when node labels are on; overlap on deep zoom-out accepted | `kg-viz` |
+| 56 | `kg-viz` full-screen focus mode: panel button or `F` key; Esc exits | `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2495,6 +2496,20 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       H now tolerates only domain-on-domain overlap, because the stub
       projects at scale 0.5, well below the ~1.8 default fit, so it is
       effectively a zoomed-out view.
+56. **`kg-viz` gains a full-screen focus mode, toggled by a panel button or
+    the `F` key.** Requested by the user on 2026-09-29: hide everything and
+    show only the graph, full screen. It hides the control, stats and
+    detail panels and the hint, requests browser fullscreen as a
+    best-effort extra, and refits the camera without the control-panel
+    keep-out. It is left by `F`, a small exit pill at the top right, or Esc.
+    Esc is followed via `fullscreenchange`, so browser fullscreen and focus
+    mode can't disagree.
+    - **Choices made without asking, all cheap to change.** Diagnostics
+      (`#notes`) stay visible, because an error should never be hidden by a
+      viewing mode. The detail pane hides, but selection still highlights
+      and labels edges. `F` is ignored with a modifier (Cmd/Ctrl+F is the
+      browser's find) and while typing in a field. Scenario FS covers the
+      toggles, the ignore cases and the refit.
     - **Known overlap, flagged rather than fixed.** A selected node is
       drawn white (`nodeDisplayColor`), so a selected external actor briefly
       shares staff's colour. The glow on a selected actor icon and the

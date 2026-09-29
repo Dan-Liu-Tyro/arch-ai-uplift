@@ -61,7 +61,9 @@
     // names* are centred in the space actually visible rather than behind
     // the controls or run off the edge.
     var margin = labelPixelMargins();
-    var availW = Math.max(160, W - LEFT_INSET - 2 * margin.x);
+    // No panel to keep clear of in focus mode (decision 56).
+    var inset = focusMode ? 0 : LEFT_INSET;
+    var availW = Math.max(160, W - inset - 2 * margin.x);
     var availH = Math.max(160, H - 2 * margin.y);
     var scale = Math.min(availW / (w + 2 * FIT_PADDING), availH / (h + 2 * FIT_PADDING));
 
@@ -70,7 +72,7 @@
 
     // Shift the look-at point left so the box lands centred inside the
     // available region instead of the full window.
-    var cx = (minX + maxX) / 2 - (LEFT_INSET / 2) / scale;
+    var cx = (minX + maxX) / 2 - (inset / 2) / scale;
     var cy = (minY + maxY) / 2;
     Graph.cameraPosition({ x: cx, y: cy, z: dist }, { x: cx, y: cy, z: 0 }, 400);
     return true;

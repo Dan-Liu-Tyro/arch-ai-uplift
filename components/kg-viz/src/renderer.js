@@ -169,6 +169,28 @@
       Graph.width(host.clientWidth).height(host.clientHeight);
     });
 
+    document.getElementById("focus-btn").onclick = function () { setFocusMode(true); };
+    document.getElementById("focus-exit").onclick = function () { setFocusMode(false); };
+    // "f" toggles focus mode. Not while typing into a field, and not with a
+    // modifier -- Cmd/Ctrl+F is the browser's find.
+    window.addEventListener("keydown", function (e) {
+      if (e.key !== "f" && e.key !== "F") return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      var t = e.target;
+      if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName || "")) return;
+      if (!DATA) return;
+      if (e.preventDefault) e.preventDefault();
+      setFocusMode(!focusMode);
+    });
+    if (document.addEventListener) {
+      document.addEventListener("fullscreenchange", function () {
+        // Esc (or any browser-initiated exit) leaves focus mode with it.
+        if (!document.fullscreenElement && focusMode) setFocusMode(false);
+        // The window has changed size; refit once it has settled.
+        else setTimeout(frameGraph, 150);
+      });
+    }
+
     document.getElementById("open-btn").onclick = function () {
       document.getElementById("file-input").click();
     };
