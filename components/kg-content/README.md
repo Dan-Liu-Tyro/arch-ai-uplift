@@ -48,7 +48,10 @@ overlay may add relationships and may add non-domain nodes, but it may never
 re-state a domain fact. Today there is one,
 `graphs/payments-target-state.json`, and it holds the first typed directed
 relationships in this repo — until it landed, every edge in the graph was
-`not_authoritative_for`.
+`not_authoritative_for`. Since decision 61 it is **`provenance:
+curated-here`**: this file is its source of truth, edited directly in git.
+The Confluence whiteboard and feed page it began from are historical origin,
+not re-synced, and changes to it are recorded in `docs/decision-log.md`.
 
 ## Boundary
 

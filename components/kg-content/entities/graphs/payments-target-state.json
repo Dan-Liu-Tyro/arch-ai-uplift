@@ -7,7 +7,8 @@
   "owner": "architecture-practice",
   "updated": "2026-09-29",
   "source": "https://tyropaymentsltd.atlassian.net/wiki/spaces/ARCH/whiteboard/1823277126",
-  "source_notes": "Derived from the structured text feed the whiteboard's owner authored for this purpose (https://tyropaymentsltd.atlassian.net/wiki/spaces/ARCH/pages/2382233611/Payment+target+state+WIP+AI+feed). The whiteboard body itself is not readable through the Atlassian connector -- only its metadata and a ~260-character indexed text extract -- so the feed page is the machine-readable source and the whiteboard is the human original. Both are WIP. Deliberate divergences from the feed, curated here (decision 60 in docs/decision-log.md): the actor 'Customer (self-serve / merchant)' is titled 'Merchant', and the edge 'Cross-domain reports CONSUMED_BY Customer (Merchant portal insights)' is removed -- it was the graph's only backwards (stage 3 to stage 2) edge.",
+  "provenance": "curated-here",
+  "source_notes": "This file is the source of truth, iterated on directly in git (decision 61 in docs/decision-log.md, 2026-09-29); the Confluence originals are not re-synced. Originally derived from the structured text feed the whiteboard's owner authored for this purpose (https://tyropaymentsltd.atlassian.net/wiki/spaces/ARCH/pages/2382233611/Payment+target+state+WIP+AI+feed), because the whiteboard body is not readable through the Atlassian connector. Divergences since then are recorded in docs/decision-log.md, starting with decision 60: the actor 'Customer (self-serve / merchant)' renamed 'Merchant', and the edge 'Cross-domain reports CONSUMED_BY Customer (Merchant portal insights)' removed.",
   "stages": [
     {
       "id": "design-a-product",

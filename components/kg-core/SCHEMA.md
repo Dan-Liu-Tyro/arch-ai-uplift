@@ -284,10 +284,19 @@ controlled vocabulary is what would let contradiction detection work across
 two overlays, and there is currently only one overlay, so there is no
 evidence yet about which predicates recur. Revisit when a second lands.
 
-Overlay graphs are also where **cycles are legitimate** — the merchant
-initiates a payment *and* consumes reports about it — so a consumer that
-needs a ranking must choose which arc to treat as feedback and should say so
-rather than assume acyclicity.
+Overlay graphs are also where **cycles are legitimate** — an actor can start
+a flow *and* consume its results — so a consumer that needs a ranking must
+choose which arc to treat as feedback and should say so rather than assume
+acyclicity. (The first overlay's one such arc, reports back to the merchant,
+was removed as a curation choice in decision 60; the rule stands.)
+
+An overlay declares its **`provenance`** (decision 61): `derived` means it
+mirrors its `source`, so a difference is an extraction error to fix, and
+this is the default when absent. `curated-here` means the file itself is the
+source of truth and is iterated on in git. `source` is then historical
+origin only, never re-synced, and differences from it are expected.
+`payments-target-state.json` is `curated-here` since 2026-09-29, which is
+also the Confluence-as-output direction (decision 5) applied to this graph.
 
 `Exceptions` on guardrails and `Known deviations` on systems exist so reality can
 be recorded instead of hidden. A KG that only holds the ideal state will be

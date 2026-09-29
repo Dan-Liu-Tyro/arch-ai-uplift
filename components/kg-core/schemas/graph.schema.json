@@ -48,7 +48,12 @@
     "source": {
       "type": "string",
       "format": "uri",
-      "description": "The human original this graph represents."
+      "description": "Where this graph originated. Authoritative only while `provenance` is `derived`; once it is `curated-here`, this is historical origin and the file itself is the source of truth."
+    },
+    "provenance": {
+      "type": "string",
+      "enum": ["derived", "curated-here"],
+      "description": "Which copy governs (decision 61). `derived`: the graph mirrors `source`, and differences are extraction errors to fix here. `curated-here`: this file is the source of truth and is iterated on directly in git; `source` is not re-synced, and differences from it are expected. Absent means `derived`, the original assumption."
     },
     "source_notes": {
       "type": "string",

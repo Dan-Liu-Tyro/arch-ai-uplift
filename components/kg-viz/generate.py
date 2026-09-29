@@ -297,6 +297,8 @@ def _payments_target_state_view(domains_data: dict) -> dict | None:
         "stages": data["stages"],
         "source": data["source"],
         "source_notes": data["source_notes"],
+        # Absent means `derived`, per graph.schema.json (decision 61).
+        "provenance": data.get("provenance", "derived"),
         "nodes": nodes,
         "links": links,
         "domain_index": _domain_index(by_id),

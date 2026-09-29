@@ -122,7 +122,12 @@
       lines.push("<b>" + view.stats.back_edges.length + "</b> feedback arc(s), drawn dashed — " +
         "edges that loop back to an earlier stage.");
     }
-    if (view.source_notes) {
+    // Which copy governs (decision 61). A curated graph must not claim to
+    // mirror a Confluence original it has deliberately diverged from.
+    if (view.provenance === "curated-here") {
+      lines.push("Curated in git: this graph is its own source of truth. It began as a " +
+        "Confluence whiteboard feed, which is no longer synced.");
+    } else if (view.source_notes) {
       lines.push("Source is WIP; the whiteboard body is not machine-readable, so this is built " +
         "from its owner's structured text feed.");
     }

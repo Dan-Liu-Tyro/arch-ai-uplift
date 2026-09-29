@@ -58,7 +58,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29p — legend bottom-right; info panel starts collapsed";
+  var PAGE_REVISION = "2026-09-29q — info panel shows curated-in-git provenance";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 

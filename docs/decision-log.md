@@ -117,6 +117,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 58 | `kg-viz` "Next-level edges" (`N`): one level beyond neighbours, upstream orange / downstream green (first built as a full chain, cut back) | `kg-viz` |
 | 59 | `kg-viz` legend bottom-right (shown by default, kept in full screen); info panel collapsed beneath it; control-panel legend moved, not copied | `kg-viz` |
 | 60 | Payments Target State: customer actor renamed "Merchant"; the only backwards edge (reports → merchant) removed; divergence from source feed recorded | `kg-content/entities/graphs/`, `kg-viz` |
+| 61 | `payments-target-state.json` is its own source of truth (`provenance: curated-here`); Confluence origin no longer synced | `kg-content`, `kg-core/schemas/graph.schema.json`, `kg-core/SCHEMA.md`, `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2620,6 +2621,36 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
     - **Knock-on.** 42 edges, down from 43, and 0 feedback arcs. Scenario
       LG now expects the feedback-arc row if and only if a view has one. The
       `kg-viz` README counts were updated.
+61. **`payments-target-state.json` is its own source of truth, iterated on
+    directly in git. The Confluence whiteboard and AI feed it was derived
+    from are historical origin, no longer synced.** Decided by the user on
+    2026-09-29, right after decision 60's first deliberate divergence from
+    the feed.
+    - **Why this is the baseline, not an exception.** It is the
+      Confluence-as-output direction (decision 5) finally applied to the
+      one entity that had been flowing the other way: git is where
+      architects edit, and Confluence is where things get published to, not
+      read from.
+    - **Mechanism.** Overlay graphs gain an optional `provenance` field in
+      `graph.schema.json`. `derived` is the default when absent: the file
+      mirrors `source`, and a difference is an extraction error.
+      `curated-here` means the file governs and `source` is historical
+      only. This graph is `curated-here`. Its `source_notes` say so first,
+      and the old "differences are listed here" text now points at this
+      log, so the file doesn't grow a changelog of its own. `generate.py`
+      carries `provenance` through. The `kg-viz` info panel, which used to
+      say the graph is "built from its owner's structured text feed", now
+      says "curated in git" for such a graph. Scenario LG checks both, and
+      was confirmed failing first. `SCHEMA.md`'s cycles paragraph no longer
+      cites the removed merchant arc as its live example.
+    - **The cost, stated so it isn't discovered later.** The whiteboard and
+      its feed page are owned outside this repo, by the whiteboard's owner,
+      and stay live. Their future edits won't reach this file, and readers
+      of the whiteboard won't see changes made here. Until
+      `confluence-publish` exists, anyone treating the whiteboard as
+      current is reading a fork. Whether to tell the owner, or to mark the
+      feed page as superseded, is the user's call. Confluence edits are
+      outward-facing, and the page isn't this repo's to change.
     - **Known overlap, flagged rather than fixed.** A selected node is
       drawn white (`nodeDisplayColor`), so a selected external actor briefly
       shares staff's colour. The glow on a selected actor icon and the

@@ -923,6 +923,12 @@ const el = (r, id) => r.els[id] || EMPTY;
     ['on: upstream and downstream rows', /upstream/.test(onText) && /downstream/.test(onText)],
     ['no second legend in the control panel', !shellHasOldLegend],
     ['legend above the info panel in one dock', legendInDock],
+    // Decision 61: provenance is carried from the overlay, and a curated
+    // graph's info panel must not claim to mirror the Confluence feed.
+    ['provenance carried from the overlay', r.probe.view().provenance ===
+      (JSON.parse(fs.readFileSync('../kg-content/entities/graphs/payments-target-state.json', 'utf8')).provenance || 'derived')],
+    ['info panel states curated-in-git provenance', r.probe.view().provenance !== 'curated-here' ||
+      (/Curated in git/.test(el(r,'stats-body')._html) && !/built from its owner/.test(el(r,'stats-body')._html))],
   ];
   console.log('LG: ' + steps.map(([k, ok]) => k + ' = ' + !!ok).join(' | '));
   steps.filter(([, ok]) => !ok).forEach(([k]) => results.push('LG: legend failed at "' + k + '"'));
