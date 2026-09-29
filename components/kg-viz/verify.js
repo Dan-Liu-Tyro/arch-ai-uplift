@@ -880,6 +880,18 @@ const el = (r, id) => r.els[id] || EMPTY;
   const layeredOk = JSON.stringify(restored) === JSON.stringify(original);
   console.log('Q: dragged node restored =', layeredOk);
   if (!layeredOk) results.push('Q: reset did not restore the computed position: ' + JSON.stringify(restored));
+
+  // The "r" key does the same, through the real keydown handler.
+  target.fx = 9999; target.fy = 9999; target.x = 9999; target.y = 9999;
+  r.listeners.keydown({ key: 'r', target: { tagName: 'CANVAS' } }); await tick();
+  const byKey = JSON.stringify({ fx: target.fx, fy: target.fy, x: target.x, y: target.y }) === JSON.stringify(original);
+  // ...but not Cmd/Ctrl+R, which is the browser's reload.
+  target.fx = 9999;
+  r.listeners.keydown({ key: 'r', metaKey: true, target: { tagName: 'CANVAS' } }); await tick();
+  const chordIgnored = target.fx === 9999;
+  console.log('Q: r key restores it =', byKey, '| Cmd+R ignored =', chordIgnored);
+  if (!byKey) results.push('Q: the r key did not reset positions');
+  if (!chordIgnored) results.push('Q: Cmd+R triggered a reset instead of being left to the browser');
 }
 
 // R: Fit to view and Reset positions level a camera drifted by 3D orbiting

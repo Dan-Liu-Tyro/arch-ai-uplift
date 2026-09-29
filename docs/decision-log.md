@@ -2525,6 +2525,12 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
     every single-key shortcut shares the same guards: no modifier, not in
     a field, only once a graph is loaded. The checkbox is updated to match,
     and the panel label reads "Edge labels (E)". Scenario FS covers it.
+    - **`R` joins the table for "Reset positions"** (undo node drags and
+      refit), at the user's request on the same day. The button reads
+      "Reset positions (R)". Cmd/Ctrl+R stays the browser's reload, by the
+      table's no-modifier rule. Scenario Q drives it through the real
+      handler and checks the chord is ignored. Q was confirmed failing
+      first. The full set of shortcuts is now F, E, N, T, R and ←.
     - **The left arrow key joins the same table as "back"** (decision 51's
       ← button), added the same day after the user found it missing. The
       first back button had been built on-screen only, with the key

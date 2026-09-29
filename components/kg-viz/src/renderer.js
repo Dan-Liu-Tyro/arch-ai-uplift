@@ -191,7 +191,7 @@
     document.getElementById("focus-exit").onclick = function () { setFocusMode(false); };
     // Single-key shortcuts: "f" toggles focus mode (decision 56), "e" edge
     // labels (decision 57), "n" next-level edges (decision 58), "t" light/dark
-    // theme (decision 63), left arrow
+    // theme (decision 63), "r" reset positions, left arrow
     // goes back along followed owner links. Never while typing into a field, and never with
     // a modifier -- Cmd/Ctrl+F is the browser's find, and the same rule
     // keeps every future shortcut clear of browser chords.
@@ -210,6 +210,8 @@
         repaint();
       },
       t: function () { setTheme(theme === "light" ? "dark" : "light"); },
+      // Same as the "Reset positions" button: undo node drags and refit.
+      r: function () { resetLayout(); },
       // The pane's back (←) button, from the keyboard (decision 51).
       arrowleft: function () { goBack(); }
     };
