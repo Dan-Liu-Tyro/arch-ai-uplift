@@ -319,9 +319,8 @@
          encoding is guesswork. This is the only legend -- it used to live in
          the control panel, and was moved, not copied, so two can't drift. -->
     <div id="legend" class="panel-base">
-      <div class="group-label" id="legend-label">Nodes</div>
+      <div class="group-label" id="legend-label">Legend</div>
       <div id="kind-legend"></div>
-      <div class="group-label">Edges</div>
       <div id="edge-legend"></div>
     </div>
     <div id="stats" class="panel-base">
@@ -384,10 +383,13 @@
     "external":            { color: "#ffd479", label: "External system", shape: "server" },
     "artefact":            { color: "#b79cff", label: "Artefact" },
     "principle":           { color: "#4dff9e", label: "Principle" },
-    "actor:InternalStaff": { color: "#ffffff", label: "Internal user (Tyro staff)", shape: "person" },
-    "actor:Customer":      { color: "#ffd479", label: "External user (merchant)", shape: "person" },
-    "actor:Partner":       { color: "#ffd479", label: "External user (partner)", shape: "person" },
-    "actor:Regulator":     { color: "#ffd479", label: "External user (regulator)", shape: "person" },
+    // `legend` groups rows in the legend: the key explains what a colour
+    // and glyph mean, and white vs light yellow means internal vs external
+    // -- the role (merchant, regulator) is the node's own label (decision 62).
+    "actor:InternalStaff": { color: "#ffffff", label: "Internal user (Tyro staff)", legend: "Internal user", shape: "person" },
+    "actor:Customer":      { color: "#ffd479", label: "External user (merchant)", legend: "External user", shape: "person" },
+    "actor:Partner":       { color: "#ffd479", label: "External user (partner)", legend: "External user", shape: "person" },
+    "actor:Regulator":     { color: "#ffd479", label: "External user (regulator)", legend: "External user", shape: "person" },
     "actor":               { color: "#8a93ab", label: "Actor (role unstated)", shape: "person" }
   };
 
@@ -426,7 +428,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29q — info panel shows curated-in-git provenance";
+  var PAGE_REVISION = "2026-09-29r — legend titled Legend; internal/external user rows";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
@@ -636,19 +638,22 @@
   // Built from NODE_PRESENTATION, and listing only the kinds actually in the
   // current view -- a legend naming things that are not on screen is noise,
   // and one that can disagree with the rendering is worse than none. Both
-  // are avoided by reading the same table `colorFor` reads.
+  // are avoided by reading the same table `colorFor` reads. Rows group by
+  // an entry's `legend` name where it has one (decision 62: every external
+  // actor is one "External user" row), else its `label`.
   function buildLegend() {
     var host = document.getElementById("kind-legend");
     host.innerHTML = "";
-    var counts = {}, order = [];
+    var counts = {}, order = [], first = {};
     view.nodes.forEach(function (n) {
-      var k = presentationKey(n);
-      if (!counts[k]) { counts[k] = 0; order.push(k); }
+      var p = NODE_PRESENTATION[presentationKey(n)] || { color: "#8a93ab", label: presentationKey(n) };
+      var k = p.legend || p.label;
+      if (!counts[k]) { counts[k] = 0; order.push(k); first[k] = p; }
       counts[k]++;
     });
     order.sort(function (a, b) { return counts[b] - counts[a]; });
     order.forEach(function (k) {
-      var p = NODE_PRESENTATION[k] || { color: "#8a93ab", label: k };
+      var p = first[k];
       var row = document.createElement("div");
       row.className = "row";
       var sw = document.createElement("span");
@@ -663,7 +668,7 @@
         sw.style.background = p.color;
       }
       var txt = document.createElement("span");
-      txt.textContent = p.label + " (" + counts[k] + ")";
+      txt.textContent = k + " (" + counts[k] + ")";
       row.appendChild(sw);
       row.appendChild(txt);
       host.appendChild(row);

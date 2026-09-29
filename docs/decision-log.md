@@ -118,6 +118,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 59 | `kg-viz` legend bottom-right (shown by default, kept in full screen); info panel collapsed beneath it; control-panel legend moved, not copied | `kg-viz` |
 | 60 | Payments Target State: customer actor renamed "Merchant"; the only backwards edge (reports → merchant) removed; divergence from source feed recorded | `kg-content/entities/graphs/`, `kg-viz` |
 | 61 | `payments-target-state.json` is its own source of truth (`provenance: curated-here`); Confluence origin no longer synced | `kg-content`, `kg-core/schemas/graph.schema.json`, `kg-core/SCHEMA.md`, `kg-viz` |
+| 62 | `kg-viz` legend titled "Legend"; actors shown as Internal user (white) / External user (light yellow) | `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2651,6 +2652,17 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       current is reading a fork. Whether to tell the owner, or to mark the
       feed page as superseded, is the user's call. Confluence edits are
       outward-facing, and the page isn't this repo's to change.
+62. **The `kg-viz` legend is titled "Legend", and actors collapse to
+    "Internal user" (white) and "External user" (light yellow).** Requested
+    by the user on 2026-09-29. The "Nodes" and "Edges" sub-headings go.
+    Actor roles (merchant, regulator, Tyro staff) are no longer spelled out
+    in the key, because the key explains what a colour and glyph mean, and
+    the role is already each node's own label. `NODE_PRESENTATION` entries
+    gain an optional `legend` group name, and `buildLegend` groups rows by
+    it with summed counts. Full `label`s are unchanged for anything else
+    that reads them. Scenario N now checks the group rows and that no role
+    is named. LG checks the title. Both were confirmed failing on the old
+    page first.
     - **Known overlap, flagged rather than fixed.** A selected node is
       drawn white (`nodeDisplayColor`), so a selected external actor briefly
       shares staff's colour. The glow on a selected actor icon and the

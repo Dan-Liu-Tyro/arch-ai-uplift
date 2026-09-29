@@ -722,12 +722,21 @@ const el = (r, id) => r.els[id] || EMPTY;
     results.push('N: domain colour still varies by stage (' + domColors.length + ' colours), so colour encodes two things');
   }
 
-  // The legend must list exactly the kinds on screen, no more and no fewer.
+  // The legend must list exactly the legend groups on screen, no more and
+  // no fewer -- kinds grouped by their `legend` name (decision 62: all
+  // external actors are one "External user" row), else their label.
+  const groups = [...new Set(keys.map(k => table[k].legend || table[k].label))];
   const legendRows = el(r,'kind-legend').children.length;
-  console.log('N: legend rows =', legendRows, 'for', keys.length, 'kinds present');
-  if (legendRows !== keys.length) {
-    results.push('N: legend shows ' + legendRows + ' rows but ' + keys.length + ' kinds are present');
+  const rowText = el(r,'kind-legend').children.map(c => (c.children[1] || {}).textContent || '');
+  console.log('N: legend rows =', legendRows, 'for', groups.length, 'groups present:', rowText.join(' / '));
+  if (legendRows !== groups.length) {
+    results.push('N: legend shows ' + legendRows + ' rows but ' + groups.length + ' groups are present');
   }
+  const ext = rowText.find(t => /^External user \(/.test(t));
+  const extCount = nodes.filter(n => n.kind === 'actor' && n.actor_type && n.actor_type !== 'InternalStaff').length;
+  if (!ext || !ext.endsWith('(' + extCount + ')')) results.push('N: no single "External user" row counting all ' + extCount + ' external actors');
+  if (!rowText.some(t => /^Internal user \(/.test(t))) results.push('N: no "Internal user" row');
+  if (rowText.some(t => /merchant|regulator|Tyro staff/i.test(t))) results.push('N: legend still names actor roles instead of internal/external');
 }
 
 // O: actors' 3D mesh is made fully transparent, in every view, never rebuilt
@@ -923,6 +932,9 @@ const el = (r, id) => r.els[id] || EMPTY;
     ['on: upstream and downstream rows', /upstream/.test(onText) && /downstream/.test(onText)],
     ['no second legend in the control panel', !shellHasOldLegend],
     ['legend above the info panel in one dock', legendInDock],
+    // Decision 62: one "Legend" title, not "Nodes"/"Edges" sub-headings.
+    ['titled Legend, no Nodes/Edges headings', /id="legend-label">Legend</.test(html) &&
+      !/group-label[^>]*>(Nodes|Edges)</.test(html)],
     // Decision 61: provenance is carried from the overlay, and a curated
     // graph's info panel must not claim to mirror the Confluence feed.
     ['provenance carried from the overlay', r.probe.view().provenance ===

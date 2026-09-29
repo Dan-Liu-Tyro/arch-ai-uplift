@@ -16,10 +16,13 @@
     "external":            { color: "#ffd479", label: "External system", shape: "server" },
     "artefact":            { color: "#b79cff", label: "Artefact" },
     "principle":           { color: "#4dff9e", label: "Principle" },
-    "actor:InternalStaff": { color: "#ffffff", label: "Internal user (Tyro staff)", shape: "person" },
-    "actor:Customer":      { color: "#ffd479", label: "External user (merchant)", shape: "person" },
-    "actor:Partner":       { color: "#ffd479", label: "External user (partner)", shape: "person" },
-    "actor:Regulator":     { color: "#ffd479", label: "External user (regulator)", shape: "person" },
+    // `legend` groups rows in the legend: the key explains what a colour
+    // and glyph mean, and white vs light yellow means internal vs external
+    // -- the role (merchant, regulator) is the node's own label (decision 62).
+    "actor:InternalStaff": { color: "#ffffff", label: "Internal user (Tyro staff)", legend: "Internal user", shape: "person" },
+    "actor:Customer":      { color: "#ffd479", label: "External user (merchant)", legend: "External user", shape: "person" },
+    "actor:Partner":       { color: "#ffd479", label: "External user (partner)", legend: "External user", shape: "person" },
+    "actor:Regulator":     { color: "#ffd479", label: "External user (regulator)", legend: "External user", shape: "person" },
     "actor":               { color: "#8a93ab", label: "Actor (role unstated)", shape: "person" }
   };
 
@@ -58,7 +61,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29q — info panel shows curated-in-git provenance";
+  var PAGE_REVISION = "2026-09-29r — legend titled Legend; internal/external user rows";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 

@@ -1,19 +1,22 @@
   // Built from NODE_PRESENTATION, and listing only the kinds actually in the
   // current view -- a legend naming things that are not on screen is noise,
   // and one that can disagree with the rendering is worse than none. Both
-  // are avoided by reading the same table `colorFor` reads.
+  // are avoided by reading the same table `colorFor` reads. Rows group by
+  // an entry's `legend` name where it has one (decision 62: every external
+  // actor is one "External user" row), else its `label`.
   function buildLegend() {
     var host = document.getElementById("kind-legend");
     host.innerHTML = "";
-    var counts = {}, order = [];
+    var counts = {}, order = [], first = {};
     view.nodes.forEach(function (n) {
-      var k = presentationKey(n);
-      if (!counts[k]) { counts[k] = 0; order.push(k); }
+      var p = NODE_PRESENTATION[presentationKey(n)] || { color: "#8a93ab", label: presentationKey(n) };
+      var k = p.legend || p.label;
+      if (!counts[k]) { counts[k] = 0; order.push(k); first[k] = p; }
       counts[k]++;
     });
     order.sort(function (a, b) { return counts[b] - counts[a]; });
     order.forEach(function (k) {
-      var p = NODE_PRESENTATION[k] || { color: "#8a93ab", label: k };
+      var p = first[k];
       var row = document.createElement("div");
       row.className = "row";
       var sw = document.createElement("span");
@@ -28,7 +31,7 @@
         sw.style.background = p.color;
       }
       var txt = document.createElement("span");
-      txt.textContent = p.label + " (" + counts[k] + ")";
+      txt.textContent = k + " (" + counts[k] + ")";
       row.appendChild(sw);
       row.appendChild(txt);
       host.appendChild(row);

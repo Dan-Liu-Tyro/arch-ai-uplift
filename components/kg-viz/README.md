@@ -305,8 +305,10 @@ no longer turns it into edges of any kind.
   predicates were the ones that disappeared**. `verify.js` asserts that all 42
   are placed and that the longest is among them.
 - **Legend, bottom right** (decision 59), shown by default and kept in full
-  screen. Nodes are listed by kind with their real glyph for icon kinds, and
-  counts. Edges cover flow and direction particles, the feedback arc when
+  screen, under one "Legend" title. Nodes are listed by kind with their real
+  glyph for icon kinds, and counts. Actors collapse to two rows, "Internal
+  user" (white) and "External user" (light yellow), because the role is the
+  node's own label (decision 62). Edges cover flow and direction particles, the feedback arc when
   the view has one, and the selection colours, which switch to
   upstream/downstream rows when Next-level edges is on. It is the only
   legend; it moved out of the control panel. The info (stats) panel sits
