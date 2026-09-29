@@ -49,11 +49,13 @@
   // Every colour the canvas and its overlays draw with, per theme. The
   // encoding is the same in both -- what a colour *means* doesn't change --
   // only the values, so each stays readable against its background. Light
-  // exists to print or screenshot into a document: white staff would vanish
-  // on white, so "internal" becomes charcoal, and "external" (light yellow on
-  // dark) becomes one amber for every outsider, people and systems alike.
-  // NODE_PRESENTATION's `color` is the dark value; `nodes` below overrides
-  // it per presentation key for light.
+  // exists to print or screenshot into a document. Icon-drawn nodes keep
+  // their dark-theme colours in light too -- white internal users, one light
+  // yellow for every outsider -- and get a dark outline instead (body.light
+  // CSS on the glyph), which is what makes white and light yellow visible on
+  // a white page (the user's call, revising the first version's charcoal
+  // and amber). NODE_PRESENTATION's `color` is the dark value; `nodes` below
+  // overrides it per presentation key for light.
   var THEME = {
     dark: {
       bg: "#05070d", flow: "rgba(196,212,240,0.85)", back: "rgba(255,140,155,0.9)",
@@ -69,9 +71,9 @@
       particle: "#1f9d5c", particleBack: "#c8374f", up: "#d9822b", down: "#1f9d5c",
       stages: ["#6a5ae0", "#1a8fc4", "#1f9d5c"],
       nodes: {
-        "domain": "#1a8fc4", "external": "#c98300", "artefact": "#7a5cd6", "principle": "#1f9d5c",
-        "actor:InternalStaff": "#2b3242", "actor:Customer": "#c98300", "actor:Partner": "#c98300",
-        "actor:Regulator": "#c98300", "actor": "#6b7488"
+        "domain": "#1a8fc4", "artefact": "#7a5cd6", "principle": "#1f9d5c", "actor": "#6b7488"
+        // external, actor:InternalStaff, actor:Customer/Partner/Regulator:
+        // unchanged from dark (white, light yellow), outlined in CSS.
       }
     }
   };
@@ -95,7 +97,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29t — light/dark theme (T); print stylesheet";
+  var PAGE_REVISION = "2026-09-29u — light theme: white/light-yellow icons with dark outline";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 

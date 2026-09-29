@@ -119,7 +119,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 60 | Payments Target State: customer actor renamed "Merchant"; the only backwards edge (reports → merchant) removed; divergence from source feed recorded | `kg-content/entities/graphs/`, `kg-viz` |
 | 61 | `payments-target-state.json` is its own source of truth (`provenance: curated-here`); Confluence origin no longer synced | `kg-content`, `kg-core/schemas/graph.schema.json`, `kg-core/SCHEMA.md`, `kg-viz` |
 | 62 | `kg-viz` legend titled "Legend"; actors shown as Internal user (white) / External user (light yellow) | `kg-viz` |
-| 63 | `kg-viz` light/dark theme (`T`); light re-maps colours for white (charcoal internal, amber external), ≥3:1 contrast; print stylesheet + preserved canvas | `kg-viz` |
+| 63 | `kg-viz` light/dark theme (`T`); light re-maps sphere colours (≥3:1), icons keep white/light-yellow with a dark outline; print stylesheet + preserved canvas | `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2701,6 +2701,20 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       flag and the stylesheet) is asserted as source only: the stub cannot
       print, and neither this nor any rendered look has been seen from a
       session here.
+    - **Revised the same day: icons keep their colours and get an outline
+      instead.** The user wanted internal users to stay white, with a
+      black border, and merchants to stay light yellow in light mode too.
+      Charcoal and amber are dropped. External systems and the regulator
+      follow the merchant, because decision 52's "one colour for every
+      outsider" is the rule being kept, not an extra choice. In light,
+      every `currentColor` shape in an icon glyph gets a `#1b2130` outline,
+      on the canvas and in the legend alike. That outline is what now
+      carries the contrast, since light yellow on white is only about
+      1.4:1. It fades with the icon when dimmed, via a new `dim` class on
+      the icon overlay. Scenario TH now checks the kept colours, the outline
+      rule, the outline's own contrast, and the dim class. The 3:1 fill
+      check covers spheres only. TH was confirmed failing on the charcoal
+      and amber version first.
     - **Known overlap, flagged rather than fixed.** A selected node is
       drawn white (`nodeDisplayColor`), so a selected external actor briefly
       shares staff's colour. The glow on a selected actor icon and the

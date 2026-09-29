@@ -105,8 +105,13 @@
       el.style.transform = "translate(-50%, -50%) translate(" + p.x + "px," + p.y + "px)";
       // currentColor drives both the glyph's fill and, via .sel below, the
       // glow's tint -- one property, so they can't fall out of step.
-      el.style.color = nodeDisplayColor(n);
-      el.className = "actor-icon" + (selected && selected.id === n.id ? " sel" : "");
+      var shown = nodeDisplayColor(n);
+      el.style.color = shown;
+      // "dim" lets the light theme's outline fade with the fill, instead of
+      // a crisp black outline around a greyed-out icon.
+      var dimmed = shown === T("dimNode") || shown === T("scopeDim");
+      el.className = "actor-icon" + (selected && selected.id === n.id ? " sel" : "") +
+        (dimmed ? " dim" : "");
     }
   }
 

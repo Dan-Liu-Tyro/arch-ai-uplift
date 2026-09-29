@@ -274,6 +274,13 @@
     text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 6px #fff, 0 0 6px #fff; }
   body.light .elabel.dim { color: rgba(90, 100, 120, 0.35); }
   body.light .actor-icon svg { filter: drop-shadow(0 1px 1.5px rgba(20, 30, 50, 0.3)); }
+  /* White and light-yellow glyphs keep their colour on a white page by
+     getting a dark outline -- on the canvas and in the legend alike. Only
+     the currentColor shapes, not the server glyph's dark cut-outs. */
+  body.light .actor-icon svg [fill="currentColor"],
+  body.light .swatch.icon svg [fill="currentColor"] {
+    stroke: #1b2130; stroke-width: 1.3; stroke-linejoin: round; paint-order: stroke; }
+  body.light .actor-icon.dim svg [fill="currentColor"] { stroke: rgba(90, 100, 120, 0.35); }
   body.light .actor-icon.sel svg { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 7px currentColor); }
   body.light #hint { color: #6b7488; }
   body.light #focus-exit { background: rgba(255, 255, 255, 0.9); color: #4a5468;

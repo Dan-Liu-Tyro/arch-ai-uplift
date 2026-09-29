@@ -1433,12 +1433,22 @@ const el = (r, id) => r.els[id] || EMPTY;
   const darkStaff = color(staff), darkFlow = r.calls['__last_linkColor'](r.probe.visible().links[0]);
   r.listeners.keydown({ key: 't', target: { tagName: 'CANVAS' } });
   steps.push(['t switches to light, white canvas', r.probe.theme() === 'light' && bg() === '#ffffff' && r.probe.bodyFocus()]);
-  steps.push(['internal user no longer white', color(staff) !== '#ffffff' && color(staff) !== darkStaff]);
+  // Icons keep their dark-theme colours in light -- white internal users,
+  // light yellow for every outsider -- and are made visible by a dark
+  // outline instead (the user's revision of the first charcoal/amber cut).
+  steps.push(['internal user stays white', color(staff) === '#ffffff' && color(staff) === darkStaff]);
+  steps.push(['merchant stays light yellow', color(merchant) === '#ffd479']);
   steps.push(['all outsiders still one colour', color(merchant) === color(system) &&
     nodes.filter(n => n.kind === 'actor' && n.actor_type !== 'InternalStaff').every(n => color(n) === color(merchant))]);
+  steps.push(['icons outlined in light (canvas and legend)',
+    /body\.light \.actor-icon svg \[fill="currentColor"\][\s\S]*?stroke:\s*#1b2130/.test(html) &&
+    /body\.light \.swatch\.icon svg \[fill="currentColor"\]/.test(html)]);
   steps.push(['edges recoloured', r.calls['__last_linkColor'](r.probe.visible().links[0]) !== darkFlow]);
-  const lowContrast = [...new Set(nodes.map(color))].filter(c => /^#/.test(c) && contrastOnWhite(c) < 3);
-  steps.push(['every node colour >= 3:1 on white' + (lowContrast.length ? ' (fails: ' + lowContrast.join(', ') + ')' : ''), !lowContrast.length]);
+  // Contrast is the fill's job only for spheres; an icon's is its outline.
+  const isIcon = n => n.kind === 'actor' || n.kind === 'external';
+  const lowContrast = [...new Set(nodes.filter(n => !isIcon(n)).map(color))].filter(c => /^#/.test(c) && contrastOnWhite(c) < 3);
+  steps.push(['every sphere colour >= 3:1 on white' + (lowContrast.length ? ' (fails: ' + lowContrast.join(', ') + ')' : ''), !lowContrast.length]);
+  steps.push(['outline itself >= 3:1 on white', contrastOnWhite('#1b2130') >= 3]);
   const band = r.probe.bands()[0];
   const bandFill = band && (band.poly || band).attrs && (band.poly || band).attrs.fill;
   steps.push(['stage bands rebuilt in light colours (' + bandFill + ')', !!bandFill && /#6a5ae0|#1a8fc4|#1f9d5c/.test(bandFill)]);
@@ -1448,6 +1458,11 @@ const el = (r, id) => r.els[id] || EMPTY;
   // overlap, not repeated here).
   r.probe.select(merchant);
   steps.push(['selected colour differs from internal user', r.probe.nodeDisplayColor(merchant) !== color(staff)]);
+  // A dimmed icon's outline fades with it, rather than staying crisp black.
+  r.probe.positionIcons();
+  const dimmedIcon = Object.entries(r.probe.iconEls()).find(([id]) => id !== merchant.id &&
+    !r.probe.highlightIds()[id]);
+  steps.push(['dimmed icons marked dim', !!dimmedIcon && /\bdim\b/.test(dimmedIcon[1].className)]);
   r.probe.select(null);
   r.listeners.keydown({ key: 't', target: { tagName: 'CANVAS' } });
   steps.push(['t switches back to dark', r.probe.theme() === 'dark' && bg() === '#05070d' && color(staff) === '#ffffff']);

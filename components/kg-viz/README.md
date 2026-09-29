@@ -307,8 +307,10 @@ no longer turns it into edges of any kind.
 - **Light and dark themes** (decision 63), switched with **Theme** in the
   control panel or `T`, and remembered between visits. Light is for
   printing or screenshots into a document. It keeps the same encoding with
-  colours re-picked for white, all checked at ≥3:1 contrast. Internal
-  users are charcoal, and every outsider (people and systems) is amber. To
+  sphere colours re-picked for white, all checked at ≥3:1 contrast. Icons
+  keep their dark colours: white internal users and light-yellow
+  outsiders, people and systems alike. A dark outline makes them visible on
+  white, and fades when an icon is dimmed. To
   print, switch to Light first: the browser's print hides the panels and
   keeps the graph and legend, in landscape.
 - **Legend, bottom right** (decision 59), shown by default and kept in full
