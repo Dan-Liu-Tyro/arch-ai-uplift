@@ -297,6 +297,17 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (!sample || !sample.textContent) results.push('F: edge label has no text');
   if (sample && /_/.test(sample.textContent)) results.push('F: edge label still shows raw SCREAMING_SNAKE: ' + sample.textContent);
 
+  // arrowheads (decision 64): big enough to see at the default fit. The
+  // cone is length x length/4 in world units; G's fit is ~1.8 px/unit, so
+  // require >= 20px long and >= 5px wide there, tip on the target surface.
+  const arrowLen = r.calls['__last_linkDirectionalArrowLength'](flow.links[0]);
+  const arrowPos = r.calls['__last_linkDirectionalArrowRelPos'];
+  const FIT = 1.8;
+  console.log('F: arrowhead length =', arrowLen, '(~' + Math.round(arrowLen * FIT) + 'x' +
+    Math.round(arrowLen / 4 * FIT) + 'px at the default fit) | rel pos =', arrowPos);
+  if (!(arrowLen * FIT >= 20 && arrowLen / 4 * FIT >= 5)) results.push('F: arrowhead too small to see: ' + arrowLen);
+  if (arrowPos !== 1) results.push('F: arrowhead tip not on the target surface (relPos ' + arrowPos + ')');
+
   // particles: direction as motion on every edge
   const parts = r.calls['__last_linkDirectionalParticles'];
   const flowParts = parts(flow.links[0]);

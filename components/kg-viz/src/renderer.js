@@ -2,6 +2,7 @@
   // so a radius in single digits renders as an almost invisible speck once
   // the whole graph is framed.
   var NODE_REL_SIZE = 9;
+  var ARROW_LENGTH = 16;
 
   function nodeVal(n) { return (n.kind === "domain" || n.type === "domain") ? 5 : 3; }
 
@@ -37,8 +38,13 @@
       // happens *after* the library has built its own mesh, from the
       // per-frame loop, not by an accessor running inside node construction
       // -- see that function for why that distinction matters here.
-      .linkDirectionalArrowLength(function (l) { return 7; })
-      .linkDirectionalArrowRelPos(0.98)
+      // The arrowhead is a cone a quarter as wide as it is long, in world
+      // units; at the default fit (~1.8 px per unit) the old 7 drew a
+      // ~12x3px speck. 16 is ~29x7px (decision 64). RelPos 1 puts the tip
+      // exactly on the target's surface -- the library already offsets
+      // both ends by each node's radius.
+      .linkDirectionalArrowLength(function (l) { return ARROW_LENGTH; })
+      .linkDirectionalArrowRelPos(1)
       // Direction as motion, not just as an arrowhead: a slow stream of
       // particles running source -> target.
       .linkDirectionalParticles(function (l) { return 3; })
