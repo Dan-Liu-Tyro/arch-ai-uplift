@@ -327,7 +327,7 @@
   // the schema permits but the viewer should not render as if it knew.
   var NODE_PRESENTATION = {
     "domain":              { color: "#3fd0ff", label: "Domain" },
-    "external":            { color: "#ff7e8f", label: "External system" },
+    "external":            { color: "#ffd479", label: "External system" },
     "artefact":            { color: "#b79cff", label: "Artefact" },
     "principle":           { color: "#4dff9e", label: "Principle" },
     "actor:InternalStaff": { color: "#ffffff", label: "Internal user (Tyro staff)", shape: "person" },
@@ -337,12 +337,13 @@
     "actor":               { color: "#8a93ab", label: "Actor (role unstated)", shape: "person" }
   };
 
-  // Two actor colours, one per side of Tyro's boundary: Tyro staff white,
-  // every external actor (merchant, partner, regulator) one light yellow --
-  // the question the flow view gets asked is "who outside Tyro touches this
-  // step", so all outsiders read as one class at a glance and staff as
-  // another. Set by the user 2026-09-29 (decision 52); the role still shows
-  // in the legend label and the detail pane.
+  // Light yellow means "outside Tyro": every external actor (merchant,
+  // partner, regulator) and every external system share it, and Tyro staff
+  // are white. The question the flow view gets asked is "what outside Tyro
+  // touches this step", so all outsiders read as one class at a glance.
+  // Shape still separates a person from a system, and the role still shows
+  // in the legend label and the detail pane. Set by the user 2026-09-29
+  // (decision 52).
   function presentationKey(node) {
     var kind = node.kind || node.type || "domain";
     if (kind !== "actor") return kind;
@@ -365,7 +366,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29d — staff white, all external actors light yellow";
+  var PAGE_REVISION = "2026-09-29e — external systems light yellow too";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 

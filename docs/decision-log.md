@@ -108,7 +108,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 49 | `authority.not_authoritative_for` becomes `{content, ref}` objects (optional `unresolved` flag), restoring what is excluded, not just who owns it | `kg-core/schemas/domain.schema.json`, `kg-content/entities/domains.json`, backlog |
 | 50 | Jira is the plan of record and read-only for Claude; the repo maps onto Jira, not the reverse; internal milestones in question | `CLAUDE.md`, program roadmap, Jira, backlog |
 | 51 | `kg-viz` "Not authoritative for" owners are links; off-graph owners open from a generated `domain_index` | `kg-viz` |
-| 52 | `kg-viz` actor colours: Tyro staff white, all external actors light yellow | `kg-viz` |
+| 52 | `kg-viz` colours: Tyro staff white; all external actors and external systems light yellow | `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2427,6 +2427,10 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
     including the regulator, which sits outside Tyro's boundary. The role
     still shows in the legend label ("External user (regulator)") and the
     detail pane. Scenario N asserts both colours.
+    - **Extended the same day, again at the user's request: external
+      systems join the same light yellow** (previously `#ff7e8f`). Light
+      yellow now means "outside Tyro" for people and systems alike. Shape
+      (person icon or sphere) still separates the two.
     - **Known overlap, flagged rather than fixed.** A selected node is
       drawn white (`nodeDisplayColor`), so a selected external actor briefly
       shares staff's colour. The glow on a selected actor icon and the

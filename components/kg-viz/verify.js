@@ -651,14 +651,15 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (!staff || !cust) results.push('N: expected both an InternalStaff and a Customer actor in the flow view');
   if (sameColor) results.push('N: internal and external users render the same colour');
 
-  // Decision 52: staff white, every external actor type one light yellow.
+  // Decision 52: staff white; every external actor type and external
+  // systems one light yellow.
   const staffWhite = r.probe.colorFor({ kind: 'actor', actor_type: 'InternalStaff' }) === '#ffffff';
   const extColors = [...new Set(['Customer', 'Partner', 'Regulator'].map(
-    t => r.probe.colorFor({ kind: 'actor', actor_type: t })))];
+    t => r.probe.colorFor({ kind: 'actor', actor_type: t })).concat(r.probe.colorFor({ kind: 'external' })))];
   const extYellow = extColors.length === 1 && extColors[0] === '#ffd479';
-  console.log('N: staff white =', staffWhite, '| external actors one light yellow =', extYellow, extColors);
+  console.log('N: staff white =', staffWhite, '| external actors + systems one light yellow =', extYellow, extColors);
   if (!staffWhite) results.push('N: Tyro staff actors are not white');
-  if (!extYellow) results.push('N: external actors are not all light yellow (' + extColors.join(', ') + ')');
+  if (!extYellow) results.push('N: external actors and systems are not all light yellow (' + extColors.join(', ') + ')');
 
   // Colour must mean exactly one thing now: two domains in different stages
   // used to differ, which made colour ambiguous between kind and stage.
