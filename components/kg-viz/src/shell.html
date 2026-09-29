@@ -232,6 +232,69 @@
   #focus-exit span { border: 1px solid rgba(120,140,180,0.4); border-radius: 3px;
     padding: 0 4px; margin-left: 4px; font-size: 10px; }
   body.focus #focus-exit { display: block; }
+  /* ---- Light theme (decision 63) -------------------------------------------
+     For printing or screenshotting into a document. Same encoding as dark,
+     values re-picked for a white page; canvas colours live in THEME
+     (state.js), this block covers the HTML around and over it. */
+  body.light { background: #ffffff; color: #1b2130; }
+  body.light .panel-base { background: rgba(255, 255, 255, 0.94);
+    border-color: rgba(60, 70, 90, 0.18); box-shadow: 0 1px 6px rgba(20, 30, 50, 0.08); }
+  body.light #controls h1, body.light #detail h2, body.light .rel .who { color: #111722; }
+  body.light #controls .sub, body.light #detail .meta { color: #5b6478; }
+  body.light .group-label, body.light .section-label { color: #6b7488; }
+  body.light .seg button { background: rgba(20, 30, 50, 0.04); color: #2b3242;
+    border-color: rgba(60, 70, 90, 0.22); }
+  body.light .seg button:hover { background: rgba(20, 30, 50, 0.09); }
+  body.light .seg button.on { background: #2d6cf6; border-color: #2d6cf6; color: #fff; }
+  body.light .count { color: #6b7488; }
+  body.light #stats { color: #4a5468; }
+  body.light #stats b { color: #b06f00; }
+  body.light #stats-toggle { color: #6b7488; }
+  body.light .rel { border-left-color: rgba(60, 70, 90, 0.2); }
+  body.light .rel .pred { color: #177a48; }
+  body.light .rel .pred.inbound { color: #b8661a; }
+  body.light .rel .payload { color: #4a5468; }
+  body.light .rel .backedge { color: #c8374f; }
+  body.light .close, body.light .back { color: #6b7488; }
+  body.light .close:hover, body.light .back:hover { color: #111722; }
+  body.light .pill { border-color: rgba(60, 70, 90, 0.3); color: #2b3242; }
+  body.light .pill.acq { border-color: #d9822b; color: #b8661a; }
+  body.light .pill.wide { border-color: #1a6fd6; color: #1a6fd6; }
+  body.light .pill.gap { border-color: #c8374f; color: #c8374f; }
+  body.light .pill.link:hover { border-color: #1f9d5c; color: #111722; }
+  body.light .nlabel { color: #1b2130;
+    text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 6px #fff; }
+  body.light .nlabel.dim { color: rgba(90, 100, 120, 0.4); text-shadow: none; }
+  body.light .nlabel.sel { color: #000; }
+  body.light .elabel { color: #177a48; background: rgba(255, 255, 255, 0.88); }
+  body.light .elabel.back { color: #c8374f; }
+  body.light .elabel.up { color: #b8661a; }
+  body.light .elabel.down { color: #177a48; }
+  body.light .elabel.along { background: transparent;
+    text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 6px #fff, 0 0 6px #fff; }
+  body.light .elabel.dim { color: rgba(90, 100, 120, 0.35); }
+  body.light .actor-icon svg { filter: drop-shadow(0 1px 1.5px rgba(20, 30, 50, 0.3)); }
+  body.light .actor-icon.sel svg { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 7px currentColor); }
+  body.light #hint { color: #6b7488; }
+  body.light #focus-exit { background: rgba(255, 255, 255, 0.9); color: #4a5468;
+    border-color: rgba(60, 70, 90, 0.25); }
+  body.light #focus-exit:hover { color: #111722; }
+  body.light #picker { background: rgba(245, 247, 250, 0.95); }
+  body.light #picker .box { background: #fff; border-color: rgba(60, 70, 90, 0.35); }
+  body.light #picker h3 { color: #111722; }
+  body.light #picker p { color: #4a5468; }
+  body.light #picker code { background: rgba(20, 30, 50, 0.06); }
+
+  /* Printing (decision 63): the graph and its legend only, landscape.
+     Best in the light theme -- the canvas is an image, so a dark theme
+     prints as a black rectangle whatever the browser does with page
+     backgrounds. */
+  @page { size: landscape; margin: 10mm; }
+  @media print {
+    #controls, #stats, #detail, #hint, #focus-exit, #notes, #picker { display: none !important; }
+    #legend.ready { display: block; }
+  }
+
   #picker { position: absolute; inset: 0; display: none; z-index: 20;
     background: rgba(5, 7, 13, 0.92); align-items: center; justify-content: center; }
   #picker.open { display: flex; }
@@ -300,7 +363,13 @@
       <button id="fit-btn">Fit to view</button>
       <button id="reset-layout-btn">Reset positions</button>
     </div>
-    <div class="seg" style="margin-top: 4px;">
+    <div class="group-label">Theme (T)</div>
+    <div class="seg" id="theme-seg">
+      <button data-theme="dark" class="on">Dark</button>
+      <button data-theme="light" title="For printing or screenshots into a document">Light</button>
+    </div>
+
+    <div class="seg" style="margin-top: 8px;">
       <button id="focus-btn" title="Hide every panel and show only the graph">Full screen (F)</button>
     </div>
 

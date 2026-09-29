@@ -7,8 +7,11 @@
 
   function ensureGraph() {
     if (Graph) return;
-    Graph = ForceGraph3D()(document.getElementById("graph"))
-      .backgroundColor("#05070d")
+    // preserveDrawingBuffer keeps the last frame readable, so printing the
+    // page (decision 63) and "Save image" capture the canvas instead of a
+    // blank rectangle -- WebGL clears its buffer after compositing otherwise.
+    Graph = ForceGraph3D({ rendererConfig: { antialias: true, alpha: false, preserveDrawingBuffer: true } })(document.getElementById("graph"))
+      .backgroundColor(T("bg"))
       .numDimensions(dims)
       .graphData(visibleData())
       .nodeLabel(function (n) { return n.title; })
@@ -45,7 +48,7 @@
         return chainRole(l) ? 4 : 1.4;
       })
       .linkDirectionalParticleColor(function (l) {
-        return l.back_edge ? "#ff9fae" : "#7ff0c0";
+        return l.back_edge ? T("particleBack") : T("particle");
       })
       .linkCurvature(function (l) { return l.back_edge ? 0.45 : 0; })
       .linkLabel(function (l) {
@@ -56,11 +59,11 @@
       .linkColor(function (l) {
         if (selected) {
           var role = chainRole(l);
-          if (!role) return "rgba(110,120,140,0.09)";
+          if (!role) return T("dimEdge");
           return chainEdgeColor(l, role);
         }
-        if (l.back_edge) return "rgba(255,140,155,0.9)";
-        return "rgba(196,212,240,0.85)";
+        if (l.back_edge) return T("back");
+        return T("flow");
       })
       .linkWidth(function (l) {
         if (!selected) return 1.6;
@@ -182,10 +185,18 @@
       repaint();
     };
 
+    document.getElementById("theme-seg").querySelectorAll("button").forEach(function (b) {
+      b.onclick = function () { setTheme(b.dataset.theme); };
+    });
+    // Apply the remembered theme's CSS and button state now that the page
+    // exists; the canvas already started in it via T("bg").
+    applyThemeChrome(theme);
+
     document.getElementById("focus-btn").onclick = function () { setFocusMode(true); };
     document.getElementById("focus-exit").onclick = function () { setFocusMode(false); };
     // Single-key shortcuts: "f" toggles focus mode (decision 56), "e" edge
-    // labels (decision 57), "n" next-level edges (decision 58), left arrow
+    // labels (decision 57), "n" next-level edges (decision 58), "t" light/dark
+    // theme (decision 63), left arrow
     // goes back along followed owner links. Never while typing into a field, and never with
     // a modifier -- Cmd/Ctrl+F is the browser's find, and the same rule
     // keeps every future shortcut clear of browser chords.
@@ -203,6 +214,7 @@
         buildEdgeLegend();
         repaint();
       },
+      t: function () { setTheme(theme === "light" ? "dark" : "light"); },
       // The pane's back (←) button, from the keyboard (decision 51).
       arrowleft: function () { goBack(); }
     };

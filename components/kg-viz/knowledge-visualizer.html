@@ -232,6 +232,69 @@
   #focus-exit span { border: 1px solid rgba(120,140,180,0.4); border-radius: 3px;
     padding: 0 4px; margin-left: 4px; font-size: 10px; }
   body.focus #focus-exit { display: block; }
+  /* ---- Light theme (decision 63) -------------------------------------------
+     For printing or screenshotting into a document. Same encoding as dark,
+     values re-picked for a white page; canvas colours live in THEME
+     (state.js), this block covers the HTML around and over it. */
+  body.light { background: #ffffff; color: #1b2130; }
+  body.light .panel-base { background: rgba(255, 255, 255, 0.94);
+    border-color: rgba(60, 70, 90, 0.18); box-shadow: 0 1px 6px rgba(20, 30, 50, 0.08); }
+  body.light #controls h1, body.light #detail h2, body.light .rel .who { color: #111722; }
+  body.light #controls .sub, body.light #detail .meta { color: #5b6478; }
+  body.light .group-label, body.light .section-label { color: #6b7488; }
+  body.light .seg button { background: rgba(20, 30, 50, 0.04); color: #2b3242;
+    border-color: rgba(60, 70, 90, 0.22); }
+  body.light .seg button:hover { background: rgba(20, 30, 50, 0.09); }
+  body.light .seg button.on { background: #2d6cf6; border-color: #2d6cf6; color: #fff; }
+  body.light .count { color: #6b7488; }
+  body.light #stats { color: #4a5468; }
+  body.light #stats b { color: #b06f00; }
+  body.light #stats-toggle { color: #6b7488; }
+  body.light .rel { border-left-color: rgba(60, 70, 90, 0.2); }
+  body.light .rel .pred { color: #177a48; }
+  body.light .rel .pred.inbound { color: #b8661a; }
+  body.light .rel .payload { color: #4a5468; }
+  body.light .rel .backedge { color: #c8374f; }
+  body.light .close, body.light .back { color: #6b7488; }
+  body.light .close:hover, body.light .back:hover { color: #111722; }
+  body.light .pill { border-color: rgba(60, 70, 90, 0.3); color: #2b3242; }
+  body.light .pill.acq { border-color: #d9822b; color: #b8661a; }
+  body.light .pill.wide { border-color: #1a6fd6; color: #1a6fd6; }
+  body.light .pill.gap { border-color: #c8374f; color: #c8374f; }
+  body.light .pill.link:hover { border-color: #1f9d5c; color: #111722; }
+  body.light .nlabel { color: #1b2130;
+    text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 6px #fff; }
+  body.light .nlabel.dim { color: rgba(90, 100, 120, 0.4); text-shadow: none; }
+  body.light .nlabel.sel { color: #000; }
+  body.light .elabel { color: #177a48; background: rgba(255, 255, 255, 0.88); }
+  body.light .elabel.back { color: #c8374f; }
+  body.light .elabel.up { color: #b8661a; }
+  body.light .elabel.down { color: #177a48; }
+  body.light .elabel.along { background: transparent;
+    text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 6px #fff, 0 0 6px #fff; }
+  body.light .elabel.dim { color: rgba(90, 100, 120, 0.35); }
+  body.light .actor-icon svg { filter: drop-shadow(0 1px 1.5px rgba(20, 30, 50, 0.3)); }
+  body.light .actor-icon.sel svg { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 7px currentColor); }
+  body.light #hint { color: #6b7488; }
+  body.light #focus-exit { background: rgba(255, 255, 255, 0.9); color: #4a5468;
+    border-color: rgba(60, 70, 90, 0.25); }
+  body.light #focus-exit:hover { color: #111722; }
+  body.light #picker { background: rgba(245, 247, 250, 0.95); }
+  body.light #picker .box { background: #fff; border-color: rgba(60, 70, 90, 0.35); }
+  body.light #picker h3 { color: #111722; }
+  body.light #picker p { color: #4a5468; }
+  body.light #picker code { background: rgba(20, 30, 50, 0.06); }
+
+  /* Printing (decision 63): the graph and its legend only, landscape.
+     Best in the light theme -- the canvas is an image, so a dark theme
+     prints as a black rectangle whatever the browser does with page
+     backgrounds. */
+  @page { size: landscape; margin: 10mm; }
+  @media print {
+    #controls, #stats, #detail, #hint, #focus-exit, #notes, #picker { display: none !important; }
+    #legend.ready { display: block; }
+  }
+
   #picker { position: absolute; inset: 0; display: none; z-index: 20;
     background: rgba(5, 7, 13, 0.92); align-items: center; justify-content: center; }
   #picker.open { display: flex; }
@@ -300,7 +363,13 @@
       <button id="fit-btn">Fit to view</button>
       <button id="reset-layout-btn">Reset positions</button>
     </div>
-    <div class="seg" style="margin-top: 4px;">
+    <div class="group-label">Theme (T)</div>
+    <div class="seg" id="theme-seg">
+      <button data-theme="dark" class="on">Dark</button>
+      <button data-theme="light" title="For printing or screenshots into a document">Light</button>
+    </div>
+
+    <div class="seg" style="margin-top: 8px;">
       <button id="focus-btn" title="Hide every panel and show only the graph">Full screen (F)</button>
     </div>
 
@@ -411,7 +480,41 @@
       NODE_PRESENTATION[node.kind || node.type] ||
       { color: "#8a93ab", label: "Unknown" };
   }
-  var STAGE_COLORS = ["#8b7bff", "#3fd0ff", "#4dff9e"];
+  // ---- Themes (decision 63) -------------------------------------------------
+  //
+  // Every colour the canvas and its overlays draw with, per theme. The
+  // encoding is the same in both -- what a colour *means* doesn't change --
+  // only the values, so each stays readable against its background. Light
+  // exists to print or screenshot into a document: white staff would vanish
+  // on white, so "internal" becomes charcoal, and "external" (light yellow on
+  // dark) becomes one amber for every outsider, people and systems alike.
+  // NODE_PRESENTATION's `color` is the dark value; `nodes` below overrides
+  // it per presentation key for light.
+  var THEME = {
+    dark: {
+      bg: "#05070d", flow: "rgba(196,212,240,0.85)", back: "rgba(255,140,155,0.9)",
+      backSel: "#ff7e8f", dimEdge: "rgba(110,120,140,0.09)", dimNode: "rgba(110,120,140,0.18)",
+      scopeDim: "rgba(110,120,140,0.22)", selNode: "#ffffff",
+      particle: "#7ff0c0", particleBack: "#ff9fae", up: "#ffb454", down: "#6fe3a8",
+      stages: ["#8b7bff", "#3fd0ff", "#4dff9e"], nodes: {}
+    },
+    light: {
+      bg: "#ffffff", flow: "rgba(55,65,90,0.7)", back: "rgba(200,55,80,0.85)",
+      backSel: "#c8374f", dimEdge: "rgba(120,130,150,0.14)", dimNode: "rgba(150,160,175,0.3)",
+      scopeDim: "rgba(150,160,175,0.35)", selNode: "#0b0f19",
+      particle: "#1f9d5c", particleBack: "#c8374f", up: "#d9822b", down: "#1f9d5c",
+      stages: ["#6a5ae0", "#1a8fc4", "#1f9d5c"],
+      nodes: {
+        "domain": "#1a8fc4", "external": "#c98300", "artefact": "#7a5cd6", "principle": "#1f9d5c",
+        "actor:InternalStaff": "#2b3242", "actor:Customer": "#c98300", "actor:Partner": "#c98300",
+        "actor:Regulator": "#c98300", "actor": "#6b7488"
+      }
+    }
+  };
+  var theme = "dark";
+  try { if (window.localStorage && localStorage.getItem("kgviz-theme") === "light") theme = "light"; } catch (e) {}
+  function T(k) { return THEME[theme][k]; }
+  function colorForKey(key, fallback) { return THEME[theme].nodes[key] || fallback; }
 
   // The mesh colour key for every icon-drawn node (actors, external systems)
   // -- a value no sphere's colour can ever take, so their transparent mesh
@@ -428,7 +531,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29s — legend order: users together, external system below";
+  var PAGE_REVISION = "2026-09-29t — light/dark theme (T); print stylesheet";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
@@ -487,7 +590,7 @@
 
   function groupsForView() {
     return view.stages.map(function (s, i) {
-      return { key: s.id, label: s.ordinal + ". " + s.title, color: STAGE_COLORS[i % STAGE_COLORS.length] };
+      return { key: s.id, label: s.ordinal + ". " + s.title, color: T("stages")[i % T("stages").length] };
     });
   }
 
@@ -499,7 +602,7 @@
   // carried twice over by the bands (tint plus caption), so colour is a
   // single, honest encoding of kind instead.
   function colorFor(node) {
-    return presentationFor(node).color;
+    return colorForKey(presentationKey(node), presentationFor(node).color);
   }
 
   function hiddenSet() {
@@ -531,7 +634,6 @@
   // The extra level never follows a feedback arc (back_edge): it loops to
   // an earlier stage. A feedback arc touching the selected node itself is
   // still a direct edge, as it is with the option off.
-  var CHAIN_UP = "#ffb454", CHAIN_DOWN = "#6fe3a8";
   var chainCache = { key: null };
 
   function chainState() {
@@ -575,9 +677,9 @@
   // Selected-state edge colour: tinted by side with next-level edges on,
   // the long-standing single green (feedback arcs pink) with it off.
   function chainEdgeColor(l, role) {
-    if (l.back_edge) return "#ff7e8f";
-    if (!nextLevel) return "#6fe3a8";
-    return role === "up" ? CHAIN_UP : CHAIN_DOWN;
+    if (l.back_edge) return T("backSel");
+    if (!nextLevel) return T("down");
+    return role === "up" ? T("up") : T("down");
   }
 
   // The single source of truth for "what colour is this node right now",
@@ -588,11 +690,11 @@
     var base = colorFor(node);
     if (selected) {
       var keep = highlightIds();
-      if (node.id === selected.id) return "#ffffff";
-      if (!keep[node.id]) return "rgba(110,120,140,0.18)";
+      if (node.id === selected.id) return T("selNode");
+      if (!keep[node.id]) return T("dimNode");
       return base;
     }
-    if (isDimmedByScope(node)) return "rgba(110,120,140,0.22)";
+    if (isDimmedByScope(node)) return T("scopeDim");
     return base;
   }
 
@@ -644,11 +746,11 @@
   function buildLegend() {
     var host = document.getElementById("kind-legend");
     host.innerHTML = "";
-    var counts = {}, order = [], first = {};
+    var counts = {}, order = [], first = {}, colour = {};
     view.nodes.forEach(function (n) {
       var p = NODE_PRESENTATION[presentationKey(n)] || { color: "#8a93ab", label: presentationKey(n) };
       var k = p.legend || p.label;
-      if (!counts[k]) { counts[k] = 0; order.push(k); first[k] = p; }
+      if (!counts[k]) { counts[k] = 0; order.push(k); first[k] = p; colour[k] = colorFor(n); }
       counts[k]++;
     });
     // A fixed reading order, not by count: people together (internal, then
@@ -666,11 +768,11 @@
       // is on the canvas by shape as well as colour (decision 59).
       if (ICON_SVG[p.shape]) {
         sw.className = "swatch icon";
-        sw.style.color = p.color;
+        sw.style.color = colour[k];
         sw.innerHTML = ICON_SVG[p.shape];
       } else {
         sw.className = "swatch";
-        sw.style.background = p.color;
+        sw.style.background = colour[k];
       }
       var txt = document.createElement("span");
       txt.textContent = k + " (" + counts[k] + ")";
@@ -694,15 +796,15 @@
         (dashed ? ' stroke-dasharray="4 3"' : "") + "/>" +
         '<path d="M19 1.5 L25 5 L19 8.5 z" fill="' + stroke + '"/></svg>';
     }
-    var rows = [[sample("rgba(196,212,240,0.85)"), "Flow; particles run source → target"]];
+    var rows = [[sample(T("flow")), "Flow; particles run source → target"]];
     if (view.links.some(function (l) { return l.back_edge; })) {
-      rows.push([sample("#ff7e8f", true), "Feedback arc (loops to an earlier stage)"]);
+      rows.push([sample(T("backSel"), true), "Feedback arc (loops to an earlier stage)"]);
     }
     if (nextLevel) {
-      rows.push([sample(CHAIN_UP), "Feeds the selected node (upstream)"]);
-      rows.push([sample(CHAIN_DOWN), "Fed by the selected node (downstream)"]);
+      rows.push([sample(T("up")), "Feeds the selected node (upstream)"]);
+      rows.push([sample(T("down")), "Fed by the selected node (downstream)"]);
     } else {
-      rows.push([sample(CHAIN_DOWN), "Selected node's edges"]);
+      rows.push([sample(T("down")), "Selected node's edges"]);
     }
     rows.forEach(function (r) {
       var row = document.createElement("div");
@@ -1003,6 +1105,29 @@
     }
     if (!on && document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
     setTimeout(frameGraph, 350);
+  }
+
+  // Switch theme (decision 63). The canvas background, every accessor
+  // colour (they read T() live), the stage bands and swatches (built with a
+  // colour, so rebuilt), and the legend all follow; CSS follows body.light.
+  // Remembered in localStorage, best-effort -- file:// pages allow it in
+  // current browsers, and failing to persist is not worth an error.
+  function setTheme(t) {
+    applyThemeChrome(t);
+    if (!Graph) return;
+    Graph.backgroundColor(T("bg"));
+    refresh();
+  }
+
+  // The HTML half only -- safe to call while the graph is still being built.
+  function applyThemeChrome(t) {
+    theme = t === "light" ? "light" : "dark";
+    document.body.classList[theme === "light" ? "add" : "remove"]("light");
+    try { if (window.localStorage) localStorage.setItem("kgviz-theme", theme); } catch (e) {}
+    var seg = document.getElementById("theme-seg");
+    if (seg && seg.querySelectorAll) seg.querySelectorAll("button").forEach(function (b) {
+      b.className = b.dataset.theme === theme ? "on" : "";
+    });
   }
 
   function refresh() {
@@ -1341,7 +1466,7 @@
     if (!showBands || !view.stages) return;
 
     view.stages.forEach(function (stage, i) {
-      var colour = STAGE_COLORS[i % STAGE_COLORS.length];
+      var colour = T("stages")[i % T("stages").length];
       var poly = document.createElementNS(SVG_NS, "polygon");
       poly.setAttribute("fill", colour);
       poly.setAttribute("fill-opacity", "0.075");
@@ -1716,8 +1841,11 @@
 
   function ensureGraph() {
     if (Graph) return;
-    Graph = ForceGraph3D()(document.getElementById("graph"))
-      .backgroundColor("#05070d")
+    // preserveDrawingBuffer keeps the last frame readable, so printing the
+    // page (decision 63) and "Save image" capture the canvas instead of a
+    // blank rectangle -- WebGL clears its buffer after compositing otherwise.
+    Graph = ForceGraph3D({ rendererConfig: { antialias: true, alpha: false, preserveDrawingBuffer: true } })(document.getElementById("graph"))
+      .backgroundColor(T("bg"))
       .numDimensions(dims)
       .graphData(visibleData())
       .nodeLabel(function (n) { return n.title; })
@@ -1754,7 +1882,7 @@
         return chainRole(l) ? 4 : 1.4;
       })
       .linkDirectionalParticleColor(function (l) {
-        return l.back_edge ? "#ff9fae" : "#7ff0c0";
+        return l.back_edge ? T("particleBack") : T("particle");
       })
       .linkCurvature(function (l) { return l.back_edge ? 0.45 : 0; })
       .linkLabel(function (l) {
@@ -1765,11 +1893,11 @@
       .linkColor(function (l) {
         if (selected) {
           var role = chainRole(l);
-          if (!role) return "rgba(110,120,140,0.09)";
+          if (!role) return T("dimEdge");
           return chainEdgeColor(l, role);
         }
-        if (l.back_edge) return "rgba(255,140,155,0.9)";
-        return "rgba(196,212,240,0.85)";
+        if (l.back_edge) return T("back");
+        return T("flow");
       })
       .linkWidth(function (l) {
         if (!selected) return 1.6;
@@ -1891,10 +2019,18 @@
       repaint();
     };
 
+    document.getElementById("theme-seg").querySelectorAll("button").forEach(function (b) {
+      b.onclick = function () { setTheme(b.dataset.theme); };
+    });
+    // Apply the remembered theme's CSS and button state now that the page
+    // exists; the canvas already started in it via T("bg").
+    applyThemeChrome(theme);
+
     document.getElementById("focus-btn").onclick = function () { setFocusMode(true); };
     document.getElementById("focus-exit").onclick = function () { setFocusMode(false); };
     // Single-key shortcuts: "f" toggles focus mode (decision 56), "e" edge
-    // labels (decision 57), "n" next-level edges (decision 58), left arrow
+    // labels (decision 57), "n" next-level edges (decision 58), "t" light/dark
+    // theme (decision 63), left arrow
     // goes back along followed owner links. Never while typing into a field, and never with
     // a modifier -- Cmd/Ctrl+F is the browser's find, and the same rule
     // keeps every future shortcut clear of browser chords.
@@ -1912,6 +2048,7 @@
         buildEdgeLegend();
         repaint();
       },
+      t: function () { setTheme(theme === "light" ? "dark" : "light"); },
       // The pane's back (←) button, from the keyboard (decision 51).
       arrowleft: function () { goBack(); }
     };

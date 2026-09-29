@@ -27,7 +27,7 @@
     if (!showBands || !view.stages) return;
 
     view.stages.forEach(function (stage, i) {
-      var colour = STAGE_COLORS[i % STAGE_COLORS.length];
+      var colour = T("stages")[i % T("stages").length];
       var poly = document.createElementNS(SVG_NS, "polygon");
       poly.setAttribute("fill", colour);
       poly.setAttribute("fill-opacity", "0.075");

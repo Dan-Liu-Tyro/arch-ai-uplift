@@ -119,6 +119,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 60 | Payments Target State: customer actor renamed "Merchant"; the only backwards edge (reports → merchant) removed; divergence from source feed recorded | `kg-content/entities/graphs/`, `kg-viz` |
 | 61 | `payments-target-state.json` is its own source of truth (`provenance: curated-here`); Confluence origin no longer synced | `kg-content`, `kg-core/schemas/graph.schema.json`, `kg-core/SCHEMA.md`, `kg-viz` |
 | 62 | `kg-viz` legend titled "Legend"; actors shown as Internal user (white) / External user (light yellow) | `kg-viz` |
+| 63 | `kg-viz` light/dark theme (`T`); light re-maps colours for white (charcoal internal, amber external), ≥3:1 contrast; print stylesheet + preserved canvas | `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2668,6 +2669,38 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       External system, Artefact, so the two user rows sit together with
       external systems directly below. Any unlisted group goes after,
       largest first. Scenario N checks the three rows are consecutive.
+63. **`kg-viz` gains a light theme alongside dark, switched by a panel
+    control or `T`. Light is built to print or screenshot cleanly into a
+    document.** Requested by the user on 2026-09-29.
+    - **Same encoding, re-picked values.** A `THEME` table in `state.js`
+      holds every canvas colour per theme: background, edges, dimming,
+      selection, particles, stage bands, and a per-kind node colour override
+      for light. Every accessor reads it live through `T()`. The HTML
+      around the canvas follows a `body.light` CSS block. The one mapping
+      that needed a decision: white staff would vanish on white, so light
+      makes internal users charcoal (`#2b3242`), and the light-yellow
+      "outside Tyro" (decision 52) becomes one amber (`#c98300`) shared by
+      external people and systems. Internal vs external and "one colour
+      for all outsiders" both survive. Light's selection colour is
+      near-black, not the internal-user charcoal, so light doesn't repeat
+      dark's accepted selected-merchant-looks-like-staff overlap.
+    - **Printing.** The canvas is created with `preserveDrawingBuffer`, so
+      print and "Save image" capture it rather than a blank rectangle. A
+      print stylesheet hides every panel except the legend, landscape. The
+      theme is not switched automatically on print: WebGL may not redraw
+      between `beforeprint` and the snapshot, so it could capture the dark
+      frame anyway. The documented step is to switch to Light, then print.
+    - **Persistence.** The choice is remembered in `localStorage`,
+      best-effort.
+    - **Verified.** New scenario TH checks the `T` toggle both ways, the
+      canvas background, that the internal user is no longer white, that
+      all outsiders share one colour, and that edges, bands and legend are
+      recoloured. It also checks that every light node colour has at least
+      3:1 contrast on white, WCAG's minimum for non-text, which is the
+      objective version of "prints nicely". The print setup (the buffer
+      flag and the stylesheet) is asserted as source only: the stub cannot
+      print, and neither this nor any rendered look has been seen from a
+      session here.
     - **Known overlap, flagged rather than fixed.** A selected node is
       drawn white (`nodeDisplayColor`), so a selected external actor briefly
       shares staff's colour. The glow on a selected actor icon and the

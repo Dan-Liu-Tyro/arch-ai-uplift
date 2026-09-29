@@ -7,11 +7,11 @@
   function buildLegend() {
     var host = document.getElementById("kind-legend");
     host.innerHTML = "";
-    var counts = {}, order = [], first = {};
+    var counts = {}, order = [], first = {}, colour = {};
     view.nodes.forEach(function (n) {
       var p = NODE_PRESENTATION[presentationKey(n)] || { color: "#8a93ab", label: presentationKey(n) };
       var k = p.legend || p.label;
-      if (!counts[k]) { counts[k] = 0; order.push(k); first[k] = p; }
+      if (!counts[k]) { counts[k] = 0; order.push(k); first[k] = p; colour[k] = colorFor(n); }
       counts[k]++;
     });
     // A fixed reading order, not by count: people together (internal, then
@@ -29,11 +29,11 @@
       // is on the canvas by shape as well as colour (decision 59).
       if (ICON_SVG[p.shape]) {
         sw.className = "swatch icon";
-        sw.style.color = p.color;
+        sw.style.color = colour[k];
         sw.innerHTML = ICON_SVG[p.shape];
       } else {
         sw.className = "swatch";
-        sw.style.background = p.color;
+        sw.style.background = colour[k];
       }
       var txt = document.createElement("span");
       txt.textContent = k + " (" + counts[k] + ")";
@@ -57,15 +57,15 @@
         (dashed ? ' stroke-dasharray="4 3"' : "") + "/>" +
         '<path d="M19 1.5 L25 5 L19 8.5 z" fill="' + stroke + '"/></svg>';
     }
-    var rows = [[sample("rgba(196,212,240,0.85)"), "Flow; particles run source → target"]];
+    var rows = [[sample(T("flow")), "Flow; particles run source → target"]];
     if (view.links.some(function (l) { return l.back_edge; })) {
-      rows.push([sample("#ff7e8f", true), "Feedback arc (loops to an earlier stage)"]);
+      rows.push([sample(T("backSel"), true), "Feedback arc (loops to an earlier stage)"]);
     }
     if (nextLevel) {
-      rows.push([sample(CHAIN_UP), "Feeds the selected node (upstream)"]);
-      rows.push([sample(CHAIN_DOWN), "Fed by the selected node (downstream)"]);
+      rows.push([sample(T("up")), "Feeds the selected node (upstream)"]);
+      rows.push([sample(T("down")), "Fed by the selected node (downstream)"]);
     } else {
-      rows.push([sample(CHAIN_DOWN), "Selected node's edges"]);
+      rows.push([sample(T("down")), "Selected node's edges"]);
     }
     rows.forEach(function (r) {
       var row = document.createElement("div");
@@ -366,6 +366,29 @@
     }
     if (!on && document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
     setTimeout(frameGraph, 350);
+  }
+
+  // Switch theme (decision 63). The canvas background, every accessor
+  // colour (they read T() live), the stage bands and swatches (built with a
+  // colour, so rebuilt), and the legend all follow; CSS follows body.light.
+  // Remembered in localStorage, best-effort -- file:// pages allow it in
+  // current browsers, and failing to persist is not worth an error.
+  function setTheme(t) {
+    applyThemeChrome(t);
+    if (!Graph) return;
+    Graph.backgroundColor(T("bg"));
+    refresh();
+  }
+
+  // The HTML half only -- safe to call while the graph is still being built.
+  function applyThemeChrome(t) {
+    theme = t === "light" ? "light" : "dark";
+    document.body.classList[theme === "light" ? "add" : "remove"]("light");
+    try { if (window.localStorage) localStorage.setItem("kgviz-theme", theme); } catch (e) {}
+    var seg = document.getElementById("theme-seg");
+    if (seg && seg.querySelectorAll) seg.querySelectorAll("button").forEach(function (b) {
+      b.className = b.dataset.theme === theme ? "on" : "";
+    });
   }
 
   function refresh() {

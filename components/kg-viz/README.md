@@ -72,7 +72,7 @@ blob that existed only to let the page auto-load, which it no longer does).
 cd components/kg-viz && node verify.js
 ```
 
-Twenty-nine scenarios (A–Z, then FS, FC and LG), exit non-zero on failure. This is the only automated check
+Thirty scenarios (A–Z, then FS, FC, LG and TH), exit non-zero on failure. This is the only automated check
 in the repo, and it exists because **nothing this component renders can be
 observed from a Claude Code session** — see `docs/decision-log.md`'s
 "Constraints identified". It is a floor, not a substitute for opening the
@@ -304,6 +304,13 @@ no longer turns it into edges of any kind.
   collides more often and was dropped first, meaning **the most informative
   predicates were the ones that disappeared**. `verify.js` asserts that all 42
   are placed and that the longest is among them.
+- **Light and dark themes** (decision 63), switched with **Theme** in the
+  control panel or `T`, and remembered between visits. Light is for
+  printing or screenshots into a document. It keeps the same encoding with
+  colours re-picked for white, all checked at ≥3:1 contrast. Internal
+  users are charcoal, and every outsider (people and systems) is amber. To
+  print, switch to Light first: the browser's print hides the panels and
+  keeps the graph and legend, in landscape.
 - **Legend, bottom right** (decision 59), shown by default and kept in full
   screen, under one "Legend" title. Nodes are listed by kind with their real
   glyph for icon kinds, and counts. Actors collapse to two rows, "Internal

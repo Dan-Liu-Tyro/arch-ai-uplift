@@ -115,7 +115,7 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), select: n => { selected = n; positionIcons(); }, renderDetail: n => renderDetail(n), openDomainRef: ref => openDomainRef(ref), selectedNode: () => selected, openFromGraph: n => openFromGraph(n), goBack: () => goBack(), closeDetail: () => closeDetail(), focusMode: () => focusMode, bodyFocus: () => document.body.classList._on, nextLevel: () => nextLevel, highlightIds: () => highlightIds(), chainRole: l => chainRole(l), };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), select: n => { selected = n; positionIcons(); }, renderDetail: n => renderDetail(n), openDomainRef: ref => openDomainRef(ref), selectedNode: () => selected, openFromGraph: n => openFromGraph(n), goBack: () => goBack(), closeDetail: () => closeDetail(), focusMode: () => focusMode, bodyFocus: () => document.body.classList._on, nextLevel: () => nextLevel, highlightIds: () => highlightIds(), chainRole: l => chainRole(l), theme: () => theme, nodeDisplayColor: n => nodeDisplayColor(n), };', ctx);
 
   return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam, controls: () => fakeControls, camera: () => fakeCamera };
 }
@@ -1400,6 +1400,62 @@ const el = (r, id) => r.els[id] || EMPTY;
 
   console.log('FC: ' + steps.map(([k, ok]) => k + ' = ' + !!ok).join(' | '));
   steps.filter(([, ok]) => !ok).forEach(([k]) => results.push('FC: next-level edges failed at "' + k + '"'));
+}
+
+// TH: decision 63's light/dark theme. "t" switches; the canvas background,
+// node/edge colours, bands and legend follow; light keeps the encoding
+// (internal vs external, one colour for all outsiders) and every node
+// colour clears 3:1 contrast on white (WCAG's non-text minimum), so it
+// survives print and screenshots. Printing needs preserveDrawingBuffer and
+// a print stylesheet -- the stub can't print, so those are asserted as
+// source.
+{
+  const r = run('TH', { cdnBlocked: false }); await tick();
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+
+  const lum = hex => {
+    const c = hex.replace('#', '').match(/../g).map(h => parseInt(h, 16) / 255)
+      .map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  };
+  const contrastOnWhite = hex => 1.05 / (lum(hex) + 0.05);
+  const color = n => r.probe.colorFor(n);
+  const nodes = r.probe.visible().nodes;
+  const staff = nodes.find(n => n.actor_type === 'InternalStaff');
+  const merchant = nodes.find(n => n.actor_type === 'Customer');
+  const system = nodes.find(n => n.kind === 'external');
+  const bg = () => r.calls['__last_backgroundColor'];
+  const steps = [];
+
+  steps.push(['starts dark', r.probe.theme() === 'dark' && bg() === '#05070d']);
+  const darkStaff = color(staff), darkFlow = r.calls['__last_linkColor'](r.probe.visible().links[0]);
+  r.listeners.keydown({ key: 't', target: { tagName: 'CANVAS' } });
+  steps.push(['t switches to light, white canvas', r.probe.theme() === 'light' && bg() === '#ffffff' && r.probe.bodyFocus()]);
+  steps.push(['internal user no longer white', color(staff) !== '#ffffff' && color(staff) !== darkStaff]);
+  steps.push(['all outsiders still one colour', color(merchant) === color(system) &&
+    nodes.filter(n => n.kind === 'actor' && n.actor_type !== 'InternalStaff').every(n => color(n) === color(merchant))]);
+  steps.push(['edges recoloured', r.calls['__last_linkColor'](r.probe.visible().links[0]) !== darkFlow]);
+  const lowContrast = [...new Set(nodes.map(color))].filter(c => /^#/.test(c) && contrastOnWhite(c) < 3);
+  steps.push(['every node colour >= 3:1 on white' + (lowContrast.length ? ' (fails: ' + lowContrast.join(', ') + ')' : ''), !lowContrast.length]);
+  const band = r.probe.bands()[0];
+  const bandFill = band && (band.poly || band).attrs && (band.poly || band).attrs.fill;
+  steps.push(['stage bands rebuilt in light colours (' + bandFill + ')', !!bandFill && /#6a5ae0|#1a8fc4|#1f9d5c/.test(bandFill)]);
+  const legendSwatch = el(r,'kind-legend').children.map(c => c.children[0].style.color || c.children[0].style.background);
+  steps.push(['legend recoloured', legendSwatch.includes(color(staff)) && legendSwatch.includes(color(merchant))]);
+  // Selection must not read as "internal user" (the dark theme's accepted
+  // overlap, not repeated here).
+  r.probe.select(merchant);
+  steps.push(['selected colour differs from internal user', r.probe.nodeDisplayColor(merchant) !== color(staff)]);
+  r.probe.select(null);
+  r.listeners.keydown({ key: 't', target: { tagName: 'CANVAS' } });
+  steps.push(['t switches back to dark', r.probe.theme() === 'dark' && bg() === '#05070d' && color(staff) === '#ffffff']);
+  steps.push(['canvas keeps its frame for print', /preserveDrawingBuffer:\s*true/.test(html)]);
+  steps.push(['print stylesheet hides the panels', /@media print\s*\{[^}]*#controls/.test(html)]);
+
+  console.log('TH: ' + steps.map(([k, ok]) => k + ' = ' + !!ok).join(' | '));
+  steps.filter(([, ok]) => !ok).forEach(([k]) => results.push('TH: theme failed at "' + k + '"'));
 }
 
 // X: payments.json's not_authoritative_for matches kg-content's domains.json.

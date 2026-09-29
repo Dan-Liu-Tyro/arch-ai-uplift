@@ -9,7 +9,7 @@
 
   function groupsForView() {
     return view.stages.map(function (s, i) {
-      return { key: s.id, label: s.ordinal + ". " + s.title, color: STAGE_COLORS[i % STAGE_COLORS.length] };
+      return { key: s.id, label: s.ordinal + ". " + s.title, color: T("stages")[i % T("stages").length] };
     });
   }
 
@@ -21,7 +21,7 @@
   // carried twice over by the bands (tint plus caption), so colour is a
   // single, honest encoding of kind instead.
   function colorFor(node) {
-    return presentationFor(node).color;
+    return colorForKey(presentationKey(node), presentationFor(node).color);
   }
 
   function hiddenSet() {
@@ -53,7 +53,6 @@
   // The extra level never follows a feedback arc (back_edge): it loops to
   // an earlier stage. A feedback arc touching the selected node itself is
   // still a direct edge, as it is with the option off.
-  var CHAIN_UP = "#ffb454", CHAIN_DOWN = "#6fe3a8";
   var chainCache = { key: null };
 
   function chainState() {
@@ -97,9 +96,9 @@
   // Selected-state edge colour: tinted by side with next-level edges on,
   // the long-standing single green (feedback arcs pink) with it off.
   function chainEdgeColor(l, role) {
-    if (l.back_edge) return "#ff7e8f";
-    if (!nextLevel) return "#6fe3a8";
-    return role === "up" ? CHAIN_UP : CHAIN_DOWN;
+    if (l.back_edge) return T("backSel");
+    if (!nextLevel) return T("down");
+    return role === "up" ? T("up") : T("down");
   }
 
   // The single source of truth for "what colour is this node right now",
@@ -110,11 +109,11 @@
     var base = colorFor(node);
     if (selected) {
       var keep = highlightIds();
-      if (node.id === selected.id) return "#ffffff";
-      if (!keep[node.id]) return "rgba(110,120,140,0.18)";
+      if (node.id === selected.id) return T("selNode");
+      if (!keep[node.id]) return T("dimNode");
       return base;
     }
-    if (isDimmedByScope(node)) return "rgba(110,120,140,0.22)";
+    if (isDimmedByScope(node)) return T("scopeDim");
     return base;
   }
 

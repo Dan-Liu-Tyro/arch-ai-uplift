@@ -44,7 +44,41 @@
       NODE_PRESENTATION[node.kind || node.type] ||
       { color: "#8a93ab", label: "Unknown" };
   }
-  var STAGE_COLORS = ["#8b7bff", "#3fd0ff", "#4dff9e"];
+  // ---- Themes (decision 63) -------------------------------------------------
+  //
+  // Every colour the canvas and its overlays draw with, per theme. The
+  // encoding is the same in both -- what a colour *means* doesn't change --
+  // only the values, so each stays readable against its background. Light
+  // exists to print or screenshot into a document: white staff would vanish
+  // on white, so "internal" becomes charcoal, and "external" (light yellow on
+  // dark) becomes one amber for every outsider, people and systems alike.
+  // NODE_PRESENTATION's `color` is the dark value; `nodes` below overrides
+  // it per presentation key for light.
+  var THEME = {
+    dark: {
+      bg: "#05070d", flow: "rgba(196,212,240,0.85)", back: "rgba(255,140,155,0.9)",
+      backSel: "#ff7e8f", dimEdge: "rgba(110,120,140,0.09)", dimNode: "rgba(110,120,140,0.18)",
+      scopeDim: "rgba(110,120,140,0.22)", selNode: "#ffffff",
+      particle: "#7ff0c0", particleBack: "#ff9fae", up: "#ffb454", down: "#6fe3a8",
+      stages: ["#8b7bff", "#3fd0ff", "#4dff9e"], nodes: {}
+    },
+    light: {
+      bg: "#ffffff", flow: "rgba(55,65,90,0.7)", back: "rgba(200,55,80,0.85)",
+      backSel: "#c8374f", dimEdge: "rgba(120,130,150,0.14)", dimNode: "rgba(150,160,175,0.3)",
+      scopeDim: "rgba(150,160,175,0.35)", selNode: "#0b0f19",
+      particle: "#1f9d5c", particleBack: "#c8374f", up: "#d9822b", down: "#1f9d5c",
+      stages: ["#6a5ae0", "#1a8fc4", "#1f9d5c"],
+      nodes: {
+        "domain": "#1a8fc4", "external": "#c98300", "artefact": "#7a5cd6", "principle": "#1f9d5c",
+        "actor:InternalStaff": "#2b3242", "actor:Customer": "#c98300", "actor:Partner": "#c98300",
+        "actor:Regulator": "#c98300", "actor": "#6b7488"
+      }
+    }
+  };
+  var theme = "dark";
+  try { if (window.localStorage && localStorage.getItem("kgviz-theme") === "light") theme = "light"; } catch (e) {}
+  function T(k) { return THEME[theme][k]; }
+  function colorForKey(key, fallback) { return THEME[theme].nodes[key] || fallback; }
 
   // The mesh colour key for every icon-drawn node (actors, external systems)
   // -- a value no sphere's colour can ever take, so their transparent mesh
@@ -61,7 +95,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29s — legend order: users together, external system below";
+  var PAGE_REVISION = "2026-09-29t — light/dark theme (T); print stylesheet";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
