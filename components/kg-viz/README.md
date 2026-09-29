@@ -15,7 +15,7 @@ in `docs/decision-log.md`).
 
 | View | Shape | Layout | What it answers |
 | --- | --- | --- | --- |
-| `payments-target-state` (**default and only**) | 26 nodes, 43 directed edges, 36 distinct predicates | Swimlanes: lane = stage, column = flow depth within the stage | How does a payment actually flow, and what does each hop carry? |
+| `payments-target-state` (**default and only**) | 26 nodes, 42 directed edges, 36 distinct predicates | Swimlanes: lane = stage, column = flow depth within the stage | How does a payment actually flow, and what does each hop carry? |
 
 There used to be a second view, `domain-authority`: 40 nodes, 296 edges, one
 predicate (`not_authoritative_for`), force layout. Removed along with that
@@ -198,7 +198,7 @@ no longer turns it into edges of any kind.
 
   All bands then share a **common left edge** — the leftmost any of them
   needs, which is whichever stage has the widest label on its leftmost node
-  (currently stage 2, "Customer (self-serve / merchant)"). Ragged left edges
+  (currently stage 2, "Customer Service (Tyro-assist)"). Ragged left edges
   read as three unrelated regions that happen to be stacked; a shared edge
   reads as three lanes of one process, which is the whole point of the view.
   This is why `positionBands()` is two passes: measure every band, then
@@ -302,7 +302,7 @@ no longer turns it into edges of any kind.
   predicate is the only place an edge's meaning appears on the canvas.
   Suppressing them was actively wrong: a longer label has a bigger box, so it
   collides more often and was dropped first, meaning **the most informative
-  predicates were the ones that disappeared**. `verify.js` asserts that all 43
+  predicates were the ones that disappeared**. `verify.js` asserts that all 42
   are placed and that the longest is among them.
 - **Legend, bottom right** (decision 59), shown by default and kept in full
   screen. Nodes are listed by kind with their real glyph for icon kinds, and
@@ -383,8 +383,10 @@ holds no data of its own and starts empty.
 Current content, as reported by `generate.py` rather than asserted here:
 
 - `payments-target-state` — 26 nodes (17 `domain_ref`, 6 actors, 2 external
-  systems, 1 artefact), 43 edges, 36 distinct predicates, 3 lanes, 7 columns
-  at the widest lane, 0 unresolved `domain_ref`s, 1 feedback arc.
+  systems, 1 artefact), 42 edges, 36 distinct predicates, 3 lanes, 7 columns
+  at the widest lane, 0 unresolved `domain_ref`s, 0 feedback arcs (the one
+  there was removed from the data by decision 60; the feedback-arc styling
+  and legend row remain for any graph that has one).
 
 ## Known gaps
 

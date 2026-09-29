@@ -1,6 +1,6 @@
 {
   "generated_from": "components/kg-content",
-  "generated_at": "2026-09-29T09:52:51",
+  "generated_at": "2026-09-29T10:54:24",
   "default_view": "payments-target-state",
   "views": [
     {
@@ -32,7 +32,7 @@
         }
       ],
       "source": "https://tyropaymentsltd.atlassian.net/wiki/spaces/ARCH/whiteboard/1823277126",
-      "source_notes": "Derived from the structured text feed the whiteboard's owner authored for this purpose (https://tyropaymentsltd.atlassian.net/wiki/spaces/ARCH/pages/2382233611/Payment+target+state+WIP+AI+feed). The whiteboard body itself is not readable through the Atlassian connector -- only its metadata and a ~260-character indexed text extract -- so the feed page is the machine-readable source and the whiteboard is the human original. Both are WIP.",
+      "source_notes": "Derived from the structured text feed the whiteboard's owner authored for this purpose (https://tyropaymentsltd.atlassian.net/wiki/spaces/ARCH/pages/2382233611/Payment+target+state+WIP+AI+feed). The whiteboard body itself is not readable through the Atlassian connector -- only its metadata and a ~260-character indexed text extract -- so the feed page is the machine-readable source and the whiteboard is the human original. Both are WIP. Deliberate divergences from the feed, curated here (decision 60 in docs/decision-log.md): the actor 'Customer (self-serve / merchant)' is titled 'Merchant', and the edge 'Cross-domain reports CONSUMED_BY Customer (Merchant portal insights)' is removed -- it was the graph's only backwards (stage 3 to stage 2) edge.",
       "nodes": [
         {
           "id": "payments-product",
@@ -1357,7 +1357,7 @@
         },
         {
           "id": "actor-customer",
-          "title": "Customer (self-serve / merchant)",
+          "title": "Merchant",
           "type": "actor",
           "kind": "actor",
           "actor_type": "Customer",
@@ -1881,16 +1881,6 @@
           "stage": "taking-payments-and-getting-paid",
           "description": "consumed by \u2014 carries: Operational and performance reports",
           "back_edge": false
-        },
-        {
-          "source": "artefact-cross-domain-reports",
-          "target": "actor-customer",
-          "predicate": "CONSUMED_BY",
-          "label": "consumed by",
-          "payload": "Merchant portal insights",
-          "stage": "taking-payments-and-getting-paid",
-          "description": "consumed by \u2014 carries: Merchant portal insights",
-          "back_edge": true
         },
         {
           "source": "artefact-cross-domain-reports",
@@ -3985,12 +3975,7 @@
       },
       "stats": {
         "unresolved_domain_refs": [],
-        "back_edges": [
-          [
-            "artefact-cross-domain-reports",
-            "actor-customer"
-          ]
-        ],
+        "back_edges": [],
         "unranked_nodes": [],
         "columns": 7,
         "lanes": 3

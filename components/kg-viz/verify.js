@@ -915,7 +915,10 @@ const el = (r, id) => r.els[id] || EMPTY;
   const steps = [
     ['legend shown once a graph is open', el(r,'legend').classList._on],
     ['icon kinds show their glyph (' + iconRows.length + ')', iconRows.length >= 3 && iconRows.every(row => /<svg/.test(row.children[0].innerHTML))],
-    ['edge legend names flow and feedback arc', /Flow/.test(offText) && /Feedback arc/.test(offText)],
+    ['edge legend names flow', /Flow/.test(offText)],
+    // The feedback-arc row is shown iff the view actually has one.
+    ['feedback-arc row iff the view has one',
+      /Feedback arc/.test(offText) === r.probe.view().links.some(l => l.back_edge)],
     ['off: one selection row', /Selected node/.test(offText) && !/upstream/.test(offText)],
     ['on: upstream and downstream rows', /upstream/.test(onText) && /downstream/.test(onText)],
     ['no second legend in the control panel', !shellHasOldLegend],

@@ -116,6 +116,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 57 | `E` key toggles `kg-viz` edge labels; shortcuts share one guarded table | `kg-viz` |
 | 58 | `kg-viz` "Next-level edges" (`N`): one level beyond neighbours, upstream orange / downstream green (first built as a full chain, cut back) | `kg-viz` |
 | 59 | `kg-viz` legend bottom-right (shown by default, kept in full screen); info panel collapsed beneath it; control-panel legend moved, not copied | `kg-viz` |
+| 60 | Payments Target State: customer actor renamed "Merchant"; the only backwards edge (reports → merchant) removed; divergence from source feed recorded | `kg-content/entities/graphs/`, `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2595,6 +2596,30 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       on screen. New scenario LG covers the legend. LG was written against
       the new DOM and was not separately run against the old page, because
       its targets (`#edge-legend`, the dock) did not exist there.
+60. **Payments Target State data cleanup: the actor "Customer (self-serve /
+    merchant)" is renamed "Merchant", and the edge "Cross-domain reports
+    CONSUMED_BY Customer (Merchant portal insights)" is removed.** Directed
+    by the user on 2026-09-29 after asking what the dashed "feedback arc"
+    was. That edge was the graph's only backwards edge, running from stage
+    3 back to the stage-2 merchant node, and so the only one drawn as a
+    feedback arc. Three options were offered: draw it like any other edge,
+    add a second stage-3 merchant node so the edge points forward, or drop
+    it. The user chose to clean up the data: remove the edge and rename the
+    actor.
+    - **This diverges from the source feed, deliberately.** The overlay is
+      derived from the whiteboard owner's WIP AI feed page. Both
+      divergences are recorded in the file's own `source_notes`, so a
+      future re-derivation from the feed doesn't silently undo them or
+      mistake them for extraction errors.
+    - **What stayed.** The node's `id` (`actor-customer`) and
+      `actor_type: Customer` are unchanged. The id is identity rather than
+      display, and `Customer` is the schema's actor type for a merchant; the
+      legend already reads "External user (merchant)". The feedback-arc
+      detection, styling and legend row stay in `kg-viz` for any graph that
+      has one. The legend row now hides itself, since this graph has none.
+    - **Knock-on.** 42 edges, down from 43, and 0 feedback arcs. Scenario
+      LG now expects the feedback-arc row if and only if a view has one. The
+      `kg-viz` README counts were updated.
     - **Known overlap, flagged rather than fixed.** A selected node is
       drawn white (`nodeDisplayColor`), so a selected external actor briefly
       shares staff's colour. The glow on a selected actor icon and the
