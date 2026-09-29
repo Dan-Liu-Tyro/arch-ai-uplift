@@ -81,8 +81,19 @@
      #controls' content got tall enough; it painted on top and silently hid
      "Fit to view" and everything after it. Right-anchored keeps it clear of
      #controls' column regardless of either panel's content length. */
-  #stats { bottom: 14px; right: 14px; width: 262px; font-size: 11px; color: #9aa4ba;
-    line-height: 1.5; }
+  #stats { width: 262px; font-size: 11px; color: #9aa4ba; line-height: 1.5; }
+  #br-dock { position: absolute; bottom: 14px; right: 14px; z-index: 5;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  #br-dock > .panel-base { position: relative; }
+  #legend { display: none; width: 220px; font-size: 11px; padding: 8px 12px 6px; }
+  #legend.ready { display: block; }
+  #legend .group-label { margin: 6px 0 4px; }
+  #legend .group-label:first-child { margin-top: 0; }
+  #legend .row { margin: 3px 0; cursor: default; }
+  .swatch.icon { width: 15px; height: 15px; border-radius: 0; box-shadow: none;
+    background: none !important; display: flex; align-items: center; justify-content: center; }
+  .swatch.icon svg { width: 15px; height: 15px; }
+  .edge-sample { width: 26px; height: 10px; flex: none; }
   #stats b { color: #ffd479; }
   #stats-toggle { position: absolute; top: 10px; right: 12px; cursor: pointer;
     font-size: 15px; color: #7b87a0; line-height: 1; }
@@ -206,11 +217,14 @@
      their own display. Two things stay: diagnostics (#notes) -- an error
      should never be hidden by a viewing mode -- and the detail pane, which
      still opens when a node is selected (the user's call: selecting a node
-     is asking about it). The exit pill sits bottom-right, where #stats
-     would be, so it never collides with the top-right detail pane. */
+     is asking about it). The legend stays too (decision 59: full screen is
+     where the graph gets presented, which is when a reader needs the key).
+     The exit pill sits top-centre, clear of the top-right detail pane and
+     the bottom-right legend. */
   body.focus #controls, body.focus #stats,
   body.focus #hint { display: none !important; }
-  #focus-exit { display: none; position: absolute; bottom: 14px; right: 14px; z-index: 6;
+  #focus-exit { display: none; position: absolute; top: 12px; left: 50%;
+    transform: translateX(-50%); z-index: 6;
     font-size: 11px; color: #8d97ad; background: rgba(12, 16, 26, 0.7);
     border: 1px solid rgba(120, 140, 180, 0.28); border-radius: 99px;
     padding: 4px 10px; cursor: pointer; user-select: none; }
@@ -259,11 +273,6 @@
     <div class="group-label" id="groups-label">Stages (show / hide)</div>
     <div id="group-rows"></div>
 
-    <!-- Node colour encodes what a node *is*. Without this the encoding is
-         guesswork: gold meant "internal user" and nothing on screen said so. -->
-    <div class="group-label" id="legend-label">What the colours mean</div>
-    <div id="kind-legend"></div>
-
     <div class="group-label">Display</div>
     <div class="row" id="labels-row">
       <input type="checkbox" id="labels-cb" checked />
@@ -302,9 +311,23 @@
     </div>
   </div>
 
-  <div id="stats" class="panel-base">
-    <span id="stats-toggle" title="Collapse">&#8722;</span>
-    <div id="stats-body"></div>
+  <!-- Bottom-right dock (decision 59): the legend, then the info panel
+       collapsed beneath it. One column, so the two can never overlap
+       however either one grows. -->
+  <div id="br-dock">
+    <!-- Node colour and shape encode what a node *is*; without a key the
+         encoding is guesswork. This is the only legend -- it used to live in
+         the control panel, and was moved, not copied, so two can't drift. -->
+    <div id="legend" class="panel-base">
+      <div class="group-label" id="legend-label">Nodes</div>
+      <div id="kind-legend"></div>
+      <div class="group-label">Edges</div>
+      <div id="edge-legend"></div>
+    </div>
+    <div id="stats" class="panel-base">
+      <span id="stats-toggle" title="Collapse">&#8722;</span>
+      <div id="stats-body"></div>
+    </div>
   </div>
 
   <div id="detail" class="panel-base">

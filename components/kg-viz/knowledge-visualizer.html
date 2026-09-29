@@ -81,8 +81,19 @@
      #controls' content got tall enough; it painted on top and silently hid
      "Fit to view" and everything after it. Right-anchored keeps it clear of
      #controls' column regardless of either panel's content length. */
-  #stats { bottom: 14px; right: 14px; width: 262px; font-size: 11px; color: #9aa4ba;
-    line-height: 1.5; }
+  #stats { width: 262px; font-size: 11px; color: #9aa4ba; line-height: 1.5; }
+  #br-dock { position: absolute; bottom: 14px; right: 14px; z-index: 5;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  #br-dock > .panel-base { position: relative; }
+  #legend { display: none; width: 220px; font-size: 11px; padding: 8px 12px 6px; }
+  #legend.ready { display: block; }
+  #legend .group-label { margin: 6px 0 4px; }
+  #legend .group-label:first-child { margin-top: 0; }
+  #legend .row { margin: 3px 0; cursor: default; }
+  .swatch.icon { width: 15px; height: 15px; border-radius: 0; box-shadow: none;
+    background: none !important; display: flex; align-items: center; justify-content: center; }
+  .swatch.icon svg { width: 15px; height: 15px; }
+  .edge-sample { width: 26px; height: 10px; flex: none; }
   #stats b { color: #ffd479; }
   #stats-toggle { position: absolute; top: 10px; right: 12px; cursor: pointer;
     font-size: 15px; color: #7b87a0; line-height: 1; }
@@ -206,11 +217,14 @@
      their own display. Two things stay: diagnostics (#notes) -- an error
      should never be hidden by a viewing mode -- and the detail pane, which
      still opens when a node is selected (the user's call: selecting a node
-     is asking about it). The exit pill sits bottom-right, where #stats
-     would be, so it never collides with the top-right detail pane. */
+     is asking about it). The legend stays too (decision 59: full screen is
+     where the graph gets presented, which is when a reader needs the key).
+     The exit pill sits top-centre, clear of the top-right detail pane and
+     the bottom-right legend. */
   body.focus #controls, body.focus #stats,
   body.focus #hint { display: none !important; }
-  #focus-exit { display: none; position: absolute; bottom: 14px; right: 14px; z-index: 6;
+  #focus-exit { display: none; position: absolute; top: 12px; left: 50%;
+    transform: translateX(-50%); z-index: 6;
     font-size: 11px; color: #8d97ad; background: rgba(12, 16, 26, 0.7);
     border: 1px solid rgba(120, 140, 180, 0.28); border-radius: 99px;
     padding: 4px 10px; cursor: pointer; user-select: none; }
@@ -259,11 +273,6 @@
     <div class="group-label" id="groups-label">Stages (show / hide)</div>
     <div id="group-rows"></div>
 
-    <!-- Node colour encodes what a node *is*. Without this the encoding is
-         guesswork: gold meant "internal user" and nothing on screen said so. -->
-    <div class="group-label" id="legend-label">What the colours mean</div>
-    <div id="kind-legend"></div>
-
     <div class="group-label">Display</div>
     <div class="row" id="labels-row">
       <input type="checkbox" id="labels-cb" checked />
@@ -302,9 +311,23 @@
     </div>
   </div>
 
-  <div id="stats" class="panel-base">
-    <span id="stats-toggle" title="Collapse">&#8722;</span>
-    <div id="stats-body"></div>
+  <!-- Bottom-right dock (decision 59): the legend, then the info panel
+       collapsed beneath it. One column, so the two can never overlap
+       however either one grows. -->
+  <div id="br-dock">
+    <!-- Node colour and shape encode what a node *is*; without a key the
+         encoding is guesswork. This is the only legend -- it used to live in
+         the control panel, and was moved, not copied, so two can't drift. -->
+    <div id="legend" class="panel-base">
+      <div class="group-label" id="legend-label">Nodes</div>
+      <div id="kind-legend"></div>
+      <div class="group-label">Edges</div>
+      <div id="edge-legend"></div>
+    </div>
+    <div id="stats" class="panel-base">
+      <span id="stats-toggle" title="Collapse">&#8722;</span>
+      <div id="stats-body"></div>
+    </div>
   </div>
 
   <div id="detail" class="panel-base">
@@ -403,13 +426,13 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29o — next-level edges (N) replace full chain";
+  var PAGE_REVISION = "2026-09-29p — legend bottom-right; info panel starts collapsed";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
   var DATA = null, view = null, Graph = null;
   var dims = 2, scopeMode = "all", focusMode = false, nextLevel = false, showLabels = true, showEdgeLabels = false, edgeLabelStyle = "along";
-  var statsCollapsed = false;
+  var statsCollapsed = true;
   var showBands = true;
   // Anything that prevents the graph drawing goes on screen. Errors thrown
   // inside the render loop never reach the fetch().catch() below, which is
@@ -629,12 +652,52 @@
       var row = document.createElement("div");
       row.className = "row";
       var sw = document.createElement("span");
-      sw.className = "swatch";
-      sw.style.background = p.color;
+      // Icon-drawn kinds show their actual glyph, so the key matches what
+      // is on the canvas by shape as well as colour (decision 59).
+      if (ICON_SVG[p.shape]) {
+        sw.className = "swatch icon";
+        sw.style.color = p.color;
+        sw.innerHTML = ICON_SVG[p.shape];
+      } else {
+        sw.className = "swatch";
+        sw.style.background = p.color;
+      }
       var txt = document.createElement("span");
       txt.textContent = p.label + " (" + counts[k] + ")";
       row.appendChild(sw);
       row.appendChild(txt);
+      host.appendChild(row);
+    });
+    buildEdgeLegend();
+  }
+
+  // What edge styling means. The selection rows follow the Next-level
+  // edges option, because that option is what changes their meaning: off,
+  // a selection's edges are one green; on, orange feeds it and green is fed
+  // by it. The feedback-arc row appears only when the view has one.
+  function buildEdgeLegend() {
+    var host = document.getElementById("edge-legend");
+    host.innerHTML = "";
+    function sample(stroke, dashed) {
+      return '<svg class="edge-sample" viewBox="0 0 26 10" aria-hidden="true">' +
+        '<line x1="1" y1="5" x2="20" y2="5" stroke="' + stroke + '" stroke-width="2"' +
+        (dashed ? ' stroke-dasharray="4 3"' : "") + "/>" +
+        '<path d="M19 1.5 L25 5 L19 8.5 z" fill="' + stroke + '"/></svg>';
+    }
+    var rows = [[sample("rgba(196,212,240,0.85)"), "Flow; particles run source → target"]];
+    if (view.links.some(function (l) { return l.back_edge; })) {
+      rows.push([sample("#ff7e8f", true), "Feedback arc (loops to an earlier stage)"]);
+    }
+    if (nextLevel) {
+      rows.push([sample(CHAIN_UP), "Feeds the selected node (upstream)"]);
+      rows.push([sample(CHAIN_DOWN), "Fed by the selected node (downstream)"]);
+    } else {
+      rows.push([sample(CHAIN_DOWN), "Selected node's edges"]);
+    }
+    rows.forEach(function (r) {
+      var row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = r[0] + "<span>" + escapeHtml(r[1]) + "</span>";
       host.appendChild(row);
     });
   }
@@ -1617,6 +1680,7 @@
 
     document.getElementById("controls").classList.add("ready");
     document.getElementById("stats").classList.add("ready");
+    document.getElementById("legend").classList.add("ready");
     buildControls();
     renderStats();
     // Labels first: a band is sized to enclose its stage's labels, so it has
@@ -1770,8 +1834,15 @@
     // element's own classList, because the CSS class is the *effect* and
     // this is the one place that decides it -- same pattern as showLabels
     // and the other toggles above, rather than treating the DOM as storage.
+    // Starts collapsed (decision 59): the legend above it is what a reader
+    // needs first, and the info panel's provenance text is one click away.
+    applyStatsCollapsed();
     document.getElementById("stats-toggle").onclick = function () {
       statsCollapsed = !statsCollapsed;
+      applyStatsCollapsed();
+    };
+
+    function applyStatsCollapsed() {
       var panel = document.getElementById("stats");
       var toggle = document.getElementById("stats-toggle");
       if (statsCollapsed) {
@@ -1786,7 +1857,7 @@
         toggle.innerHTML = "&#8722;";
         toggle.title = "Collapse";
       }
-    };
+    }
 
     // 3d-force-graph sizes its renderer from the container once, at
     // construction, and does not follow the window. Without this, resizing
@@ -1801,6 +1872,7 @@
     document.getElementById("next-level-cb").checked = nextLevel;
     document.getElementById("next-level-cb").onchange = function (e) {
       nextLevel = e.target.checked;
+      buildEdgeLegend();
       repaint();
     };
 
@@ -1822,6 +1894,7 @@
       n: function () {
         nextLevel = !nextLevel;
         document.getElementById("next-level-cb").checked = nextLevel;
+        buildEdgeLegend();
         repaint();
       },
       // The pane's back (←) button, from the keyboard (decision 51).

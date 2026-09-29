@@ -17,12 +17,52 @@
       var row = document.createElement("div");
       row.className = "row";
       var sw = document.createElement("span");
-      sw.className = "swatch";
-      sw.style.background = p.color;
+      // Icon-drawn kinds show their actual glyph, so the key matches what
+      // is on the canvas by shape as well as colour (decision 59).
+      if (ICON_SVG[p.shape]) {
+        sw.className = "swatch icon";
+        sw.style.color = p.color;
+        sw.innerHTML = ICON_SVG[p.shape];
+      } else {
+        sw.className = "swatch";
+        sw.style.background = p.color;
+      }
       var txt = document.createElement("span");
       txt.textContent = p.label + " (" + counts[k] + ")";
       row.appendChild(sw);
       row.appendChild(txt);
+      host.appendChild(row);
+    });
+    buildEdgeLegend();
+  }
+
+  // What edge styling means. The selection rows follow the Next-level
+  // edges option, because that option is what changes their meaning: off,
+  // a selection's edges are one green; on, orange feeds it and green is fed
+  // by it. The feedback-arc row appears only when the view has one.
+  function buildEdgeLegend() {
+    var host = document.getElementById("edge-legend");
+    host.innerHTML = "";
+    function sample(stroke, dashed) {
+      return '<svg class="edge-sample" viewBox="0 0 26 10" aria-hidden="true">' +
+        '<line x1="1" y1="5" x2="20" y2="5" stroke="' + stroke + '" stroke-width="2"' +
+        (dashed ? ' stroke-dasharray="4 3"' : "") + "/>" +
+        '<path d="M19 1.5 L25 5 L19 8.5 z" fill="' + stroke + '"/></svg>';
+    }
+    var rows = [[sample("rgba(196,212,240,0.85)"), "Flow; particles run source → target"]];
+    if (view.links.some(function (l) { return l.back_edge; })) {
+      rows.push([sample("#ff7e8f", true), "Feedback arc (loops to an earlier stage)"]);
+    }
+    if (nextLevel) {
+      rows.push([sample(CHAIN_UP), "Feeds the selected node (upstream)"]);
+      rows.push([sample(CHAIN_DOWN), "Fed by the selected node (downstream)"]);
+    } else {
+      rows.push([sample(CHAIN_DOWN), "Selected node's edges"]);
+    }
+    rows.forEach(function (r) {
+      var row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = r[0] + "<span>" + escapeHtml(r[1]) + "</span>";
       host.appendChild(row);
     });
   }

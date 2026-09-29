@@ -861,22 +861,27 @@ const el = (r, id) => r.els[id] || EMPTY;
   inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
   inp.onchange(); await tick();
 
+  // Starts collapsed since decision 59 -- and the element must already
+  // look collapsed (class, icon, title), not just the variable.
   const before = r.probe.statsCollapsed();
+  const startLooksCollapsed = el(r,'stats').classList._on && el(r,'stats-toggle')._html === '&#9432;' &&
+    el(r,'stats-toggle').title === 'Expand';
   el(r,'stats-toggle').click();
   const afterFirstClick = r.probe.statsCollapsed();
-  const titleAfterCollapse = el(r,'stats-toggle').title;
-  const iconAfterCollapse = el(r,'stats-toggle')._html;
-  el(r,'stats-toggle').click();
-  const afterSecondClick = r.probe.statsCollapsed();
   const titleAfterExpand = el(r,'stats-toggle').title;
   const iconAfterExpand = el(r,'stats-toggle')._html;
-  console.log('S: starts expanded =', !before, '| collapses on click =', afterFirstClick,
-    '| expands on a second click =', !afterSecondClick,
+  el(r,'stats-toggle').click();
+  const afterSecondClick = r.probe.statsCollapsed();
+  const titleAfterCollapse = el(r,'stats-toggle').title;
+  const iconAfterCollapse = el(r,'stats-toggle')._html;
+  console.log('S: starts collapsed =', before, '| and looks it =', startLooksCollapsed,
+    '| expands on click =', !afterFirstClick, '| collapses on a second click =', afterSecondClick,
     '| title tracks state =', titleAfterCollapse === 'Expand' && titleAfterExpand === 'Collapse',
     '| icon tracks state =', iconAfterCollapse === '&#9432;' && iconAfterExpand === '&#8722;');
-  if (before) results.push('S: stats panel starts collapsed, expected expanded by default');
-  if (!afterFirstClick) results.push('S: clicking the toggle did not collapse the stats panel');
-  if (afterSecondClick) results.push('S: clicking the toggle again did not expand the stats panel back');
+  if (!before) results.push('S: info panel starts expanded, expected collapsed by default (decision 59)');
+  if (!startLooksCollapsed) results.push('S: info panel is collapsed in state but not on screen at start');
+  if (afterFirstClick) results.push('S: clicking the toggle did not expand the info panel');
+  if (!afterSecondClick) results.push('S: clicking the toggle again did not collapse the info panel back');
   // A minimize glyph while expanded ("click to shrink me"), an info glyph
   // once collapsed ("this is the info panel") -- not the same icon twice,
   // which never signalled which action a click would take.
@@ -887,6 +892,37 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (titleAfterCollapse !== 'Expand' || titleAfterExpand !== 'Collapse') {
     results.push('S: toggle title did not track collapsed state: ' + titleAfterCollapse + ' / ' + titleAfterExpand);
   }
+}
+
+// LG: decision 59's bottom-right legend -- node kinds with their real glyph
+// for icon kinds, edge meanings that follow the Next-level option, and the
+// control panel no longer holding a second copy.
+{
+  const r = run('LG', { cdnBlocked: false }); await tick();
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+
+  const kinds = el(r,'kind-legend').children;
+  const iconRows = kinds.filter(row => row.children[0] && /\bicon\b/.test(row.children[0].className));
+  const edgeText = () => el(r,'edge-legend').children.map(c => c._html).join(' ');
+  const offText = edgeText();
+  r.listeners.keydown({ key: 'n', target: { tagName: 'CANVAS' } });
+  const onText = edgeText();
+  r.listeners.keydown({ key: 'n', target: { tagName: 'CANVAS' } });
+  const shellHasOldLegend = /What the colours mean/.test(html);
+  const legendInDock = /id="br-dock"[\s\S]*id="legend"[\s\S]*id="stats"/.test(html);
+  const steps = [
+    ['legend shown once a graph is open', el(r,'legend').classList._on],
+    ['icon kinds show their glyph (' + iconRows.length + ')', iconRows.length >= 3 && iconRows.every(row => /<svg/.test(row.children[0].innerHTML))],
+    ['edge legend names flow and feedback arc', /Flow/.test(offText) && /Feedback arc/.test(offText)],
+    ['off: one selection row', /Selected node/.test(offText) && !/upstream/.test(offText)],
+    ['on: upstream and downstream rows', /upstream/.test(onText) && /downstream/.test(onText)],
+    ['no second legend in the control panel', !shellHasOldLegend],
+    ['legend above the info panel in one dock', legendInDock],
+  ];
+  console.log('LG: ' + steps.map(([k, ok]) => k + ' = ' + !!ok).join(' | '));
+  steps.filter(([, ok]) => !ok).forEach(([k]) => results.push('LG: legend failed at "' + k + '"'));
 }
 
 // T: actor icon overlay, coloured like the mesh, shown in every view

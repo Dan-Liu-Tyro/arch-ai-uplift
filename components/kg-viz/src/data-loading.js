@@ -121,6 +121,7 @@
 
     document.getElementById("controls").classList.add("ready");
     document.getElementById("stats").classList.add("ready");
+    document.getElementById("legend").classList.add("ready");
     buildControls();
     renderStats();
     // Labels first: a band is sized to enclose its stage's labels, so it has

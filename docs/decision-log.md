@@ -115,6 +115,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 56 | `kg-viz` full-screen focus mode: panel button or `F` key; Esc exits | `kg-viz` |
 | 57 | `E` key toggles `kg-viz` edge labels; shortcuts share one guarded table | `kg-viz` |
 | 58 | `kg-viz` "Next-level edges" (`N`): one level beyond neighbours, upstream orange / downstream green (first built as a full chain, cut back) | `kg-viz` |
+| 59 | `kg-viz` legend bottom-right (shown by default, kept in full screen); info panel collapsed beneath it; control-panel legend moved, not copied | `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2570,6 +2571,30 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       full chain, and that the `N` key ticks the checkbox. It was confirmed
       failing on the old page first. The "known cost" above mostly falls
       away with this change.
+59. **`kg-viz` legend at the bottom right, shown by default and kept in
+    full screen. The info panel starts collapsed beneath it.** Requested by
+    the user on 2026-09-29. Asked how it should relate to the existing
+    stats panel (already at the bottom right) and to the control panel's
+    colour legend, the user answered: show the legend by default and
+    collapse the info window by default. The legend stays in full screen,
+    which was the recommendation, because full screen is where the graph
+    gets presented.
+    - **Layout.** One bottom-right dock holds the legend with the info panel
+      beneath it, in a flex column so the two can't overlap however either
+      grows. The full-screen exit pill moves to the top centre, clear of
+      both the dock and the top-right detail pane.
+    - **Content.** Nodes are listed by kind with counts, and icon kinds show
+      their real glyph, so the key matches the canvas by shape as well as
+      colour. Edges cover flow, the feedback arc (only when present), and
+      the selection colours, which follow the Next-level edges option: one
+      green row when it is off, orange upstream and green downstream when
+      it is on.
+    - **One legend, not two.** The control panel's "What the colours mean"
+      was moved here, not copied, so there is no second key to drift.
+      Scenario S now expects the info panel to start collapsed, in state and
+      on screen. New scenario LG covers the legend. LG was written against
+      the new DOM and was not separately run against the old page, because
+      its targets (`#edge-legend`, the dock) did not exist there.
     - **Known overlap, flagged rather than fixed.** A selected node is
       drawn white (`nodeDisplayColor`), so a selected external actor briefly
       shares staff's colour. The glow on a selected actor icon and the

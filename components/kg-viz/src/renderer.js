@@ -140,8 +140,15 @@
     // element's own classList, because the CSS class is the *effect* and
     // this is the one place that decides it -- same pattern as showLabels
     // and the other toggles above, rather than treating the DOM as storage.
+    // Starts collapsed (decision 59): the legend above it is what a reader
+    // needs first, and the info panel's provenance text is one click away.
+    applyStatsCollapsed();
     document.getElementById("stats-toggle").onclick = function () {
       statsCollapsed = !statsCollapsed;
+      applyStatsCollapsed();
+    };
+
+    function applyStatsCollapsed() {
       var panel = document.getElementById("stats");
       var toggle = document.getElementById("stats-toggle");
       if (statsCollapsed) {
@@ -156,7 +163,7 @@
         toggle.innerHTML = "&#8722;";
         toggle.title = "Collapse";
       }
-    };
+    }
 
     // 3d-force-graph sizes its renderer from the container once, at
     // construction, and does not follow the window. Without this, resizing
@@ -171,6 +178,7 @@
     document.getElementById("next-level-cb").checked = nextLevel;
     document.getElementById("next-level-cb").onchange = function (e) {
       nextLevel = e.target.checked;
+      buildEdgeLegend();
       repaint();
     };
 
@@ -192,6 +200,7 @@
       n: function () {
         nextLevel = !nextLevel;
         document.getElementById("next-level-cb").checked = nextLevel;
+        buildEdgeLegend();
         repaint();
       },
       // The pane's back (←) button, from the keyboard (decision 51).

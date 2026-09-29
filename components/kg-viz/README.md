@@ -72,7 +72,7 @@ blob that existed only to let the page auto-load, which it no longer does).
 cd components/kg-viz && node verify.js
 ```
 
-Twenty-eight scenarios (A–Z, then FS and FC), exit non-zero on failure. This is the only automated check
+Twenty-nine scenarios (A–Z, then FS, FC and LG), exit non-zero on failure. This is the only automated check
 in the repo, and it exists because **nothing this component renders can be
 observed from a Claude Code session** — see `docs/decision-log.md`'s
 "Constraints identified". It is a floor, not a substitute for opening the
@@ -304,6 +304,13 @@ no longer turns it into edges of any kind.
   collides more often and was dropped first, meaning **the most informative
   predicates were the ones that disappeared**. `verify.js` asserts that all 43
   are placed and that the longest is among them.
+- **Legend, bottom right** (decision 59), shown by default and kept in full
+  screen. Nodes are listed by kind with their real glyph for icon kinds, and
+  counts. Edges cover flow and direction particles, the feedback arc when
+  the view has one, and the selection colours, which switch to
+  upstream/downstream rows when Next-level edges is on. It is the only
+  legend; it moved out of the control panel. The info (stats) panel sits
+  beneath it in the same dock, collapsed by default.
 - **Next-level edges** (decision 58), off by default, toggled by its
   checkbox or `N`. When off, a selection highlights the node's direct edges
   and neighbours. When on, it goes one level further in the same
@@ -315,7 +322,7 @@ no longer turns it into edges of any kind.
 - **Full-screen focus mode** (decision 56) — **Full screen (F)** in the
   control panel, or the `F` key, hides every panel and puts the browser in
   real fullscreen where it allows it. The camera refits to the whole
-  window. `F`, the **Exit full screen** pill at the bottom right, or Esc
+  window. `F`, the **Exit full screen** pill at the top centre, or Esc
   leaves it. `F` is ignored with a modifier (Cmd/Ctrl+F stays the browser's
   find) and while typing in a field. Selecting a node works exactly as
   outside it, detail pane included. Diagnostics stay visible.
