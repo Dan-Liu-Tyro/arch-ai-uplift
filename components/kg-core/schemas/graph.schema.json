@@ -1,0 +1,140 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://tyro.internal/arch-ai-uplift/kg-core/schemas/graph.schema.json",
+  "title": "overlay graph",
+  "description": "Shape of components/kg-content/entities/graphs/<slug>.json -- a named set of typed, directed relationships over entities that already exist elsewhere in kg-content. See SCHEMA.md's 'Overlay graphs' section for the governing rule (reference, never restate) and decision 35 for why this type exists. No automated validator wired up yet (stdlib-only convention; skipping a jsonschema dependency rather than breaking it -- see kg-core/README.md).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "type",
+    "title",
+    "status",
+    "owner",
+    "updated",
+    "source",
+    "stages",
+    "nodes",
+    "edges"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Marked -experimental while the overlay-graph shape is still provisional. Only one overlay exists, so nothing has yet tested whether a second would fit."
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "type": {
+      "const": "graph"
+    },
+    "title": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "superseded"]
+    },
+    "owner": {
+      "type": "string",
+      "description": "Role, never a personal name -- see CLAUDE.md's no-personal-names rule."
+    },
+    "updated": {
+      "type": "string",
+      "format": "date"
+    },
+    "source": {
+      "type": "string",
+      "format": "uri",
+      "description": "The human original this graph represents."
+    },
+    "source_notes": {
+      "type": "string",
+      "description": "Required in practice whenever `source` is not directly machine-readable, so a reader can tell what was transcribed from where. The first overlay's source is a Confluence whiteboard whose body the Atlassian connector cannot fetch at all."
+    },
+    "stages": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Ordered phases of the modelled flow. Consumers may use `ordinal` for layout and for deciding which arcs are feedback.",
+      "items": {
+        "type": "object",
+        "required": ["id", "ordinal", "title", "boundary"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+          "ordinal": { "type": "integer", "minimum": 1 },
+          "title": { "type": "string" },
+          "boundary": { "type": "string", "enum": ["design-time", "runtime"] },
+          "purpose": { "type": "string" }
+        }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "stage", "boundary"],
+        "additionalProperties": false,
+        "description": "Either `domain_ref` (and then NO restated domain facts) or `kind` + `title` for something the domain model does not cover. Enforcing that either/or is a validation rule, not expressible cleanly here -- see SCHEMA.md.",
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+          "domain_ref": {
+            "type": "string",
+            "description": "An id in domains.json. Title, category, purpose and scope are resolved from there at read time and must NOT be duplicated here."
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["domain", "actor", "external", "artefact"],
+            "description": "Omitted (implying `domain`) when `domain_ref` is present."
+          },
+          "title": {
+            "type": "string",
+            "description": "Only for nodes without a `domain_ref`. A title alongside a `domain_ref` is a restated domain fact and a bug."
+          },
+          "actor_type": { "type": "string", "enum": ["InternalStaff", "Customer", "Regulator", "ExternalRail"] },
+          "artefact_type": { "type": "string", "enum": ["Report", "Policy", "Catalog", "Instruction"] },
+          "stage": { "type": "string", "description": "Must match a `stages[].id`." },
+          "boundary": {
+            "type": "string",
+            "enum": ["design-time", "runtime", "external", "cross-cutting"]
+          },
+          "responsibility": {
+            "type": "string",
+            "description": "What this node does *in this flow specifically* -- distinct from the domain's own `purpose`, which stays in domains.json."
+          },
+          "touchpoints": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Concrete endpoints collapsed into this node rather than modelled as separate nodes, because no edge addresses them individually. Kept lean on purpose."
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["source", "target", "predicate", "payload", "stage"],
+        "additionalProperties": false,
+        "properties": {
+          "source": { "type": "string", "description": "Must match a `nodes[].id`." },
+          "target": { "type": "string", "description": "Must match a `nodes[].id`." },
+          "predicate": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z_]*$",
+            "description": "SCREAMING_SNAKE_CASE. Deliberately NOT a controlled vocabulary yet -- the first overlay uses 36 distinct predicates and there is no second overlay to show which recur. A controlled vocabulary is what cross-overlay contradiction detection would need; see SCHEMA.md's open item."
+          },
+          "payload": {
+            "type": "string",
+            "description": "What actually crosses the edge. Required, because an untyped arrow is the thing this schema exists to prevent."
+          },
+          "stage": { "type": "string", "description": "Must match a `stages[].id`. May differ from either endpoint's stage; a cross-stage edge is the interesting case." }
+        }
+      }
+    }
+  }
+}

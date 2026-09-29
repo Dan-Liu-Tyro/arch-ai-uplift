@@ -1,0 +1,538 @@
+{
+  "schema_version": "0.1-experimental",
+  "id": "payments-target-state",
+  "type": "graph",
+  "title": "Payments Target State",
+  "status": "draft",
+  "owner": "architecture-practice",
+  "updated": "2026-09-18",
+  "source": "https://tyropaymentsltd.atlassian.net/wiki/spaces/ARCH/whiteboard/1823277126",
+  "source_notes": "Derived from the structured text feed the whiteboard's owner authored for this purpose (https://tyropaymentsltd.atlassian.net/wiki/spaces/ARCH/pages/2382233611/Payment+target+state+WIP+AI+feed). The whiteboard body itself is not readable through the Atlassian connector -- only its metadata and a ~260-character indexed text extract -- so the feed page is the machine-readable source and the whiteboard is the human original. Both are WIP.",
+  "stages": [
+    {
+      "id": "design-a-product",
+      "ordinal": 1,
+      "title": "Design a Product",
+      "boundary": "design-time",
+      "purpose": "Define and govern canonical product specifications, pricing models, feature policies and bundling rules before any customer or terminal interaction."
+    },
+    {
+      "id": "customer-product-onboarding",
+      "ordinal": 2,
+      "title": "Customer / Product Onboarding",
+      "boundary": "runtime",
+      "purpose": "Convert prospect intent into configured merchant records, provision terminal hardware and SDKs, and distribute customer configuration intent into runtime domains."
+    },
+    {
+      "id": "taking-payments-and-getting-paid",
+      "ordinal": 3,
+      "title": "Taking Payments and Getting Paid",
+      "boundary": "runtime",
+      "purpose": "Ingest payments across touchpoints, clear and authorise against schemes, project ledger accounting, calculate settlements, execute funds movement, recover fees, and feed analytics."
+    }
+  ],
+  "nodes": [
+    {
+      "id": "payments-product",
+      "domain_ref": "payments-product",
+      "stage": "design-a-product",
+      "boundary": "design-time",
+      "responsibility": "Canonical product catalog, versioned product/feature policies"
+    },
+    {
+      "id": "product-quoting-and-pricing",
+      "domain_ref": "product-quoting-and-pricing",
+      "stage": "design-a-product",
+      "boundary": "design-time",
+      "responsibility": "Canonical commercial pricing and revenue policies"
+    },
+    {
+      "id": "product-bundling-and-eligibility",
+      "domain_ref": "product-bundling-and-eligibility",
+      "stage": "design-a-product",
+      "boundary": "design-time",
+      "responsibility": "Canonical bundling rules and eligibility criteria"
+    },
+    {
+      "id": "digital-channels-and-experience",
+      "domain_ref": "digital-channels-and-experience",
+      "stage": "customer-product-onboarding",
+      "boundary": "runtime",
+      "responsibility": "Experience composition and channel orchestration"
+    },
+    {
+      "id": "customer-service-and-support",
+      "domain_ref": "customer-service-and-support",
+      "stage": "customer-product-onboarding",
+      "boundary": "runtime",
+      "responsibility": "Support cases, assisted interactions"
+    },
+    {
+      "id": "user-and-identity",
+      "domain_ref": "user-and-identity",
+      "stage": "customer-product-onboarding",
+      "boundary": "runtime",
+      "responsibility": "Authentication, authorisation and access control"
+    },
+    {
+      "id": "customer-and-product-onboarding",
+      "domain_ref": "customer-and-product-onboarding",
+      "stage": "customer-product-onboarding",
+      "boundary": "runtime",
+      "responsibility": "Prospect-to-activation state orchestration"
+    },
+    {
+      "id": "customer",
+      "domain_ref": "customer",
+      "stage": "customer-product-onboarding",
+      "boundary": "runtime",
+      "responsibility": "Party, customer master, relationship models"
+    },
+    {
+      "id": "payments-customer-configuration",
+      "domain_ref": "payments-customer-configuration",
+      "stage": "customer-product-onboarding",
+      "boundary": "runtime",
+      "responsibility": "Merchant acquiring setup (MIDs), pricing assignments, acceptance parameters"
+    },
+    {
+      "id": "terminal-fleet-and-device-management",
+      "domain_ref": "terminal-fleet-and-device-management",
+      "stage": "customer-product-onboarding",
+      "boundary": "runtime",
+      "responsibility": "Device runtime control, config provisioning, fleet management"
+    },
+    {
+      "id": "payments-channels",
+      "domain_ref": "payments-channels",
+      "stage": "taking-payments-and-getting-paid",
+      "boundary": "runtime",
+      "responsibility": "Touchpoint runtime (terminals, SoftPOS, eCom)",
+      "touchpoints": [
+        "Y series Terminal",
+        "Pro series Terminal",
+        "SoftPOS",
+        "Embedded SDK",
+        "eCom"
+      ]
+    },
+    {
+      "id": "payments-processing",
+      "domain_ref": "payments-processing",
+      "stage": "taking-payments-and-getting-paid",
+      "boundary": "runtime",
+      "responsibility": "Canonical transaction model, switching, authorisation"
+    },
+    {
+      "id": "settlement-and-reconciliation",
+      "domain_ref": "settlement-and-reconciliation",
+      "stage": "taking-payments-and-getting-paid",
+      "boundary": "runtime",
+      "responsibility": "Settlement intent, settlement calculation, reconciliation controls"
+    },
+    {
+      "id": "payments-accounting",
+      "domain_ref": "payments-accounting",
+      "stage": "taking-payments-and-getting-paid",
+      "boundary": "runtime",
+      "responsibility": "Sub-ledger, journal entries, accounting projections"
+    },
+    {
+      "id": "funds-movement",
+      "domain_ref": "funds-movement",
+      "stage": "taking-payments-and-getting-paid",
+      "boundary": "runtime",
+      "responsibility": "Payment rail execution, transfer state authority"
+    },
+    {
+      "id": "billing-and-accounts-receivable",
+      "domain_ref": "billing-and-accounts-receivable",
+      "stage": "taking-payments-and-getting-paid",
+      "boundary": "runtime",
+      "responsibility": "Invoicing, fee calculation, customer receivables"
+    },
+    {
+      "id": "data-analytics-and-intelligence",
+      "domain_ref": "data-analytics-and-intelligence",
+      "stage": "taking-payments-and-getting-paid",
+      "boundary": "cross-cutting",
+      "responsibility": "Enterprise ingestion, lakehouse/warehouse, reporting store"
+    },
+    {
+      "id": "schemes-network",
+      "kind": "external",
+      "title": "Schemes / Network",
+      "stage": "taking-payments-and-getting-paid",
+      "boundary": "external",
+      "responsibility": "Card schemes (Visa, Mastercard, eftpos, Amex)"
+    },
+    {
+      "id": "rba-payment-rails",
+      "kind": "external",
+      "title": "RBA / Payment Rails",
+      "stage": "taking-payments-and-getting-paid",
+      "boundary": "external",
+      "responsibility": "Settlement rails (NPP, BECS, RBA clearing)"
+    },
+    {
+      "id": "actor-product-and-tech",
+      "kind": "actor",
+      "actor_type": "InternalStaff",
+      "title": "Product + Tech",
+      "stage": "design-a-product",
+      "boundary": "design-time"
+    },
+    {
+      "id": "actor-growth-and-tech",
+      "kind": "actor",
+      "actor_type": "InternalStaff",
+      "title": "Growth + Tech",
+      "stage": "design-a-product",
+      "boundary": "design-time"
+    },
+    {
+      "id": "actor-customer",
+      "kind": "actor",
+      "actor_type": "Customer",
+      "title": "Customer (self-serve / merchant)",
+      "stage": "customer-product-onboarding",
+      "boundary": "external"
+    },
+    {
+      "id": "actor-customer-service",
+      "kind": "actor",
+      "actor_type": "InternalStaff",
+      "title": "Customer Service (Tyro-assist)",
+      "stage": "customer-product-onboarding",
+      "boundary": "external"
+    },
+    {
+      "id": "actor-tyro-staff",
+      "kind": "actor",
+      "actor_type": "InternalStaff",
+      "title": "Tyro Staff",
+      "stage": "taking-payments-and-getting-paid",
+      "boundary": "external"
+    },
+    {
+      "id": "actor-regulator",
+      "kind": "actor",
+      "actor_type": "Regulator",
+      "title": "Regulator",
+      "stage": "taking-payments-and-getting-paid",
+      "boundary": "external"
+    },
+    {
+      "id": "artefact-cross-domain-reports",
+      "kind": "artefact",
+      "artefact_type": "Report",
+      "title": "Cross-domain reports",
+      "stage": "taking-payments-and-getting-paid",
+      "boundary": "cross-cutting",
+      "responsibility": "Analytical models and aggregated views produced for staff, merchants and regulators"
+    }
+  ],
+  "edges": [
+    {
+      "source": "actor-product-and-tech",
+      "target": "payments-product",
+      "predicate": "DEFINES_POLICY",
+      "payload": "Product / feature specifications",
+      "stage": "design-a-product"
+    },
+    {
+      "source": "actor-growth-and-tech",
+      "target": "product-quoting-and-pricing",
+      "predicate": "DEFINES_PRICING",
+      "payload": "Commercial pricing rules",
+      "stage": "design-a-product"
+    },
+    {
+      "source": "actor-growth-and-tech",
+      "target": "product-bundling-and-eligibility",
+      "predicate": "DEFINES_BUNDLING",
+      "payload": "Bundling and eligibility rules",
+      "stage": "design-a-product"
+    },
+    {
+      "source": "payments-product",
+      "target": "product-bundling-and-eligibility",
+      "predicate": "SUPPLIES_CATALOG",
+      "payload": "Product catalog metadata",
+      "stage": "design-a-product"
+    },
+    {
+      "source": "payments-product",
+      "target": "customer-and-product-onboarding",
+      "predicate": "PROVIDES_CATALOG",
+      "payload": "Product catalog",
+      "stage": "design-a-product"
+    },
+    {
+      "source": "product-quoting-and-pricing",
+      "target": "customer-and-product-onboarding",
+      "predicate": "PROVIDES_PRICING_POLICY",
+      "payload": "Product pricing policy",
+      "stage": "design-a-product"
+    },
+    {
+      "source": "product-bundling-and-eligibility",
+      "target": "customer-and-product-onboarding",
+      "predicate": "PROVIDES_BUNDLING_POLICY",
+      "payload": "Product bundling and eligibility policy",
+      "stage": "design-a-product"
+    },
+    {
+      "source": "payments-product",
+      "target": "payments-channels",
+      "predicate": "CONFIGURES_EDGE_FEATURES",
+      "payload": "Product config / policy",
+      "stage": "design-a-product"
+    },
+    {
+      "source": "payments-product",
+      "target": "payments-processing",
+      "predicate": "CONFIGURES_PROCESSING",
+      "payload": "Product config / policy",
+      "stage": "design-a-product"
+    },
+    {
+      "source": "payments-product",
+      "target": "settlement-and-reconciliation",
+      "predicate": "CONFIGURES_SETTLEMENT",
+      "payload": "Product config / policy",
+      "stage": "design-a-product"
+    },
+    {
+      "source": "product-quoting-and-pricing",
+      "target": "billing-and-accounts-receivable",
+      "predicate": "PROVIDES_BASE_PRICING",
+      "payload": "Product pricing data",
+      "stage": "design-a-product"
+    },
+    {
+      "source": "actor-customer",
+      "target": "digital-channels-and-experience",
+      "predicate": "INTERACTS_VIA",
+      "payload": "Self-serve onboarding and management",
+      "stage": "customer-product-onboarding"
+    },
+    {
+      "source": "actor-customer-service",
+      "target": "customer-service-and-support",
+      "predicate": "INTERACTS_VIA",
+      "payload": "Assisted onboarding / servicing",
+      "stage": "customer-product-onboarding"
+    },
+    {
+      "source": "digital-channels-and-experience",
+      "target": "user-and-identity",
+      "predicate": "AUTHENTICATES_AGAINST",
+      "payload": "Access tokens and credentials",
+      "stage": "customer-product-onboarding"
+    },
+    {
+      "source": "customer-service-and-support",
+      "target": "user-and-identity",
+      "predicate": "AUTHENTICATES_AGAINST",
+      "payload": "Staff permissions and tokens",
+      "stage": "customer-product-onboarding"
+    },
+    {
+      "source": "digital-channels-and-experience",
+      "target": "customer-and-product-onboarding",
+      "predicate": "INITIATES_SELF_SERVE",
+      "payload": "Self-serve onboarding request",
+      "stage": "customer-product-onboarding"
+    },
+    {
+      "source": "customer-service-and-support",
+      "target": "customer-and-product-onboarding",
+      "predicate": "INITIATES_ASSISTED",
+      "payload": "Tyro-assist onboarding request",
+      "stage": "customer-product-onboarding"
+    },
+    {
+      "source": "customer-and-product-onboarding",
+      "target": "customer",
+      "predicate": "PRODUCES_PARTY_RECORD",
+      "payload": "Customer and party master entities",
+      "stage": "customer-product-onboarding"
+    },
+    {
+      "source": "customer-and-product-onboarding",
+      "target": "payments-customer-configuration",
+      "predicate": "ORIGINATES_PAYMENT_CONFIG",
+      "payload": "Product origination request",
+      "stage": "customer-product-onboarding"
+    },
+    {
+      "source": "payments-customer-configuration",
+      "target": "terminal-fleet-and-device-management",
+      "predicate": "DRIVES_PROVISIONING",
+      "payload": "Configuration intent",
+      "stage": "customer-product-onboarding"
+    },
+    {
+      "source": "terminal-fleet-and-device-management",
+      "target": "payments-channels",
+      "predicate": "DEPLOYS_CONFIGURATION",
+      "payload": "Deploy / activate terminal config",
+      "stage": "customer-product-onboarding"
+    },
+    {
+      "source": "payments-customer-configuration",
+      "target": "payments-processing",
+      "predicate": "PROVISIONS_MERCHANT_CONFIG",
+      "payload": "Merchant's payment data / config",
+      "stage": "customer-product-onboarding"
+    },
+    {
+      "source": "payments-customer-configuration",
+      "target": "settlement-and-reconciliation",
+      "predicate": "PROVISIONS_SETTLEMENT_CONFIG",
+      "payload": "Merchant MID, bank details, schedule",
+      "stage": "customer-product-onboarding"
+    },
+    {
+      "source": "payments-customer-configuration",
+      "target": "billing-and-accounts-receivable",
+      "predicate": "PROVISIONS_MERCHANT_PRICING",
+      "payload": "Merchant pricing data",
+      "stage": "customer-product-onboarding"
+    },
+    {
+      "source": "payments-channels",
+      "target": "payments-processing",
+      "predicate": "TRANSMITS_TRANSACTION",
+      "payload": "Transaction (auth / capture payloads)",
+      "stage": "taking-payments-and-getting-paid"
+    },
+    {
+      "source": "payments-processing",
+      "target": "schemes-network",
+      "predicate": "CLEARS_AND_AUTHORISES",
+      "payload": "Authorisation / clearing, recon",
+      "stage": "taking-payments-and-getting-paid"
+    },
+    {
+      "source": "payments-processing",
+      "target": "payments-accounting",
+      "predicate": "POSTS_ACCRUAL",
+      "payload": "Accounting projection",
+      "stage": "taking-payments-and-getting-paid"
+    },
+    {
+      "source": "payments-processing",
+      "target": "settlement-and-reconciliation",
+      "predicate": "SUBMITS_CLEARED_TXN",
+      "payload": "Transaction data",
+      "stage": "taking-payments-and-getting-paid"
+    },
+    {
+      "source": "settlement-and-reconciliation",
+      "target": "payments-accounting",
+      "predicate": "POSTS_SETTLEMENT_JOURNAL",
+      "payload": "Accounting projection",
+      "stage": "taking-payments-and-getting-paid"
+    },
+    {
+      "source": "settlement-and-reconciliation",
+      "target": "funds-movement",
+      "predicate": "DISPATCHES_PAYOUT",
+      "payload": "Pay merchant (payout instruction)",
+      "stage": "taking-payments-and-getting-paid"
+    },
+    {
+      "source": "funds-movement",
+      "target": "rba-payment-rails",
+      "predicate": "EXECUTES_TRANSFER",
+      "payload": "Send instruction / receive payment",
+      "stage": "taking-payments-and-getting-paid"
+    },
+    {
+      "source": "settlement-and-reconciliation",
+      "target": "billing-and-accounts-receivable",
+      "predicate": "TRIGGERS_FEE_COLLECTION",
+      "payload": "Charge merchant (fee offset / invoice)",
+      "stage": "taking-payments-and-getting-paid"
+    },
+    {
+      "source": "digital-channels-and-experience",
+      "target": "payments-processing",
+      "predicate": "QUERIES_TRANSACTIONS",
+      "payload": "Access transaction data",
+      "stage": "taking-payments-and-getting-paid"
+    },
+    {
+      "source": "digital-channels-and-experience",
+      "target": "payments-customer-configuration",
+      "predicate": "QUERIES_CONFIG",
+      "payload": "Access merchant data",
+      "stage": "taking-payments-and-getting-paid"
+    },
+    {
+      "source": "digital-channels-and-experience",
+      "target": "billing-and-accounts-receivable",
+      "predicate": "QUERIES_INVOICES",
+      "payload": "Access billing / invoicing data",
+      "stage": "taking-payments-and-getting-paid"
+    },
+    {
+      "source": "payments-processing",
+      "target": "data-analytics-and-intelligence",
+      "predicate": "INGESTS_STREAM",
+      "payload": "Transaction data",
+      "stage": "taking-payments-and-getting-paid"
+    },
+    {
+      "source": "settlement-and-reconciliation",
+      "target": "data-analytics-and-intelligence",
+      "predicate": "INGESTS_STREAM",
+      "payload": "Settlement data",
+      "stage": "taking-payments-and-getting-paid"
+    },
+    {
+      "source": "billing-and-accounts-receivable",
+      "target": "data-analytics-and-intelligence",
+      "predicate": "INGESTS_STREAM",
+      "payload": "Billing / invoicing data",
+      "stage": "taking-payments-and-getting-paid"
+    },
+    {
+      "source": "customer",
+      "target": "data-analytics-and-intelligence",
+      "predicate": "INGESTS_STREAM",
+      "payload": "Party and customer data",
+      "stage": "taking-payments-and-getting-paid"
+    },
+    {
+      "source": "data-analytics-and-intelligence",
+      "target": "artefact-cross-domain-reports",
+      "predicate": "PRODUCES_ARTEFACT",
+      "payload": "Analytical models and aggregated views",
+      "stage": "taking-payments-and-getting-paid"
+    },
+    {
+      "source": "artefact-cross-domain-reports",
+      "target": "actor-tyro-staff",
+      "predicate": "CONSUMED_BY",
+      "payload": "Operational and performance reports",
+      "stage": "taking-payments-and-getting-paid"
+    },
+    {
+      "source": "artefact-cross-domain-reports",
+      "target": "actor-customer",
+      "predicate": "CONSUMED_BY",
+      "payload": "Merchant portal insights",
+      "stage": "taking-payments-and-getting-paid"
+    },
+    {
+      "source": "artefact-cross-domain-reports",
+      "target": "actor-regulator",
+      "predicate": "CONSUMED_BY",
+      "payload": "Compliance and statutory reporting",
+      "stage": "taking-payments-and-getting-paid"
+    }
+  ]
+}

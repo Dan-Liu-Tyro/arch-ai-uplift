@@ -1,0 +1,2737 @@
+{
+  "schema_version": "0.1-experimental",
+  "source": "https://tyropaymentsltd.atlassian.net/wiki/spaces/ARCH/pages/1633976330/TS+-+Reference+Domain+Model+-+Domain+Definitions",
+  "owner": "architecture-practice",
+  "updated": "2026-09-15",
+  "categories": [
+    {
+      "id": "support-and-experience-channels",
+      "title": "Support & Experience Channels"
+    },
+    {
+      "id": "core-customer-and-product-domains",
+      "title": "Core Customer & Product Domains"
+    },
+    {
+      "id": "business-operations-domains",
+      "title": "Business Operations Domains"
+    },
+    {
+      "id": "partner-integrations-and-value-add-services-domains",
+      "title": "Partner Integrations & Value-Add Services Domains"
+    },
+    {
+      "id": "data-and-intelligence-domains",
+      "title": "Data & Intelligence Domains"
+    },
+    {
+      "id": "cross-domain-orchestrators",
+      "title": "Cross-Domain Orchestrators"
+    }
+  ],
+  "domains": [
+    {
+      "id": "customer-service-and-support",
+      "title": "Customer Service & Support Domain",
+      "category": "support-and-experience-channels",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "This domain is the system of record for support work and outcomes, not for product configuration truth, transaction truth, or customer identity truth.",
+      "authority": {
+        "owns": [
+          "Case & complaint lifecycle management",
+          "Support routing and workforce workflows",
+          "Customer communication in the context of a case",
+          "Support diagnostics orchestration",
+          "Operational insight capture",
+          "Case records, complaint records, and their lifecycle state",
+          "Interaction timeline and attachments metadata",
+          "SLA metrics and routing/assignment metadata",
+          "Resolution notes and references to authoritative actions taken"
+        ],
+        "not_authoritative_for": [
+          "customer",
+          "user-and-identity",
+          "payments-customer-configuration",
+          "payments-processing",
+          "settlement-and-reconciliation",
+          "Banking Domain",
+          "fraud-and-risk-decisioning",
+          "risk-compliance-and-regulatory",
+          "Operational Investigations & Exceptions"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-customer-configuration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "settlement-and-reconciliation"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Banking Domain"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "fraud-and-risk-decisioning"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "risk-compliance-and-regulatory"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Operational Investigations & Exceptions"
+        }
+      ]
+    },
+    {
+      "id": "digital-channels-and-experience",
+      "title": "Digital Channels & Experience Domain",
+      "category": "support-and-experience-channels",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "This domain owns the experience layer and channel behaviour, not the underlying product truth. It should be thin, API-driven, and orchestration-focused to support platformisation and reuse.",
+      "authority": {
+        "owns": [
+          "Channel experience orchestration",
+          "Session management & channel context",
+          "Experience consistency & reusable UI patterns",
+          "Telemetry & experimentation for experiences",
+          "API composition layer",
+          "Session state and channel-local preferences",
+          "Journey configuration and feature flag state",
+          "UX telemetry/events",
+          "Non-authoritative caches/read models for performance"
+        ],
+        "not_authoritative_for": [
+          "customer",
+          "user-and-identity",
+          "payments-customer-configuration",
+          "payments-channels",
+          "payments-processing",
+          "Settlement",
+          "Banking",
+          "product-quoting-and-pricing",
+          "partnerships",
+          "fraud-and-risk-decisioning",
+          "risk-compliance-and-regulatory",
+          "customer-notifications-and-communications"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-customer-configuration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-channels"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Settlement"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Banking"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "product-quoting-and-pricing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "partnerships"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "fraud-and-risk-decisioning"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "risk-compliance-and-regulatory"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer-notifications-and-communications"
+        }
+      ]
+    },
+    {
+      "id": "payments-channels",
+      "title": "Payments Channels Domain",
+      "category": "support-and-experience-channels",
+      "status": "draft",
+      "scope": "acquirer-specific",
+      "purpose": "This domain owns checkout/session lifecycle, channel runtime behaviour, device/app channel configuration at runtime, and request shaping/validation. It is the execution layer that bridges merchant configuration and downstream processing. It does not own transaction truth , merchant configuration truth , or settlement logic.",
+      "authority": {
+        "owns": [
+          "Checkout/session lifecycle management",
+          "Channel runtime execution",
+          "Validation & request shaping",
+          "Channel configuration consumption and effective runtime binding",
+          "SDK/app version governance",
+          "Channel observability & operational controls",
+          "Checkout/session records and lifecycle state",
+          "Channel runtime metadata and bindings",
+          "SDK/version registry and channel capability matrices",
+          "Validation outcomes and request shaping artefacts",
+          "Channel operational telemetry"
+        ],
+        "not_authoritative_for": [
+          "payments-customer-configuration",
+          "payments-processing",
+          "fraud-and-risk-decisioning",
+          "product-quoting-and-pricing",
+          "settlement-and-reconciliation",
+          "funds-movement",
+          "deposits-product",
+          "partnerships",
+          "integration-enablement-and-certification",
+          "customer",
+          "user-and-identity",
+          "digital-channels-and-experience"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-customer-configuration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "fraud-and-risk-decisioning"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "product-quoting-and-pricing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "settlement-and-reconciliation"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "funds-movement"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "deposits-product"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "partnerships"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "integration-enablement-and-certification"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "digital-channels-and-experience"
+        }
+      ]
+    },
+    {
+      "id": "customer",
+      "title": "Customer Domain",
+      "category": "core-customer-and-product-domains",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "Provide Tyro’s authoritative capability for mastering real-world parties and their relationships so Tyro can maintain a single system of record for customers across products and services. This domain is authoritative for party identity and relationships, not for authentication credentials, sessions/tokens, or low-level access control policy evaluation.",
+      "authority": {
+        "owns": [
+          "Create/update/deactivate party records",
+          "Manage party identity resolution and linking",
+          "Manage party relationships and roles",
+          "Maintain customer relationship lifecycle status and derived restriction flags",
+          "Publish canonical party/relationship events for downstream consumers",
+          "Provide party/relationship query services for channels and operational domains",
+          "Provide authoritative business access grant intent for User & Identity to materialise into enforceable entitlements",
+          "Party master records",
+          "Party identifiers/aliases and linkage references",
+          "Party relationships, roles, and effective dating",
+          "Customer relationship status and relationship lifecycle metadata",
+          "Business access grant intent records and audit metadata"
+        ],
+        "not_authoritative_for": [
+          "user-and-identity",
+          "partnerships",
+          "customer-and-product-onboarding",
+          "Relevant product domains",
+          "risk-compliance-and-regulatory",
+          "Operational Investigations & Exceptions",
+          "customer-service-and-support",
+          "corporate-finance"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "partnerships"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer-and-product-onboarding"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Relevant product domains"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "risk-compliance-and-regulatory"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Operational Investigations & Exceptions"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer-service-and-support"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "corporate-finance"
+        }
+      ]
+    },
+    {
+      "id": "user-and-identity",
+      "title": "User & Identity Domain",
+      "category": "core-customer-and-product-domains",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "Provide Tyro’s authoritative capability for managing system identities and enforcing access through authentication and authorisation controls across customer, partner, and staff channels. This domain is authoritative for system accounts and access control metadata, not for real-world party relationships or customer master identity.",
+      "authority": {
+        "owns": [
+          "Identity lifecycle management",
+          "Authentication services",
+          "Authorisation enforcement",
+          "Access governance and auditability",
+          "Service principal management",
+          "User accounts and service principals and their lifecycle status",
+          "Authentication method metadata and identity provider linkage records",
+          "Session/token lifecycle artefacts",
+          "Roles, scopes, policies, bindings, and derived entitlement claims",
+          "Access governance audit logs and security telemetry"
+        ],
+        "not_authoritative_for": [
+          "customer",
+          "partnerships",
+          "Relevant product domains",
+          "origination",
+          "servicing domains",
+          "risk-compliance-and-regulatory",
+          "Operational Investigations & Exceptions",
+          "customer-service-and-support",
+          "data-analytics-and-intelligence"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "partnerships"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Relevant product domains"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "origination"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "servicing domains"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "risk-compliance-and-regulatory"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Operational Investigations & Exceptions"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer-service-and-support"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "data-analytics-and-intelligence"
+        }
+      ]
+    },
+    {
+      "id": "payments-product",
+      "title": "Payments Product Domain",
+      "category": "core-customer-and-product-domains",
+      "status": "draft",
+      "scope": "acquirer-specific",
+      "purpose": "Own Tyro’s merchant acquiring product as a coherent offering across channels , by defining the product-level rules, entitlements, and lifecycle that sit above merchant configuration and below commercial pricing. It provides the authoritative “product view” for acquiring—what capabilities exist, how they’re packaged, and which features apply to which customer cohort—without becoming a system-of-record for transactions or balances.",
+      "authority": {
+        "owns": [
+          "Payments product definition and lifecycle policy",
+          "Entitlements and eligibility rules",
+          "Cross-channel product consistency rules",
+          "Product capability governance",
+          "Product-level reporting semantics",
+          "Payments product catalog and versions",
+          "Entitlements/eligibility rule sets and versions",
+          "Product lifecycle policies and constraints",
+          "Product-level defaults and guardrails",
+          "References to pricing plan IDs / offer constructs"
+        ],
+        "not_authoritative_for": [
+          "payments-customer-configuration",
+          "payments-channels",
+          "payments-processing",
+          "settlement-and-reconciliation",
+          "product-quoting-and-pricing",
+          "pos-integration",
+          "payments-vas-integrations",
+          "integration-enablement-and-certification",
+          "customer",
+          "user-and-identity",
+          "customer-service-and-support",
+          "enterprise-data-governance",
+          "data-analytics-and-intelligence",
+          "ai-and-ml"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-customer-configuration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-channels"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "settlement-and-reconciliation"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "product-quoting-and-pricing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "pos-integration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-vas-integrations"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "integration-enablement-and-certification"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer-service-and-support"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "enterprise-data-governance"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "data-analytics-and-intelligence"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "ai-and-ml"
+        }
+      ]
+    },
+    {
+      "id": "payments-customer-configuration",
+      "title": "Payments Customer Configuration Domain",
+      "category": "core-customer-and-product-domains",
+      "status": "draft",
+      "scope": "acquirer-specific",
+      "purpose": "Maintain the authoritative configuration for how a specific customer is set up to accept payments across Tyro’s acquiring channels . This domain is the “control plane” for acquiring: it defines the merchant’s operational setup that downstream runtime and processing domains must follow. This domain is merchant-specific configuration truth. It does not run checkout sessions, does not own transaction truth, does not calculate payouts, and does not own commercial pricing rules.",
+      "authority": {
+        "owns": [
+          "Merchant acquiring configuration lifecycle",
+          "Location and acceptance footprint management",
+          "Channel enablement configuration",
+          "Terminal/device binding intent",
+          "Terminal Sharing Group lifecycle",
+          "Effective configuration publishing",
+          "Merchant acquiring configuration records",
+          "Location configuration and merchant-location associations",
+          "Channel enablement state and acceptance parameters",
+          "Terminal binding intent records",
+          "Terminal Sharing Group records",
+          "Configuration versions and audit trail"
+        ],
+        "not_authoritative_for": [
+          "customer",
+          "user-and-identity",
+          "payments-channels",
+          "payments-processing",
+          "product-quoting-and-pricing",
+          "settlement-and-reconciliation",
+          "funds-movement",
+          "deposits-product",
+          "hardware-and-asset-management",
+          "terminal-fleet-and-device-management",
+          "integration-enablement-and-certification",
+          "pos-integration"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-channels"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "product-quoting-and-pricing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "settlement-and-reconciliation"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "funds-movement"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "deposits-product"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "hardware-and-asset-management"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "terminal-fleet-and-device-management"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "integration-enablement-and-certification"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "pos-integration"
+        }
+      ]
+    },
+    {
+      "id": "payments-processing",
+      "title": "Payments Processing Domain",
+      "category": "core-customer-and-product-domains",
+      "status": "draft",
+      "scope": "acquirer-specific",
+      "purpose": "Process acquiring card payments from authorisation to clearing, and maintain the authoritative “transaction truth” required for reliable merchant acquiring operations. It is the system of record for payment transaction lifecycle state and clearing evidence, not for merchant configuration, settlement calculation, disputes workflow, accounting journals, rail transfers, or banking ledgers.",
+      "authority": {
+        "owns": [
+          "Transaction switching & routing",
+          "Authorisation engine",
+          "Scheme clearing ingestion & reconciliation",
+          "Dispute/chargeback signal publishing",
+          "Authoritative transaction event publishing",
+          "Transaction master record and lifecycle state",
+          "Authorisation state records and reason codes",
+          "Clearing records and reconciliation state",
+          "Scheme/network fee records",
+          "Dispute/chargeback signals and evidence references",
+          "Processing lifecycle audit trail and correlation metadata"
+        ],
+        "not_authoritative_for": [
+          "payments-customer-configuration",
+          "payments-channels",
+          "fraud-and-risk-decisioning",
+          "risk-compliance-and-regulatory",
+          "product-quoting-and-pricing",
+          "disputes-and-recovery",
+          "settlement-and-reconciliation",
+          "payments-accounting",
+          "funds-movement",
+          "deposits-product",
+          "customer-service-and-support",
+          "enterprise-data-governance",
+          "data-analytics-and-intelligence",
+          "ai-and-ml"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-customer-configuration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-channels"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "fraud-and-risk-decisioning"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "risk-compliance-and-regulatory"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "product-quoting-and-pricing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "disputes-and-recovery"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "settlement-and-reconciliation"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-accounting"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "funds-movement"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "deposits-product"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer-service-and-support"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "enterprise-data-governance"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "data-analytics-and-intelligence"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "ai-and-ml"
+        }
+      ]
+    },
+    {
+      "id": "settlement-and-reconciliation",
+      "title": "Settlement & Reconciliation Domain",
+      "category": "core-customer-and-product-domains",
+      "status": "draft",
+      "scope": "acquirer-specific",
+      "purpose": "Aggregate cleared acquiring transactions, apply fees/adjustments, and produce the authoritative calculation of what Tyro owes each merchant , including settlement batch formation and reconciliation controls. …and to provide reproducible, auditable settlement outcomes suitable for a regulated environment. It is the system of record for merchant settlement calculations, not for executing transfers , not for maintaining the bank ledger , and not for maintaining payments accounting journals/control accounts .",
+      "authority": {
+        "owns": [
+          "Settlement batch formation and lifecycle",
+          "Net payout calculation",
+          "Reconciliation controls and break management",
+          "Hold and restriction application",
+          "Dispute outcome application",
+          "Payout instruction preparation",
+          "Settlement batches and settlement line items",
+          "Fee allocation and adjustment records as applied in settlement",
+          "Merchant payable balances and hold state",
+          "Reconciliation control totals and variance records",
+          "Links between settlement outcomes and transfer execution references"
+        ],
+        "not_authoritative_for": [
+          "payments-processing",
+          "disputes-and-recovery",
+          "payments-channels",
+          "product-quoting-and-pricing",
+          "payments-accounting",
+          "funds-movement",
+          "deposits-product",
+          "customer",
+          "user-and-identity",
+          "payments-customer-configuration",
+          "risk-compliance-and-regulatory",
+          "Operational Investigations & Exceptions Domain",
+          "corporate-finance"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "disputes-and-recovery"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-channels"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "product-quoting-and-pricing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-accounting"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "funds-movement"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "deposits-product"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-customer-configuration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "risk-compliance-and-regulatory"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Operational Investigations & Exceptions Domain"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "corporate-finance"
+        }
+      ]
+    },
+    {
+      "id": "payments-accounting",
+      "title": "Payments Accounting Domain",
+      "category": "core-customer-and-product-domains",
+      "status": "draft",
+      "scope": "acquirer-specific",
+      "scope_note": "Called acquirer-specific: the payments sub-ledger. Distinct from the tyro-wide Accounting Product Domain.",
+      "purpose": "This domain is the system of record for operational accounting entries and balances for the Payments product. It consumes authoritative source events from Payments Processing, Settlement & Reconciliation, and Product Quoting & Pricing and produces auditable double-entry accounting representations.",
+      "authority": {
+        "owns": [
+          "Execute payments accounting policy",
+          "Generate and post payments sub-ledger journals from authoritative events",
+          "Maintain payments sub-ledger account structures and GL mapping rules",
+          "Manage reversals, corrections, and controlled adjustments with approvals and audit metadata",
+          "Maintain operational trial balance and control account positions",
+          "Reconcile accounting control positions to operational sources",
+          "Provide drill-down/explainability services",
+          "Produce reconciled GL export feeds/batches to Corporate Finance and track downstream acknowledgements",
+          "Support audit evidence retrieval for any entry or balance",
+          "Payments sub-ledger journals and journal lines",
+          "Payments sub-ledger chart of accounts and account metadata",
+          "Mappings from payments sub-ledger accounts to corporate GL",
+          "Payments accounting balances, trial balances, and control account positions",
+          "Reversal/correction records and approval/audit metadata",
+          "GL export batch records and export/reconciliation status"
+        ],
+        "not_authoritative_for": [
+          "payments-processing",
+          "settlement-and-reconciliation",
+          "product-quoting-and-pricing",
+          "billing-and-accounts-receivable",
+          "funds-movement",
+          "customer",
+          "user-and-identity",
+          "deposits-product",
+          "corporate-finance",
+          "accounting-product"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "settlement-and-reconciliation"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "product-quoting-and-pricing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "billing-and-accounts-receivable"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "funds-movement"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "deposits-product"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "corporate-finance"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "accounting-product"
+        }
+      ]
+    },
+    {
+      "id": "hardware-and-asset-management",
+      "title": "Hardware & Asset Management Domain",
+      "category": "core-customer-and-product-domains",
+      "status": "draft",
+      "scope": "acquirer-specific",
+      "scope_note": "Called acquirer-specific: the managed hardware estate is payment terminals today. Revisit if non-payment assets are brought in.",
+      "purpose": "Manage Tyro’s physical payment hardware assets across their lifecycle — procurement to disposal — ensuring we have a canonical record of what devices exist, who owns them, where they are, and their compliance/servicing status. This domain is the system of record for physical assets, not runtime behaviour.",
+      "authority": {
+        "owns": [
+          "Procurement intake and inventory registration",
+          "Warehousing and stock management",
+          "Shipping, returns, and RMA workflow",
+          "Ownership and assignment tracking",
+          "Physical compliance lifecycle",
+          "Asset registry and asset lifecycle state",
+          "Device identity/metadata",
+          "Assignment/shipping/return records",
+          "RMA and repair history"
+        ],
+        "not_authoritative_for": [
+          "terminal-fleet-and-device-management",
+          "payments-customer-configuration",
+          "payments-channels",
+          "payments-processing"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "terminal-fleet-and-device-management"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-customer-configuration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-channels"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        }
+      ]
+    },
+    {
+      "id": "terminal-fleet-and-device-management",
+      "title": "Terminal Fleet & Device Management Domain",
+      "category": "core-customer-and-product-domains",
+      "status": "draft",
+      "scope": "acquirer-specific",
+      "purpose": "This domain ensures terminals are secure, up to date, correctly configured, and observable — without owning financial transaction truth.",
+      "authority": {
+        "owns": [
+          "Device provisioning/registration into Tyro fleet systems",
+          "OTA firmware/software distribution and rollout governance",
+          "Connectivity management",
+          "Remote device control commands",
+          "Runtime configuration deployment",
+          "Fleet observability and device health state management",
+          "Fleet provisioning state",
+          "Firmware versions, rollout plans/cohorts, rollout outcomes",
+          "Device connectivity and last-seen status",
+          "Applied configuration state",
+          "Command and audit history",
+          "Fleet health state"
+        ],
+        "not_authoritative_for": [
+          "hardware-and-asset-management",
+          "payments-customer-configuration",
+          "integration-enablement-and-certification",
+          "payments-channels",
+          "payments-processing"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "hardware-and-asset-management"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-customer-configuration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "integration-enablement-and-certification"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-channels"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        }
+      ]
+    },
+    {
+      "id": "deposits-product",
+      "title": "Deposits Product Domain",
+      "category": "core-customer-and-product-domains",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "This domain is the system of record for deposit account truth, while still separating policy and customer configuration concerns to keep the ledger clean and stable.",
+      "authority": {
+        "owns": [
+          "Product policy definitions and versions",
+          "Customer banking configuration records",
+          "Account records, ledger entries, balances, term deposits, statements",
+          "Banking audit trail for account/config changes"
+        ],
+        "not_authoritative_for": [
+          "funds-movement",
+          "banking-vas-integrations",
+          "settlement-and-reconciliation",
+          "billing-and-accounts-receivable",
+          "corporate-finance",
+          "customer",
+          "user-and-identity",
+          "credit-and-underwriting",
+          "fraud-and-risk-decisioning",
+          "risk-compliance-and-regulatory"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "funds-movement"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "banking-vas-integrations"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "settlement-and-reconciliation"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "billing-and-accounts-receivable"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "corporate-finance"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "credit-and-underwriting"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "fraud-and-risk-decisioning"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "risk-compliance-and-regulatory"
+        }
+      ]
+    },
+    {
+      "id": "lending-product",
+      "title": "Lending Product Domain",
+      "category": "core-customer-and-product-domains",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "This domain is the system of record for loan lifecycle and servicing truth, while keeping product policy and customer configuration distinct from contract/sub-ledger truth.",
+      "authority": {
+        "owns": [
+          "Lending product policy definitions and versions",
+          "Borrower/loan configuration records",
+          "Loan contracts, schedules, sub-ledger balances, allocation records, servicing state",
+          "Lending audit trail for changes within domain scope"
+        ],
+        "not_authoritative_for": [
+          "credit-and-underwriting",
+          "customer-and-product-onboarding",
+          "funds-movement",
+          "deposits-product",
+          "product-quoting-and-pricing",
+          "customer",
+          "user-and-identity",
+          "fraud-and-risk-decisioning",
+          "risk-compliance-and-regulatory",
+          "corporate-finance"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "credit-and-underwriting"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer-and-product-onboarding"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "funds-movement"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "deposits-product"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "product-quoting-and-pricing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "fraud-and-risk-decisioning"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "risk-compliance-and-regulatory"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "corporate-finance"
+        }
+      ]
+    },
+    {
+      "id": "credit-and-underwriting",
+      "title": "Credit & Underwriting Domain",
+      "category": "core-customer-and-product-domains",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "This domain is the authoritative source for credit decision truth, while the Lending Product domain owns loan contract lifecycle and repayment obligations.",
+      "authority": {
+        "owns": [
+          "Underwriting policy definition and governance",
+          "Credit decisioning",
+          "Integration orchestration for credit inputs as assessment inputs",
+          "Decision issuance with conditions, limits, and reason codes",
+          "Credit decision audit trail and reporting",
+          "Credit decision records and history",
+          "Underwriting policy/rule definitions and versions",
+          "Credit scoring outputs and reason codes",
+          "Manual review notes and approvals",
+          "Decision validity windows/expiry metadata"
+        ],
+        "not_authoritative_for": [
+          "lending-product",
+          "customer-and-product-onboarding",
+          "customer",
+          "user-and-identity",
+          "Banking Domain",
+          "fraud-and-risk-decisioning",
+          "risk-compliance-and-regulatory",
+          "product-quoting-and-pricing",
+          "funds-movement"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "lending-product"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer-and-product-onboarding"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Banking Domain"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "fraud-and-risk-decisioning"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "risk-compliance-and-regulatory"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "product-quoting-and-pricing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "funds-movement"
+        }
+      ]
+    },
+    {
+      "id": "accounting-product",
+      "title": "Accounting Product Domain",
+      "category": "core-customer-and-product-domains",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "This domain exists to deliver a “merchant CFO/finance OS” layer that can integrate with Tyro product data but remains distinct from Tyro’s corporate accounting and from regulated banking ledgers.",
+      "authority": {
+        "owns": [
+          "Merchant bookkeeping & ledgering",
+          "Merchant reporting & compliance support",
+          "Accounting configuration",
+          "Data ingestion/normalisation for merchant books",
+          "Merchant chart of accounts",
+          "Merchant journal entries and accounting period state",
+          "Categorisation rules and reconciliation state",
+          "Merchant tax artefacts",
+          "Merchant financial statements"
+        ],
+        "not_authoritative_for": [
+          "customer",
+          "user-and-identity",
+          "payments-customer-configuration",
+          "payments-processing",
+          "settlement-and-reconciliation",
+          "Banking Domain",
+          "lending-product",
+          "corporate-finance",
+          "partnerships",
+          "banking-vas-integrations"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-customer-configuration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "settlement-and-reconciliation"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Banking Domain"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "lending-product"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "corporate-finance"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "partnerships"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "banking-vas-integrations"
+        }
+      ]
+    },
+    {
+      "id": "funds-movement",
+      "title": "Funds Movement Domain",
+      "category": "core-customer-and-product-domains",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "scope_note": "Called tyro-wide: rail execution (BECS/NPP/RTGS) serves banking payouts and merchant settlement alike, though merchant settlement is its highest-volume caller.",
+      "purpose": "This domain is the authoritative source for transfer execution state, not the source of “why” a payment is being made, and not the ledger of balances .",
+      "authority": {
+        "owns": [
+          "Transfer instruction acceptance and validation",
+          "Rail orchestration and submission",
+          "Status tracking, retries , and reconciliation of rail responses",
+          "Return/failed payment handling",
+          "Idempotency and correlation controls",
+          "Transfer execution observability",
+          "Transfer instruction records and execution status history",
+          "Rail routing decisions",
+          "Return codes, failure reasons, settlement/confirmation timestamps",
+          "Idempotency/correlation records and audit trail"
+        ],
+        "not_authoritative_for": [
+          "Banking Domain",
+          "settlement-and-reconciliation",
+          "billing-and-accounts-receivable",
+          "banking-vas-integrations",
+          "customer",
+          "user-and-identity",
+          "product-quoting-and-pricing",
+          "customer-notifications-and-communications"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Banking Domain"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "settlement-and-reconciliation"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "billing-and-accounts-receivable"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "banking-vas-integrations"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "product-quoting-and-pricing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer-notifications-and-communications"
+        }
+      ]
+    },
+    {
+      "id": "billing-and-accounts-receivable",
+      "title": "Billing & Accounts Receivable Domain",
+      "category": "core-customer-and-product-domains",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "scope_note": "Called tyro-wide: bills every Tyro product, though merchant fee recovery in the acquiring flow is a large share of it.",
+      "purpose": "Manage what customers owe Tyro by owning the authoritative lifecycle for billing accounts, invoice generation and issuance, and accounts-receivable balances, aging, and collections, kept separate from transaction settlement, the banking ledger, and corporate GL.",
+      "authority": {
+        "owns": [
+          "Billing account/profile management",
+          "Invoice lifecycle",
+          "AR sub-ledger management",
+          "Credits, adjustments, write-offs",
+          "Collections orchestration",
+          "Billing dispute intake and tracking",
+          "Billing profiles and invoice records",
+          "AR balances, aging, payment allocation records",
+          "Credit/adjustment/write-off records and audit trail",
+          "Collections and billing-dispute state"
+        ],
+        "not_authoritative_for": [
+          "product-quoting-and-pricing",
+          "payments-processing",
+          "settlement-and-reconciliation",
+          "Banking Domain",
+          "funds-movement",
+          "corporate-finance",
+          "customer",
+          "user-and-identity"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "product-quoting-and-pricing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "settlement-and-reconciliation"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Banking Domain"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "funds-movement"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "corporate-finance"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        }
+      ]
+    },
+    {
+      "id": "customer-acquisition",
+      "title": "Customer Acquisition Domain",
+      "category": "business-operations-domains",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "Manage Tyro’s go-to-market engine from market engagement through to a qualified, accepted opportunity and a clean handoff into Customer & Product Onboarding. It does not own customer identity truth, product activation truth, merchant configuration truth, or pricing rule truth.",
+      "authority": {
+        "owns": [
+          "Marketing campaign execution & optimisation",
+          "Lead capture, enrichment, scoring & routing",
+          "Opportunity & pipeline management",
+          "Channel & acquisition attribution",
+          "Commercial intent packaging",
+          "Handoff orchestration to Customer & Product Onboarding",
+          "Campaign records, attribution metadata, and growth experiments",
+          "Lead records and their lifecycle",
+          "Opportunity records and pipeline stage truth",
+          "Sales activity timeline and engagement artefacts",
+          "Handoff package metadata and growth-side handoff status",
+          "Acquisition attribution linkages"
+        ],
+        "not_authoritative_for": [
+          "customer",
+          "user-and-identity",
+          "partnerships",
+          "customer-and-product-onboarding",
+          "payments-customer-configuration",
+          "payments-channels",
+          "payments-processing",
+          "Settlement",
+          "Banking",
+          "Lending",
+          "product-quoting-and-pricing",
+          "billing-and-accounts-receivable",
+          "risk-compliance-and-regulatory"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "partnerships"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer-and-product-onboarding"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-customer-configuration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-channels"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Settlement"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Banking"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Lending"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "product-quoting-and-pricing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "billing-and-accounts-receivable"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "risk-compliance-and-regulatory"
+        }
+      ]
+    },
+    {
+      "id": "partnerships",
+      "title": "Partnerships Domain",
+      "category": "business-operations-domains",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "Maintain the authoritative record and lifecycle for all third-party organisations Tyro engages with as partners, and govern how those partners participate in Tyro’s go-to-market and product ecosystem. It owns the commercial relationship, not the technical integration and not the customer identity model.",
+      "authority": {
+        "owns": [
+          "Partner lifecycle management",
+          "Commercial relationship governance",
+          "Referral participation governance",
+          "Partner directory / lookup services",
+          "Partner master record and lifecycle state",
+          "Partner roles/types and eligibility flags",
+          "Partner contacts and governance metadata",
+          "Agreement/contract references and effective dates",
+          "Referral identifiers and attribution configuration",
+          "Relationship links"
+        ],
+        "not_authoritative_for": [
+          "customer",
+          "user-and-identity",
+          "customer-acquisition",
+          "pos-integration",
+          "payments-vas-integrations",
+          "banking-vas-integrations",
+          "integration-enablement-and-certification",
+          "payments-customer-configuration",
+          "product-quoting-and-pricing"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer-acquisition"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "pos-integration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-vas-integrations"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "banking-vas-integrations"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "integration-enablement-and-certification"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-customer-configuration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "product-quoting-and-pricing"
+        }
+      ]
+    },
+    {
+      "id": "groups-and-enterprises",
+      "title": "Groups & Enterprises Domain",
+      "category": "business-operations-domains",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "Manage the policies, control structures, and governance rules required to support enterprise and franchise operating models where multiple customer legal entities operate under a shared umbrella . It is authoritative for group governance and policy, not for customer identity master, merchant configuration truth, transaction truth, settlement balances, or pricing engine calculation.",
+      "authority": {
+        "owns": [
+          "Enterprise/group governance policy management",
+          "Group-level override policy definition",
+          "Group reporting structure governance",
+          "Cross-entity governance signals",
+          "Group governance policy records and versions",
+          "Delegation/control rule sets",
+          "Group-level operational policy baselines and exceptions",
+          "Settlement routing and fee carve-out policy definitions",
+          "Reporting aggregation structures",
+          "Governance audit trail"
+        ],
+        "not_authoritative_for": [
+          "customer",
+          "user-and-identity",
+          "payments-customer-configuration",
+          "payments-processing",
+          "settlement-and-reconciliation",
+          "product-quoting-and-pricing",
+          "Banking",
+          "Lending",
+          "Credit",
+          "partnerships"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-customer-configuration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "settlement-and-reconciliation"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "product-quoting-and-pricing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Banking"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Lending"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Credit"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "partnerships"
+        }
+      ]
+    },
+    {
+      "id": "corporate-finance",
+      "title": "Corporate Finance Domain",
+      "category": "business-operations-domains",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "Maintain Tyro's corporate general ledger, accounting periods and close processes, and statutory/management financial reporting as the authoritative source, kept separate from product/customer financial truth such as merchant settlements and banking ledgers.",
+      "authority": {
+        "owns": [
+          "Corporate journal posting & adjustments",
+          "Period close management",
+          "Corporate financial reporting",
+          "Corporate reconciliation governance",
+          "Chart of accounts",
+          "Corporate journals and posting history",
+          "Accounting periods and close status",
+          "Corporate financial statements and reporting artefacts",
+          "Corporate reconciliation status metadata and evidence references"
+        ],
+        "not_authoritative_for": [
+          "settlement-and-reconciliation",
+          "Banking Domain",
+          "accounting-product",
+          "payments-processing",
+          "product-quoting-and-pricing",
+          "billing-and-accounts-receivable",
+          "enterprise-data-governance",
+          "data-analytics-and-intelligence",
+          "ai-and-ml"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "settlement-and-reconciliation"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Banking Domain"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "accounting-product"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "product-quoting-and-pricing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "billing-and-accounts-receivable"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "enterprise-data-governance"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "data-analytics-and-intelligence"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "ai-and-ml"
+        }
+      ]
+    },
+    {
+      "id": "risk-compliance-and-regulatory",
+      "title": "Risk, Compliance & Regulatory Domain",
+      "category": "business-operations-domains",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "Provide Tyro’s authoritative capability for managing regulatory obligations and compliance controls across the customer lifecycle , ensuring Tyro can operate as a regulated Australian business bank with auditable adherence to applicable regulatory requirements. Operational domains remain authoritative for transaction truth, product lifecycles, and ledger truth. This domain is authoritative for regulatory policy execution and outcomes.",
+      "authority": {
+        "owns": [
+          "CDD/KYC/KYB policy execution and decisioning",
+          "Customer risk assessment",
+          "OCDD",
+          "ECDD",
+          "Ongoing monitoring",
+          "Periodic KYC refresh management",
+          "Regulatory reporting and evidence",
+          "Compliance outcomes publication for enforcement",
+          "Regulatory decision records and outcomes",
+          "Monitoring alerts and dispositions and their audit metadata",
+          "Restriction/condition directives and time-bound enforcement instructions",
+          "Regulatory reporting artefacts metadata and evidence references",
+          "Control operation evidence, attestations, exceptions/waivers, and audit trail metadata"
+        ],
+        "not_authoritative_for": [
+          "customer",
+          "user-and-identity",
+          "customer-and-product-onboarding",
+          "payments-processing",
+          "disputes-and-recovery",
+          "settlement-and-reconciliation",
+          "payments-accounting",
+          "deposits-product",
+          "funds-movement",
+          "Operational Investigations & Exceptions Domain",
+          "data-analytics-and-intelligence",
+          "ai-and-ml"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer-and-product-onboarding"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "disputes-and-recovery"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "settlement-and-reconciliation"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-accounting"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "deposits-product"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "funds-movement"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Operational Investigations & Exceptions Domain"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "data-analytics-and-intelligence"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "ai-and-ml"
+        }
+      ]
+    },
+    {
+      "id": "fraud-and-risk-decisioning",
+      "title": "Fraud & Risk Decisioning Domain",
+      "category": "business-operations-domains",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "scope_note": "Called tyro-wide: covers banking and onboarding risk as well as card-present and CNP transaction fraud.",
+      "purpose": "Prevent fraud and misuse by providing a low-latency decision engine that produces operational risk outcomes used inline in product flows, primarily in acquiring payments , and optionally in adjacent areas . It does not own AML/CTF compliance monitoring, sanctions screening, or regulatory reporting .",
+      "authority": {
+        "owns": [
+          "Inline fraud decisioning",
+          "Near-real-time adaptive controls",
+          "Operational policy & model lifecycle",
+          "Decision event publishing",
+          "Fraud/risk decision records",
+          "Operational fraud policy definitions and versions",
+          "Model/version registry for decisioning",
+          "Decision telemetry",
+          "Canonical decision request/response schemas"
+        ],
+        "not_authoritative_for": [
+          "risk-compliance-and-regulatory",
+          "payments-processing",
+          "payments-channels",
+          "digital-channels-and-experience",
+          "payments-customer-configuration",
+          "settlement-and-reconciliation",
+          "Banking Domain",
+          "Operational Investigations & Exceptions",
+          "customer",
+          "user-and-identity",
+          "enterprise-data-governance",
+          "data-analytics-and-intelligence",
+          "ai-and-ml"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "risk-compliance-and-regulatory"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-channels"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "digital-channels-and-experience"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-customer-configuration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "settlement-and-reconciliation"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Banking Domain"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Operational Investigations & Exceptions"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "enterprise-data-governance"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "data-analytics-and-intelligence"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "ai-and-ml"
+        }
+      ]
+    },
+    {
+      "id": "disputes-and-recovery",
+      "title": "Disputes & Recovery Domain",
+      "category": "business-operations-domains",
+      "status": "draft",
+      "scope": "acquirer-specific",
+      "scope_note": "Called acquirer-specific: scheme chargebacks and recovery. Banking disputes would widen this.",
+      "purpose": "Manage disputes arising from payments acquiring across two coupled workflows: scheme-managed dispute progression (chargebacks, retrieval requests, representment) and Tyro's own economic recovery, publishing authoritative scheme and recovery outcomes to downstream consumers.",
+      "authority": {
+        "owns": [
+          "Dispute case master record and scheme-managed lifecycle truth",
+          "Evidence coordination references and deadline/SLA artefacts",
+          "Final scheme outcomes",
+          "Recovery records for liability/economic outcomes",
+          "FinancialCommitment intents and their lineage to dispute cases/outcomes",
+          "Operational audit trails and correlation metadata"
+        ],
+        "not_authoritative_for": [
+          "payments-processing",
+          "settlement-and-reconciliation",
+          "funds-movement",
+          "payments-accounting",
+          "product-quoting-and-pricing",
+          "fraud-and-risk-decisioning",
+          "risk-compliance-and-regulatory",
+          "customer-service-and-support",
+          "enterprise-data-governance",
+          "data-analytics-and-intelligence",
+          "ai-and-ml",
+          "payments-customer-configuration"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "settlement-and-reconciliation"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "funds-movement"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-accounting"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "product-quoting-and-pricing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "fraud-and-risk-decisioning"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "risk-compliance-and-regulatory"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer-service-and-support"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "enterprise-data-governance"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "data-analytics-and-intelligence"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "ai-and-ml"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-customer-configuration"
+        }
+      ]
+    },
+    {
+      "id": "payments-vas-integrations",
+      "title": "Payments VAS Integrations Domain",
+      "category": "partner-integrations-and-value-add-services-domains",
+      "status": "draft",
+      "scope": "acquirer-specific",
+      "purpose": "Enable and operate value-added services that are invoked within the acquiring payment flow , by integrating Tyro’s acceptance and payment flows with approved third-party providers. It is authoritative for VAS invocation, provider abstraction, and VAS outcomes—not for transaction truth.",
+      "authority": {
+        "owns": [
+          "VAS invocation orchestration: when to call a provider; request/response choreography; timeouts/retries/fallback policies",
+          "Provider abstraction layer: mapping canonical ↔ provider protocols; adapter versioning",
+          "Merchant-level VAS enablement: enable/disable per merchant/channel/device; validate config; routing to provider",
+          "Operational resilience controls: circuit breakers; degradation; alerting triggers for provider failure",
+          "VAS outcome normalisation: standardised outcomes surfaced to Runtime/Support tooling",
+          "Merchant VAS enablement configuration",
+          "Provider registry",
+          "VAS invocation outcomes and telemetry state",
+          "Provider health state and operational control flags"
+        ],
+        "not_authoritative_for": [
+          "partnerships",
+          "Revenue",
+          "integration-enablement-and-certification",
+          "payments-channels",
+          "payments-processing",
+          "payments-customer-configuration"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "partnerships"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Revenue"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "integration-enablement-and-certification"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-channels"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-customer-configuration"
+        }
+      ]
+    },
+    {
+      "id": "pos-integration",
+      "title": "POS Integration Domain",
+      "category": "partner-integrations-and-value-add-services-domains",
+      "status": "draft",
+      "scope": "acquirer-specific",
+      "purpose": "Define and operate the POS integration surface for Tyro acquiring so POS vendors can initiate and manage payment flows reliably and consistently across supported channels . This domain owns the technical integration model for POS → Tyro , not the commercial partnership and not cross-ecosystem certification governance.",
+      "authority": {
+        "owns": [
+          "POS integration API / protocol design",
+          "POS flow orchestration at the integration edge",
+          "Partner technical integration modes",
+          "Reference implementations / sample apps / SDKs specifically for POS integration",
+          "Technical troubleshooting patterns and diagnostics hooks for POS flows",
+          "POS integration specs and versioned contracts",
+          "POS technical capability declarations",
+          "POS integration configuration metadata required to operate the integration surface"
+        ],
+        "not_authoritative_for": []
+      },
+      "relationships": []
+    },
+    {
+      "id": "banking-vas-integrations",
+      "title": "Banking VAS Integrations Domain",
+      "category": "partner-integrations-and-value-add-services-domains",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "This domain exists to keep the regulated Banking ledger clean and stable while allowing external ecosystem services to plug in modularly. It owns the consent model and partner-facing orchestration of banking workflows—not ledger truth or rail execution.",
+      "authority": {
+        "owns": [
+          "Consent lifecycle management",
+          "Partner-facing banking workflow orchestration",
+          "Data access, subscriptions, and feeds",
+          "Provider abstraction & integration adapters",
+          "Operational governance of partner access",
+          "Consent records and audit history",
+          "Banking workflow orchestration state and execution logs",
+          "Subscription/feed state and delivery logs",
+          "Provider capability registry and mapping configuration metadata",
+          "Provider health state and operational control flags"
+        ],
+        "not_authoritative_for": [
+          "Banking Domain",
+          "funds-movement",
+          "accounting-product",
+          "partnerships",
+          "integration-enablement-and-certification",
+          "customer",
+          "user-and-identity",
+          "product-quoting-and-pricing",
+          "digital-channels-and-experience"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Banking Domain"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "funds-movement"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "accounting-product"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "partnerships"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "integration-enablement-and-certification"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "product-quoting-and-pricing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "digital-channels-and-experience"
+        }
+      ]
+    },
+    {
+      "id": "partner-developer-experience",
+      "title": "Partner Developer Experience Domain",
+      "category": "partner-integrations-and-value-add-services-domains",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "It exists to prevent partner experience and tooling from fragmenting across product-specific integration domains. This domain is authoritative for the experience and tooling layer of partner development—not the product integration specifications, not certification decisions, and not partner commercial lifecycle.",
+      "authority": {
+        "owns": [
+          "Developer portal & onboarding experience",
+          "Documentation publishing & governance",
+          "Sandbox provisioning & test-data enablement",
+          "Developer access enablement",
+          "Shared developer tooling",
+          "Developer communications orchestration",
+          "Developer portal catalogue metadata and documentation publishing state",
+          "Sandbox tenancy records and sandbox state",
+          "Credential lifecycle metadata and audit logs",
+          "Developer tooling artefact metadata",
+          "Developer-facing change notice and distribution logs"
+        ],
+        "not_authoritative_for": [
+          "partnerships",
+          "integration-enablement-and-certification",
+          "pos-integration",
+          "payments-vas-integrations",
+          "banking-vas-integrations",
+          "payments-channels",
+          "payments-processing",
+          "payments-customer-configuration",
+          "customer",
+          "user-and-identity",
+          "customer-acquisition",
+          "customer-notifications-and-communications"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "partnerships"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "integration-enablement-and-certification"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "pos-integration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-vas-integrations"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "banking-vas-integrations"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-channels"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-customer-configuration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer-acquisition"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer-notifications-and-communications"
+        }
+      ]
+    },
+    {
+      "id": "integration-enablement-and-certification",
+      "title": "Integration Enablement & Certification Domain",
+      "category": "partner-integrations-and-value-add-services-domains",
+      "status": "draft",
+      "scope": "acquirer-specific",
+      "scope_note": "Called acquirer-specific: scheme and device certification dominate. Partner API enablement leans tyro-wide.",
+      "purpose": "This domain owns the certification lifecycle and conformance truth: what is certified, for which versions, with what scope, and whether it is production-eligible.",
+      "authority": {
+        "owns": [
+          "Certification lifecycle/state machine",
+          "Conformance standards governance",
+          "Test plan orchestration and certification decisioning",
+          "Production eligibility gating",
+          "Version compatibility governance and re-certification triggers",
+          "Waiver/exception workflow and expiry enforcement",
+          "Certification records and status history",
+          "Conformance requirements registry",
+          "Test suite catalog and required mapping per surface/type",
+          "Test results and evidence references",
+          "Compatibility matrix and support policy for certified versions",
+          "Waivers/exceptions and approvals",
+          "Production eligibility flags"
+        ],
+        "not_authoritative_for": []
+      },
+      "relationships": []
+    },
+    {
+      "id": "enterprise-data-governance",
+      "title": "Enterprise Data Governance Domain",
+      "category": "data-and-intelligence-domains",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "Provide Tyro’s enterprise-wide data governance, assurance, and control framework so data across domains is trusted, secure, compliant, and reusable — without owning operational business truth or regulatory policy. Risk & Compliance domains remain responsible for regulatory interpretation and policy setting. Enterprise Data Governance enables compliance to those policies through defined data standards and control frameworks.",
+      "authority": {
+        "owns": [
+          "Establish enterprise data ownership and stewardship model",
+          "Define glossary operating model and semantic lifecycle governance",
+          "Define classification, access, retention and handling standards",
+          "Define CDE frameworks aligned to regulatory obligations",
+          "Define and govern data contract framework",
+          "Define enterprise data quality policy",
+          "Define minimum lineage and metadata standards",
+          "Provide assurance processes and certification reviews",
+          "Govern lifecycle of certified cross-domain metrics",
+          "Governance artefacts, standards and frameworks",
+          "Ownership model and accountability mappings",
+          "Glossary and term registry metadata",
+          "Data contract standards and registry metadata",
+          "Data quality policy definitions and assurance artefacts"
+        ],
+        "not_authoritative_for": [
+          "risk-compliance-and-regulatory",
+          "Operational Domains",
+          "data-analytics-and-intelligence",
+          "ai-and-ml"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "risk-compliance-and-regulatory"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Operational Domains"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "data-analytics-and-intelligence"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "ai-and-ml"
+        }
+      ]
+    },
+    {
+      "id": "data-analytics-and-intelligence",
+      "title": "Data Analytics & Intelligence Domain",
+      "category": "data-and-intelligence-domains",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "Provide Tyro’s technical foundation and operational capability to ingest, transform, store, and serve data as trusted, reusable data products — enabling analytics and cross-domain insights while not owning operational master truth. Operational domains remain authoritative for business invariants.",
+      "authority": {
+        "owns": [
+          "Data ingestion engineering and operations",
+          "Transformation and orchestration tooling operations",
+          "Storage and serving operations",
+          "Secure environment implementation",
+          "Data product management and SLAs",
+          "Cross-domain insight activation",
+          "Data quality monitoring and triage",
+          "Self-serve analytics enablement",
+          "Platform operational metadata",
+          "Curated analytical data products and SLAs",
+          "Certified cross-domain analytical metrics",
+          "Cross-domain derived datasets and activation artefacts",
+          "Data quality monitoring records"
+        ],
+        "not_authoritative_for": [
+          "Operational Domains",
+          "Relevant business domains",
+          "enterprise-data-governance",
+          "ai-and-ml"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Operational Domains"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Relevant business domains"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "enterprise-data-governance"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "ai-and-ml"
+        }
+      ]
+    },
+    {
+      "id": "ai-and-ml",
+      "title": "AI & ML Domain",
+      "category": "data-and-intelligence-domains",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "Productionise AI and ML capabilities safely and reliably across Tyro by providing shared lifecycle tooling, operational controls, and governance mechanisms — while keeping business decision authority in relevant domains. This capability is the system of record for AI/ML operational artefacts — not for business decision policy.",
+      "authority": {
+        "owns": [
+          "Model registry and lineage management",
+          "Training pipeline orchestration and CI/CD",
+          "Deployment orchestration, rollback and monitoring",
+          "Drift detection and retraining automation",
+          "Prompt lifecycle governance",
+          "Standard inference serving patterns",
+          "Embeddings and retrieval operations",
+          "AI/ML operational runbooks and incident response",
+          "Model registry records",
+          "Training and deployment metadata",
+          "Monitoring and drift artefacts",
+          "Prompt versions and governance artefacts",
+          "Embedding/vector index operational metadata",
+          "AI/ML audit logs"
+        ],
+        "not_authoritative_for": [
+          "Relevant business domains",
+          "Operational domains",
+          "data-analytics-and-intelligence",
+          "enterprise-data-governance",
+          "risk-compliance-and-regulatory"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Relevant business domains"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Operational domains"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "data-analytics-and-intelligence"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "enterprise-data-governance"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "risk-compliance-and-regulatory"
+        }
+      ]
+    },
+    {
+      "id": "customer-and-product-onboarding",
+      "title": "Customer & Product Onboarding",
+      "category": "cross-domain-orchestrators",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "Orchestrate the end-to-end process from prospect → application → assessment → approval → product activation across one or more products . Owns the application workflow state machine and sequencing, while delegating decisions and record creation to authoritative domains.",
+      "authority": {
+        "owns": [
+          "Application lifecycle state machine and orchestration rules",
+          "Conditional branching logic",
+          "Sequencing and idempotent activation coordination across domains",
+          "Handoff/return loops for missing info and manual review",
+          "Application record + status history",
+          "Required-check registry + references to outcomes",
+          "Activation orchestration log"
+        ],
+        "not_authoritative_for": [
+          "customer",
+          "user-and-identity",
+          "payments-customer-configuration",
+          "risk-compliance-and-regulatory",
+          "credit-and-underwriting",
+          "Banking",
+          "lending-product",
+          "payments-processing",
+          "Settlement"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-customer-configuration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "risk-compliance-and-regulatory"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "credit-and-underwriting"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Banking"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "lending-product"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Settlement"
+        }
+      ]
+    },
+    {
+      "id": "customer-lifecycle-management",
+      "title": "Customer Lifecycle Management",
+      "category": "cross-domain-orchestrators",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "Coordinate lifecycle transitions for active customers/products , such as suspension, reactivation, upgrades/downgrades, product add-ons, and offboarding. Ensures lifecycle policies are applied consistently across multiple product domains without embedding cross-domain workflow logic inside them.",
+      "authority": {
+        "owns": [
+          "Cross-product lifecycle state machine and orchestration rules",
+          "Controlled execution of suspend/reactivate/offboard across products",
+          "Coordination of “product add-on” lifecycle where multiple domains must act",
+          "Emission of lifecycle events and tracking of completion/partial failure handling",
+          "Lifecycle workflow state and execution logs",
+          "Lifecycle reason codes and policy references"
+        ],
+        "not_authoritative_for": [
+          "customer",
+          "user-and-identity",
+          "payments-customer-configuration",
+          "Banking",
+          "lending-product",
+          "product-quoting-and-pricing",
+          "Operational Investigations & Exceptions"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-customer-configuration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Banking"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "lending-product"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "product-quoting-and-pricing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Operational Investigations & Exceptions"
+        }
+      ]
+    },
+    {
+      "id": "product-bundling-and-eligibility",
+      "title": "Product Bundling & Eligibility",
+      "category": "cross-domain-orchestrators",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "Define and orchestrate how Tyro sells and manages multi-product bundles , including eligibility checks, bundle composition rules, and cross-product activation coordination. This prevents bundling logic being scattered across product domains and sales tools.",
+      "authority": {
+        "owns": [
+          "Bundle catalog management",
+          "Orchestration of bundle purchase/upgrade/downgrade flows",
+          "Cross-product dependency management",
+          "Bundle definitions + versions",
+          "Bundle eligibility rules",
+          "Bundle subscription/orchestration state"
+        ],
+        "not_authoritative_for": [
+          "product-quoting-and-pricing",
+          "customer",
+          "user-and-identity",
+          "payments-customer-configuration",
+          "Banking",
+          "Lending",
+          "Credit"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "product-quoting-and-pricing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-customer-configuration"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Banking"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Lending"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Credit"
+        }
+      ]
+    },
+    {
+      "id": "product-quoting-and-pricing",
+      "title": "Product Quoting & Pricing",
+      "category": "cross-domain-orchestrators",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "scope_note": "Called tyro-wide: prices all products, though acquiring MSF / interchange-plus pricing is its most complex case.",
+      "purpose": "Define, govern, and apply Tyro’s commercial revenue logic across products and channels—so pricing, fees, revenue share, and commissions are consistent, versioned, auditable, and reusable across Payments, Banking, Lending, Financial Management, and partner-led propositions. It is authoritative for commercial policy and calculation, not for scheme fees, ledger entries, invoicing, or settlement.",
+      "authority": {
+        "owns": [
+          "Pricing & fee rule management",
+          "Rate engine / commercial calculation",
+          "Enterprise & negotiated terms support",
+          "Partner monetisation policy",
+          "Revenue attribution policy",
+          "Pricing plan catalog and versions",
+          "Rate cards, fee rules, and applicability/eligibility policies",
+          "Override records and approval history",
+          "Partner commission and revenue-share rule definitions",
+          "Pricing decision outputs and fee breakdowns",
+          "Revenue attribution mappings/policies"
+        ],
+        "not_authoritative_for": [
+          "payments-processing",
+          "settlement-and-reconciliation",
+          "Banking Domain",
+          "lending-product",
+          "billing-and-accounts-receivable",
+          "corporate-finance",
+          "partnerships",
+          "customer",
+          "user-and-identity"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "settlement-and-reconciliation"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Banking Domain"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "lending-product"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "billing-and-accounts-receivable"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "corporate-finance"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "partnerships"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        }
+      ]
+    },
+    {
+      "id": "operational-case-management",
+      "title": "Operational Case Management",
+      "category": "cross-domain-orchestrators",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "A shared and generic enterprise capability for operational case management, investigations, evidence handling, and exception workflow orchestration across multiple domains. Manage cross-domain operational exceptions and investigations that require multi-team workflows, evidence, and audit trails—such as reconciliation breaks, disputes coordination, compliance investigations, fraud escalations, and complex operational incidents. This domain owns the workflow of exceptions, not the underlying product records.",
+      "authority": {
+        "owns": [
+          "Case lifecycle, routing, SLA tracking",
+          "Evidence management",
+          "Multi-team task orchestration and decision logging",
+          "Escalation and exception outcome recording",
+          "Triggering actions in other domains",
+          "Case records, workflow state, task state",
+          "Evidence references and audit trail",
+          "SLA metrics and routing metadata"
+        ],
+        "not_authoritative_for": [
+          "customer-service-and-support",
+          "payments-processing",
+          "settlement-and-reconciliation",
+          "Banking",
+          "fraud-and-risk-decisioning",
+          "risk-compliance-and-regulatory"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "customer-service-and-support"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "payments-processing"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "settlement-and-reconciliation"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "Banking"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "fraud-and-risk-decisioning"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "risk-compliance-and-regulatory"
+        }
+      ]
+    },
+    {
+      "id": "customer-notifications-and-communications",
+      "title": "Customer Notifications & Communications",
+      "category": "cross-domain-orchestrators",
+      "status": "draft",
+      "scope": "tyro-wide",
+      "purpose": "Decide what communications to send, when, and through which channel, based on events from authoritative domains—ensuring regulated communications are compliant, templates are managed, delivery is tracked, and customer communication logic isn’t duplicated across product systems.",
+      "authority": {
+        "owns": [
+          "Communication rules engine",
+          "Channel routing selection",
+          "Template selection and dispatch orchestration",
+          "Delivery tracking and retry/backoff policies",
+          "Opt-in/opt-out enforcement by consuming preference sources",
+          "Communication rules and versions",
+          "Delivery logs/status and audit trail",
+          "Template metadata references and dispatch records"
+        ],
+        "not_authoritative_for": [
+          "customer",
+          "user-and-identity",
+          "All authoritative domains",
+          "customer-acquisition",
+          "digital-channels-and-experience"
+        ]
+      },
+      "relationships": [
+        {
+          "type": "not_authoritative_for",
+          "target": "customer"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "user-and-identity"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target_unresolved": "All authoritative domains"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "customer-acquisition"
+        },
+        {
+          "type": "not_authoritative_for",
+          "target": "digital-channels-and-experience"
+        }
+      ]
+    }
+  ]
+}

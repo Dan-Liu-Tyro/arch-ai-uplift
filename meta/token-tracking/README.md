@@ -5,15 +5,51 @@ adjusted from evidence rather than intuition.
 
 ## Answering the allowance question honestly
 
-**Claude Code does not expose your plan allowance locally.** Transcripts were
-checked for quota, limit, and allowance fields; the only matches were incidental
-prompt text. There is no local number to compare daily spend against.
+**Correction, 2026-09-14.** This section previously stated, as a verified
+finding, that "Claude Code does not expose your plan allowance locally." That
+was wrong. The probe behind it only searched *transcripts*; the figure lives in
+`~/.claude.json`, under `cachedUsageUtilization.utilization`. See
+`meta/perception-failures/log.md` entry 3 for how a narrow probe became a flat
+claim. What follows is the corrected account.
 
-Two things follow. First, `--allowance` takes a figure *you* supply — read your
-limit from `/usage` in Claude Code and pass it in, and the tool reports spend as a
-percentage of it. Second, `--by window` buckets by rolling five-hour periods,
-which is how Claude Code actually enforces usage limits, so it is the grouping
-that corresponds to allowance consumption rather than to calendar days.
+Claude Code **does** cache the account's real usage-credit position locally:
+
+```
+cachedUsageUtilization
+  fetchedAtMs                              when the cache was last refreshed
+  utilization.extra_usage.monthly_limit    pool size, in currency minor units
+  utilization.extra_usage.used_credits     consumed, same units
+  utilization.extra_usage.utilization      percent consumed
+  utilization.extra_usage.decimal_places   minor-unit exponent (2 = cents)
+  utilization.spend.can_purchase_credits   false when org-administered
+  utilization.five_hour / .seven_day       rolling plan-limit utilization
+```
+
+Three things matter about this number more than its existence.
+
+**It is a cache, not a live reading.** It refreshes when `/usage` runs, not on a
+timer. It was 4 days 19 hours stale the first time it was read here, and both
+figures in it were wrong: it reported a $150 pool at 66.6% consumed when the
+true position was $500 at 24.1%. `budget.py` always prints the age and says to
+refresh when it is over a day old — but note that the warning is not a
+mitigation. If the cache is stale, refresh it with `/usage` before believing
+any pace figure, including the calibrated bridge this tool computes. See
+`meta/perception-failures/log.md` entry 4 for what happened when that advice
+was not taken.
+
+**`extra_usage` is overage, not an allowance.** Usage credits are consumed only
+*after* subscription plan limits are hit — they are the buffer that keeps work
+moving when you are rate-limited. They are therefore not a budget to spend down.
+A deliberate push toward "90% of credits used" is a decision to spend most of the
+month rate-limited, which is a throughput problem wearing a cost costume. Treat a
+*low* credit burn as the healthy state, and the pool as a reserve for genuinely
+urgent work.
+
+**The rolling-window fields are the ones that bind day to day.** `five_hour` and
+`seven_day` are how limits are actually enforced; they read `null` here, which
+means only that they were not populated at fetch time. `summarize.py --by window`
+remains the right grouping for understanding what trips a limit, and
+`--allowance N` still takes a figure you supply for that purpose.
 
 ```
 python3 meta/token-tracking/summarize.py --by window --allowance 15
@@ -51,6 +87,47 @@ attribution keys that make per-task costing possible without manual bookkeeping.
 ```
 
 No dependencies, standard library only.
+
+## `budget.py` — credit position and daily pace
+
+`summarize.py` answers "what did this task cost, relative to that one." `budget.py`
+answers "am I going to run out before the cycle ends." Built for decision 25 in
+`docs/decision-log.md`.
+
+```
+python3 meta/token-tracking/budget.py
+python3 meta/token-tracking/budget.py --cycle-start 16 --target 75
+python3 meta/token-tracking/budget.py --json
+```
+
+| Flag | Meaning |
+|---|---|
+| `--limit N` | override the pool size instead of reading it from the config |
+| `--cycle-start D` | day of month the cycle resets (default 1, clamped to 28) |
+| `--target P` | percent of pool to aim for by cycle end (default 90) |
+| `--recent N` | days of history in the burn-rate table (default 7) |
+| `--cache-ttl` | passed through to the `summarize.py` cost model |
+| `--today` | override today's date, for testing the cycle arithmetic |
+| `--json` | machine-readable |
+
+Two deliberate differences from `summarize.py`:
+
+**It scans every project, not this one.** `summarize.py` derives its transcript
+directory from its own `__file__`, which is right for per-feature attribution and
+wrong for a budget — every project on the machine draws on the same pool.
+`budget.py` walks all of `~/.claude/projects/*/` and reports the project split.
+
+**It separates confirmed spend from estimate, and never blurs them.** The
+authoritative figure comes from the config cache. The list-price estimate covers
+the gap between the cache's fetch time and now, scaled by a calibration ratio
+(credits per $1 of list price) derived over the part of the cycle the cache
+already covers. That ratio is an approximation and is labelled as one: credits
+accrue only past plan limits, so the true relationship is non-linear, and early
+cycle usage costs no credits at all.
+
+The cycle reset day is an assumption (`--cycle-start`, default the 1st). The real
+date is shown by `/usage`. Every pace figure depends on it, so confirm it rather
+than trusting the default.
 
 ## Cost model
 
@@ -113,5 +190,13 @@ built on guesswork would be worse than none.
 
 ## Status
 
-Working. Regenerate the baseline with `--by day` and `--by branch` after any
-significant stretch of work.
+Working, both scripts. Regenerate the baseline with `--by day` and `--by branch`
+after any significant stretch of work.
+
+Two things about `budget.py` are unconfirmed rather than designed. The cycle reset
+day is assumed to be the 1st (`--cycle-start` overrides it); the real date shows in
+`/usage`, and every pace figure depends on it, so until it is confirmed read those
+figures as directional. And `monthly_limit` is not a constant: it moved from 15000
+to 50000 between two cache reads five days apart while `used_credits` kept
+accumulating, consistent with the org raising the allocation mid-cycle. Don't cache
+the limit anywhere else or hard-code it. Both are named as open in decision 25.

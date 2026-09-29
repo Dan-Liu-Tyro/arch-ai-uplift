@@ -51,6 +51,20 @@ Whatever is chosen, publishing must be idempotent — republishing an unchanged
 entity should produce no page version churn, or the space's history becomes
 useless.
 
+**The connector only does full-body replacement, which suits this component
+and rules out a related use.** `updateConfluencePage` takes no patch — `body`
+replaces the entire page. For pages this component owns and generates
+wholesale from entities, that is exactly the right shape and costs nothing.
+But it means Claude cannot make a small, surgical edit to a page a human
+curates by hand: a one-character change requires re-emitting the whole body
+byte-perfect, which is not reliable at page scale (verified 2026-09-14 on a
+66,877-character page — see the constraint in `../../docs/decision-log.md`).
+Two consequences worth stating, since the boundary is easy to blur: this
+component must only ever write to pages in the generated space it owns, never
+to an architect's working page; and if some future workflow needs Claude to
+annotate a hand-maintained page, the additive
+`createConfluenceInlineComment` call is the mechanism, not this one.
+
 ## Extraction notes
 
 Plausible promotion candidate if publishing becomes scheduled or event-driven

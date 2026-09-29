@@ -82,9 +82,24 @@ def read_records(path):
                 }
 
 
+def price_for(model):
+    """Price entry for a model id, tolerating a trailing date suffix.
+
+    Claude Code reports some models with a dated id (`claude-haiku-4-5-20251001`)
+    and others without. Keying PRICING on the undated name and stripping the
+    suffix here avoids silently pricing a real model at zero.
+    """
+    if model in PRICING:
+        return PRICING[model]
+    for name, price in PRICING.items():
+        if model.startswith(name + "-"):
+            return price
+    return None
+
+
 def cost(model, usage, cache_ttl):
     """Cost in USD for one message. Returns 0.0 for models with no known price."""
-    price = PRICING.get(model)
+    price = price_for(model)
     if not price:
         return 0.0
     per_token = price["input"] / 1_000_000

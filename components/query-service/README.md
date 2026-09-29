@@ -28,11 +28,27 @@ no infrastructure at all.
 
 ## Boundary, when it exists
 
-**In scope** — HTTP query surface, auth, deployment manifests, the transport.
+**Known now — purpose.** Give a remote consumer (Rovo, or any other agent that
+isn't Claude Code and can't read this repo's filesystem) access to the curated
+architecture knowledge, as a thin transport over `kg-core`. Schema and traversal
+logic stay in `kg-core`; if this component starts accumulating graph logic, that
+logic belongs in the core instead.
 
-**Out of scope** — schema and traversal logic, which stay in `kg-core`. This
-component should be a thin transport over `kg-core`, and if it starts accumulating
-graph logic, that logic belongs in the core instead.
+**Not yet defined — the protocol.** "Network-reachable" and "thin transport" are
+committed; the actual wire protocol is not. MCP is a plausible candidate — Rovo
+already speaks MCP for the Atlassian connector, so it would be a familiar shape
+for that side to consume — but nothing here has chosen it over a plain REST or
+GraphQL API. That choice is deliberately left open until this component is
+actually built; picking it now, before the schema is stable or a real consumer
+need is demonstrated, would be exactly the premature-infrastructure this
+project's `least-infrastructure-first` pattern argues against. See the open
+question in `docs/decision-log.md`.
+
+**In scope, once the protocol is chosen** — the query surface itself, auth,
+deployment manifests, the transport.
+
+**Out of scope regardless of protocol** — schema and traversal logic, which stay
+in `kg-core`.
 
 ## Extraction notes
 

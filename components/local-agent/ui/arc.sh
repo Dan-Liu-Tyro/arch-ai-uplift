@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Start/stop/restart the local Arc Lite UI server (server.py).
-# Usage: ./arc-lite.sh {start|stop|restart|status}
+# Usage: ./arc.sh {start|stop|restart|status}
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RUN_DIR="$SCRIPT_DIR/.run"
-PID_FILE="$RUN_DIR/arc-lite.pid"
-LOG_FILE="$RUN_DIR/arc-lite.log"
+PID_FILE="$RUN_DIR/arc.pid"
+LOG_FILE="$RUN_DIR/arc.log"
 PORT=8765  # must match PORT in server.py
 
 is_running() {

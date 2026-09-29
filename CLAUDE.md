@@ -9,19 +9,41 @@ knowledge — principles, guardrails, patterns, reference architectures, decisio
 as the grounding source for the Architecture stream's AI agent to uplift the internal 
 business process as well as offer Architecture service to wider steams such as architecture sparring preparation, architecture/design review, etc.
 
-**Status: design phase.** A schema draft and component scaffolding exist; no code,
-build system, or test suite is committed. Do not invent or assume build/lint/test
-commands; there are none. If asked to add tooling, choose per the org language
-standards (Kotlin preferred for complex applications).
+**Status: design phase.** A schema draft and component scaffolding exist. No
+product code, build system, or test suite is committed — the only code that runs
+is `components/local-agent/ui/server.py`, `components/kg-viz/generate.py`,
+plus the stdlib scripts under `meta/`. `kg-viz` deliberately has **no**
+server any more (decision 36) -- `knowledge-visualizer.html` is opened
+directly from disk; do not reintroduce one.
+There is no build system and no lint step, with one narrow exception:
+`kg-viz`'s own `build.py` (decision 39) concatenates its `src/*.js` files
+into `knowledge-visualizer.html`, because the source is now split by concern
+while the shipped page must stay one self-contained file. It is stdlib
+Python, no bundler, and does not extend to the rest of the repo. The **one**
+test command is `node components/kg-viz/verify.js` (plain node, no
+dependencies) -- it exists because nothing `kg-viz` renders can be observed
+from a session here, and it now also checks that `knowledge-visualizer.html`
+is not stale against `src/`. Do not invent or assume any other build/lint/test
+commands. If asked to add tooling, choose per the org language standards
+(Kotlin preferred for complex applications).
 
 ## Layout
 
 ```
 docs/decision-log.md      running design record — the primary artifact
-docs/backlog.md           parked feature ideas, not yet decided or scheduled
+docs/backlog.md           parked feature ideas; owned by the `backlog` agent
+                                  (decision 43), not hand-edited directly
 docs/component-model.md   component boundaries, dependency + promotion rules
 components/kg-core/       schema contract (SCHEMA.md), validation, traversal
 components/kg-content/    the curated graph — entity files, data only
+components/kg-viz/        read-only viewer, two purpose-built views (2D
+                                  flow default, 3D a toggle); no server --
+                                  open knowledge-visualizer.html from disk,
+                                  then open any compatible graph file
+                                  (default payments.json, a
+                                  regenerable artifact, never hand-edited);
+                                  knowledge-visualizer.html is itself
+                                  generated too, by build.py from src/*.js
 components/confluence-ingest/    inbound: Confluence pages → draft entities
 components/confluence-publish/   outbound: entities → generated pages
 components/query-service/        v2, deferred — do not build yet
@@ -29,7 +51,20 @@ components/claude-code-access/   local query glue for Claude Code
 components/local-agent/          MVP: local mirror of Arc, no production access
 meta/procedural-memory/          operational lessons — read lessons.md early
 meta/architecture-learning/      evidence-based record of demonstrated style
+meta/perception-failures/        catalogue of Claude's own incorrect-belief incidents
 meta/token-tracking/             token usage data + summarize.py
+meta/idea-to-presentation/       idea -> deck/page capability, general-purpose
+meta/CDCD/                       evidence log: conversation-driven co-design
+practice/                        Architecture-stream business work, not software
+practice/capability-maturity/    IN-563: initiative -> process-map mapping
+.claude/agents/arc.md            local-agent's persona; lives here (not nested
+                                  under components/) because this is where
+                                  Claude Code's harness scans for it
+.claude/skills/arc-lite-identity/  local-agent's one native Claude Code Skill,
+                                  same harness-discovery reason as above
+.claude/agents/backlog.md        owns docs/backlog.md's structure and every
+                                  edit to it (decision 43); the pilot of the
+                                  agent-owns-artifact pattern
 ```
 
 ## Working with the user
@@ -39,21 +74,44 @@ strongest honest objection is the useful contribution; an objection grounded in 
 user's own stated design lands harder than an appeal to external policy. Once a
 decision is made and reaffirmed, implement it well rather than relitigating it.
 
-**Read `meta/procedural-memory/lessons.md` and `universal.md` before substantial
-work.** `lessons.md` holds mistakes tied to something specific about this project;
-`universal.md` holds mistakes whose rule doesn't depend on this project at all, and
-so is worth checking before starting on any project. Four of `universal.md`'s rules
-are short enough to state here, because violating them is expensive: never put a
-credential in a command line; test an environment hypothesis before proposing a
-change to the user's config; after a denied tool call, ask rather than retrying a
-variant; run any code that derives paths or does index arithmetic in the same turn
-you write it.
+**Read `meta/procedural-memory/INDEX.md` before substantial work.** It's the cheap,
+rule-only summary of every entry in `lessons.md` (mistakes tied to something
+specific about this project) and `universal.md` (mistakes whose rule doesn't depend
+on this project at all, and so is worth checking before starting on any project) —
+open either full file only when a current situation matches a rule closely enough
+that the one-liner isn't enough, or before adding a new entry, to check it isn't a
+restatement of one that exists. This split exists specifically so the mandatory
+read doesn't grow unbounded as entries accumulate — see that component's own
+Growth policy. Four of `universal.md`'s rules are short enough to state here
+anyway, because violating them is expensive: never put a credential in a command
+line; test an environment hypothesis before proposing a change to the user's
+config; after a denied tool call, ask rather than retrying a variant; run any code
+that derives paths or does index arithmetic in the same turn you write it.
 
-`meta/` observes the process of building the project rather than participating in
-it. **`components/` must never depend on `meta/`** — that would tie an extractable
-component to this project's history. The repo's only executables live here —
-`token-tracking/summarize.py`, `architecture-learning/reindex.py`, and
+`meta/` holds whatever doesn't ship as part of the architecture agent product
+(agent, skills, knowledge graph): either it observes the process of building the
+project, or (since decision 22 in `docs/decision-log.md`) it's a general-purpose
+capability useful along the journey without being part of the product's own
+delivery. **`components/` must never depend on `meta/`** — that would tie an
+extractable component to something outside the KG pipeline's own trajectory. The
+repo's only executables outside `components/` live here —
+`token-tracking/summarize.py`, `token-tracking/budget.py`,
+`architecture-learning/reindex.py`, and
 `architecture-learning/extract_transcript.py`, all stdlib only.
+
+`practice/` (decision 26) is the third tier: the Architecture practice's own
+business work — Jira initiatives, practice roadmaps, capability and maturity
+assessments. The three tiers are one test on what a thing *is*, not what it's
+about, since all three are about architecture: does it ship with the product
+(`components/`), is it useful while building the product without shipping with it
+(`meta/`), or is it work owed to the org that happens not to be software
+(`practice/`). **Nothing under `components/` or `meta/` may depend on anything
+under `practice/`** — stronger than the `meta/` rule, because `practice/` content
+is partly owned outside this repo: a roadmap page another architect owns can be
+superseded in a meeting this repo never sees, so code depending on it would break
+for reasons invisible from the codebase. Every artefact there declares its
+provenance in its header — `snapshot`, `authored here`, or `derived` — because one
+that doesn't gets read as authoritative anyway.
 
 `meta/architecture-learning/` is two layers: append a line to `observations.md`
 during a conversation (no read needed), and promote to `principles/<slug>.md` only
@@ -79,7 +137,12 @@ conversation length, not with work done.
 
 Each component's `README.md` states its purpose, boundary, dependencies, and
 extraction notes, and is treated as its contract — if a change makes a README
-wrong, update it in the same change.
+wrong, update it in the same change. When part of that contract isn't decided yet
+(a mechanism, a protocol), say so explicitly rather than leaving it implicit — an
+unstated gap reads as decided by omission. `components/query-service/README.md`'s
+purpose-vs-protocol split is the pattern: settled purpose stated plainly, the open
+question named and pointed at its `docs/decision-log.md` entry, not silently
+absent.
 
 ## Working conventions
 
@@ -112,15 +175,22 @@ wrong, update it in the same change.
   ideas; a component's `README.md` when its purpose, boundary, or
   dependencies change. If it isn't in one of those files, it didn't happen,
   as far as the next session (or a teammate) is concerned.
-- **Two more background habits, easy to let slide in a long session.** Before
+- **Three background habits, easy to let slide in a long session.** Before
   treating a substantial turn as finished, check whether anything in it
   qualifies for `meta/architecture-learning/observations.md` (append, no
-  ceremony — see that component's README) or `meta/procedural-memory/lessons.md`
-  (a mistake worth a rule — see that component's README). Both are described in
-  full elsewhere in this file; this bullet exists because the habit has already
-  been observed to lapse across a whole session without a reminder. Treat a
-  session with no entries in either file as something to ask about, not as
-  quiet evidence that nothing qualified.
+  ceremony — see that component's README), `meta/procedural-memory/lessons.md`
+  (a mistake worth a rule — see that component's README), or
+  `meta/perception-failures/log.md` (Claude stated something as settled fact
+  that turned out to be an overgeneralization or a stale carried-forward
+  belief — see that component's README for the exact shape). All three are
+  described in full elsewhere in this file; this bullet exists because the
+  habit has already been observed to lapse across a whole session without a
+  reminder. Treat a session with no entries in the first two files as
+  something to ask about, not as quiet evidence that nothing qualified.
+  `perception-failures/log.md` is different: most sessions genuinely won't
+  produce an entry, so its absence isn't itself a signal — the risk with
+  that one is failing to notice the rare turn where it does apply, not
+  under-filling it on a normal turn.
 - **Roadmap and milestone scope changes need explicit approval, not just
   good reasoning.** Both the program's phase/milestone roadmap
   (`docs/program-roadmap.md`) and the local three-step integration plan
@@ -128,6 +198,27 @@ wrong, update it in the same change.
   changes priorities — but that's a reason to propose a change and ask, never
   to edit the committed phases/milestones unilaterally on the strength of a
   good argument. Flag it, wait for a clear yes, then write it down.
+- **No personal names in anything committed — use the role.** Refer to
+  people by role ("the Head of Architecture", "the initiative's reporter")
+  in every tracked file *and in commit messages*, which are equally
+  permanent. Names are fine in conversation; the boundary is the artefact.
+  Two reasons: a git history is permanent and broadly readable, and Tyro's
+  review standards call out preventing PII exposure — so a name committed
+  once is effectively un-removable. Role titles also age better, staying
+  correct when people change jobs where a name silently misattributes
+  authority. Where a name sits inside a verbatim quote, bracket the
+  substitution — `[the Head of Architecture]` — rather than rewriting the
+  quote silently. For provenance, cite the source page or ticket plus its
+  role owner; that preserves everything provenance is for.
+- **A supplied link is one input, not the source set.** Before building on
+  a page someone hands over, spend one search for an existing artefact
+  covering the same ground — in the space where the work's other material
+  lives, by ticket key, and by obvious titles. Decision 28 exists because
+  this was skipped: a 32-row activity model was derived from the wrong page
+  while the real working document, with the same layer already in it, sat
+  one search away. Never write "the source does not contain X" without
+  having searched for X; "I did not find X in the page supplied" is what is
+  actually known.
 - Keep prose wrapped to ~80 columns to match the existing files.
 - `.idea/` is gitignored (JetBrains); it is present locally but not tracked.
 
@@ -152,10 +243,13 @@ cross-references:
 3. **Confluence is an output, not the source of truth.** Curate in git → generate
    one structured page per entity → publish to a dedicated clean Confluence space
    → Rovo indexes that space. Architects edit git, never raw Confluence.
-4. **Components over one application.** Six components under `components/`, sized
-   so that pieces which outgrow this repo can be promoted out as a move rather
-   than an untangling. Plus a `meta/` tier that observes the project without being
-   part of it. See the Layout section above.
+4. **Components over one application.** Eight components under `components/`,
+   sized so that pieces which outgrow this repo can be promoted out as a move
+   rather than an untangling. Plus a `meta/` tier for whatever doesn't ship as
+   part of the product — self-observation, or (decision 22) a general-purpose
+   capability useful along the journey but not part of the delivery — and a
+   `practice/` tier (decision 26) for the Architecture stream's own business
+   deliverables, which aren't software at all. See the Layout section above.
 
 The graph shape is the point: typed relationships (`pattern REQUIRES guardrail`,
 `principle CONFLICTS_WITH pattern`, `decision SUPERSEDES decision`,

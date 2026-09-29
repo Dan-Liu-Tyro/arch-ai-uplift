@@ -25,8 +25,13 @@ schema.
 
 ## Status
 
-Not started. Blocked on the schema stabilising: extracting entities against a shape
-that is still moving means re-extracting.
+Not started as tooling, but holds its first real artifact:
+`sources/reference-domain-model-domain-definitions.md`, a verbatim cache of
+the Confluence page behind the domain-model ingestion experiment (see
+[`../../docs/domain-model-experiment.md`](../../docs/domain-model-experiment.md)),
+saved manually rather than through any extraction tooling. Otherwise still
+blocked on the schema stabilising: extracting entities against a shape that
+is still moving means re-extracting.
 
 ## Design note
 

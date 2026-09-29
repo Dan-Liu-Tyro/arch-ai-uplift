@@ -32,6 +32,8 @@
   .msg.arc .who::before { content: "Arc Lite"; }
   .msg.error .who::before { content: "Error"; }
   .msg.error { color: #c0392b; }
+  .msg.warn .who::before { content: "Notice"; }
+  .msg.warn { color: #b8860b; font-size: 0.85rem; }
   form { flex: 0 0 auto; display: flex; gap: 0.5rem; }
   input[type=text] {
     flex: 1 1 auto;
@@ -95,6 +97,9 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "request failed");
       addMessage("arc", data.answer);
+      if (data.compliant === false) {
+        addMessage("warn", "Spec-compliance check failed on this answer — logged to gap-log.md.");
+      }
     } catch (err) {
       addMessage("error", err.message);
     } finally {
