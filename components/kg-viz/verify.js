@@ -400,6 +400,8 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (nodeOp !== 1) results.push('F: nodeOpacity is ' + nodeOp + ', so edges show through the spheres');
   if (!(effUnsel >= 0.12 && effUnsel <= 0.25)) results.push('F: unselected edge opacity changed from its old look: ' + effUnsel.toFixed(2));
   if (!(wid >= 1.5)) results.push('F: flow edge still thin, width ' + wid);
+  // Thicker than unselected, but not heavy: 3 read too thick (2026-09-30).
+  if (!(selWid > wid && selWid <= 2.4)) results.push('F: selected edge width ' + selWid + ', want just above ' + wid);
 }
 
 // G: the computed camera fit actually fills the available region

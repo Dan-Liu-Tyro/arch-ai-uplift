@@ -2784,7 +2784,10 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       colour at `HIGHLIGHT_EDGE_ALPHA` = 0.7, still about four times an
       unselected edge. Arrowheads follow, as they match their highlighted
       line. F now wants selected edges between 0.6 and 0.8. The exact-hex
-      colour checks in FC and TH now compare RGB only.
+      colour checks in FC and TH now compare RGB only. Highlighted edge
+      width also went from 3 to 2.2 after the user found it too thick;
+      unselected edges stay at 1.6. F now bounds selected width to just
+      above unselected, and was confirmed failing at 3 first.
 66. **`kg-viz` spheres are opaque (`nodeOpacity` 1), so an edge no longer
     shows inside a domain ball.** Reported by the user on 2026-09-30: edges
     visibly ran into the circle, which looked ugly. Edges are drawn centre

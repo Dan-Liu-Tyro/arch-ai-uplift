@@ -72,7 +72,8 @@
       .linkOpacity(1)
       .linkWidth(function (l) {
         if (!selected) return 1.6;
-        return chainRole(l) ? 3 : 0.4;
+        // 2.2, down from 3, which read too thick at 0.7 opacity (decision 65).
+        return chainRole(l) ? 2.2 : 0.4;
       })
       .onNodeClick(function (n) {
         selected = (selected && selected.id === n.id) ? null : n;
