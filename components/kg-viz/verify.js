@@ -1233,6 +1233,16 @@ const el = (r, id) => r.els[id] || EMPTY;
   el(r,'focus-btn').onclick && el(r,'focus-btn').onclick();   steps.push(['button enters', on()]);
   el(r,'focus-exit').onclick && el(r,'focus-exit').onclick(); steps.push(['exit button exits', !on()]);
 
+  // Decision 57: "e" toggles edge labels and keeps the checkbox in step;
+  // same modifier/field rules as "f".
+  const eOn = () => r.probe.edgeLabelsOn();
+  const eStart = eOn();
+  key({ key: 'e' });              steps.push(['e toggles edge labels', eOn() === !eStart && el(r,'edge-labels-cb').checked === eOn()]);
+  key({ key: 'E' });              steps.push(['E (shift) toggles back', eOn() === eStart && el(r,'edge-labels-cb').checked === eOn()]);
+  key({ key: 'e', ctrlKey: true }); steps.push(['Ctrl+E ignored', eOn() === eStart]);
+  key({ key: 'e', target: { tagName: 'INPUT' } }); steps.push(['e in a field ignored', eOn() === eStart]);
+  steps.push(['e left focus mode alone', !on()]);
+
   console.log('FS: ' + steps.map(([k, ok]) => k + ' = ' + !!ok).join(' | '));
   steps.filter(([, ok]) => !ok).forEach(([k]) => results.push('FS: focus mode failed at "' + k + '"'));
 }

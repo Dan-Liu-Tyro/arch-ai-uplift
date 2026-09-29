@@ -269,7 +269,7 @@
     </div>
     <div class="row" id="edge-labels-row">
       <input type="checkbox" id="edge-labels-cb" />
-      <span>Edge labels</span>
+      <span>Edge labels (E)</span>
     </div>
     <div class="group-label">Edge label style</div>
     <div class="seg" id="elabel-seg">
@@ -393,7 +393,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29j — full-screen focus mode (F)";
+  var PAGE_REVISION = "2026-09-29k — E toggles edge labels";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
@@ -1726,16 +1726,28 @@
 
     document.getElementById("focus-btn").onclick = function () { setFocusMode(true); };
     document.getElementById("focus-exit").onclick = function () { setFocusMode(false); };
-    // "f" toggles focus mode. Not while typing into a field, and not with a
-    // modifier -- Cmd/Ctrl+F is the browser's find.
+    // Single-key shortcuts: "f" toggles focus mode (decision 56), "e" edge
+    // labels (decision 57). Never while typing into a field, and never with
+    // a modifier -- Cmd/Ctrl+F is the browser's find, and the same rule
+    // keeps every future shortcut clear of browser chords.
+    var SHORTCUTS = {
+      f: function () { setFocusMode(!focusMode); },
+      e: function () {
+        showEdgeLabels = !showEdgeLabels;
+        // The checkbox mirrors state, so the panel never disagrees with it.
+        document.getElementById("edge-labels-cb").checked = showEdgeLabels;
+        rebuildLabels();
+      }
+    };
     window.addEventListener("keydown", function (e) {
-      if (e.key !== "f" && e.key !== "F") return;
+      var action = SHORTCUTS[String(e.key || "").toLowerCase()];
+      if (!action) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       var t = e.target;
       if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName || "")) return;
       if (!DATA) return;
       if (e.preventDefault) e.preventDefault();
-      setFocusMode(!focusMode);
+      action();
     });
     if (document.addEventListener) {
       document.addEventListener("fullscreenchange", function () {

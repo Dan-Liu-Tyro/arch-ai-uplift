@@ -288,7 +288,8 @@ no longer turns it into edges of any kind.
   rule: with a node selected, exactly that node's edges are labelled,
   whatever the global toggle says; with nothing selected, the toggle
   decides. The toggle is the user's and a view switch does not silently
-  override it.
+  override it. The `E` key flips it too (decision 57), with the same
+  modifier and field rules as `F`.
 - **Non-domain node labels are suppressed on collision; domain and edge
   labels never are.** Greedy placement reserves node markers first, then
   places every domain label unconditionally, still reserving its space
