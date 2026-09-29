@@ -678,8 +678,10 @@ const el = (r, id) => r.els[id] || EMPTY;
   // external systems went invisible once they shared actors' yellow, and
   // why a selected node (#ffffff) would vanish alongside white staff.
   const meshColor = r.calls['__last_nodeColor'];
+  // "Actor" here means any icon-drawn node -- external systems too, since
+  // decision 54 -- because that is what gets the transparent material.
   const isActor = n => r.probe.presentation()[r.probe.presentationKey(n)] &&
-    r.probe.presentation()[r.probe.presentationKey(n)].shape === 'person';
+    !!r.probe.presentation()[r.probe.presentationKey(n)].shape;
   const actorKeys = new Set(), otherKeys = new Set();
   for (const sel of [null, ...nodes]) {
     r.probe.select(sel);
@@ -723,8 +725,11 @@ const el = (r, id) => r.els[id] || EMPTY;
   nodes.forEach(n => { n.__threeObj = mkObj(); });
   r.probe.decorateShapes();
 
-  const actors = nodes.filter(n => n.kind === 'actor');
-  const others = nodes.filter(n => n.kind !== 'actor');
+  // "Actors" here means every icon-drawn node: external systems joined the
+  // icon overlay in decision 54, so their sphere must be hidden the same way.
+  const iconDrawn = n => n.kind === 'actor' || n.kind === 'external';
+  const actors = nodes.filter(iconDrawn);
+  const others = nodes.filter(n => !iconDrawn(n));
   const actorsHidden = actors.every(n => n.__threeObj.material.opacity === 0 &&
     n.__threeObj.material.transparent === true);
   const othersUntouched = others.every(n => n.__threeObj.material.opacity === undefined);
@@ -874,11 +879,23 @@ const el = (r, id) => r.els[id] || EMPTY;
   const actors = r.probe.visible().nodes.filter(n => n.kind === 'actor');
   const iconEls = r.probe.iconEls();
   const built = actors.every(n => !!iconEls[n.id]);
-  const noExtra = Object.keys(iconEls).length === actors.length;
-  console.log('T: actor icons built =', built, '| one per actor, no extra =', noExtra,
-    '(', Object.keys(iconEls).length, 'of', actors.length, ')');
+  const iconKinds = r.probe.visible().nodes.filter(n => n.kind === 'actor' || n.kind === 'external');
+  const noExtra = Object.keys(iconEls).length === iconKinds.length;
+  console.log('T: actor icons built =', built, '| one per actor/external system, no extra =', noExtra,
+    '(', Object.keys(iconEls).length, 'of', iconKinds.length, ')');
   if (!built) results.push('T: not every actor got an icon element');
-  if (!noExtra) results.push('T: icon count does not match actor count: ' + Object.keys(iconEls).length + ' vs ' + actors.length);
+  if (!noExtra) results.push('T: icon count does not match actor + external system count: ' + Object.keys(iconEls).length + ' vs ' + iconKinds.length);
+
+  // Decision 54: external systems are drawn as a server icon, not a sphere,
+  // and actors keep the person glyph.
+  const externals = r.probe.visible().nodes.filter(n => n.kind === 'external');
+  const serverIcons = externals.filter(n => iconEls[n.id] && iconEls[n.id].getAttribute('data-shape') === 'server');
+  const personIcons = actors.filter(n => iconEls[n.id] && iconEls[n.id].getAttribute('data-shape') === 'person');
+  console.log('T: external systems as server icon =', serverIcons.length, 'of', externals.length,
+    '| actors as person icon =', personIcons.length, 'of', actors.length);
+  if (!externals.length) results.push('T: no external system in the flow view to test the server icon against');
+  if (serverIcons.length !== externals.length) results.push('T: not every external system is drawn as a server icon');
+  if (personIcons.length !== actors.length) results.push('T: not every actor is drawn as a person icon');
 
   // 2D is the default: visible, positioned, and coloured per role.
   const sample = actors[0];

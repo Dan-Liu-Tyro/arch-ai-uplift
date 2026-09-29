@@ -227,10 +227,13 @@ no longer turns it into edges of any kind.
   external *party* is an actor with a non-staff role. The legend says
   "External system" for the former precisely because both read as "external"
   in English otherwise.
-- **Actors are drawn as a coloured person-shaped icon** — a flat HTML overlay,
-  not a mesh, in every view (2D and 3D alike). `shape: "person"` on the actor
-  entries of `NODE_PRESENTATION` is what selects it, so shape is keyed off the
-  strict type the same way colour is.
+- **Actors are drawn as a coloured person-shaped icon, and external systems
+  as a server-rack icon** (decision 54) — a flat HTML overlay, not a mesh, in
+  every view (2D and 3D alike). A `shape` on a `NODE_PRESENTATION` entry
+  (`"person"`, `"server"`) that names a glyph in `ICON_SVG` is what selects
+  it, so shape is keyed off the strict type the same way colour is. Every
+  icon-drawn node's mesh uses one colour key (`ICON_MESH_COLOR`) so its
+  transparent material is never shared with a sphere (decision 52's fix).
 
   This used to be a real 3D shape: a cloned-and-raised "head" mesh on top of
   the body sphere, built by mutating the library's own mesh because the

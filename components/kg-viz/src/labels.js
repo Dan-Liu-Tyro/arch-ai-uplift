@@ -37,11 +37,36 @@
   // mesh uses) rather than sitting on a coloured circle -- no badge, so
   // selection/scope highlighting stays visually consistent with every other
   // node kind without a separate background to keep in sync.
+  //
+  // Not only actors any more: any kind whose presentation names a `shape`
+  // in ICON_SVG gets the overlay. External systems use a server-rack glyph
+  // (decision 54), because once they share external actors' light yellow
+  // (decision 52) shape is the only thing separating a system from a person,
+  // and a sphere read as "a kind of domain". Inline SVG, not PNG: the page
+  // stays one offline file, the glyph takes currentColor so selection and
+  // dimming apply unchanged, and it stays crisp at any zoom.
   var iconEls = {};
-  var PERSON_ICON_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true">' +
-    '<circle cx="12" cy="7.4" r="4.4" fill="currentColor"/>' +
-    '<path d="M12 13c-4.6 0-8.4 3.6-8.4 8.4V22h16.8v-0.6C20.4 16.6 16.6 13 12 13z" fill="currentColor"/>' +
-    '</svg>';
+  var ICON_SVG = {
+    person: '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+      '<circle cx="12" cy="7.4" r="4.4" fill="currentColor"/>' +
+      '<path d="M12 13c-4.6 0-8.4 3.6-8.4 8.4V22h16.8v-0.6C20.4 16.6 16.6 13 12 13z" fill="currentColor"/>' +
+      '</svg>',
+    server: '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+      '<rect x="3" y="3" width="18" height="7.5" rx="1.8" fill="currentColor"/>' +
+      '<rect x="3" y="13.5" width="18" height="7.5" rx="1.8" fill="currentColor"/>' +
+      '<circle cx="7" cy="6.75" r="1.2" fill="rgba(10,12,20,0.75)"/>' +
+      '<circle cx="7" cy="17.25" r="1.2" fill="rgba(10,12,20,0.75)"/>' +
+      '<rect x="11" y="6" width="7" height="1.5" rx="0.75" fill="rgba(10,12,20,0.55)"/>' +
+      '<rect x="11" y="16.5" width="7" height="1.5" rx="0.75" fill="rgba(10,12,20,0.55)"/>' +
+      '</svg>'
+  };
+
+  // True for any node drawn as an overlay icon rather than a sphere. The
+  // single test every icon-vs-mesh decision uses (here, the mesh colour key
+  // in renderer.js, and decorateShapes), so they can't disagree.
+  function hasIcon(n) {
+    return !!ICON_SVG[presentationFor(n).shape];
+  }
 
   function rebuildIcons() {
     var vis = visibleData();
@@ -49,10 +74,11 @@
     host.innerHTML = "";
     iconEls = {};
     vis.nodes.forEach(function (n) {
-      if (presentationFor(n).shape !== "person") return;
+      if (!hasIcon(n)) return;
       var el = document.createElement("div");
       el.className = "actor-icon";
-      el.innerHTML = PERSON_ICON_SVG;
+      el.setAttribute("data-shape", presentationFor(n).shape);
+      el.innerHTML = ICON_SVG[presentationFor(n).shape];
       host.appendChild(el);
       iconEls[n.id] = el;
     });

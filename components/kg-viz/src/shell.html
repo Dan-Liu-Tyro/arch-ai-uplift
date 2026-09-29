@@ -179,6 +179,8 @@
     will-change: transform; }
   .actor-icon svg { width: 34px; height: 34px;
     filter: drop-shadow(0 1px 3px rgba(0,0,0,0.7)); }
+  /* A rack is denser than a person, so it reads as the same weight smaller. */
+  .actor-icon[data-shape="server"] svg { width: 28px; height: 28px; }
   /* Glow is selection-only, not an ambient effect -- a plain flat-coloured
      glyph the rest of the time, matching the mesh's own "white plus glow"
      treatment for whichever node is actually selected. */

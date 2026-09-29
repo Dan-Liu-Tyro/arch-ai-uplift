@@ -13,7 +13,7 @@
   // the schema permits but the viewer should not render as if it knew.
   var NODE_PRESENTATION = {
     "domain":              { color: "#3fd0ff", label: "Domain" },
-    "external":            { color: "#ffd479", label: "External system" },
+    "external":            { color: "#ffd479", label: "External system", shape: "server" },
     "artefact":            { color: "#b79cff", label: "Artefact" },
     "principle":           { color: "#4dff9e", label: "Principle" },
     "actor:InternalStaff": { color: "#ffffff", label: "Internal user (Tyro staff)", shape: "person" },
@@ -43,10 +43,11 @@
   }
   var STAGE_COLORS = ["#8b7bff", "#3fd0ff", "#4dff9e"];
 
-  // The mesh colour key for every actor -- a value no other node's colour can
-  // ever take, so actors' transparent mesh material is never shared. See the
-  // nodeColor accessor in renderer.js.
-  var ACTOR_MESH_COLOR = "rgba(0,0,0,0)";
+  // The mesh colour key for every icon-drawn node (actors, external systems)
+  // -- a value no sphere's colour can ever take, so their transparent mesh
+  // material is never shared with a sphere. See the nodeColor accessor in
+  // renderer.js.
+  var ICON_MESH_COLOR = "rgba(0,0,0,0)";
 
   var COL_SPACING = 230, LANE_HEIGHT = 300, ROW_SPACING = 62;
 
@@ -57,7 +58,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29g — external systems visible again (actor mesh colour key)";
+  var PAGE_REVISION = "2026-09-29h — external systems drawn as a server icon";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 

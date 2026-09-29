@@ -110,6 +110,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 51 | `kg-viz` "Not authoritative for" owners are links; off-graph owners open from a generated `domain_index` | `kg-viz` |
 | 52 | `kg-viz` colours: Tyro staff white; all external actors and external systems light yellow | `kg-viz` |
 | 53 | `kg-viz` edge labels off by default; a selected node's edges always labelled | `kg-viz` |
+| 54 | `kg-viz` external systems drawn as a flat server-rack SVG icon, not a sphere | `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2459,6 +2460,24 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
     default. Scenario U asserts all five toggle/selection combinations.
     Scenarios H and I, which test label behaviour when labels are on, now
     turn labels on explicitly instead of relying on the old default.
+54. **`kg-viz` external systems are drawn as a flat server-rack icon, not a
+    sphere.** Proposed by the user on 2026-09-29 as "a nice 2D png icon".
+    Built as inline SVG instead, which was recommended and agreed. An SVG
+    keeps the page one offline file, takes `currentColor` so selection and
+    dimming apply unchanged, and stays crisp at any zoom; a PNG would be an
+    extra asset with its colour baked in. The glyph is a server rack rather
+    than a cloud (which reads as SaaS) or a building (which reads as an
+    organisation and would blur into the regulator). Why this earns its
+    form: after decision 52 put external systems and external actors in the
+    same light yellow, shape is the only thing separating a system from a
+    person, and a sphere read as "a kind of domain".
+    - **Mechanism.** The actor icon overlay is generalised: any
+      `NODE_PRESENTATION` entry whose `shape` names a glyph in `ICON_SVG` is
+      drawn as an icon. `hasIcon()` is the single test used by the overlay,
+      the mesh colour key (renamed `ICON_MESH_COLOR`) and `decorateShapes`,
+      so those three cannot disagree about which nodes are icons.
+      Scenarios T, O and N now cover external systems too. T was confirmed
+      failing on the old page first.
     - **Known overlap, flagged rather than fixed.** A selected node is
       drawn white (`nodeDisplayColor`), so a selected external actor briefly
       shares staff's colour. The glow on a selected actor icon and the
