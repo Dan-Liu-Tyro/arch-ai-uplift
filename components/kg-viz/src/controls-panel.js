@@ -65,7 +65,7 @@
       rows.push([sample(T("up")), "Feeds the selected node (upstream)"]);
       rows.push([sample(T("down")), "Fed by the selected node (downstream)"]);
     } else {
-      rows.push([sample(T("down")), "Selected node's edges"]);
+      rows.push([sample(T("selEdge")), "Selected node's edges"]);
     }
     rows.forEach(function (r) {
       var row = document.createElement("div");

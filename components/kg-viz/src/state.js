@@ -62,6 +62,7 @@
       backSel: "#ff7e8f", dimEdge: "rgba(110,120,140,0.09)", dimNode: "rgba(110,120,140,0.18)",
       scopeDim: "rgba(110,120,140,0.22)", selNode: "#ffffff",
       particle: "#7ff0c0", particleBack: "#ff9fae", up: "#ffb454", down: "#6fe3a8",
+      selEdge: "#6fe3a8",
       stages: ["#8b7bff", "#3fd0ff", "#4dff9e"], nodes: {}
     },
     light: {
@@ -69,6 +70,9 @@
       backSel: "#c8374f", dimEdge: "rgba(120,130,150,0.14)", dimNode: "rgba(150,160,175,0.3)",
       scopeDim: "rgba(150,160,175,0.35)", selNode: "#0b0f19",
       particle: "#1f9d5c", particleBack: "#c8374f", up: "#d9822b", down: "#1f9d5c",
+      // A selected node's own edges (Next-level off): black on white, the
+      // user's call -- green read as just another colour on a white page.
+      selEdge: "#111722",
       stages: ["#6a5ae0", "#1a8fc4", "#1f9d5c"],
       nodes: {
         "domain": "#1a8fc4", "artefact": "#7a5cd6", "principle": "#1f9d5c", "actor": "#6b7488"
@@ -97,7 +101,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29x — R resets positions";
+  var PAGE_REVISION = "2026-09-29y — light: selected node's edges black";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 

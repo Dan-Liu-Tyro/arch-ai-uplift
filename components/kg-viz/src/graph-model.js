@@ -97,7 +97,7 @@
   // the long-standing single green (feedback arcs pink) with it off.
   function chainEdgeColor(l, role) {
     if (l.back_edge) return T("backSel");
-    if (!nextLevel) return T("down");
+    if (!nextLevel) return T("selEdge");
     return role === "up" ? T("up") : T("down");
   }
 

@@ -270,7 +270,7 @@
     text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 6px #fff; }
   body.light .nlabel.dim { color: rgba(90, 100, 120, 0.4); text-shadow: none; }
   body.light .nlabel.sel { color: #000; }
-  body.light .elabel { color: #177a48; background: rgba(255, 255, 255, 0.88); }
+  body.light .elabel { color: #111722; background: rgba(255, 255, 255, 0.88); }
   body.light .elabel.back { color: #c8374f; }
   body.light .elabel.up { color: #b8661a; }
   body.light .elabel.down { color: #177a48; }
@@ -510,6 +510,7 @@
       backSel: "#ff7e8f", dimEdge: "rgba(110,120,140,0.09)", dimNode: "rgba(110,120,140,0.18)",
       scopeDim: "rgba(110,120,140,0.22)", selNode: "#ffffff",
       particle: "#7ff0c0", particleBack: "#ff9fae", up: "#ffb454", down: "#6fe3a8",
+      selEdge: "#6fe3a8",
       stages: ["#8b7bff", "#3fd0ff", "#4dff9e"], nodes: {}
     },
     light: {
@@ -517,6 +518,9 @@
       backSel: "#c8374f", dimEdge: "rgba(120,130,150,0.14)", dimNode: "rgba(150,160,175,0.3)",
       scopeDim: "rgba(150,160,175,0.35)", selNode: "#0b0f19",
       particle: "#1f9d5c", particleBack: "#c8374f", up: "#d9822b", down: "#1f9d5c",
+      // A selected node's own edges (Next-level off): black on white, the
+      // user's call -- green read as just another colour on a white page.
+      selEdge: "#111722",
       stages: ["#6a5ae0", "#1a8fc4", "#1f9d5c"],
       nodes: {
         "domain": "#1a8fc4", "artefact": "#7a5cd6", "principle": "#1f9d5c", "actor": "#6b7488"
@@ -545,7 +549,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29x — R resets positions";
+  var PAGE_REVISION = "2026-09-29y — light: selected node's edges black";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
@@ -692,7 +696,7 @@
   // the long-standing single green (feedback arcs pink) with it off.
   function chainEdgeColor(l, role) {
     if (l.back_edge) return T("backSel");
-    if (!nextLevel) return T("down");
+    if (!nextLevel) return T("selEdge");
     return role === "up" ? T("up") : T("down");
   }
 
@@ -831,7 +835,7 @@
       rows.push([sample(T("up")), "Feeds the selected node (upstream)"]);
       rows.push([sample(T("down")), "Fed by the selected node (downstream)"]);
     } else {
-      rows.push([sample(T("down")), "Selected node's edges"]);
+      rows.push([sample(T("selEdge")), "Selected node's edges"]);
     }
     rows.forEach(function (r) {
       var row = document.createElement("div");

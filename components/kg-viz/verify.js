@@ -1505,6 +1505,10 @@ const el = (r, id) => r.els[id] || EMPTY;
   // overlap, not repeated here).
   r.probe.select(merchant);
   steps.push(['selected colour differs from internal user', r.probe.nodeDisplayColor(merchant) !== color(staff)]);
+  // A selected node's own edges are black in light (Next-level off), and
+  // their arrowheads follow.
+  const selEdge = r.probe.visible().links.find(l => (l.source.id || l.source) === merchant.id || (l.target.id || l.target) === merchant.id);
+  steps.push(['selected edges black in light', !!selEdge && r.calls['__last_linkColor'](selEdge) === '#111722']);
   // A dimmed icon's outline fades with it, rather than staying crisp black.
   r.probe.positionIcons();
   const dimmedIcon = Object.entries(r.probe.iconEls()).find(([id]) => id !== merchant.id &&
@@ -1513,6 +1517,9 @@ const el = (r, id) => r.els[id] || EMPTY;
   r.probe.select(null);
   r.listeners.keydown({ key: 't', target: { tagName: 'CANVAS' } });
   steps.push(['t switches back to dark', r.probe.theme() === 'dark' && bg() === '#05070d' && color(staff) === '#ffffff']);
+  r.probe.select(merchant);
+  steps.push(['selected edges stay green in dark', !!selEdge && r.calls['__last_linkColor'](selEdge) === '#6fe3a8']);
+  r.probe.select(null);
   steps.push(['canvas keeps its frame for print', /preserveDrawingBuffer:\s*true/.test(html)]);
   steps.push(['print stylesheet hides the panels', /@media print\s*\{[^}]*#controls/.test(html)]);
 

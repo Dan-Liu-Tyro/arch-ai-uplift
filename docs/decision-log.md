@@ -2718,7 +2718,16 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       on the canvas and in the legend alike. That outline is what now
       carries the contrast, since light yellow on white is only about
       1.4:1. It fades with the icon when dimmed, via a new `dim` class on
-      the icon overlay. Scenario TH now checks the kept colours, the outline
+      the icon overlay.
+    - **Selected edges black in light,** at the user's request on the same
+      day. A new theme key, `selEdge`, sets the colour of a selected
+      node's own edges when Next-level is off. Dark keeps its green, and
+      light uses `#111722`. The arrowheads and the legend's "Selected
+      node's edges" row follow it, and light's base edge-label colour moves
+      to the same near-black. With Next-level on, orange and green still
+      mark upstream and downstream in both themes, because that is their
+      meaning. TH checks both themes and was confirmed failing first.
+    - Scenario TH now checks the kept colours, the outline
       rule, the outline's own contrast, and the dim class. The 3:1 fill
       check covers spheres only. TH was confirmed failing on the charcoal
       and amber version first.
