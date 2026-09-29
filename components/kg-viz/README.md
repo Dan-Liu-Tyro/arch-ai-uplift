@@ -304,14 +304,14 @@ no longer turns it into edges of any kind.
   collides more often and was dropped first, meaning **the most informative
   predicates were the ones that disappeared**. `verify.js` asserts that all 43
   are placed and that the longest is among them.
-- **Full chain on click** (decision 58), off by default. When off, a
-  selection highlights the node's direct edges and neighbours. When on, it
-  highlights everything upstream (what feeds this node, transitively) and
-  downstream (what it feeds). Upstream edges and labels are orange and
-  downstream ones green, the detail pane's Inbound/Outbound colours.
-  Feedback arcs are never traversed. The tint is needed because a typical
-  chain lights about 19 of 26 nodes, which untinted reads as "nothing
-  selected".
+- **Next-level edges** (decision 58), off by default, toggled by its
+  checkbox or `N`. When off, a selection highlights the node's direct edges
+  and neighbours. When on, it goes one level further in the same
+  direction: the upstream neighbours' own upstream edges, and the downstream
+  neighbours' own downstream edges. Upstream is orange and downstream green,
+  the detail pane's Inbound/Outbound colours, for both lines and labels.
+  The extra level never uses a feedback arc. A median of 7 nodes are lit,
+  against 4 with it off.
 - **Full-screen focus mode** (decision 56) — **Full screen (F)** in the
   control panel, or the `F` key, hides every panel and puts the browser in
   real fullscreen where it allows it. The camera refits to the whole

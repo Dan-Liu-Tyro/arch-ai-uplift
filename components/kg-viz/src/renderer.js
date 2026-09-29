@@ -168,16 +168,17 @@
     });
 
     // Synced from state for the same reason as the edge-labels checkbox.
-    document.getElementById("full-chain-cb").checked = fullChain;
-    document.getElementById("full-chain-cb").onchange = function (e) {
-      fullChain = e.target.checked;
+    document.getElementById("next-level-cb").checked = nextLevel;
+    document.getElementById("next-level-cb").onchange = function (e) {
+      nextLevel = e.target.checked;
       repaint();
     };
 
     document.getElementById("focus-btn").onclick = function () { setFocusMode(true); };
     document.getElementById("focus-exit").onclick = function () { setFocusMode(false); };
     // Single-key shortcuts: "f" toggles focus mode (decision 56), "e" edge
-    // labels (decision 57), left arrow goes back along followed owner links. Never while typing into a field, and never with
+    // labels (decision 57), "n" next-level edges (decision 58), left arrow
+    // goes back along followed owner links. Never while typing into a field, and never with
     // a modifier -- Cmd/Ctrl+F is the browser's find, and the same rule
     // keeps every future shortcut clear of browser chords.
     var SHORTCUTS = {
@@ -187,6 +188,11 @@
         // The checkbox mirrors state, so the panel never disagrees with it.
         document.getElementById("edge-labels-cb").checked = showEdgeLabels;
         rebuildLabels();
+      },
+      n: function () {
+        nextLevel = !nextLevel;
+        document.getElementById("next-level-cb").checked = nextLevel;
+        repaint();
       },
       // The pane's back (←) button, from the keyboard (decision 51).
       arrowleft: function () { goBack(); }

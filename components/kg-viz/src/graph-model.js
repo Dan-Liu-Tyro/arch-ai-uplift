@@ -39,56 +39,44 @@
     return node.scope !== scopeMode;
   }
 
-  // The single source of truth for "what colour is this node right now",
-  // selection and scope dimming included -- shared by the 3D mesh's
-  // nodeColor() accessor and the 2D actor icon overlay, so the two never
-  // drift into disagreeing about which nodes are highlighted or dimmed.
   // ---- What a selection highlights (decision 58) --------------------------
   //
   // Off (the default): the selected node's direct edges and neighbours.
-  // "Full chain" on: everything upstream (what feeds this node, transitively)
-  // and downstream (what it feeds), so a click answers "what is this step
-  // part of". Upstream and downstream are tinted apart, orange and green --
-  // the Inbound/Outbound colours the detail pane already uses -- because
-  // measured on the payments flow a typical chain lights ~19 of 26 nodes,
-  // and an untinted highlight that size reads as "nothing selected".
+  // "Next-level edges" on (N): one level further in the same direction --
+  // the upstream neighbours' own upstream edges, and the downstream
+  // neighbours' own downstream edges -- tinted orange (feeds this) and
+  // green (fed by this), the Inbound/Outbound colours the detail pane
+  // already uses. Measured on the payments flow: a median of 7 nodes lit,
+  // against 4 with it off. The first version followed the chain to the end
+  // (median 19 of 26) and the user found it too much.
   //
-  // Traversal never follows a feedback arc (back_edge): it loops to an
-  // earlier stage, and following it lit 20-26 of 26 nodes for every click.
-  // A feedback arc touching the selected node itself is still highlighted
-  // as a direct edge, as it is with the option off.
+  // The extra level never follows a feedback arc (back_edge): it loops to
+  // an earlier stage. A feedback arc touching the selected node itself is
+  // still a direct edge, as it is with the option off.
   var CHAIN_UP = "#ffb454", CHAIN_DOWN = "#6fe3a8";
   var chainCache = { key: null };
 
   function chainState() {
     var vis = visibleData();
-    var key = (selected ? selected.id : "") + "|" + fullChain + "|" + vis.links.length + "|" +
+    var key = (selected ? selected.id : "") + "|" + nextLevel + "|" + vis.links.length + "|" +
       Object.keys(hiddenSet()).join(",");
     if (chainCache.key === key) return chainCache;
     var roles = {}, nodes = {};
     if (selected) {
       var sel = selected.id;
+      var upN = {}, downN = {};
       nodes[sel] = true;
       vis.links.forEach(function (l) {
         var s = srcId(l), t = tgtId(l);
-        if (s === sel) { roles[linkKey(l)] = "down"; nodes[t] = true; }
-        else if (t === sel) { roles[linkKey(l)] = "up"; nodes[s] = true; }
+        if (s === sel) { roles[linkKey(l)] = "down"; nodes[t] = true; downN[t] = true; }
+        else if (t === sel) { roles[linkKey(l)] = "up"; nodes[s] = true; upN[s] = true; }
       });
-      if (fullChain) {
-        [["down", true], ["up", false]].forEach(function (dir) {
-          var seen = {}, stack = [sel];
-          seen[sel] = true;
-          while (stack.length) {
-            var x = stack.pop();
-            vis.links.forEach(function (l) {
-              if (l.back_edge) return;
-              var from = dir[1] ? srcId(l) : tgtId(l), to = dir[1] ? tgtId(l) : srcId(l);
-              if (from !== x) return;
-              roles[linkKey(l)] = dir[0];
-              nodes[to] = true;
-              if (!seen[to]) { seen[to] = true; stack.push(to); }
-            });
-          }
+      if (nextLevel) {
+        vis.links.forEach(function (l) {
+          if (l.back_edge || roles[linkKey(l)]) return;
+          var s = srcId(l), t = tgtId(l);
+          if (downN[s]) { roles[linkKey(l)] = "down"; nodes[t] = true; }
+          else if (upN[t]) { roles[linkKey(l)] = "up"; nodes[s] = true; }
         });
       }
     }
@@ -106,14 +94,18 @@
     return chainState().nodes;
   }
 
-  // Selected-state edge colour: tinted by side with the full chain on,
+  // Selected-state edge colour: tinted by side with next-level edges on,
   // the long-standing single green (feedback arcs pink) with it off.
   function chainEdgeColor(l, role) {
     if (l.back_edge) return "#ff7e8f";
-    if (!fullChain) return "#6fe3a8";
+    if (!nextLevel) return "#6fe3a8";
     return role === "up" ? CHAIN_UP : CHAIN_DOWN;
   }
 
+  // The single source of truth for "what colour is this node right now",
+  // selection and scope dimming included -- shared by the 3D mesh's
+  // nodeColor() accessor and the 2D actor icon overlay, so the two never
+  // drift into disagreeing about which nodes are highlighted or dimmed.
   function nodeDisplayColor(node) {
     var base = colorFor(node);
     if (selected) {

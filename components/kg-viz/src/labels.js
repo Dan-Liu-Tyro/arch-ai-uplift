@@ -280,7 +280,7 @@
         var el2 = edgeEls[linkKey(l)];
         if (!el2) continue;
         // With a node selected, only its highlighted edges are labelled --
-        // its own, or its whole chain with "Full chain" on (decision 58).
+        // its own, plus the next level with "Next-level edges" on (decision 58).
         var role = chainRole(l);
         if (selected && !role) { el2.style.display = "none"; continue; }
         var a = nodeById[srcId(l)], b = nodeById[tgtId(l)];
@@ -290,7 +290,7 @@
         if (!pa || !pb || !isFinite(pa.x) || !isFinite(pb.x)) { el2.style.display = "none"; continue; }
         var mid = { x: (pa.x + pb.x) / 2, y: (pa.y + pb.y) / 2 };
         el2.className = "elabel" + (l.back_edge ? " back" : "") +
-          (fullChain && role && !l.back_edge ? " " + role : "") +
+          (nextLevel && role && !l.back_edge ? " " + role : "") +
           (edgeLabelStyle === "along" ? " along" : "");
         place(el2, mid, edgeLabelStyle === "along" ? 0 : -6,
           edgeLabelStyle === "along" ? { rotate: edgeAngle(pa, pb) } : {});

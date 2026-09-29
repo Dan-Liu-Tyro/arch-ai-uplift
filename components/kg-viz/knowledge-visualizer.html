@@ -158,7 +158,7 @@
     background: rgba(5, 7, 13, 0.8); padding: 0 3px; border-radius: 3px;
     will-change: transform; }
   .elabel.back { color: #ffb3bf; }
-  /* Full chain (decision 58): upstream orange, downstream green. */
+  /* Next-level edges (decision 58): upstream orange, downstream green. */
   .elabel.up { color: #ffc98a; }
   .elabel.down { color: #9ff0c8; }
   /* Rotated onto the line: no pill (it would rotate into the edge and look
@@ -277,9 +277,9 @@
       <input type="checkbox" id="edge-labels-cb" />
       <span>Edge labels (E)</span>
     </div>
-    <div class="row" id="full-chain-row" title="Clicking a node highlights everything upstream (orange) and downstream (green) of it, not just its neighbours">
-      <input type="checkbox" id="full-chain-cb" />
-      <span>Full chain on click</span>
+    <div class="row" id="next-level-row" title="Clicking a node also highlights its neighbours' own edges, one level further: upstream orange, downstream green">
+      <input type="checkbox" id="next-level-cb" />
+      <span>Next-level edges (N)</span>
     </div>
     <div class="group-label">Edge label style</div>
     <div class="seg" id="elabel-seg">
@@ -403,12 +403,12 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29n — full chain on click (upstream orange, downstream green)";
+  var PAGE_REVISION = "2026-09-29o — next-level edges (N) replace full chain";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
   var DATA = null, view = null, Graph = null;
-  var dims = 2, scopeMode = "all", focusMode = false, fullChain = false, showLabels = true, showEdgeLabels = false, edgeLabelStyle = "along";
+  var dims = 2, scopeMode = "all", focusMode = false, nextLevel = false, showLabels = true, showEdgeLabels = false, edgeLabelStyle = "along";
   var statsCollapsed = false;
   var showBands = true;
   // Anything that prevents the graph drawing goes on screen. Errors thrown
@@ -492,56 +492,44 @@
     return node.scope !== scopeMode;
   }
 
-  // The single source of truth for "what colour is this node right now",
-  // selection and scope dimming included -- shared by the 3D mesh's
-  // nodeColor() accessor and the 2D actor icon overlay, so the two never
-  // drift into disagreeing about which nodes are highlighted or dimmed.
   // ---- What a selection highlights (decision 58) --------------------------
   //
   // Off (the default): the selected node's direct edges and neighbours.
-  // "Full chain" on: everything upstream (what feeds this node, transitively)
-  // and downstream (what it feeds), so a click answers "what is this step
-  // part of". Upstream and downstream are tinted apart, orange and green --
-  // the Inbound/Outbound colours the detail pane already uses -- because
-  // measured on the payments flow a typical chain lights ~19 of 26 nodes,
-  // and an untinted highlight that size reads as "nothing selected".
+  // "Next-level edges" on (N): one level further in the same direction --
+  // the upstream neighbours' own upstream edges, and the downstream
+  // neighbours' own downstream edges -- tinted orange (feeds this) and
+  // green (fed by this), the Inbound/Outbound colours the detail pane
+  // already uses. Measured on the payments flow: a median of 7 nodes lit,
+  // against 4 with it off. The first version followed the chain to the end
+  // (median 19 of 26) and the user found it too much.
   //
-  // Traversal never follows a feedback arc (back_edge): it loops to an
-  // earlier stage, and following it lit 20-26 of 26 nodes for every click.
-  // A feedback arc touching the selected node itself is still highlighted
-  // as a direct edge, as it is with the option off.
+  // The extra level never follows a feedback arc (back_edge): it loops to
+  // an earlier stage. A feedback arc touching the selected node itself is
+  // still a direct edge, as it is with the option off.
   var CHAIN_UP = "#ffb454", CHAIN_DOWN = "#6fe3a8";
   var chainCache = { key: null };
 
   function chainState() {
     var vis = visibleData();
-    var key = (selected ? selected.id : "") + "|" + fullChain + "|" + vis.links.length + "|" +
+    var key = (selected ? selected.id : "") + "|" + nextLevel + "|" + vis.links.length + "|" +
       Object.keys(hiddenSet()).join(",");
     if (chainCache.key === key) return chainCache;
     var roles = {}, nodes = {};
     if (selected) {
       var sel = selected.id;
+      var upN = {}, downN = {};
       nodes[sel] = true;
       vis.links.forEach(function (l) {
         var s = srcId(l), t = tgtId(l);
-        if (s === sel) { roles[linkKey(l)] = "down"; nodes[t] = true; }
-        else if (t === sel) { roles[linkKey(l)] = "up"; nodes[s] = true; }
+        if (s === sel) { roles[linkKey(l)] = "down"; nodes[t] = true; downN[t] = true; }
+        else if (t === sel) { roles[linkKey(l)] = "up"; nodes[s] = true; upN[s] = true; }
       });
-      if (fullChain) {
-        [["down", true], ["up", false]].forEach(function (dir) {
-          var seen = {}, stack = [sel];
-          seen[sel] = true;
-          while (stack.length) {
-            var x = stack.pop();
-            vis.links.forEach(function (l) {
-              if (l.back_edge) return;
-              var from = dir[1] ? srcId(l) : tgtId(l), to = dir[1] ? tgtId(l) : srcId(l);
-              if (from !== x) return;
-              roles[linkKey(l)] = dir[0];
-              nodes[to] = true;
-              if (!seen[to]) { seen[to] = true; stack.push(to); }
-            });
-          }
+      if (nextLevel) {
+        vis.links.forEach(function (l) {
+          if (l.back_edge || roles[linkKey(l)]) return;
+          var s = srcId(l), t = tgtId(l);
+          if (downN[s]) { roles[linkKey(l)] = "down"; nodes[t] = true; }
+          else if (upN[t]) { roles[linkKey(l)] = "up"; nodes[s] = true; }
         });
       }
     }
@@ -559,14 +547,18 @@
     return chainState().nodes;
   }
 
-  // Selected-state edge colour: tinted by side with the full chain on,
+  // Selected-state edge colour: tinted by side with next-level edges on,
   // the long-standing single green (feedback arcs pink) with it off.
   function chainEdgeColor(l, role) {
     if (l.back_edge) return "#ff7e8f";
-    if (!fullChain) return "#6fe3a8";
+    if (!nextLevel) return "#6fe3a8";
     return role === "up" ? CHAIN_UP : CHAIN_DOWN;
   }
 
+  // The single source of truth for "what colour is this node right now",
+  // selection and scope dimming included -- shared by the 3D mesh's
+  // nodeColor() accessor and the 2D actor icon overlay, so the two never
+  // drift into disagreeing about which nodes are highlighted or dimmed.
   function nodeDisplayColor(node) {
     var base = colorFor(node);
     if (selected) {
@@ -1224,7 +1216,7 @@
         var el2 = edgeEls[linkKey(l)];
         if (!el2) continue;
         // With a node selected, only its highlighted edges are labelled --
-        // its own, or its whole chain with "Full chain" on (decision 58).
+        // its own, plus the next level with "Next-level edges" on (decision 58).
         var role = chainRole(l);
         if (selected && !role) { el2.style.display = "none"; continue; }
         var a = nodeById[srcId(l)], b = nodeById[tgtId(l)];
@@ -1234,7 +1226,7 @@
         if (!pa || !pb || !isFinite(pa.x) || !isFinite(pb.x)) { el2.style.display = "none"; continue; }
         var mid = { x: (pa.x + pb.x) / 2, y: (pa.y + pb.y) / 2 };
         el2.className = "elabel" + (l.back_edge ? " back" : "") +
-          (fullChain && role && !l.back_edge ? " " + role : "") +
+          (nextLevel && role && !l.back_edge ? " " + role : "") +
           (edgeLabelStyle === "along" ? " along" : "");
         place(el2, mid, edgeLabelStyle === "along" ? 0 : -6,
           edgeLabelStyle === "along" ? { rotate: edgeAngle(pa, pb) } : {});
@@ -1806,16 +1798,17 @@
     });
 
     // Synced from state for the same reason as the edge-labels checkbox.
-    document.getElementById("full-chain-cb").checked = fullChain;
-    document.getElementById("full-chain-cb").onchange = function (e) {
-      fullChain = e.target.checked;
+    document.getElementById("next-level-cb").checked = nextLevel;
+    document.getElementById("next-level-cb").onchange = function (e) {
+      nextLevel = e.target.checked;
       repaint();
     };
 
     document.getElementById("focus-btn").onclick = function () { setFocusMode(true); };
     document.getElementById("focus-exit").onclick = function () { setFocusMode(false); };
     // Single-key shortcuts: "f" toggles focus mode (decision 56), "e" edge
-    // labels (decision 57), left arrow goes back along followed owner links. Never while typing into a field, and never with
+    // labels (decision 57), "n" next-level edges (decision 58), left arrow
+    // goes back along followed owner links. Never while typing into a field, and never with
     // a modifier -- Cmd/Ctrl+F is the browser's find, and the same rule
     // keeps every future shortcut clear of browser chords.
     var SHORTCUTS = {
@@ -1825,6 +1818,11 @@
         // The checkbox mirrors state, so the panel never disagrees with it.
         document.getElementById("edge-labels-cb").checked = showEdgeLabels;
         rebuildLabels();
+      },
+      n: function () {
+        nextLevel = !nextLevel;
+        document.getElementById("next-level-cb").checked = nextLevel;
+        repaint();
       },
       // The pane's back (←) button, from the keyboard (decision 51).
       arrowleft: function () { goBack(); }

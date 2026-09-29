@@ -114,7 +114,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 55 | `kg-viz` domain labels never suppressed when node labels are on; overlap on deep zoom-out accepted | `kg-viz` |
 | 56 | `kg-viz` full-screen focus mode: panel button or `F` key; Esc exits | `kg-viz` |
 | 57 | `E` key toggles `kg-viz` edge labels; shortcuts share one guarded table | `kg-viz` |
-| 58 | `kg-viz` "Full chain on click": upstream (orange) + downstream (green), feedback arcs not traversed | `kg-viz` |
+| 58 | `kg-viz` "Next-level edges" (`N`): one level beyond neighbours, upstream orange / downstream green (first built as a full chain, cut back) | `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2554,6 +2554,22 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       Payments Processing), which crowds. `E` doesn't help, since selection
       labels win over the toggle (decision 53). Worth revisiting if it
       bothers in practice.
+    - **Revised the same day: "Next-level edges", not the full chain.** On
+      real use the user found the full chain too much. The option now goes
+      exactly one level beyond the direct neighbours, in the same direction:
+      the upstream neighbours' own upstream edges and the downstream
+      neighbours' own downstream edges. It is renamed "Next-level edges",
+      and `N` toggles it through the shared `SHORTCUTS` table. Measured: a
+      median of 7 nodes and 8 edges lit, where the full chain lit 19 nodes.
+      Payments Processing, a hub, lights 16 nodes and labels 19 edges. The
+      tinting and the feedback-arc rule carry over unchanged. Same-direction
+      was a judgement call. The alternative, all edges of the neighbours
+      including their other inputs and outputs, would break the orange/green
+      meaning.
+      Scenario FC now checks one level exactly, that it stops short of the
+      full chain, and that the `N` key ticks the checkbox. It was confirmed
+      failing on the old page first. The "known cost" above mostly falls
+      away with this change.
     - **Known overlap, flagged rather than fixed.** A selected node is
       drawn white (`nodeDisplayColor`), so a selected external actor briefly
       shares staff's colour. The glow on a selected actor icon and the
