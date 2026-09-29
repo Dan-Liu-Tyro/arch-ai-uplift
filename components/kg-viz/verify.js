@@ -672,6 +672,24 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (!staffWhite) results.push('N: Tyro staff actors are not white');
   if (!extYellow) results.push('N: external actors and systems are not all light yellow (' + extColors.join(', ') + ')');
 
+  // The library caches one mesh material per colour string, and actors'
+  // material is made transparent -- so no non-actor may ever get a mesh
+  // colour string an actor gets, in any selection state. This is how
+  // external systems went invisible once they shared actors' yellow, and
+  // why a selected node (#ffffff) would vanish alongside white staff.
+  const meshColor = r.calls['__last_nodeColor'];
+  const isActor = n => r.probe.presentation()[r.probe.presentationKey(n)] &&
+    r.probe.presentation()[r.probe.presentationKey(n)].shape === 'person';
+  const actorKeys = new Set(), otherKeys = new Set();
+  for (const sel of [null, ...nodes]) {
+    r.probe.select(sel);
+    nodes.forEach(n => (isActor(n) ? actorKeys : otherKeys).add(meshColor(n)));
+  }
+  r.probe.select(null);
+  const shared = [...actorKeys].filter(k => otherKeys.has(k));
+  console.log('N: actor mesh colour keys =', [...actorKeys], '| shared with a non-actor mesh =', shared);
+  if (shared.length) results.push('N: actor mesh colour ' + shared.join(', ') + ' is shared with a non-actor, which then inherits the transparent material');
+
   // Colour must mean exactly one thing now: two domains in different stages
   // used to differ, which made colour ambiguous between kind and stage.
   const doms = nodes.filter(n => n.kind === 'domain');

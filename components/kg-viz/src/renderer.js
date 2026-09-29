@@ -17,7 +17,17 @@
       // speck once the whole graph is framed.
       .nodeRelSize(NODE_REL_SIZE)
       .nodeVal(nodeVal)
-      .nodeColor(function (n) { return nodeDisplayColor(n); })
+      // Actor meshes get their own colour key, never their display colour.
+      // The library caches one material per colour string, and an actor's
+      // mesh material is made fully transparent (decorateShapes) so its
+      // icon overlay shows through. A shared key would share that invisible
+      // material: external systems vanished once they shared external
+      // actors' light yellow, and a selected node (#ffffff) would vanish
+      // alongside white staff (decision 52). The icon overlay still takes
+      // nodeDisplayColor, so what the user sees is unchanged.
+      .nodeColor(function (n) {
+        return presentationFor(n).shape === "person" ? ACTOR_MESH_COLOR : nodeDisplayColor(n);
+      })
       // Still no nodeThreeObject, deliberately. Actors' meshes do get
       // touched (made transparent, in decorateShapes() below), but that
       // happens *after* the library has built its own mesh, from the

@@ -2432,6 +2432,22 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       systems join the same light yellow** (previously `#ff7e8f`). Light
       yellow now means "outside Tyro" for people and systems alike. Shape
       (person icon or sphere) still separates the two.
+    - **Bug this caused, found by the user from a screenshot, and fixed.**
+      External systems rendered invisible. The renderer caches one mesh
+      material per colour string, and actors' mesh material is made fully
+      transparent so their icon overlay shows through. Once external
+      systems shared external actors' `#ffd479`, they got the same
+      invisible material. The same coupling was latent for white, since a
+      selected node is drawn `#ffffff` like staff. It had also been live
+      before this decision for the dimmed grey, where a dimmed domain
+      shared a dimmed actor's material. Fix: every actor mesh uses one
+      colour key, `ACTOR_MESH_COLOR`, that no other node can take. The icon
+      overlay still uses the display colour. Scenario N now fails if any
+      actor mesh colour, in any selection state, is shared with a
+      non-actor. The check was confirmed failing on all three shared keys
+      before the fix. `verify.js` stayed green through the original change
+      because it asserted colour values, not material sharing, and pixels
+      are outside what it can see.
 53. **`kg-viz` edge labels are off by default, and a selected node's edges
     are always labelled.** Requested by the user on 2026-09-29. The rule:
     an edge label shows if and only if *(a node is selected) ? (the edge

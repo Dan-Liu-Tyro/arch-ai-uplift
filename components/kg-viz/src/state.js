@@ -43,6 +43,11 @@
   }
   var STAGE_COLORS = ["#8b7bff", "#3fd0ff", "#4dff9e"];
 
+  // The mesh colour key for every actor -- a value no other node's colour can
+  // ever take, so actors' transparent mesh material is never shared. See the
+  // nodeColor accessor in renderer.js.
+  var ACTOR_MESH_COLOR = "rgba(0,0,0,0)";
+
   var COL_SPACING = 230, LANE_HEIGHT = 300, ROW_SPACING = 62;
 
   // Shown bottom-left. Bump this on any edit to this file. It exists because
@@ -52,7 +57,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29f — edge labels off by default; selected node's edges always labelled";
+  var PAGE_REVISION = "2026-09-29g — external systems visible again (actor mesh colour key)";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
