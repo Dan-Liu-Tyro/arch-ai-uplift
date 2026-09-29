@@ -120,7 +120,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 61 | `payments-target-state.json` is its own source of truth (`provenance: curated-here`); Confluence origin no longer synced | `kg-content`, `kg-core/schemas/graph.schema.json`, `kg-core/SCHEMA.md`, `kg-viz` |
 | 62 | `kg-viz` legend titled "Legend"; actors shown as Internal user (white) / External user (light yellow) | `kg-viz` |
 | 63 | `kg-viz` light/dark theme (`T`); light re-maps sphere colours (≥3:1), icons keep white/light-yellow with a dark outline; print stylesheet + preserved canvas | `kg-viz` |
-| 64 | `kg-viz` edge arrowheads 7 → 16 units (~29×7px at default fit), tip on target surface | `kg-viz` |
+| 64 | `kg-viz` arrowheads: flat 12×10px 2D triangles in a screen overlay (replacing enlarged 3D cones), tip on target edge | `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2725,6 +2725,21 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
     draws roughly 29×7px. `relPos` goes from 0.98 to 1, so the tip sits
     exactly on the target surface. Scenario F now requires at least
     20×5px at the default fit, and was confirmed failing at 7 first.
+    - **Replaced the same day: flat 2D arrowheads instead of 3D cones,**
+      at the user's request. The library's arrowheads are turned off
+      (length 0). Each edge gets a 12×10px triangle in a new `#arrows`
+      SVG overlay, positioned every frame like the labels and icons.
+      It is a fixed pixel size, so it no longer shrinks on zoom-out. The
+      tip sits on the target's edge: for a sphere, its world radius (the
+      library's own `cbrt(val) × relSize`) times the live pixels per unit
+      along that edge; for an icon, a fixed pixel radius, because the glyph
+      is a fixed pixel size. The line colour moved into one
+      `edgeDisplayColor()` shared by the line and its arrowhead, so
+      highlighting and dimming can't diverge. Curved feedback arcs would
+      take the straight-line direction, an approximation that is moot
+      while the data has none. Scenario F checks that the library arrows
+      are off, that there is one flat arrowhead per edge, its tip distance,
+      its 12×10 size, and that its colour matches its line.
     - **Known overlap, flagged rather than fixed.** A selected node is
       drawn white (`nodeDisplayColor`), so a selected external actor briefly
       shares staff's colour. The glow on a selected actor icon and the

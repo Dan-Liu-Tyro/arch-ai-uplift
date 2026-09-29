@@ -2,7 +2,6 @@
   // so a radius in single digits renders as an almost invisible speck once
   // the whole graph is framed.
   var NODE_REL_SIZE = 9;
-  var ARROW_LENGTH = 16;
 
   function nodeVal(n) { return (n.kind === "domain" || n.type === "domain") ? 5 : 3; }
 
@@ -38,13 +37,11 @@
       // happens *after* the library has built its own mesh, from the
       // per-frame loop, not by an accessor running inside node construction
       // -- see that function for why that distinction matters here.
-      // The arrowhead is a cone a quarter as wide as it is long, in world
-      // units; at the default fit (~1.8 px per unit) the old 7 drew a
-      // ~12x3px speck. 16 is ~29x7px (decision 64). RelPos 1 puts the tip
-      // exactly on the target's surface -- the library already offsets
-      // both ends by each node's radius.
-      .linkDirectionalArrowLength(function (l) { return ARROW_LENGTH; })
-      .linkDirectionalArrowRelPos(1)
+      // No library arrowheads: they are 3D cones sized in world units, so
+      // they shrink on zoom-out and read as a blob. Arrowheads are flat
+      // screen-space triangles in the #arrows overlay instead (labels.js,
+      // decision 64).
+      .linkDirectionalArrowLength(0)
       // Direction as motion, not just as an arrowhead: a slow stream of
       // particles running source -> target.
       .linkDirectionalParticles(function (l) { return 3; })
@@ -62,15 +59,7 @@
       })
       // Edges were too faint to read against the near-black background --
       // 43 of them are the content, so they are nearly opaque.
-      .linkColor(function (l) {
-        if (selected) {
-          var role = chainRole(l);
-          if (!role) return T("dimEdge");
-          return chainEdgeColor(l, role);
-        }
-        if (l.back_edge) return T("back");
-        return T("flow");
-      })
+      .linkColor(function (l) { return edgeDisplayColor(l); })
       .linkWidth(function (l) {
         if (!selected) return 1.6;
         return chainRole(l) ? 3 : 0.4;

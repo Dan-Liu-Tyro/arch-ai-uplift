@@ -101,6 +101,19 @@
     return role === "up" ? T("up") : T("down");
   }
 
+  // The single source of truth for "what colour is this edge right now",
+  // shared by the canvas line and its flat arrowhead (labels.js) so the two
+  // can never disagree about highlighting or dimming.
+  function edgeDisplayColor(l) {
+    if (selected) {
+      var role = chainRole(l);
+      if (!role) return T("dimEdge");
+      return chainEdgeColor(l, role);
+    }
+    if (l.back_edge) return T("back");
+    return T("flow");
+  }
+
   // The single source of truth for "what colour is this node right now",
   // selection and scope dimming included -- shared by the 3D mesh's
   // nodeColor() accessor and the 2D actor icon overlay, so the two never

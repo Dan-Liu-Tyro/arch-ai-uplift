@@ -339,6 +339,11 @@ no longer turns it into edges of any kind.
   outside it, detail pane included. Diagnostics stay visible.
 - **Direction as motion** — a slow stream of particles runs source → target on
   every edge, so direction reads without tracing an arrowhead.
+- **Flat arrowheads** (decision 64) — a 12×10px 2D triangle per edge in the
+  `#arrows` overlay, replacing the library's 3D cones. It stays the same
+  size at any zoom, its tip sits on the target's edge, and it is coloured by
+  the same function as its line, so highlighting and dimming match. An
+  arrowhead hides when an edge is too short on screen to hold one.
 - **Feedback arcs** drawn dashed/curved, in a contrasting colour for both the
   line and its particles, and counted in the stats box.
 - **Fills the viewport.** For the layered view the camera is computed directly

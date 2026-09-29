@@ -115,6 +115,67 @@
     }
   }
 
+  // ---- Flat arrowheads (decision 64) ----------------------------------------
+  //
+  // A 2D triangle per edge in screen space, the same overlay trick as the
+  // labels and icons, replacing the library's 3D cones. Fixed pixel size, so
+  // direction stays readable at any zoom. The tip sits on the target's
+  // edge: a sphere's world radius (the library's own cbrt(val) * relSize)
+  // times the live px-per-unit along this edge, or a fixed pixel radius for
+  // an icon, whose glyph is a fixed pixel size. Colour comes from
+  // edgeDisplayColor, the function that colours the line itself. Curved
+  // edges (feedback arcs) take the straight-line direction -- an
+  // approximation, and none are in the current data.
+  var arrowEls = {};
+  var ARROW_PX = { len: 12, half: 5 };
+  var ICON_RADIUS_PX = { person: 15, server: 13 };
+
+  function rebuildArrows() {
+    var svg = document.getElementById("arrows");
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    arrowEls = {};
+    visibleData().links.forEach(function (l) {
+      var p = document.createElementNS(SVG_NS, "path");
+      svg.appendChild(p);
+      arrowEls[linkKey(l)] = p;
+    });
+    positionArrows();
+  }
+
+  function positionArrows() {
+    if (!Graph) return;
+    var links = visibleData().links;
+    for (var i = 0; i < links.length; i++) {
+      var l = links[i], el = arrowEls[linkKey(l)];
+      if (!el) continue;
+      var a = nodeById[srcId(l)], b = nodeById[tgtId(l)];
+      if (!a || !b || !isFinite(a.x) || !isFinite(b.x)) { el.setAttribute("d", ""); continue; }
+      var pa = Graph.graph2ScreenCoords(a.x, a.y, isFinite(a.z) ? a.z : 0);
+      var pb = Graph.graph2ScreenCoords(b.x, b.y, isFinite(b.z) ? b.z : 0);
+      if (!pa || !pb || !isFinite(pa.x) || !isFinite(pb.x)) { el.setAttribute("d", ""); continue; }
+      var dx = pb.x - pa.x, dy = pb.y - pa.y, len = Math.sqrt(dx * dx + dy * dy);
+      if (len < 1) { el.setAttribute("d", ""); continue; }
+      var ux = dx / len, uy = dy / len;
+      var r = arrowTipRadiusPx(a, b, len);
+      if (len - r < ARROW_PX.len) { el.setAttribute("d", ""); continue; }
+      var tx = pb.x - ux * r, ty = pb.y - uy * r;
+      var bx = tx - ux * ARROW_PX.len, by = ty - uy * ARROW_PX.len;
+      var px = -uy * ARROW_PX.half, py = ux * ARROW_PX.half;
+      el.setAttribute("d", "M" + tx.toFixed(1) + " " + ty.toFixed(1) +
+        " L" + (bx + px).toFixed(1) + " " + (by + py).toFixed(1) +
+        " L" + (bx - px).toFixed(1) + " " + (by - py).toFixed(1) + " Z");
+      el.setAttribute("fill", edgeDisplayColor(l));
+    }
+  }
+
+  function arrowTipRadiusPx(a, b, screenLen) {
+    var shape = presentationFor(b).shape;
+    if (ICON_SVG[shape]) return ICON_RADIUS_PX[shape] || 14;
+    var wx = b.x - a.x, wy = b.y - a.y, wz = (b.z || 0) - (a.z || 0);
+    var worldLen = Math.sqrt(wx * wx + wy * wy + wz * wz) || 1;
+    return Math.cbrt(nodeVal(b)) * NODE_REL_SIZE * (screenLen / worldLen) + 1;
+  }
+
   function shortTitle(n) {
     return String(n.title).replace(/ Domain$/, "");
   }
@@ -181,8 +242,9 @@
     positionLabels();
     // Same node membership as the labels just rebuilt above -- rebuilding
     // here, rather than at every rebuildLabels() call site, means a future
-    // caller can't forget it.
+    // caller can't forget it. Arrowheads likewise track the edge set.
     rebuildIcons();
+    rebuildArrows();
   }
 
   // Greedy collision suppression. Text that overlaps other text -- or sits on

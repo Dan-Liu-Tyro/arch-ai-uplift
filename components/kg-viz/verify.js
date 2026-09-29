@@ -115,7 +115,7 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), select: n => { selected = n; positionIcons(); }, renderDetail: n => renderDetail(n), openDomainRef: ref => openDomainRef(ref), selectedNode: () => selected, openFromGraph: n => openFromGraph(n), goBack: () => goBack(), closeDetail: () => closeDetail(), focusMode: () => focusMode, bodyFocus: () => document.body.classList._on, nextLevel: () => nextLevel, highlightIds: () => highlightIds(), chainRole: l => chainRole(l), theme: () => theme, nodeDisplayColor: n => nodeDisplayColor(n), };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), select: n => { selected = n; positionIcons(); }, renderDetail: n => renderDetail(n), openDomainRef: ref => openDomainRef(ref), selectedNode: () => selected, openFromGraph: n => openFromGraph(n), goBack: () => goBack(), closeDetail: () => closeDetail(), focusMode: () => focusMode, bodyFocus: () => document.body.classList._on, nextLevel: () => nextLevel, highlightIds: () => highlightIds(), chainRole: l => chainRole(l), theme: () => theme, nodeDisplayColor: n => nodeDisplayColor(n), arrowEls: () => arrowEls, };', ctx);
 
   return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam, controls: () => fakeControls, camera: () => fakeCamera };
 }
@@ -297,16 +297,40 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (!sample || !sample.textContent) results.push('F: edge label has no text');
   if (sample && /_/.test(sample.textContent)) results.push('F: edge label still shows raw SCREAMING_SNAKE: ' + sample.textContent);
 
-  // arrowheads (decision 64): big enough to see at the default fit. The
-  // cone is length x length/4 in world units; G's fit is ~1.8 px/unit, so
-  // require >= 20px long and >= 5px wide there, tip on the target surface.
-  const arrowLen = r.calls['__last_linkDirectionalArrowLength'](flow.links[0]);
-  const arrowPos = r.calls['__last_linkDirectionalArrowRelPos'];
-  const FIT = 1.8;
-  console.log('F: arrowhead length =', arrowLen, '(~' + Math.round(arrowLen * FIT) + 'x' +
-    Math.round(arrowLen / 4 * FIT) + 'px at the default fit) | rel pos =', arrowPos);
-  if (!(arrowLen * FIT >= 20 && arrowLen / 4 * FIT >= 5)) results.push('F: arrowhead too small to see: ' + arrowLen);
-  if (arrowPos !== 1) results.push('F: arrowhead tip not on the target surface (relPos ' + arrowPos + ')');
+  // arrowheads (decision 64): flat 2D triangles in the #arrows overlay, not
+  // the library's 3D cones -- fixed pixel size, tip on the target's edge,
+  // coloured exactly like their line.
+  const libArrow = r.calls['__last_linkDirectionalArrowLength'];
+  const arrows = r.probe.arrowEls();
+  const live = r.probe.visible().links;
+  const nodeAt = id => r.probe.visible().nodes.find(n => n.id === id);
+  const proj = n => ({ x: n.x * 0.5 + 500, y: n.y * 0.5 + 400 });   // the stub's projection
+  const parse = d => (d.match(/-?[\d.]+/g) || []).map(Number);
+  let drawn = 0, tipOff = 0, sizeOff = 0, colourOff = 0, ex = null;
+  live.forEach(l => {
+    const el = arrows[(l.source.id || l.source) + '->' + (l.target.id || l.target) + ':' + (l.predicate || '')];
+    const d = el && el.getAttribute('d');
+    if (!d) return;
+    drawn++;
+    const [tx, ty, b1x, b1y, b2x, b2y] = parse(d);
+    const t = nodeAt(l.target.id || l.target), s = nodeAt(l.source.id || l.source);
+    const pt = proj(t), ps = proj(s);
+    const icon = t.kind === 'actor' || t.kind === 'external';
+    const wantR = icon ? (t.kind === 'external' ? 13 : 15)
+      : Math.cbrt(t.kind === 'domain' ? 5 : 3) * 9 * 0.5 + 1;
+    const gotR = Math.hypot(pt.x - tx, pt.y - ty);
+    if (Math.abs(gotR - wantR) > 0.6) { tipOff++; ex = ex || (t.title + ': ' + gotR.toFixed(1) + ' vs ' + wantR.toFixed(1)); }
+    const bx = (b1x + b2x) / 2, by = (b1y + b2y) / 2;
+    if (Math.abs(Math.hypot(tx - bx, ty - by) - 12) > 0.3 || Math.abs(Math.hypot(b1x - b2x, b1y - b2y) - 10) > 0.3) sizeOff++;
+    if (el.getAttribute('fill') !== r.calls['__last_linkColor'](l)) colourOff++;
+  });
+  console.log('F: library 3D arrowheads =', libArrow, '| flat arrowheads drawn =', drawn, 'of', live.length,
+    '| tip off target edge =', tipOff, ex ? '(' + ex + ')' : '', '| wrong size =', sizeOff, '| colour mismatch =', colourOff);
+  if (libArrow !== 0) results.push('F: library 3D arrowheads still drawn (length ' + libArrow + ')');
+  if (drawn !== live.length) results.push('F: only ' + drawn + ' of ' + live.length + ' edges have a flat arrowhead');
+  if (tipOff) results.push('F: ' + tipOff + ' arrowhead tips not on the target edge, e.g. ' + ex);
+  if (sizeOff) results.push('F: ' + sizeOff + ' arrowheads not 12x10px');
+  if (colourOff) results.push('F: ' + colourOff + ' arrowheads coloured differently from their line');
 
   // particles: direction as motion on every edge
   const parts = r.calls['__last_linkDirectionalParticles'];

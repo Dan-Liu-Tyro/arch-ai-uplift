@@ -3,6 +3,7 @@
     positionBands();
     positionLabels();
     positionIcons();
+    positionArrows();
     requestAnimationFrame(labelLoop);
   }
 
