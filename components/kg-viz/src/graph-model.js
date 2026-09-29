@@ -96,9 +96,21 @@
   // Selected-state edge colour: tinted by side with next-level edges on,
   // the long-standing single green (feedback arcs pink) with it off.
   function chainEdgeColor(l, role) {
-    if (l.back_edge) return T("backSel");
-    if (!nextLevel) return T("selEdge");
-    return role === "up" ? T("up") : T("down");
+    var c;
+    if (l.back_edge) c = T("backSel");
+    else if (!nextLevel) c = T("selEdge");
+    else c = role === "up" ? T("up") : T("down");
+    return withAlpha(c, HIGHLIGHT_EDGE_ALPHA);
+  }
+
+  // Highlighted edges draw at 0.7, not solid (decision 65): solid read as
+  // too heavy once linkOpacity stopped hiding it, and 0.7 is still four
+  // times an unselected edge's ~0.17.
+  var HIGHLIGHT_EDGE_ALPHA = 0.7;
+  function withAlpha(hex, a) {
+    var m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
+    if (!m) return hex;
+    return "rgba(" + parseInt(m[1], 16) + "," + parseInt(m[2], 16) + "," + parseInt(m[3], 16) + "," + a + ")";
   }
 
   // The single source of truth for "what colour is this edge right now",

@@ -121,7 +121,8 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 62 | `kg-viz` legend titled "Legend"; actors shown as Internal user (white) / External user (light yellow) | `kg-viz` |
 | 63 | `kg-viz` light/dark theme (`T`); light re-maps sphere colours (≥3:1), icons keep white/light-yellow with a dark outline; print stylesheet + preserved canvas | `kg-viz` |
 | 64 | `kg-viz` arrowheads: flat 12×10px 2D triangles in a screen overlay (replacing enlarged 3D cones), tip on target edge | `kg-viz` |
-| 65 | `kg-viz` `linkOpacity` pinned to 1 (was an unset 0.2 default): selected edges solid, unselected look unchanged, arrowheads get their own alpha | `kg-viz`, `meta/perception-failures` |
+| 65 | `kg-viz` `linkOpacity` pinned to 1 (was an unset 0.2 default): highlighted edges 0.7 (first solid, eased back), unselected look unchanged, arrowheads get their own alpha | `kg-viz`, `meta/perception-failures` |
+| 66 | `kg-viz` opaque spheres (`nodeOpacity` 1) so edges don't show inside the domain ball | `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2778,6 +2779,24 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       between 0.12 and 0.25, and unselected arrowheads must be at least
       0.7. It was confirmed failing on the old page, which reported
       selected edges at 0.20.
+    - **Revised the next day: highlighted edges at 0.7, not solid.** The
+      user found solid too much. `chainEdgeColor` now returns the theme
+      colour at `HIGHLIGHT_EDGE_ALPHA` = 0.7, still about four times an
+      unselected edge. Arrowheads follow, as they match their highlighted
+      line. F now wants selected edges between 0.6 and 0.8. The exact-hex
+      colour checks in FC and TH now compare RGB only.
+66. **`kg-viz` spheres are opaque (`nodeOpacity` 1), so an edge no longer
+    shows inside a domain ball.** Reported by the user on 2026-09-30: edges
+    visibly ran into the circle, which looked ugly. Edges are drawn centre
+    to centre, and the library's default `nodeOpacity` of 0.75 let the
+    segment inside each sphere show through. The same unset-library-default
+    pattern as decision 65. An opaque sphere's front face hides that
+    segment, so an edge reads as starting at the ball's surface, with no
+    change to line geometry. The flat arrowheads already stopped at the
+    surface (decision 64). Dimmed and icon meshes still take their alpha
+    from their colour. The cost: spheres lose their slight translucency and
+    render a little more saturated. Scenario F asserts `nodeOpacity` is 1,
+    and was confirmed failing first.
     - **Known overlap, flagged rather than fixed.** A selected node is
       drawn white (`nodeDisplayColor`), so a selected external actor briefly
       shares staff's colour. The glow on a selected actor icon and the

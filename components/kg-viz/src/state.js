@@ -109,7 +109,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29z — selected edges fully opaque (linkOpacity 1)";
+  var PAGE_REVISION = "2026-09-30a — highlighted edges 0.7; opaque spheres hide inner line";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 

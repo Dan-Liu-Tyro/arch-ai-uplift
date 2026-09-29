@@ -29,6 +29,12 @@
       // actors' light yellow, and a selected node (#ffffff) would vanish
       // alongside white staff (decision 52). The icon overlay still takes
       // nodeDisplayColor, so what the user sees is unchanged.
+      // Opaque spheres (decision 66): edges run centre to centre, and at the
+      // library's default 0.75 the part of a line inside a ball showed
+      // through it. Opaque, the sphere's front face hides that segment, so
+      // an edge reads as starting at the ball's surface. Dimmed and icon
+      // meshes still get their own alpha from their colour.
+      .nodeOpacity(1)
       .nodeColor(function (n) {
         return hasIcon(n) ? ICON_MESH_COLOR : nodeDisplayColor(n);
       })

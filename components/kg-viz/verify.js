@@ -28,6 +28,18 @@ const html = fs.readFileSync('knowledge-visualizer.html', 'utf8');
 const js = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 const data = JSON.parse(fs.readFileSync('payments.json', 'utf8'));
 
+// Same colour ignoring alpha: highlighted edges are their theme colour at
+// 0.7 (decision 65), so an rgba() must match its hex.
+function sameRgb(a, b) {
+  const rgb = c => {
+    const h = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(c);
+    if (h) return [1, 2, 3].map(i => parseInt(h[i], 16)).join(',');
+    const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(c);
+    return m ? [m[1], m[2], m[3]].join(',') : String(c);
+  };
+  return rgb(a) === rgb(b);
+}
+
 function run(scenario, opts) {
   const els = {};
   const mkEl = () => ({
@@ -379,7 +391,13 @@ const el = (r, id) => r.els[id] || EMPTY;
   console.log('F: linkOpacity =', linkOp, '| unselected effective opacity =', effUnsel.toFixed(2),
     '| selected effective opacity =', effSel.toFixed(2), '| width unselected/selected =', wid, '/', selWid);
   if (linkOp !== 1) results.push('F: linkOpacity is ' + linkOp + ', not 1 -- every edge colour is being multiplied down');
-  if (!(effSel >= 0.95)) results.push('F: selected edge not solid, effective opacity ' + effSel.toFixed(2));
+  // 0.7: solid was too heavy (user, 2026-09-30), 0.2 far too faint.
+  if (!(effSel >= 0.6 && effSel <= 0.8)) results.push('F: selected edge opacity ' + effSel.toFixed(2) + ', want ~0.7');
+  // Opaque spheres hide the segment of a centre-to-centre line inside the
+  // ball (decision 66); the library default 0.75 let it show through.
+  const nodeOp = r.calls['__last_nodeOpacity'];
+  console.log('F: nodeOpacity =', nodeOp);
+  if (nodeOp !== 1) results.push('F: nodeOpacity is ' + nodeOp + ', so edges show through the spheres');
   if (!(effUnsel >= 0.12 && effUnsel <= 0.25)) results.push('F: unselected edge opacity changed from its old look: ' + effUnsel.toFixed(2));
   if (!(wid >= 1.5)) results.push('F: flow edge still thin, width ' + wid);
 }
@@ -1459,8 +1477,8 @@ const el = (r, id) => r.els[id] || EMPTY;
   const farUp = liveLinks.find(l => want.roles[kOf(l)] === 'up' && (l.target.id || l.target) !== pick.id);
   const farDown = liveLinks.find(l => want.roles[kOf(l)] === 'down' && (l.source.id || l.source) !== pick.id);
   const off = liveLinks.find(l => !want.roles[kOf(l)]);
-  steps.push(['a next-level upstream edge is orange', !!farUp && color(farUp) === '#ffb454']);
-  steps.push(['a next-level downstream edge is green', !!farDown && color(farDown) === '#6fe3a8']);
+  steps.push(['a next-level upstream edge is orange', !!farUp && sameRgb(color(farUp), '#ffb454')]);
+  steps.push(['a next-level downstream edge is green', !!farDown && sameRgb(color(farDown), '#6fe3a8')]);
   steps.push(['an edge beyond the next level stays dim', !off || /^rgba\(110,120,140/.test(color(off))]);
 
   const back = liveLinks.find(l => l.back_edge);
@@ -1540,7 +1558,7 @@ const el = (r, id) => r.els[id] || EMPTY;
   // A selected node's own edges are black in light (Next-level off), and
   // their arrowheads follow.
   const selEdge = r.probe.visible().links.find(l => (l.source.id || l.source) === merchant.id || (l.target.id || l.target) === merchant.id);
-  steps.push(['selected edges black in light', !!selEdge && r.calls['__last_linkColor'](selEdge) === '#111722']);
+  steps.push(['selected edges black in light', !!selEdge && sameRgb(r.calls['__last_linkColor'](selEdge), '#111722')]);
   // A dimmed icon's outline fades with it, rather than staying crisp black.
   r.probe.positionIcons();
   const dimmedIcon = Object.entries(r.probe.iconEls()).find(([id]) => id !== merchant.id &&
@@ -1550,7 +1568,7 @@ const el = (r, id) => r.els[id] || EMPTY;
   r.listeners.keydown({ key: 't', target: { tagName: 'CANVAS' } });
   steps.push(['t switches back to dark', r.probe.theme() === 'dark' && bg() === '#05070d' && color(staff) === '#ffffff']);
   r.probe.select(merchant);
-  steps.push(['selected edges stay green in dark', !!selEdge && r.calls['__last_linkColor'](selEdge) === '#6fe3a8']);
+  steps.push(['selected edges stay green in dark', !!selEdge && sameRgb(r.calls['__last_linkColor'](selEdge), '#6fe3a8')]);
   r.probe.select(null);
   steps.push(['canvas keeps its frame for print', /preserveDrawingBuffer:\s*true/.test(html)]);
   steps.push(['print stylesheet hides the panels', /@media print\s*\{[^}]*#controls/.test(html)]);
