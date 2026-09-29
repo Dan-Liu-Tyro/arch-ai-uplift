@@ -2663,6 +2663,11 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
     that reads them. Scenario N now checks the group rows and that no role
     is named. LG checks the title. Both were confirmed failing on the old
     page first.
+    - **Row order fixed, same day, at the user's request.** The order used
+      to be by count. It is now Domain, Internal user, External user,
+      External system, Artefact, so the two user rows sit together with
+      external systems directly below. Any unlisted group goes after,
+      largest first. Scenario N checks the three rows are consecutive.
     - **Known overlap, flagged rather than fixed.** A selected node is
       drawn white (`nodeDisplayColor`), so a selected external actor briefly
       shares staff's colour. The glow on a selected actor icon and the

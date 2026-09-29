@@ -737,6 +737,12 @@ const el = (r, id) => r.els[id] || EMPTY;
   if (!ext || !ext.endsWith('(' + extCount + ')')) results.push('N: no single "External user" row counting all ' + extCount + ' external actors');
   if (!rowText.some(t => /^Internal user \(/.test(t))) results.push('N: no "Internal user" row');
   if (rowText.some(t => /merchant|regulator|Tyro staff/i.test(t))) results.push('N: legend still names actor roles instead of internal/external');
+  // Users adjacent, external system directly below them.
+  const at = name => rowText.findIndex(t => t.startsWith(name + ' ('));
+  const iu = at('Internal user'), eu = at('External user'), es = at('External system');
+  if (!(iu >= 0 && eu === iu + 1 && es === eu + 1)) {
+    results.push('N: legend order should be Internal user, External user, External system consecutively: ' + rowText.join(' / '));
+  }
 }
 
 // O: actors' 3D mesh is made fully transparent, in every view, never rebuilt

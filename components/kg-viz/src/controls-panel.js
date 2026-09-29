@@ -14,7 +14,12 @@
       if (!counts[k]) { counts[k] = 0; order.push(k); first[k] = p; }
       counts[k]++;
     });
-    order.sort(function (a, b) { return counts[b] - counts[a]; });
+    // A fixed reading order, not by count: people together (internal, then
+    // external), then external systems below them (decision 62). A group
+    // not listed here goes after, largest first.
+    var LEGEND_ORDER = ["Domain", "Internal user", "External user", "External system", "Artefact"];
+    var rank = function (k) { var i = LEGEND_ORDER.indexOf(k); return i < 0 ? LEGEND_ORDER.length : i; };
+    order.sort(function (a, b) { return (rank(a) - rank(b)) || (counts[b] - counts[a]); });
     order.forEach(function (k) {
       var p = first[k];
       var row = document.createElement("div");
