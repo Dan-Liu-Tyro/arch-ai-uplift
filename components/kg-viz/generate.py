@@ -289,10 +289,14 @@ def _payments_target_state_view(domains_data: dict) -> dict | None:
     return {
         "id": "payments-target-state",
         "title": data["title"],
-        "description": (
+        # The graph's own curated overview (decision 67); the generic line is
+        # only a fallback for an overlay that hasn't written one yet.
+        "description": data.get("description") or (
             "Directed flow overlay: every edge has a predicate and a payload. "
-            "Laid out left-to-right by flow depth, so the payment path reads in order."
+            "Laid out left-to-right by flow depth, so the path reads in order."
         ),
+        "status": data.get("status"),
+        "updated": data.get("updated"),
         "layout": "layered",
         "stages": data["stages"],
         "source": data["source"],

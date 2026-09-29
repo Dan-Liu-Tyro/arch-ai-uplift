@@ -3,6 +3,7 @@
   "id": "payments-target-state",
   "type": "graph",
   "title": "Payments Target State",
+  "description": "Tyro's target-state payment flow, end to end: designing a product, onboarding a merchant onto it, then taking payments and getting paid. It shows which domains, systems and people take part at each step, and what each hand-off between them carries.",
   "status": "draft",
   "owner": "architecture-practice",
   "updated": "2026-09-29",

@@ -123,6 +123,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 64 | `kg-viz` arrowheads: flat 12×10px 2D triangles in a screen overlay (replacing enlarged 3D cones), tip on target edge | `kg-viz` |
 | 65 | `kg-viz` `linkOpacity` pinned to 1 (was an unset 0.2 default): highlighted edges 0.7 (first solid, eased back), unselected look unchanged, arrowheads get their own alpha | `kg-viz`, `meta/perception-failures` |
 | 66 | `kg-viz` opaque spheres (`nodeOpacity` 1) so edges don't show inside the domain ball | `kg-viz` |
+| 67 | `kg-viz` panel overview = graph file's title + curated `description` + counted facts; `description` added to overlay schema | `kg-viz`, `kg-content`, `kg-core/schemas/graph.schema.json` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2800,6 +2801,24 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
     from their colour. The cost: spheres lose their slight translucency and
     render a little more saturated. Scenario F asserts `nodeOpacity` is 1,
     and was confirmed failing first.
+67. **The `kg-viz` panel overview under "Knowledge Visualizer" comes from
+    the loaded graph file: its title, its own curated description, and
+    facts counted from the data.** Requested by the user on 2026-09-30. It
+    replaces a generic line hard-coded in `generate.py`, which described
+    how the view is drawn rather than what the graph is.
+    - **The description is curated content, in the source of truth.**
+      Overlay graphs gain an optional `description` in
+      `graph.schema.json`, and `payments-target-state.json` has one. It is
+      a first draft, written by Claude from the file's three stage
+      purposes, so it needs the user's review. Since decision 61 this file
+      is edited directly, so rewording it is a plain edit. `generate.py`
+      passes it through along with `status` and `updated`, and falls back
+      to the generic line only for an overlay without a description.
+    - **Facts are counted, never restated.** The stats line (stages,
+      nodes, edges, status, updated date) is computed from the loaded
+      view, so it can't go stale. LG checks the title, the file's
+      description and the counts, and was confirmed failing on the old
+      page first.
     - **Known overlap, flagged rather than fixed.** A selected node is
       drawn white (`nodeDisplayColor`), so a selected external actor briefly
       shares staff's colour. The glow on a selected actor icon and the

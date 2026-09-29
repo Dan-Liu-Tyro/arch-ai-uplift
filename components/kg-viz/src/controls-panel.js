@@ -75,8 +75,25 @@
     });
   }
 
+  // The overview under the panel heading (decision 67): the loaded graph's
+  // own title and curated description, then a line of facts counted from
+  // the data itself -- never restated by hand, so it can't go stale.
+  function overviewHtml() {
+    var stages = (view.stages || []).length;
+    var facts = [
+      stages ? stages + " stage" + (stages === 1 ? "" : "s") : null,
+      view.nodes.length + " nodes",
+      view.links.length + " edges",
+      view.status || null,
+      view.updated ? "updated " + view.updated : null
+    ].filter(Boolean);
+    return '<span class="ov-title">' + escapeHtml(view.title || view.id) + "</span>" +
+      (view.description ? '<span class="ov-desc">' + escapeHtml(view.description) + "</span>" : "") +
+      '<span class="ov-facts">' + escapeHtml(facts.join(" · ")) + "</span>";
+  }
+
   function buildControls() {
-    document.getElementById("view-desc").textContent = view.description;
+    document.getElementById("view-desc").innerHTML = overviewHtml();
 
     var counts = {};
     view.nodes.forEach(function (n) {

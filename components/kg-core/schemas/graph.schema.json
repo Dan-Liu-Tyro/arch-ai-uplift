@@ -33,6 +33,10 @@
     "title": {
       "type": "string"
     },
+    "description": {
+      "type": "string",
+      "description": "A short, plain-language overview of what the graph shows and what question it answers -- what a viewer displays under its title (decision 67). Curated like the rest of the file; not derived from `stages` or `nodes`."
+    },
     "status": {
       "type": "string",
       "enum": ["draft", "active", "superseded"]

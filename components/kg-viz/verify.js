@@ -1037,6 +1037,20 @@ const el = (r, id) => r.els[id] || EMPTY;
     ['on: upstream and downstream rows', /upstream/.test(onText) && /downstream/.test(onText)],
     ['no second legend in the control panel', !shellHasOldLegend],
     ['legend above the info panel in one dock', legendInDock],
+    // Decision 67: the panel overview is the graph's own title and curated
+    // description, plus facts counted from the data.
+    ...(() => {
+      const src = JSON.parse(fs.readFileSync('../kg-content/entities/graphs/payments-target-state.json', 'utf8'));
+      const ov = el(r,'view-desc')._html;
+      const v = r.probe.view();
+      return [
+        ['overview shows the graph title', ov.includes(src.title)],
+        ['overview shows the graph file\'s description', !!src.description &&
+          ov.includes(src.description.slice(0, 40).replace(/&/g, '&amp;').replace(/'/g, '&#39;'))],
+        ['overview counts come from the data', ov.includes(v.nodes.length + ' nodes') && ov.includes(v.links.length + ' edges') &&
+          ov.includes(v.stages.length + ' stages')],
+      ];
+    })(),
     // Decision 62: one "Legend" title, not "Nodes"/"Edges" sub-headings.
     ['titled Legend, no Nodes/Edges headings', /id="legend-label">Legend</.test(html) &&
       !/group-label[^>]*>(Nodes|Edges)</.test(html)],

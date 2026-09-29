@@ -1,12 +1,14 @@
 {
   "generated_from": "components/kg-content",
-  "generated_at": "2026-09-29T11:01:33",
+  "generated_at": "2026-09-29T14:14:56",
   "default_view": "payments-target-state",
   "views": [
     {
       "id": "payments-target-state",
       "title": "Payments Target State",
-      "description": "Directed flow overlay: every edge has a predicate and a payload. Laid out left-to-right by flow depth, so the payment path reads in order.",
+      "description": "Tyro's target-state payment flow, end to end: designing a product, onboarding a merchant onto it, then taking payments and getting paid. It shows which domains, systems and people take part at each step, and what each hand-off between them carries.",
+      "status": "draft",
+      "updated": "2026-09-29",
       "layout": "layered",
       "stages": [
         {
