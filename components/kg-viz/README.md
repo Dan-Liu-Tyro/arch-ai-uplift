@@ -307,10 +307,10 @@ no longer turns it into edges of any kind.
 - **Full-screen focus mode** (decision 56) — **Full screen (F)** in the
   control panel, or the `F` key, hides every panel and puts the browser in
   real fullscreen where it allows it. The camera refits to the whole
-  window. `F`, the **Exit full screen** pill at the top right, or Esc
+  window. `F`, the **Exit full screen** pill at the bottom right, or Esc
   leaves it. `F` is ignored with a modifier (Cmd/Ctrl+F stays the browser's
-  find) and while typing in a field. Selection still highlights and labels
-  edges; only the detail pane is hidden. Diagnostics stay visible.
+  find) and while typing in a field. Selecting a node works exactly as
+  outside it, detail pane included. Diagnostics stay visible.
 - **Direction as motion** — a slow stream of particles runs source → target on
   every edge, so direction reads without tracing an arrowhead.
 - **Feedback arcs** drawn dashed/curved, in a contrasting colour for both the

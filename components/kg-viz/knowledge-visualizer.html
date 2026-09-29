@@ -199,12 +199,15 @@
   #notes code { background: rgba(0,0,0,0.35); padding: 1px 5px; border-radius: 4px; }
   #notes div + div { margin-top: 6px; }
   /* Focus mode (decision 56): everything but the graph and its overlays
-     hidden. !important because #controls.ready / #stats.ready and
-     #detail.open each set their own display. Diagnostics (#notes) stay --
-     an error should never be hidden by a viewing mode. */
-  body.focus #controls, body.focus #stats, body.focus #detail,
+     hidden. !important because #controls.ready / #stats.ready each set
+     their own display. Two things stay: diagnostics (#notes) -- an error
+     should never be hidden by a viewing mode -- and the detail pane, which
+     still opens when a node is selected (the user's call: selecting a node
+     is asking about it). The exit pill sits bottom-right, where #stats
+     would be, so it never collides with the top-right detail pane. */
+  body.focus #controls, body.focus #stats,
   body.focus #hint { display: none !important; }
-  #focus-exit { display: none; position: absolute; top: 12px; right: 14px; z-index: 6;
+  #focus-exit { display: none; position: absolute; bottom: 14px; right: 14px; z-index: 6;
     font-size: 11px; color: #8d97ad; background: rgba(12, 16, 26, 0.7);
     border: 1px solid rgba(120, 140, 180, 0.28); border-radius: 99px;
     padding: 4px 10px; cursor: pointer; user-select: none; }
@@ -393,7 +396,7 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29l — left arrow key goes back";
+  var PAGE_REVISION = "2026-09-29m — detail pane shows in full screen";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
@@ -835,8 +838,8 @@
   // Full-screen focus mode (decision 56): every panel hidden, the browser in
   // real fullscreen where it allows it, and the camera refit to the whole
   // window -- fitLayered() drops its control-panel keep-out while this is
-  // on. Selecting a node still highlights it and labels its edges; only the
-  // detail pane is hidden. Browser fullscreen is best-effort: if the
+  // on. Selecting a node works exactly as outside it, detail pane
+  // included. Browser fullscreen is best-effort: if the
   // request is refused, the panels still hide, which is the part that
   // matters. Esc leaves browser fullscreen natively, and the
   // fullscreenchange handler in renderer.js follows it out of focus mode

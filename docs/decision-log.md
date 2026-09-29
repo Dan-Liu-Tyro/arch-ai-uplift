@@ -2507,8 +2507,10 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
     mode can't disagree.
     - **Choices made without asking, all cheap to change.** Diagnostics
       (`#notes`) stay visible, because an error should never be hidden by a
-      viewing mode. The detail pane hides, but selection still highlights
-      and labels edges. `F` is ignored with a modifier (Cmd/Ctrl+F is the
+      viewing mode. The detail pane originally hid too. **Revised the same
+      day at the user's request:** a selected node opens the detail pane in
+      full screen as it does anywhere else, and the exit pill moves to the
+      bottom right so the two never collide. `F` is ignored with a modifier (Cmd/Ctrl+F is the
       browser's find) and while typing in a field. Scenario FS covers the
       toggles, the ignore cases and the refit.
 57. **`E` toggles `kg-viz` edge labels.** Requested by the user on

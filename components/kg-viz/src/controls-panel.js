@@ -296,8 +296,8 @@
   // Full-screen focus mode (decision 56): every panel hidden, the browser in
   // real fullscreen where it allows it, and the camera refit to the whole
   // window -- fitLayered() drops its control-panel keep-out while this is
-  // on. Selecting a node still highlights it and labels its edges; only the
-  // detail pane is hidden. Browser fullscreen is best-effort: if the
+  // on. Selecting a node works exactly as outside it, detail pane
+  // included. Browser fullscreen is best-effort: if the
   // request is refused, the panels still hide, which is the part that
   // matters. Esc leaves browser fullscreen natively, and the
   // fullscreenchange handler in renderer.js follows it out of focus mode

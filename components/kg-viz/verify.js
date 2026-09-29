@@ -1246,6 +1246,17 @@ const el = (r, id) => r.els[id] || EMPTY;
   key({ key: 'e', target: { tagName: 'INPUT' } }); steps.push(['e in a field ignored', eOn() === eStart]);
   steps.push(['e left focus mode alone', !on()]);
 
+  // The detail pane stays available in focus mode: the stub has no CSS
+  // engine, so assert the rule itself -- the focus-mode hide list must not
+  // name #detail -- and that selecting a node in focus mode opens it.
+  const hideRule = (html.match(/([^{}]*)\{\s*display:\s*none\s*!important/) || [])[1] || '';
+  steps.push(['focus hide rule found', /body\.focus/.test(hideRule)]);
+  steps.push(['focus mode does not hide the detail pane', !/#detail/.test(hideRule)]);
+  key();
+  r.probe.openFromGraph(r.probe.visible().nodes.find(n => n.kind === 'domain'));
+  steps.push(['selecting in focus mode opens the pane', on() && el(r,'detail').classList._on]);
+  key();
+
   console.log('FS: ' + steps.map(([k, ok]) => k + ' = ' + !!ok).join(' | '));
   steps.filter(([, ok]) => !ok).forEach(([k]) => results.push('FS: focus mode failed at "' + k + '"'));
 }
