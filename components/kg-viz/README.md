@@ -72,7 +72,7 @@ blob that existed only to let the page auto-load, which it no longer does).
 cd components/kg-viz && node verify.js
 ```
 
-Twenty-seven scenarios (A–Z, then FS), exit non-zero on failure. This is the only automated check
+Twenty-eight scenarios (A–Z, then FS and FC), exit non-zero on failure. This is the only automated check
 in the repo, and it exists because **nothing this component renders can be
 observed from a Claude Code session** — see `docs/decision-log.md`'s
 "Constraints identified". It is a floor, not a substitute for opening the
@@ -304,6 +304,14 @@ no longer turns it into edges of any kind.
   collides more often and was dropped first, meaning **the most informative
   predicates were the ones that disappeared**. `verify.js` asserts that all 43
   are placed and that the longest is among them.
+- **Full chain on click** (decision 58), off by default. When off, a
+  selection highlights the node's direct edges and neighbours. When on, it
+  highlights everything upstream (what feeds this node, transitively) and
+  downstream (what it feeds). Upstream edges and labels are orange and
+  downstream ones green, the detail pane's Inbound/Outbound colours.
+  Feedback arcs are never traversed. The tint is needed because a typical
+  chain lights about 19 of 26 nodes, which untinted reads as "nothing
+  selected".
 - **Full-screen focus mode** (decision 56) — **Full screen (F)** in the
   control panel, or the `F` key, hides every panel and puts the browser in
   real fullscreen where it allows it. The camera refits to the whole

@@ -42,7 +42,7 @@
       .linkDirectionalParticleSpeed(0.0035)
       .linkDirectionalParticleWidth(function (l) {
         if (!selected) return 2.6;
-        return (srcId(l) === selected.id || tgtId(l) === selected.id) ? 4 : 1.4;
+        return chainRole(l) ? 4 : 1.4;
       })
       .linkDirectionalParticleColor(function (l) {
         return l.back_edge ? "#ff9fae" : "#7ff0c0";
@@ -54,19 +54,17 @@
       // Edges were too faint to read against the near-black background --
       // 43 of them are the content, so they are nearly opaque.
       .linkColor(function (l) {
-        var s = srcId(l), t = tgtId(l);
         if (selected) {
-          var on = s === selected.id || t === selected.id;
-          if (!on) return "rgba(110,120,140,0.09)";
-          return l.back_edge ? "#ff7e8f" : "#6fe3a8";
+          var role = chainRole(l);
+          if (!role) return "rgba(110,120,140,0.09)";
+          return chainEdgeColor(l, role);
         }
         if (l.back_edge) return "rgba(255,140,155,0.9)";
         return "rgba(196,212,240,0.85)";
       })
       .linkWidth(function (l) {
         if (!selected) return 1.6;
-        var s = srcId(l), t = tgtId(l);
-        return (s === selected.id || t === selected.id) ? 3 : 0.4;
+        return chainRole(l) ? 3 : 0.4;
       })
       .onNodeClick(function (n) {
         selected = (selected && selected.id === n.id) ? null : n;
@@ -168,6 +166,13 @@
       var host = document.getElementById("graph");
       Graph.width(host.clientWidth).height(host.clientHeight);
     });
+
+    // Synced from state for the same reason as the edge-labels checkbox.
+    document.getElementById("full-chain-cb").checked = fullChain;
+    document.getElementById("full-chain-cb").onchange = function (e) {
+      fullChain = e.target.checked;
+      repaint();
+    };
 
     document.getElementById("focus-btn").onclick = function () { setFocusMode(true); };
     document.getElementById("focus-exit").onclick = function () { setFocusMode(false); };

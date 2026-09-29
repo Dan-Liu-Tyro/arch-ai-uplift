@@ -115,7 +115,7 @@ function run(scenario, opts) {
 
   const vm = require('vm');
   const ctx = vm.createContext(sandbox);
-  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), select: n => { selected = n; positionIcons(); }, renderDetail: n => renderDetail(n), openDomainRef: ref => openDomainRef(ref), selectedNode: () => selected, openFromGraph: n => openFromGraph(n), goBack: () => goBack(), closeDetail: () => closeDetail(), focusMode: () => focusMode, bodyFocus: () => document.body.classList._on, };', ctx);
+  vm.runInContext(js + '\n;globalThis.__probe = { view: () => view, visible: () => (typeof view === "undefined" || !view) ? null : visibleData(), labelEls: () => labelEls, edgeEls: () => edgeEls, setEdgeLabels: v => { showEdgeLabels = v; rebuildLabels(); }, hidden: () => hiddenSet(), edgeLabelsOn: () => showEdgeLabels, setEdgeStyle: v => { edgeLabelStyle = v; rebuildLabels(); }, edgeStyle: () => edgeLabelStyle, colorFor: n => colorFor(n), presentationKey: n => presentationKey(n), presentation: () => NODE_PRESENTATION, decorateShapes: () => decorateShapes(), bands: () => bandEls, setBands: v => { showBands = v; rebuildBands(); }, positionBands: () => positionBands(), positionLabels: () => positionLabels(), rebuild: () => rebuildLabels(), defaultGraph: () => (typeof DEFAULT_GRAPH === "undefined" ? null : DEFAULT_GRAPH), loadDefault: () => loadDefault(), setDims: v => { dims = v; applyControlMode(); }, resetLayout: () => resetLayout(), statsCollapsed: () => statsCollapsed, iconEls: () => iconEls, positionIcons: () => positionIcons(), select: n => { selected = n; positionIcons(); }, renderDetail: n => renderDetail(n), openDomainRef: ref => openDomainRef(ref), selectedNode: () => selected, openFromGraph: n => openFromGraph(n), goBack: () => goBack(), closeDetail: () => closeDetail(), focusMode: () => focusMode, bodyFocus: () => document.body.classList._on, fullChain: () => fullChain, highlightIds: () => highlightIds(), chainRole: l => chainRole(l), };', ctx);
 
   return { els, calls, loaded, loadedAll: () => attempted, errs, probe: sandbox.__probe, listeners, fgCount: () => sandbox.__fgCount || 0, cam: () => calls.__cam, controls: () => fakeControls, camera: () => fakeCamera };
 }
@@ -1259,6 +1259,85 @@ const el = (r, id) => r.els[id] || EMPTY;
 
   console.log('FS: ' + steps.map(([k, ok]) => k + ' = ' + !!ok).join(' | '));
   steps.filter(([, ok]) => !ok).forEach(([k]) => results.push('FS: focus mode failed at "' + k + '"'));
+}
+
+// FC: decision 58's "Full chain on click". Off by default (1-hop, as
+// before). On: every node upstream and downstream of the selection, edges
+// tinted up=orange / down=green, feedback arcs never traversed. Expected
+// sets are computed here independently from payments.json, not by asking
+// the page.
+{
+  const r = run('FC', { cdnBlocked: false }); await tick();
+  const inp = el(r,'file-input');
+  inp.files = [{ name: 'payments.json', _text: JSON.stringify(data) }];
+  inp.onchange(); await tick();
+
+  const v = data.views[0];
+  const L = v.links;
+  const expect = (sel, full) => {
+    const nodes = new Set([sel]); const roles = {};
+    const key = l => l.source + '->' + l.target + ':' + (l.predicate || '');
+    L.forEach(l => {
+      if (l.source === sel) { roles[key(l)] = 'down'; nodes.add(l.target); }
+      else if (l.target === sel) { roles[key(l)] = 'up'; nodes.add(l.source); }
+    });
+    if (full) for (const [dir, fwd] of [['down', true], ['up', false]]) {
+      const seen = new Set([sel]); const stack = [sel];
+      while (stack.length) {
+        const x = stack.pop();
+        L.forEach(l => {
+          if (l.back_edge) return;
+          const from = fwd ? l.source : l.target, to = fwd ? l.target : l.source;
+          if (from !== x) return;
+          roles[key(l)] = dir; nodes.add(to);
+          if (!seen.has(to)) { seen.add(to); stack.push(to); }
+        });
+      }
+    }
+    return { nodes, roles };
+  };
+
+  const pick = r.probe.visible().nodes.find(n => n.title === 'Payments Processing Domain');
+  const steps = [];
+  steps.push(['off by default', !r.probe.fullChain() && !el(r,'full-chain-cb').checked]);
+
+  r.probe.select(pick);
+  const offLit = Object.keys(r.probe.highlightIds()).length;
+  steps.push(['off lights direct neighbours only (' + offLit + ')', offLit === expect(pick.id, false).nodes.size]);
+
+  el(r,'full-chain-cb').onchange({ target: { checked: true } });
+  r.probe.select(pick);
+  const want = expect(pick.id, true);
+  const got = r.probe.highlightIds();
+  const sameNodes = Object.keys(got).length === want.nodes.size && [...want.nodes].every(id => got[id]);
+  steps.push(['on lights the whole chain (' + Object.keys(got).length + ' of ' + v.nodes.length + ')', sameNodes]);
+
+  const color = r.calls['__last_linkColor'];
+  const liveLinks = r.probe.visible().links;
+  const kOf = l => (l.source.id || l.source) + '->' + (l.target.id || l.target) + ':' + (l.predicate || '');
+  const farUp = liveLinks.find(l => want.roles[kOf(l)] === 'up' && (l.target.id || l.target) !== pick.id);
+  const farDown = liveLinks.find(l => want.roles[kOf(l)] === 'down' && (l.source.id || l.source) !== pick.id);
+  const off = liveLinks.find(l => !want.roles[kOf(l)]);
+  steps.push(['a transitive upstream edge is orange', !!farUp && color(farUp) === '#ffb454']);
+  steps.push(['a transitive downstream edge is green', !!farDown && color(farDown) === '#6fe3a8']);
+  steps.push(['an edge off the chain stays dim', !off || /^rgba\(110,120,140/.test(color(off))]);
+
+  const back = liveLinks.find(l => l.back_edge);
+  const backTouches = back && [back.source.id || back.source, back.target.id || back.target].includes(pick.id);
+  steps.push(['feedback arc not traversed', !back || backTouches || r.probe.chainRole(back) === null]);
+
+  const shownLabels = Object.values(r.probe.edgeEls()).filter(e => e.style.display !== 'none').length;
+  r.probe.rebuild();
+  const shownAfter = Object.values(r.probe.edgeEls()).filter(e => e.style.display !== 'none').length;
+  steps.push(['edge labels follow the chain (' + shownAfter + ')', shownAfter === Object.keys(want.roles).length]);
+
+  el(r,'full-chain-cb').onchange({ target: { checked: false } });
+  r.probe.select(pick);
+  steps.push(['turning it off restores 1-hop', Object.keys(r.probe.highlightIds()).length === offLit]);
+  r.probe.select(null);
+
+  console.log('FC: ' + steps.map(([k, ok]) => k + ' = ' + !!ok).join(' | '));
+  steps.filter(([, ok]) => !ok).forEach(([k]) => results.push('FC: full chain failed at "' + k + '"'));
 }
 
 // X: payments.json's not_authoritative_for matches kg-content's domains.json.

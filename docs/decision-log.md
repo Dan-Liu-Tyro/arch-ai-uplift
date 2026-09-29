@@ -114,6 +114,7 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
 | 55 | `kg-viz` domain labels never suppressed when node labels are on; overlap on deep zoom-out accepted | `kg-viz` |
 | 56 | `kg-viz` full-screen focus mode: panel button or `F` key; Esc exits | `kg-viz` |
 | 57 | `E` key toggles `kg-viz` edge labels; shortcuts share one guarded table | `kg-viz` |
+| 58 | `kg-viz` "Full chain on click": upstream (orange) + downstream (green), feedback arcs not traversed | `kg-viz` |
 
 ## Decisions so far (tentative — open to change)
 
@@ -2523,6 +2524,36 @@ scale that doesn't yet justify that component's `reindex.py` tooling.
       first back button had been built on-screen only, with the key
       offered as optional. Scenario Z now drives a step through the real
       keydown handler.
+58. **`kg-viz` "Full chain on click", off by default: a selection
+    highlights everything upstream and downstream, tinted by side.**
+    Requested by the user on 2026-09-29.
+    - **The measurement that shaped it.** Before building, the reach was
+      measured on the payments flow. Undirected, the graph is one component,
+      so every click would light all 26 nodes. Directed upstream plus
+      downstream lights 5 / 19 / 25 (min / median / max). Following the one
+      feedback arc raises that to 20 / 23 / 26. Upstream-only or
+      downstream-only lights about 12. Three designs were put to the user:
+      both directions tinted by side, a four-way Off/Up/Down/Both control,
+      or both directions untinted. The user chose the first, which was the
+      recommendation. It keeps the requested single toggle while making a
+      19-node highlight still read as two flows through one node.
+    - **Rules.** The option off is unchanged: one hop, single green.
+      With it on, upstream edges are orange and downstream green, the
+      detail pane's Inbound/Outbound colours, for both lines and edge
+      labels. Feedback arcs are never traversed, though one touching the
+      selected node is still shown as a direct edge. Edge labels follow the
+      highlight, so a selection labels its whole chain.
+    - **Mechanism.** One cached `chainState()` in `graph-model.js` is the
+      single source for which nodes and edges are lit. Node colour, edge
+      colour and width, particles and edge labels all read it, so they
+      cannot disagree. Scenario FC checks it against sets computed
+      independently from `payments.json`: Payments Processing lights 24 of
+      26 with it on and 9 with it off. FC was confirmed failing on the old
+      page first.
+    - **Known cost.** A big chain labels many edges at once (33 for
+      Payments Processing), which crowds. `E` doesn't help, since selection
+      labels win over the toggle (decision 53). Worth revisiting if it
+      bothers in practice.
     - **Known overlap, flagged rather than fixed.** A selected node is
       drawn white (`nodeDisplayColor`), so a selected external actor briefly
       shares staff's colour. The glow on a selected actor icon and the

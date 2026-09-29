@@ -158,6 +158,9 @@
     background: rgba(5, 7, 13, 0.8); padding: 0 3px; border-radius: 3px;
     will-change: transform; }
   .elabel.back { color: #ffb3bf; }
+  /* Full chain (decision 58): upstream orange, downstream green. */
+  .elabel.up { color: #ffc98a; }
+  .elabel.down { color: #9ff0c8; }
   /* Rotated onto the line: no pill (it would rotate into the edge and look
      like a smear), a text shadow instead, and a nudge clear of the stroke. */
   .elabel.along { background: transparent; padding: 0;
@@ -273,6 +276,10 @@
     <div class="row" id="edge-labels-row">
       <input type="checkbox" id="edge-labels-cb" />
       <span>Edge labels (E)</span>
+    </div>
+    <div class="row" id="full-chain-row" title="Clicking a node highlights everything upstream (orange) and downstream (green) of it, not just its neighbours">
+      <input type="checkbox" id="full-chain-cb" />
+      <span>Full chain on click</span>
     </div>
     <div class="group-label">Edge label style</div>
     <div class="seg" id="elabel-seg">

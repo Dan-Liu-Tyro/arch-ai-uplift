@@ -237,7 +237,7 @@
   function positionLabels() {
     if (!Graph) return;
     var vis = visibleData();
-    var keep = selected ? neighbourIds(selected) : null;
+    var keep = selected ? highlightIds() : null;
     placed = [];
 
     // Reserve the node markers themselves, so no label ever covers a node.
@@ -279,9 +279,10 @@
         var l = vis.links[j];
         var el2 = edgeEls[linkKey(l)];
         if (!el2) continue;
-        var on = !selected || srcId(l) === selected.id || tgtId(l) === selected.id;
-        // With a node selected, only its own edges are worth labelling.
-        if (selected && !on) { el2.style.display = "none"; continue; }
+        // With a node selected, only its highlighted edges are labelled --
+        // its own, or its whole chain with "Full chain" on (decision 58).
+        var role = chainRole(l);
+        if (selected && !role) { el2.style.display = "none"; continue; }
         var a = nodeById[srcId(l)], b = nodeById[tgtId(l)];
         if (!a || !b || !isFinite(a.x) || !isFinite(b.x)) { el2.style.display = "none"; continue; }
         var pa = Graph.graph2ScreenCoords(a.x, a.y, isFinite(a.z) ? a.z : 0);
@@ -289,6 +290,7 @@
         if (!pa || !pb || !isFinite(pa.x) || !isFinite(pb.x)) { el2.style.display = "none"; continue; }
         var mid = { x: (pa.x + pb.x) / 2, y: (pa.y + pb.y) / 2 };
         el2.className = "elabel" + (l.back_edge ? " back" : "") +
+          (fullChain && role && !l.back_edge ? " " + role : "") +
           (edgeLabelStyle === "along" ? " along" : "");
         place(el2, mid, edgeLabelStyle === "along" ? 0 : -6,
           edgeLabelStyle === "along" ? { rotate: edgeAngle(pa, pb) } : {});

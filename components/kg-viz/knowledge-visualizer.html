@@ -158,6 +158,9 @@
     background: rgba(5, 7, 13, 0.8); padding: 0 3px; border-radius: 3px;
     will-change: transform; }
   .elabel.back { color: #ffb3bf; }
+  /* Full chain (decision 58): upstream orange, downstream green. */
+  .elabel.up { color: #ffc98a; }
+  .elabel.down { color: #9ff0c8; }
   /* Rotated onto the line: no pill (it would rotate into the edge and look
      like a smear), a text shadow instead, and a nudge clear of the stroke. */
   .elabel.along { background: transparent; padding: 0;
@@ -273,6 +276,10 @@
     <div class="row" id="edge-labels-row">
       <input type="checkbox" id="edge-labels-cb" />
       <span>Edge labels (E)</span>
+    </div>
+    <div class="row" id="full-chain-row" title="Clicking a node highlights everything upstream (orange) and downstream (green) of it, not just its neighbours">
+      <input type="checkbox" id="full-chain-cb" />
+      <span>Full chain on click</span>
     </div>
     <div class="group-label">Edge label style</div>
     <div class="seg" id="elabel-seg">
@@ -396,12 +403,12 @@
   // way any more, but a file:// page can still be reloaded from a browser's
   // memory cache -- if the revision on screen is not the one you expect, you
   // are not looking at the current page.
-  var PAGE_REVISION = "2026-09-29m — detail pane shows in full screen";
+  var PAGE_REVISION = "2026-09-29n — full chain on click (upstream orange, downstream green)";
   var LOADED_FROM = "(nothing loaded)";
   var LIB_LOADED_FROM = null;
 
   var DATA = null, view = null, Graph = null;
-  var dims = 2, scopeMode = "all", focusMode = false, showLabels = true, showEdgeLabels = false, edgeLabelStyle = "along";
+  var dims = 2, scopeMode = "all", focusMode = false, fullChain = false, showLabels = true, showEdgeLabels = false, edgeLabelStyle = "along";
   var statsCollapsed = false;
   var showBands = true;
   // Anything that prevents the graph drawing goes on screen. Errors thrown
@@ -489,10 +496,81 @@
   // selection and scope dimming included -- shared by the 3D mesh's
   // nodeColor() accessor and the 2D actor icon overlay, so the two never
   // drift into disagreeing about which nodes are highlighted or dimmed.
+  // ---- What a selection highlights (decision 58) --------------------------
+  //
+  // Off (the default): the selected node's direct edges and neighbours.
+  // "Full chain" on: everything upstream (what feeds this node, transitively)
+  // and downstream (what it feeds), so a click answers "what is this step
+  // part of". Upstream and downstream are tinted apart, orange and green --
+  // the Inbound/Outbound colours the detail pane already uses -- because
+  // measured on the payments flow a typical chain lights ~19 of 26 nodes,
+  // and an untinted highlight that size reads as "nothing selected".
+  //
+  // Traversal never follows a feedback arc (back_edge): it loops to an
+  // earlier stage, and following it lit 20-26 of 26 nodes for every click.
+  // A feedback arc touching the selected node itself is still highlighted
+  // as a direct edge, as it is with the option off.
+  var CHAIN_UP = "#ffb454", CHAIN_DOWN = "#6fe3a8";
+  var chainCache = { key: null };
+
+  function chainState() {
+    var vis = visibleData();
+    var key = (selected ? selected.id : "") + "|" + fullChain + "|" + vis.links.length + "|" +
+      Object.keys(hiddenSet()).join(",");
+    if (chainCache.key === key) return chainCache;
+    var roles = {}, nodes = {};
+    if (selected) {
+      var sel = selected.id;
+      nodes[sel] = true;
+      vis.links.forEach(function (l) {
+        var s = srcId(l), t = tgtId(l);
+        if (s === sel) { roles[linkKey(l)] = "down"; nodes[t] = true; }
+        else if (t === sel) { roles[linkKey(l)] = "up"; nodes[s] = true; }
+      });
+      if (fullChain) {
+        [["down", true], ["up", false]].forEach(function (dir) {
+          var seen = {}, stack = [sel];
+          seen[sel] = true;
+          while (stack.length) {
+            var x = stack.pop();
+            vis.links.forEach(function (l) {
+              if (l.back_edge) return;
+              var from = dir[1] ? srcId(l) : tgtId(l), to = dir[1] ? tgtId(l) : srcId(l);
+              if (from !== x) return;
+              roles[linkKey(l)] = dir[0];
+              nodes[to] = true;
+              if (!seen[to]) { seen[to] = true; stack.push(to); }
+            });
+          }
+        });
+      }
+    }
+    chainCache = { key: key, roles: roles, nodes: nodes };
+    return chainCache;
+  }
+
+  // "up", "down", or null: whether a link is part of the current selection's
+  // highlight, and on which side of the selected node.
+  function chainRole(l) {
+    return selected ? (chainState().roles[linkKey(l)] || null) : null;
+  }
+
+  function highlightIds() {
+    return chainState().nodes;
+  }
+
+  // Selected-state edge colour: tinted by side with the full chain on,
+  // the long-standing single green (feedback arcs pink) with it off.
+  function chainEdgeColor(l, role) {
+    if (l.back_edge) return "#ff7e8f";
+    if (!fullChain) return "#6fe3a8";
+    return role === "up" ? CHAIN_UP : CHAIN_DOWN;
+  }
+
   function nodeDisplayColor(node) {
     var base = colorFor(node);
     if (selected) {
-      var keep = neighbourIds(selected);
+      var keep = highlightIds();
       if (node.id === selected.id) return "#ffffff";
       if (!keep[node.id]) return "rgba(110,120,140,0.18)";
       return base;
@@ -1103,7 +1181,7 @@
   function positionLabels() {
     if (!Graph) return;
     var vis = visibleData();
-    var keep = selected ? neighbourIds(selected) : null;
+    var keep = selected ? highlightIds() : null;
     placed = [];
 
     // Reserve the node markers themselves, so no label ever covers a node.
@@ -1145,9 +1223,10 @@
         var l = vis.links[j];
         var el2 = edgeEls[linkKey(l)];
         if (!el2) continue;
-        var on = !selected || srcId(l) === selected.id || tgtId(l) === selected.id;
-        // With a node selected, only its own edges are worth labelling.
-        if (selected && !on) { el2.style.display = "none"; continue; }
+        // With a node selected, only its highlighted edges are labelled --
+        // its own, or its whole chain with "Full chain" on (decision 58).
+        var role = chainRole(l);
+        if (selected && !role) { el2.style.display = "none"; continue; }
         var a = nodeById[srcId(l)], b = nodeById[tgtId(l)];
         if (!a || !b || !isFinite(a.x) || !isFinite(b.x)) { el2.style.display = "none"; continue; }
         var pa = Graph.graph2ScreenCoords(a.x, a.y, isFinite(a.z) ? a.z : 0);
@@ -1155,6 +1234,7 @@
         if (!pa || !pb || !isFinite(pa.x) || !isFinite(pb.x)) { el2.style.display = "none"; continue; }
         var mid = { x: (pa.x + pb.x) / 2, y: (pa.y + pb.y) / 2 };
         el2.className = "elabel" + (l.back_edge ? " back" : "") +
+          (fullChain && role && !l.back_edge ? " " + role : "") +
           (edgeLabelStyle === "along" ? " along" : "");
         place(el2, mid, edgeLabelStyle === "along" ? 0 : -6,
           edgeLabelStyle === "along" ? { rotate: edgeAngle(pa, pb) } : {});
@@ -1600,7 +1680,7 @@
       .linkDirectionalParticleSpeed(0.0035)
       .linkDirectionalParticleWidth(function (l) {
         if (!selected) return 2.6;
-        return (srcId(l) === selected.id || tgtId(l) === selected.id) ? 4 : 1.4;
+        return chainRole(l) ? 4 : 1.4;
       })
       .linkDirectionalParticleColor(function (l) {
         return l.back_edge ? "#ff9fae" : "#7ff0c0";
@@ -1612,19 +1692,17 @@
       // Edges were too faint to read against the near-black background --
       // 43 of them are the content, so they are nearly opaque.
       .linkColor(function (l) {
-        var s = srcId(l), t = tgtId(l);
         if (selected) {
-          var on = s === selected.id || t === selected.id;
-          if (!on) return "rgba(110,120,140,0.09)";
-          return l.back_edge ? "#ff7e8f" : "#6fe3a8";
+          var role = chainRole(l);
+          if (!role) return "rgba(110,120,140,0.09)";
+          return chainEdgeColor(l, role);
         }
         if (l.back_edge) return "rgba(255,140,155,0.9)";
         return "rgba(196,212,240,0.85)";
       })
       .linkWidth(function (l) {
         if (!selected) return 1.6;
-        var s = srcId(l), t = tgtId(l);
-        return (s === selected.id || t === selected.id) ? 3 : 0.4;
+        return chainRole(l) ? 3 : 0.4;
       })
       .onNodeClick(function (n) {
         selected = (selected && selected.id === n.id) ? null : n;
@@ -1726,6 +1804,13 @@
       var host = document.getElementById("graph");
       Graph.width(host.clientWidth).height(host.clientHeight);
     });
+
+    // Synced from state for the same reason as the edge-labels checkbox.
+    document.getElementById("full-chain-cb").checked = fullChain;
+    document.getElementById("full-chain-cb").onchange = function (e) {
+      fullChain = e.target.checked;
+      repaint();
+    };
 
     document.getElementById("focus-btn").onclick = function () { setFocusMode(true); };
     document.getElementById("focus-exit").onclick = function () { setFocusMode(false); };
